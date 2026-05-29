@@ -308,9 +308,9 @@ src/
 
 | Milestone | Action |
 | ----------- | -------- |
-| 1k DAU | Single Railway instance; Upstash Redis free tier |
+| 1k DAU | Single AWS instance (API/backend); PostgreSQL on Railway; Redis on AWS ElastiCache |
 | 5k DAU | Add PostgreSQL read replica; increase BullMQ concurrency to 4 |
-| 10k DAU | Migrate to Fly.io; horizontal API scaling (2–4 instances); self-hosted Redis |
+| 10k DAU | Horizontal API scaling on AWS (2–4 instances); self-hosted Redis |
 | 50k DAU | Kubernetes; separate ingest service from read service; CDN for static assets + OG images |
 | 100k DAU | Read replicas per region; evaluate CQRS for leaderboard; TimescaleDB for events |
 
