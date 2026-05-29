@@ -306,13 +306,18 @@ src/
 
 ## 10. Scalability Plan
 
-| Milestone | Action |
-| ----------- | -------- |
-| 1k DAU | Single AWS instance (API/backend); PostgreSQL on Railway; Redis on AWS ElastiCache |
-| 5k DAU | Add PostgreSQL read replica; increase BullMQ concurrency to 4 |
-| 10k DAU | Horizontal API scaling on AWS (2–4 instances); self-hosted Redis |
-| 50k DAU | Kubernetes; separate ingest service from read service; CDN for static assets + OG images |
-| 100k DAU | Read replicas per region; evaluate CQRS for leaderboard; TimescaleDB for events |
+- **MVP (0 users):** EC2 t3.micro free tier · Upstash Redis free · Railway $5 · Vercel free = ~$5/mo
+- **1k DAU:** Same stack, upgrade Railway plan if needed
+- **5k DAU:** Upgrade to EC2 t3.small, add Railway read replica
+- **10k DAU:** Migrate API to ECS Fargate + ALB, move Redis to ElastiCache
+- **50k DAU:** ECS auto-scaling, CloudFront CDN, separate ingest/read services
+
+### Deployment Secrets (GitHub Actions)
+
+The `deploy-api` workflow (`.github/workflows/deploy-api.yml`) requires these repository secrets, set under **Settings → Secrets and variables → Actions**:
+
+- `EC2_HOST` — public IP or domain of the EC2 instance
+- `EC2_SSH_KEY` — contents of the `.pem` private key file
 
 ---
 

@@ -33,7 +33,7 @@ commma is open-source under MIT. All product concepts and social mechanics are o
 | Heatmap (server OG) | sharp |
 | Auth | GitHub OAuth, JWT + HTTP-only refresh token |
 | Monorepo | pnpm workspaces, Turborepo |
-| Deployment (MVP) | API/backend on AWS, PostgreSQL on Railway, Redis on AWS ElastiCache |
+| Deployment (MVP) | EC2 t3.micro (API), Railway (PostgreSQL), Upstash Redis, Vercel (web) |
 
 ---
 

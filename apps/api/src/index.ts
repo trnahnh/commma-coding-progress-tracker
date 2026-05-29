@@ -7,6 +7,8 @@ app.get('/', (c) => {
   return c.text('Hello Hono!')
 })
 
+app.get('/healthz', (c) => c.json({ status: 'ok', ts: Date.now() }))
+
 serve(
   {
     fetch: app.fetch,
