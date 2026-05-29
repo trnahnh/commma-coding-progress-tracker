@@ -23,6 +23,8 @@
   --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
 
   --animate-rise: rise 800ms ease forwards;
+  --animate-rise-700: rise 700ms ease forwards;
+  --animate-rise-900: rise 900ms ease forwards;
   --animate-marquee: marquee 60s linear infinite;
   --animate-pulse-dot: pulse-dot 1800ms ease-out infinite;
 
