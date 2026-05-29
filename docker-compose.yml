@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: commma-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: commma
+      POSTGRES_PASSWORD: commma
+      POSTGRES_DB: commma
+    ports:
+      - "5432:5432"
+    volumes:
+      - commma-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U commma -d commma"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: commma-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - commma-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  commma-postgres-data:
+  commma-redis-data:
