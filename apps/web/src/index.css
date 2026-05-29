@@ -1,8 +1,5 @@
 @import "tailwindcss";
 
-/* ============================================================
-   commma — design tokens (Tailwind v4 @theme)
-   ============================================================ */
 @theme {
   --color-ink: #efead8;
   --color-ink-soft: #c9c2ad;
@@ -43,9 +40,6 @@
   }
 }
 
-/* ============================================================
-   base
-   ============================================================ */
 :root {
   color-scheme: dark;
   font-family: var(--font-sans);
@@ -65,7 +59,6 @@ body {
   overflow-x: hidden;
 }
 
-/* warm vignette + grain texture */
 body {
   background-image:
     radial-gradient(ellipse 80% 60% at 50% -10%, rgba(255, 77, 26, 0.08), transparent 60%),
@@ -78,13 +71,11 @@ body {
   color: var(--color-paper);
 }
 
-/* tabular figures helper (used wherever data lives) */
 .tnum {
   font-feature-settings: "tnum", "ss01";
   font-variant-numeric: tabular-nums;
 }
 
-/* clip-mask so rising lines reveal cleanly inside their box */
 .reveal-clip > span {
   display: inline-block;
   will-change: transform, opacity;

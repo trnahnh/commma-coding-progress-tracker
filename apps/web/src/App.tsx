@@ -1,7 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
 
-/* ---------- mocked data ---------- */
-
 const SESSION = {
   date: 'Tue · May 26, 2026',
   startedAt: '08:42',
@@ -98,8 +96,6 @@ const TICKER = [
   { who: 'yoursquid', what: 'started a session in', em: 'TypeScript' },
 ]
 
-/* ---------- helpers ---------- */
-
 function buildChartPath(data: number[], w: number, h: number, pad = 4) {
   const max = Math.max(...data)
   const stepX = (w - pad * 2) / (data.length - 1)
@@ -116,8 +112,6 @@ function buildAreaPath(data: number[], w: number, h: number, pad = 4) {
   return `${buildChartPath(data, w, h, pad)} L ${w - pad} ${h - pad} L ${pad} ${h - pad} Z`
 }
 
-/* ---------- ui ---------- */
-
 function Wordmark({ size = 'text-[28px]' }: { size?: string }) {
   return (
     <span className={`font-serif ${size} leading-none tracking-[-0.02em]`}>
@@ -130,7 +124,7 @@ function Nav() {
   return (
     <nav className='sticky top-0 z-50 border-b border-rule backdrop-blur-xl backdrop-saturate-150 bg-paper/70'>
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
-        <div className='grid grid-cols-[1fr_auto_1fr] items-center h-16'>
+        <div className='grid grid-cols-[1fr_auto] md:grid-cols-[1fr_auto_1fr] items-center h-16'>
           <a href='#' className='justify-self-start'>
             <Wordmark />
           </a>
@@ -163,10 +157,11 @@ function Nav() {
             </a>
             <a
               href='#'
-              className='group inline-flex items-center gap-2.5 h-[38px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider font-medium
-                bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors'
+              className='group inline-flex items-center gap-2.5 h-[38px] px-3.5 sm:px-4 rounded-full font-mono text-[11px] sm:text-[12px] uppercase tracking-wider font-medium
+                bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors whitespace-nowrap'
             >
-              Install for VSCode
+              <span className='hidden sm:inline'>Install for VSCode</span>
+              <span className='sm:hidden'>Install</span>
               <span className='inline-block transition-transform group-hover:translate-x-1'>
                 →
               </span>
@@ -198,27 +193,27 @@ function Hero() {
   return (
     <section className='relative'>
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)] pt-[clamp(56px,9vw,120px)] pb-[clamp(48px,6vw,96px)]'>
-        <div className='flex items-center gap-3.5 mb-12 opacity-0 animate-rise-700 delay-100'>
+        <div className='flex items-center gap-3.5 mb-10 sm:mb-12 opacity-0 animate-rise-700 delay-100'>
           <LiveDot />
           <span className='font-mono text-[11px] tracking-[0.16em] uppercase text-ink-mute'>
             v0.1 · invite-only · 2,841 athletes
           </span>
         </div>
 
-        <h1 className='font-serif font-normal text-[clamp(56px,10.5vw,168px)] leading-[0.92] tracking-[-0.035em] m-0'>
-          <span className='block overflow-hidden reveal-clip'>
+        <h1 className='font-serif font-normal text-[clamp(44px,10.5vw,168px)] leading-[0.92] tracking-[-0.035em] m-0'>
+          <span className='block overflow-hidden reveal-clip py-[0.12em] -my-[0.12em]'>
             <span className='animate-rise-900 delay-120 inline-block'>
               Every commit
             </span>
           </span>
-          <span className='block overflow-hidden reveal-clip'>
+          <span className='block overflow-hidden reveal-clip py-[0.12em] -my-[0.12em]'>
             <span className='animate-rise-900 delay-240 inline-block'>
               is a <em className='font-serif italic text-accent'>step.</em>
             </span>
           </span>
         </h1>
 
-        <div className='grid md:grid-cols-[1.4fr_1fr] gap-[clamp(40px,6vw,96px)] items-end mt-[clamp(40px,6vw,80px)]'>
+        <div className='grid md:grid-cols-[1.4fr_1fr] gap-[clamp(36px,6vw,96px)] items-end mt-[clamp(36px,6vw,80px)]'>
           <div>
             <p
               className='font-sans text-[clamp(16px,1.3vw,19px)] leading-relaxed text-ink-soft max-w-[46ch] m-0 mb-8
@@ -252,16 +247,16 @@ function Hero() {
 
           <div className='opacity-0 animate-rise delay-720'>
             <div className='grid grid-cols-2 border-t border-rule'>
-              <div className='py-5 pr-6 border-b border-r border-rule'>
-                <span className='block font-serif text-[clamp(36px,4vw,56px)] leading-none tracking-[-0.02em] tnum'>
+              <div className='py-5 pr-4 sm:pr-6 border-b border-r border-rule'>
+                <span className='block font-serif text-[clamp(34px,4vw,56px)] leading-none tracking-[-0.02em] tnum'>
                   {pulse.toLocaleString()}
                 </span>
                 <span className='block font-mono text-[11px] tracking-[0.14em] uppercase text-ink-mute mt-2.5'>
                   active right now
                 </span>
               </div>
-              <div className='py-5 pl-6 border-b border-rule'>
-                <span className='block font-serif text-[clamp(36px,4vw,56px)] leading-none tracking-[-0.02em] tnum'>
+              <div className='py-5 pl-4 sm:pl-6 border-b border-rule'>
+                <span className='block font-serif text-[clamp(34px,4vw,56px)] leading-none tracking-[-0.02em] tnum'>
                   211
                   <span className='text-ink-mute text-[0.5em] align-baseline'>
                     d
@@ -271,16 +266,16 @@ function Hero() {
                   longest streak
                 </span>
               </div>
-              <div className='py-5 pr-6 border-b border-r border-rule'>
-                <span className='block font-serif text-[clamp(36px,4vw,56px)] leading-none tracking-[-0.02em] tnum'>
+              <div className='py-5 pr-4 sm:pr-6 border-b border-r border-rule'>
+                <span className='block font-serif text-[clamp(34px,4vw,56px)] leading-none tracking-[-0.02em] tnum'>
                   1.4M
                 </span>
                 <span className='block font-mono text-[11px] tracking-[0.14em] uppercase text-ink-mute mt-2.5'>
                   hours logged
                 </span>
               </div>
-              <div className='py-5 pl-6 border-b border-rule'>
-                <span className='block font-serif text-[clamp(36px,4vw,56px)] leading-none tracking-[-0.02em] tnum'>
+              <div className='py-5 pl-4 sm:pl-6 border-b border-rule'>
+                <span className='block font-serif text-[clamp(34px,4vw,56px)] leading-none tracking-[-0.02em] tnum'>
                   92
                   <span className='text-ink-mute text-[0.5em] align-baseline'>
                     %
@@ -326,11 +321,11 @@ function SectionHead({
   aside?: string
 }) {
   return (
-    <div className='grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-8 items-baseline pb-[clamp(40px,5vw,72px)]'>
+    <div className='grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-3 md:gap-8 items-baseline pb-[clamp(36px,5vw,72px)]'>
       <span className='font-mono text-[11px] tracking-[0.18em] uppercase text-ink-mute'>
         § {no}
       </span>
-      <h2 className='font-serif font-normal text-[clamp(32px,4.5vw,64px)] leading-none tracking-tight m-0'>
+      <h2 className='font-serif font-normal text-[clamp(30px,4.5vw,64px)] leading-none tracking-tight m-0'>
         {title}
       </h2>
       {aside && (
@@ -349,21 +344,20 @@ function ActivityCard() {
   const area = buildAreaPath(CHART, W, H)
   return (
     <div className='relative border border-rule-strong bg-linear-to-b from-paper-2 to-paper rounded overflow-hidden'>
-      {/* head */}
-      <div className='grid grid-cols-[1fr_auto] gap-6 items-start px-8 py-7 border-b border-rule'>
+      <div className='grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto] sm:gap-6 items-start px-5 sm:px-8 py-6 sm:py-7 border-b border-rule'>
         <div>
           <div className='font-mono text-[11px] tracking-[0.16em] text-accent uppercase mb-2.5 flex items-center gap-2.5'>
             <LiveDot color='accent' />
             session · 2026-05-26
           </div>
-          <h3 className='font-serif text-[clamp(28px,3vw,42px)] leading-[1.05] tracking-[-0.02em] m-0 text-ink'>
+          <h3 className='font-serif text-[clamp(26px,3vw,42px)] leading-[1.05] tracking-[-0.02em] m-0 text-ink'>
             {SESSION.title}
             <span className='block italic text-ink-mute text-[0.6em] mt-1.5'>
               {SESSION.subtitle}
             </span>
           </h3>
         </div>
-        <div className='font-mono text-[12px] text-ink-mute flex flex-col items-end gap-1.5 whitespace-nowrap'>
+        <div className='font-mono text-[12px] text-ink-mute flex flex-row sm:flex-col flex-wrap gap-x-4 gap-y-1.5 items-start sm:items-end whitespace-nowrap'>
           <span>
             <strong className='text-ink font-medium'>{SESSION.date}</strong>
           </span>
@@ -379,7 +373,6 @@ function ActivityCard() {
         </div>
       </div>
 
-      {/* stats grid */}
       <div className='grid grid-cols-2 md:grid-cols-4 border-b border-rule'>
         {[
           { label: 'Duration', value: SESSION.duration, delta: null },
@@ -399,12 +392,12 @@ function ActivityCard() {
         ].map((s, i) => (
           <div
             key={s.label}
-            className={`px-8 py-6 ${i < 3 ? 'md:border-r' : ''} border-rule ${i < 2 ? 'border-b md:border-b-0' : ''} ${i === 1 ? 'border-r md:border-r' : ''}`}
+            className={`px-5 sm:px-8 py-5 sm:py-6 ${i < 3 ? 'md:border-r' : ''} border-rule ${i < 2 ? 'border-b md:border-b-0' : ''} ${i === 1 ? 'border-r md:border-r' : ''}`}
           >
             <span className='block font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-mute mb-3.5'>
               {s.label}
             </span>
-            <span className='flex items-baseline gap-1.5 font-serif text-[clamp(30px,3vw,44px)] leading-none tracking-[-0.02em] text-ink tnum'>
+            <span className='flex items-baseline gap-1.5 font-serif text-[clamp(28px,3vw,44px)] leading-none tracking-[-0.02em] text-ink tnum'>
               {s.value}
               {s.unit && (
                 <span className='font-mono text-[12px] tracking-wide text-ink-mute lowercase'>
@@ -421,18 +414,17 @@ function ActivityCard() {
         ))}
       </div>
 
-      {/* chart */}
-      <div className='px-8 py-8'>
-        <div className='flex justify-between items-baseline mb-4 font-mono text-[11px] tracking-[0.14em] uppercase text-ink-mute'>
+      <div className='px-5 sm:px-8 py-6 sm:py-8'>
+        <div className='flex justify-between items-baseline gap-3 mb-4 font-mono text-[11px] tracking-[0.14em] uppercase text-ink-mute'>
           <span>Keystrokes / minute</span>
-          <span>
+          <span className='text-right'>
             peak <span className='text-ink tnum'>241</span> at{' '}
             <span className='text-ink tnum'>09:51</span>
           </span>
         </div>
         <svg
           viewBox={`0 0 ${W} ${H}`}
-          className='w-full h-[180px] block'
+          className='w-full h-[140px] sm:h-[180px] block'
           preserveAspectRatio='none'
         >
           <defs>
@@ -458,7 +450,7 @@ function ActivityCard() {
           <path d={area} fill='url(#cfill)' />
           <path d={line} fill='none' stroke='#FF4D1A' strokeWidth='1.5' />
         </svg>
-        <div className='grid grid-cols-8 mt-2.5 font-mono text-[10px] text-ink-faint tracking-wider'>
+        <div className='grid grid-cols-4 sm:grid-cols-8 mt-2.5 font-mono text-[10px] text-ink-faint tracking-wider'>
           {[
             '08:42',
             '09:00',
@@ -468,17 +460,19 @@ function ActivityCard() {
             '10:20',
             '10:40',
             '11:00',
-          ].map((t) => (
-            <span key={t} className='tnum'>
+          ].map((t, i) => (
+            <span
+              key={t}
+              className={`tnum ${i % 2 === 1 ? 'hidden sm:block' : ''}`}
+            >
               {t}
             </span>
           ))}
         </div>
       </div>
 
-      {/* foot */}
       <div className='grid grid-cols-1 md:grid-cols-2 border-t border-rule'>
-        <div className='px-8 py-6 md:border-r border-rule'>
+        <div className='px-5 sm:px-8 py-6 border-b md:border-b-0 md:border-r border-rule'>
           <div className='font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-mute mb-3.5'>
             Languages
           </div>
@@ -500,7 +494,7 @@ function ActivityCard() {
             </div>
           ))}
         </div>
-        <div className='px-8 py-6'>
+        <div className='px-5 sm:px-8 py-6'>
           <div className='font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-mute mb-3.5'>
             Most-touched files
           </div>
@@ -509,7 +503,7 @@ function ActivityCard() {
               key={f.name}
               className='grid grid-cols-[1fr_auto] items-baseline gap-3 py-2 font-mono text-[12.5px] text-ink-soft border-b border-dashed border-rule last:border-b-0'
             >
-              <span>
+              <span className='truncate'>
                 <span className='text-ink-mute'>{f.path}</span>
                 <strong className='text-ink font-medium'>{f.name}</strong>
               </span>
@@ -524,7 +518,7 @@ function ActivityCard() {
 
 function Activity() {
   return (
-    <section className='py-[clamp(64px,9vw,140px)]'>
+    <section className='py-[clamp(56px,9vw,140px)]'>
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
         <SectionHead
           no='01'
@@ -577,7 +571,7 @@ function HowItWorks() {
   ]
 
   return (
-    <section className='py-[clamp(64px,9vw,140px)] border-t border-rule'>
+    <section className='py-[clamp(56px,9vw,140px)] border-t border-rule'>
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
         <SectionHead
           no='02'
@@ -592,13 +586,13 @@ function HowItWorks() {
           {steps.map((s, i) => (
             <div
               key={s.no}
-              className={`px-8 py-10 ${i < 2 ? 'md:border-r' : ''} ${i < 2 ? 'border-b md:border-b-0' : ''} border-rule`}
+              className={`px-5 sm:px-8 py-8 sm:py-10 ${i < 2 ? 'md:border-r' : ''} ${i < 2 ? 'border-b md:border-b-0' : ''} border-rule`}
             >
               <div className='font-mono text-[11px] tracking-[0.16em] text-ink-mute flex items-center gap-3 mb-7'>
                 <span>{s.no}</span>
                 <span className='flex-1 h-px bg-rule' />
               </div>
-              <pre className='font-mono text-[12px] leading-snug text-accent bg-paper-2 border border-rule px-4 py-3.5 rounded-[2px] mb-6 whitespace-pre'>
+              <pre className='font-mono text-[12px] leading-snug text-accent bg-paper-2 border border-rule px-4 py-3.5 rounded-[2px] mb-6 whitespace-pre overflow-x-auto'>
                 {s.ascii}
               </pre>
               <h3 className='font-serif font-normal text-[28px] leading-tight tracking-[-0.015em] m-0 mb-3.5 text-ink'>
@@ -617,7 +611,7 @@ function HowItWorks() {
 
 function Leaderboard() {
   return (
-    <section className='py-[clamp(64px,9vw,140px)] border-t border-rule'>
+    <section className='py-[clamp(56px,9vw,140px)] border-t border-rule'>
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
         <SectionHead
           no='03'
@@ -629,59 +623,64 @@ function Leaderboard() {
           aside='updated · 14 min ago'
         />
         <div className='border-y border-rule-strong'>
-          {/* head row */}
-          <div className='grid grid-cols-[56px_1.4fr_1fr_1fr_1fr_0.6fr_32px] items-center px-6 py-3.5 font-mono text-[10.5px] tracking-[0.14em] uppercase text-ink-mute bg-paper-2 border-b border-rule'>
+          <div className='grid grid-cols-[40px_1fr_auto] md:grid-cols-[56px_1.4fr_1fr_1fr_1fr_0.6fr_32px] items-center px-4 sm:px-6 py-3.5 gap-3 font-mono text-[10.5px] tracking-[0.14em] uppercase text-ink-mute bg-paper-2 border-b border-rule'>
             <span>Rank</span>
             <span>Athlete</span>
-            <span>Time coded</span>
-            <span>Top language</span>
-            <span>Streak</span>
-            <span>Region</span>
-            <span></span>
+            <span className='text-right md:text-left'>Time</span>
+            <span className='hidden md:block'>Top language</span>
+            <span className='hidden md:block'>Streak</span>
+            <span className='hidden md:block'>Region</span>
+            <span className='hidden md:block' />
           </div>
           {LEADERS.map((row) => (
             <div
               key={row.handle}
-              className={`group grid grid-cols-[56px_1.4fr_1fr_1fr_1fr_0.6fr_32px] items-center px-6 py-4 border-b border-rule last:border-b-0 font-mono text-[13px] text-ink-soft relative transition-colors
+              className={`group grid grid-cols-[40px_1fr_auto] md:grid-cols-[56px_1.4fr_1fr_1fr_1fr_0.6fr_32px] items-center px-4 sm:px-6 py-4 gap-3 border-b border-rule last:border-b-0 font-mono text-[13px] text-ink-soft relative transition-colors
                 ${row.self ? 'bg-accent-soft' : 'hover:bg-paper-2'}`}
             >
               {row.self && (
                 <span className='absolute left-0 top-0 bottom-0 w-0.5 bg-accent' />
               )}
               <span
-                className={`font-serif text-[22px] tracking-[-0.02em] tnum ${row.rank === 1 ? 'text-accent' : 'text-ink'}`}
+                className={`font-serif text-[20px] sm:text-[22px] tracking-[-0.02em] tnum ${row.rank === 1 ? 'text-accent' : 'text-ink'}`}
               >
                 {row.rank.toString().padStart(2, '0')}
               </span>
-              <span className='flex items-center gap-3.5'>
-                <span className='w-8 h-8 rounded-full bg-paper-3 border border-rule-strong font-serif text-[14px] text-ink grid place-items-center'>
+              <span className='flex items-center gap-2.5 sm:gap-3.5 min-w-0'>
+                <span className='shrink-0 w-8 h-8 rounded-full bg-paper-3 border border-rule-strong font-serif text-[14px] text-ink grid place-items-center'>
                   {row.handle[0].toUpperCase()}
                 </span>
-                <span>
-                  <span className='block text-ink font-medium'>
+                <span className='min-w-0'>
+                  <span className='block text-ink font-medium truncate'>
                     @{row.handle}
                   </span>
-                  <span className='block text-[11px] text-ink-mute mt-0.5'>
+                  <span className='block text-[11px] text-ink-mute mt-0.5 truncate'>
                     {row.sub}
+                    <span className='md:hidden'>
+                      {' · '}
+                      {row.lang} · {row.streak}d
+                    </span>
                   </span>
                 </span>
               </span>
-              <span className='tnum text-ink'>{row.time}</span>
-              <span className='inline-flex items-center gap-2 text-[12px]'>
+              <span className='tnum text-ink text-right md:text-left whitespace-nowrap'>
+                {row.time}
+              </span>
+              <span className='hidden md:inline-flex items-center gap-2 text-[12px]'>
                 <span
                   className='w-2 h-2 rounded-sm'
                   style={{ background: row.langDot }}
                 />
                 {row.lang}
               </span>
-              <span className='inline-flex items-center gap-1.5 text-ink'>
+              <span className='hidden md:inline-flex items-center gap-1.5 text-ink'>
                 <span className='w-1.5 h-1.5 bg-accent rounded-full' />
                 <span className='tnum'>{row.streak}d</span>
               </span>
-              <span className='text-[11px] text-ink-mute uppercase tracking-wider'>
+              <span className='hidden md:block text-[11px] text-ink-mute uppercase tracking-wider'>
                 {row.sub}
               </span>
-              <span className='text-accent font-mono text-[14px] text-right opacity-0 -translate-x-1 transition group-hover:opacity-100 group-hover:translate-x-0'>
+              <span className='hidden md:block text-accent font-mono text-[14px] text-right opacity-0 -translate-x-1 transition group-hover:opacity-100 group-hover:translate-x-0'>
                 →
               </span>
             </div>
@@ -694,28 +693,29 @@ function Leaderboard() {
 
 function Final() {
   return (
-    <section className='py-[clamp(80px,12vw,200px)] text-center border-t border-rule relative'>
+    <section className='py-[clamp(72px,12vw,200px)] text-center border-t border-rule relative'>
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
         <p className='font-mono text-[12px] tracking-[0.18em] uppercase text-ink-mute m-0 mb-9'>
           <LiveDot /> &nbsp; 2,841 athletes logging right now
         </p>
-        <h2 className='font-serif font-normal text-[clamp(48px,9vw,140px)] leading-[0.95] tracking-[-0.035em] m-0 mb-10 mx-auto max-w-[14ch] text-ink'>
+        <h2 className='font-serif font-normal text-[clamp(44px,9vw,140px)] leading-[0.95] tracking-[-0.035em] m-0 mb-10 mx-auto max-w-[14ch] text-ink'>
           Stop coding into the <em className='italic text-accent'>void.</em>
         </h2>
         <form
           onSubmit={(e) => e.preventDefault()}
-          className='inline-flex items-center gap-2 border border-rule-strong rounded-full p-1.5 pl-6 bg-paper-2 min-w-[min(440px,90vw)]'
+          className='flex items-center gap-2 border border-rule-strong rounded-full p-1.5 pl-5 sm:pl-6 bg-paper-2 w-full max-w-[440px] mx-auto'
         >
           <input
             type='email'
             placeholder='you@dev.local'
-            className='flex-1 bg-transparent border-0 outline-none text-ink font-mono text-[13px] py-3'
+            className='flex-1 min-w-0 bg-transparent border-0 outline-none text-ink font-mono text-[13px] py-3'
           />
           <button
             type='submit'
-            className='group inline-flex items-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[12px] uppercase tracking-wider font-medium bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors'
+            className='group shrink-0 inline-flex items-center gap-2.5 h-[42px] px-4 sm:px-5 rounded-full font-mono text-[12px] uppercase tracking-wider font-medium bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors'
           >
-            Request access
+            <span className='hidden sm:inline'>Request access</span>
+            <span className='sm:hidden'>Join</span>
             <span className='inline-block transition-transform group-hover:translate-x-1'>
               →
             </span>
