@@ -16,7 +16,7 @@ Goal: working ingest pipeline end-to-end.
 
 ### In Progress
 
-- [ ] PostgreSQL schema migration (users, events, sessions, streaks, follows)
+- [x] PostgreSQL schema migration (users, events, sessions, streaks, follows)
 - [ ] GitHub OAuth flow (API ↔ GitHub)
 - [ ] JWT issuance and middleware
 - [ ] VSCode extension: SecretStorage token management
