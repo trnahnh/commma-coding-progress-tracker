@@ -1,3 +1,3 @@
-export * from './schema'
-export { createDb, type Db } from './client'
-export * as schema from './schema'
+export * from './schema.js'
+export { createDb, type Db } from './client.js'
+export * as schema from './schema.js'
