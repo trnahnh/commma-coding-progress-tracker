@@ -10,6 +10,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
 
@@ -112,6 +113,25 @@ export const streaks = pgTable('streaks', {
   longestDays: integer('longest_days').notNull().default(0),
   lastActiveDate: date('last_active_date'),
 })
+
+export const refreshTokens = pgTable(
+  'refresh_tokens',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id),
+    tokenHash: text('token_hash').notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('refresh_tokens_hash').on(t.tokenHash),
+    index('refresh_tokens_user').on(t.userId),
+  ],
+)
 
 export const follows = pgTable(
   'follows',
