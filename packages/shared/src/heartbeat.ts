@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { keyLabelSchema } from './keyLabels'
+import { keyLabelSchema } from './keyLabels.js'
 
 export const keyFreqSchema = z.record(
   keyLabelSchema,

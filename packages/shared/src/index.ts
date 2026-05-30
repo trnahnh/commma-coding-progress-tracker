@@ -1,3 +1,3 @@
-export * from './keyLabels'
-export * from './privacy'
-export * from './heartbeat'
+export * from './keyLabels.js'
+export * from './privacy.js'
+export * from './heartbeat.js'
