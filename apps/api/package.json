@@ -9,8 +9,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@commma/db": "workspace:*",
+    "@commma/shared": "workspace:*",
     "@hono/node-server": "^1.19.14",
-    "hono": "^4.12.23"
+    "@hono/zod-validator": "^0.4.3",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
+    "hono": "^4.12.23",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",
