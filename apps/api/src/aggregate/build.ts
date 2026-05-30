@@ -27,14 +27,16 @@ export interface SessionDraft {
 }
 
 const BUCKET_MS = 60 * 1000
+const HEARTBEAT_WINDOW_S = 60
 
 export function buildSession(rows: EventRow[]): SessionDraft {
   const startedAt = rows[0].ts
   const endedAt = rows[rows.length - 1].ts
-  const durationS = Math.max(
+  const spanS = Math.max(
     0,
     Math.round((endedAt.getTime() - startedAt.getTime()) / 1000),
   )
+  const durationS = spanS + HEARTBEAT_WINDOW_S
 
   const totalKeystrokes = rows.reduce((sum, r) => sum + r.keystrokes, 0)
   const linesDelta = rows.reduce((sum, r) => sum + r.lines, 0)
