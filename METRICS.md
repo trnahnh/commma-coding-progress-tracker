@@ -32,30 +32,46 @@ Each metric lists:
 
 | Metric | now | target | source |
 | --- | --- | --- | --- |
-| Ingest latency p95 (`POST /v1/ingest`) | per-request ms in logs only | < 50 ms server-time | Hono request logger → metrics sink |
-| Read latency p95 (`/v1/me`, `/v1/sessions`, future `/v1/sessions/:id`, `/v1/leaderboard`) | not instrumented | < 200 ms @ 100 concurrent (Phase 2 DoD); < 150 ms @ 1k (Phase 3 DoD) | request logger; k6 load test |
-| Aggregation lag (event `ts` → `sessions.created_at`) | not measured | ≤ ~20 min by design (5-min interval + 15-min idle gap; ADR-010) | `sessions.created_at − max(event.ts)` |
-| Ingest success rate (`202` / total) | not measured | ≥ 99.9% | request logger |
-| Server error rate (`5xx` / total) | not measured | < 0.1% | request logger / `unhandled_error` logs |
-| Availability | not measured | 99.5% (MVP) | uptime check on `/healthz` |
+| Ingest p95 (`POST /v1/ingest`) | logs only | <50ms srv | Hono logger → sink |
+| Read p95 (see note) | not instrumented | <200ms; <150ms | logger + k6 |
+| Aggregation lag | not measured | ≤~20 min | `created_at − max(ts)` |
+| Ingest success (`202`/total) | not measured | ≥99.9% | request logger |
+| Server errors (`5xx`/total) | not measured | <0.1% | logger / unhandled |
+| Availability | not measured | 99.5% (MVP) | `/healthz` uptime |
+
+Read p95 routes: `/v1/me`, `/v1/sessions`, `/v1/sessions/:id`, `/v1/leaderboard`.
+Targets: <200 ms @ 100 concurrent (Phase 2 DoD); <150 ms @ 1k (Phase 3 DoD).
+
+Aggregation lag: 5-min interval + 15-min idle gap (ADR-010); event `ts` →
+`sessions.created_at`.
 
 ## 2. Cost guardrails
 
 | Metric | now | target | source |
 | --- | --- | --- | --- |
-| Redis commands / month | ~0 idle by design (interval aggregation, not BullMQ — ADR-010); cost = per-request rate-limit + per-finalize `ZINCRBY` | < 500k/mo (Upstash free tier) | Upstash console / `INFO commandstats` |
-| `events` table size | bounded — finalized rows are pruned, holds only open/recent sessions | stays bounded regardless of history | `count(*)` on `events` |
-| `sessions` table growth | grows with history (intended; basis for leaderboard rebuild) | within Railway plan; monitor | `count(*)`, table size |
-| Postgres storage (Railway) | not measured | within ~$5 plan at MVP | Railway console |
+| Redis cmds/mo | ~0 idle (ADR-010) | <500k/mo | Upstash / commandstats |
+| `events` rows | pruned after finalize | bounded | `count(*)` |
+| `sessions` growth | historical (rebuild) | Railway plan | count + table size |
+| Postgres storage | not measured | ~$5 MVP plan | Railway console |
+
+Redis cost drivers: per-request rate limits + per-finalize `ZINCRBY` (no BullMQ).
+`events` holds only open/recent sessions after aggregation prunes finalized rows.
 
 ## 3. Privacy / trust (invariants — verifiable, brand-defining)
 
 | Metric | now | target | source |
 | --- | --- | --- | --- |
-| Key-content bytes stored | **0** — schema has no content column; only `key_freq` label histograms | **0, permanently** (ADR-006) | schema review + ingest payload audit; verifiable in the OSS extension |
-| `contentChanges.text` retained | never — folded into a counter then discarded (ADR-006 amendment) | never | extension source review (`keyCounter.ts`) |
-| PII surface | emails (auth) + file paths (only when `privacy = full`) | minimal; `summary` drops file paths + `key_freq`, `off` sends nothing | schema + `privacy.ts` |
-| Leaderboard reconciliation drift | not measured | 0 — `Σ sessions.duration_s` per period == Redis ZSET score | compare DB sum vs `ZSCORE`; surfaces the post-commit `ZINCRBY` failure risk (backlog B), fixed by the Phase-2 rebuild |
+| Key-content bytes | **0** (histogram only) | **0** forever | schema + audit |
+| `contentChanges.text` | never stored | never | `keyCounter.ts` |
+| PII (see note) | auth + optional paths | minimal modes | schema + privacy |
+| Leaderboard drift | not measured | 0 | DB sum vs `ZSCORE` |
+
+Key-content: no content column; only `key_freq` label histograms (ADR-006).
+PII: emails always; file paths when `privacy = full`. `summary` drops paths +
+`key_freq`; `off` sends nothing.
+
+Leaderboard: `Σ sessions.duration_s` per period must match Redis ZSET score.
+Drift surfaces post-commit `ZINCRBY` failure (backlog B); Phase-2 rebuild fixes.
 
 ## 4. Product (post-launch — aspirational until users exist)
 
@@ -64,11 +80,11 @@ lands with the features rather than being retrofitted.
 
 | Metric | target | source |
 | --- | --- | --- |
-| Activation: install → first heartbeat within 24h | ≥ 60% | extension install telemetry + first `events` row |
-| Retention W1 / W4 | W1 ≥ 40% / W4 ≥ 20% | active-user cohort over `events`/`sessions` |
-| Engagement: sessions per active user / week | ≥ 5 | `sessions` |
-| Streak participation (users with `currentDays ≥ 3`) | grows MoM | `streaks` |
-| Growth: GitHub stars at launch | 200 within 72h (ROADMAP Phase 4 DoD) | GitHub |
+| Activation (install → HB @24h) | ≥60% | extension telemetry + events |
+| Retention W1 / W4 | W1≥40%; W4≥20% | cohort on events/sessions |
+| Sessions / active user / week | ≥5 | `sessions` |
+| Streak (`currentDays ≥ 3`) | grows MoM | `streaks` |
+| Launch GitHub stars | 200 / 72h | GitHub (ROADMAP Ph4) |
 
 ---
 
