@@ -51,6 +51,7 @@ Goal: something a real user can experience end-to-end.
 - [ ] `GET /v1/sessions/:id` with lang breakdown, files, and heatmap data
 - [ ] Session detail page in web app (chart, lang breakdown, file list)
 - [ ] Keyboard heatmap Canvas renderer component
+- [ ] Heatmap completeness (E) — add a `Space` label (the single most-pressed key, currently invisible) and map shifted symbols to their physical key (e.g. `!`→`1`) instead of collapsing to `Other`; `@commma/shared` `KEY_LABELS` change. Full per-layout mapping aligns with the Phase 4 keyboard-layout configs.
 - [ ] PNG export (9:16, 1:1, 16:9 presets, transparent background)
 - [ ] Streak calculation cron job
 - [ ] Profile page at `/@handle` (live data)
@@ -77,6 +78,8 @@ Goal: production-safe. No known P0/P1 bugs. Published extension.
 
 - [x] Redis rate limiter middleware (built early in step 4) — **follow-up: trust the correct `x-forwarded-for` hop once an ALB/CloudFront fronts the API; see ADR-010 (B)**
 - [ ] Privacy mode: `key_freq` and file paths suppressed when `privacy = summary`
+- [ ] Unit tests (Vitest) for the pure aggregator functions (D) — `splitIntoSessions`, `buildSession`, `streak`, `tallyChange`/`keyCounter`; no runner configured yet. A synthetic `splitIntoSessions` check already passed 12/12 during step-5 closeout — port it as the first test.
+- [ ] Expired `refresh_tokens` cleanup job (C) — periodic `DELETE WHERE expires_at < now()`; `rotateRefreshToken` only deletes the rotated row, so dead tokens accumulate otherwise.
 - [ ] Extension offline queue with exponential backoff retry
 - [ ] Structured error responses across all endpoints
 - [ ] Input validation hardening (edge cases, large payloads)
