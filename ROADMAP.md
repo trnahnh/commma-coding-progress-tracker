@@ -51,7 +51,7 @@ Goal: something a real user can experience end-to-end.
 
 ### Planned
 
-- [ ] `GET /v1/sessions/:id` with lang breakdown, files, and heatmap data
+- [x] `GET /v1/sessions/:id` with lang breakdown, files, and heatmap data
 - [ ] Session detail page in web app (chart, lang breakdown, file list)
 - [ ] Keyboard heatmap Canvas renderer component
 - [ ] Heatmap completeness (E) — add a `Space` label (the single most-pressed key, currently invisible) and map shifted symbols to their physical key (e.g. `!`→`1`) instead of collapsing to `Other`; `@commma/shared` `KEY_LABELS` change. Full per-layout mapping aligns with the Phase 4 keyboard-layout configs.

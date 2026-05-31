@@ -285,7 +285,7 @@ Returns the authenticated user's sessions, paginated.
 
 Returns full session detail including language breakdown, top files, and keyboard heatmap.
 
-**Auth:** Required (own sessions) or None (public sessions of public users)
+**Auth:** Optional. Public, gated by the owner's `privacy`: sessions of `full`/`summary` users are viewable by anyone; sessions of `off` users are owner-only (a valid bearer matching the owner). Non-owners requesting an `off` user's session receive `404`.
 
 **Response:**
 
