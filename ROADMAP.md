@@ -6,6 +6,9 @@ Items move from Planned → In Progress → Done as work proceeds. The roadmap i
 not date-locked beyond the current phase so it can flex with contributor
 availability.
 
+Metric targets in the Definition-of-Done sections (latency, Lighthouse, growth)
+are defined canonically in `METRICS.md` — update numbers there, not here.
+
 Current phase: Phase 1 — Foundation
 
 ---
