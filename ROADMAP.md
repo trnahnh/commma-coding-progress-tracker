@@ -55,18 +55,14 @@ Goal: something a real user can experience end-to-end.
 - [x] Session detail page in web app (lang-breakdown bar, file list; KPM line chart dropped — no time series in the endpoint, events pruned per ADR-010)
 - [x] Keyboard heatmap Canvas renderer component (QWERTY layout in `@commma/shared` per ADR-005; purple freq ramp; basic transparent-PNG download — presets/OG render still deferred below)
 - [x] Heatmap completeness (E) — added a `Space` label (the single most-pressed key, previously invisible) and the eleven punctuation physical keys; shifted symbols now map to their physical key (e.g. `!`→`1`) instead of collapsing to `Other`; `@commma/shared` `KEY_LABELS` change. Full per-layout mapping (Dvorak/Colemak) still aligns with the Phase 4 keyboard-layout configs.
-- [ ] PNG export (9:16, 1:1, 16:9 presets, transparent background)
+- [x] PNG export (9:16, 1:1, 16:9 presets, transparent background) — three preset export buttons on the session heatmap; offscreen canvas letterboxes the keyboard into the target dimensions (8% margin)
 - [x] Streak calculation cron job — in-process hourly interval (ADR-010 style,
   gated by `RUN_AGGREGATION`) that zeroes `current_days` for users whose
   `last_active_date` is older than yesterday (UTC), preserving `longest_days` and
   `last_active_date` so the next session restarts the streak at 1. The aggregator
   only *bumps* streaks on activity; this closes the missed-day gap so reads stop
   showing a stale streak. Pure cutoff helper `streakBreakCutoff` (testable).
-- [ ] Profile page at `/@handle` (live data) — backing endpoints done: `GET
-  /v1/users/:handle` (handle/avatar/streak + aggregated `total_sessions`/
-  `total_duration_s`/all-time `top_lang`; `badges` is `[]` until Phase 4) and
-  `GET /v1/users/:handle/sessions` (public, keyset-paginated, privacy-gated). The
-  web page itself is still to build.
+- [x] Profile page at `/@handle` (live data) — avatar, handle, 4-stat grid (sessions/time/streak/top-lang), keyset-paginated session feed with "Load more". Route `/@:handle` in react-router-dom.
 - [x] Redis leaderboard sorted set (incremental `ZINCRBY` on session write — done in step 4)
 - [x] `GET /v1/leaderboard` endpoint — public; `period` week/month/alltime, top 100 from Redis sorted sets, hydrated from PostgreSQL (handle/avatar/streak/top-lang), `privacy='off'` excluded. Includes the cold-start rebuild summing `sessions.duration_s` over the period window (never `events`, which are pruned; ADR-007/ADR-010). Deferred: `lang` filter (needs per-language sorted sets) and `delta` rank change (needs period snapshots).
 - [x] Follow/unfollow API — `POST`/`DELETE /v1/users/:handle/follow` (auth,
@@ -74,8 +70,8 @@ Goal: something a real user can experience end-to-end.
 - [x] `GET /v1/feed` endpoint — auth; sessions from followed users newest-first,
   keyset-paginated (`limit` default 20/max 50), excludes followees now
   `privacy='off'`. `SessionSummary` + `{ handle, avatar_url }` per entry.
-- [ ] Leaderboard page in web app
-- [ ] Feed page with miniature heatmap thumbnails
+- [x] Leaderboard page in web app — period tabs (week/month/alltime), ranked entries with rank badge, avatar, handle linked to `/@handle`, lang dot, streak, duration. Route `/leaderboard`.
+- [x] Feed page — auth-gated (`localStorage` token, Phase 3 will add OAuth UI); signed-out state directs to extension sign-in; session cards with user attribution and pagination. Route `/feed`. Heatmap thumbnails deferred to Phase 3 (requires server-side `POST /v1/sessions/:id/heatmap-card`).
 
 **Definition of Done:**
 
