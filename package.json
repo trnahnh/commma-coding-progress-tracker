@@ -9,11 +9,17 @@
     "dev:extension": "pnpm run --filter @commma/extension dev",
     "build": "pnpm -r run build",
     "lint": "pnpm -r run lint",
-    "typecheck": "pnpm -r run typecheck"
+    "typecheck": "pnpm -r run typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "packageManager": "pnpm@10.28.1",
-  "devDependencies": {},
+  "devDependencies": {
+    "vitest": "^4.1.8"
+  },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild"]
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }

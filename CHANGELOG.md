@@ -38,6 +38,11 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 - **Infra** — `apps/web/.env.example` documenting `VITE_API_BASE_URL`.
 - **API** — Auth rate limit raised to 100/hr outside `NODE_ENV=production`
   (was 20/hr in all environments).
+- **Tooling** — Vitest test runner (root `pnpm test` / `pnpm test:watch`).
+  Unit tests for the pure aggregator functions (`splitIntoSessions`,
+  `buildSession`, `applyActiveDate`/`streakBreakCutoff`) and the extension
+  key counter (`tallyChange`, `addKeyFreq`). API build now uses
+  `tsconfig.build.json` so `test/` is typechecked but excluded from `dist/`.
 
 
 
