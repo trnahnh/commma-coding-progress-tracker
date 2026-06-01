@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { LiveDot, Shell, StatusPanel } from '../components/chrome'
 import {
@@ -53,7 +53,7 @@ function RankBadge({ rank }: { rank: number }) {
         : 'text-ink-faint'
   return (
     <span
-      className={`font-mono text-[13px] tnum w-6 text-right flex-shrink-0 ${cls}`}
+      className={`font-mono text-[13px] tnum w-6 text-right shrink-0 ${cls}`}
     >
       {rank}
     </span>
@@ -72,10 +72,10 @@ function EntryRow({ entry }: { entry: LeaderboardEntry }) {
           alt={handle}
           width={28}
           height={28}
-          className='w-7 h-7 rounded-full border border-rule object-cover flex-shrink-0'
+          className='w-7 h-7 rounded-full border border-rule object-cover shrink-0'
         />
       ) : (
-        <span className='w-7 h-7 rounded-full border border-rule bg-paper-3 flex-shrink-0' />
+        <span className='w-7 h-7 rounded-full border border-rule bg-paper-3 shrink-0' />
       )}
       <Link
         to={`/@${handle}`}
@@ -83,7 +83,7 @@ function EntryRow({ entry }: { entry: LeaderboardEntry }) {
       >
         @{handle}
       </Link>
-      <div className='hidden sm:flex items-center gap-5 flex-shrink-0'>
+      <div className='hidden sm:flex items-center gap-5 shrink-0'>
         {style && (
           <span className='flex items-center gap-1.5 font-mono text-[12px] text-ink-soft'>
             <span
@@ -100,7 +100,7 @@ function EntryRow({ entry }: { entry: LeaderboardEntry }) {
           </span>
         )}
       </div>
-      <span className='font-mono text-[13px] tnum text-ink-soft flex-shrink-0'>
+      <span className='font-mono text-[13px] tnum text-ink-soft shrink-0'>
         {formatDuration(duration_s)}
       </span>
     </div>
@@ -136,12 +136,12 @@ function LeaderboardCard({
       ) : (
         <>
           <div className='hidden sm:flex items-center gap-3 sm:gap-4 px-5 sm:px-8 py-2.5 border-b border-rule bg-paper-3/60'>
-            <span className='w-6 flex-shrink-0' />
-            <span className='w-7 flex-shrink-0' />
+            <span className='w-6 shrink-0' />
+            <span className='w-7 shrink-0' />
             <span className='flex-1 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint'>
               Player
             </span>
-            <div className='flex items-center gap-5 flex-shrink-0'>
+            <div className='flex items-center gap-5 shrink-0'>
               <span className='font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint w-[90px] text-right'>
                 Lang
               </span>
@@ -149,7 +149,7 @@ function LeaderboardCard({
                 Streak
               </span>
             </div>
-            <span className='font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint flex-shrink-0 w-[52px] text-right'>
+            <span className='font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint shrink-0 w-[52px] text-right'>
               Time
             </span>
           </div>
@@ -176,9 +176,13 @@ export default function Leaderboard() {
   const [period, setPeriod] = useState<LeaderboardPeriod>('week')
   const [state, setState] = useState<LoadState>({ phase: 'loading' })
 
+  const changePeriod = useCallback((p: LeaderboardPeriod) => {
+    setPeriod(p)
+    setState({ phase: 'loading' })
+  }, [])
+
   useEffect(() => {
     let cancelled = false
-    setState({ phase: 'loading' })
     getLeaderboard(period)
       .then((data) => {
         if (!cancelled) setState({ phase: 'ready', data })
@@ -226,7 +230,7 @@ export default function Leaderboard() {
       <LeaderboardCard
         data={state.data}
         period={period}
-        onPeriodChange={setPeriod}
+        onPeriodChange={changePeriod}
       />
     </Shell>
   )
