@@ -48,7 +48,7 @@ export default function SignIn() {
       </a>
 
       <div className='w-full max-w-[480px] text-center'>
-        <h1 className='font-serif text-[clamp(42px,7vw,72px)] leading-[0.96] tracking-[-0.03em] m-0 text-ink mb-5'>
+        <h1 className='font-serif text-[clamp(48px,8vw,80px)] leading-[0.95] tracking-[-0.03em] m-0 text-ink mb-5'>
           Welcome back.
         </h1>
         <p className='font-mono text-[14px] text-ink-mute m-0 mb-12 leading-relaxed'>
