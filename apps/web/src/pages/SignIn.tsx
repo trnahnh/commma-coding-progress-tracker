@@ -42,61 +42,38 @@ export default function SignIn() {
   }, [isLoading, token, navigate])
 
   return (
-    <div className='min-h-screen bg-paper grid md:grid-cols-[1fr_1fr]'>
-      <div className='hidden md:flex flex-col justify-between p-[clamp(32px,4vw,56px)] border-r border-rule bg-linear-to-b from-paper-2 to-paper'>
-        <a href='/'>
-          <Wordmark size='text-[28px]' />
-        </a>
-        <div>
-          <p className='font-serif text-[clamp(36px,4.5vw,64px)] leading-[1.0] tracking-[-0.03em] text-ink m-0'>
-            Every session
-            <br />
-            <em className='italic text-accent'>logged.</em>
-          </p>
-          <p className='font-mono text-[13px] text-ink-mute mt-6 m-0 max-w-[36ch] leading-relaxed'>
-            commma turns your editor into a sport. Pace, splits, streaks,
-            podiums — all the rituals of a real athlete, for the work you
-            already do.
-          </p>
-        </div>
-        <p className='font-mono text-[11px] text-ink-faint m-0'>
-          © 2026 commma labs
+    <div className='min-h-screen bg-paper flex flex-col items-center justify-center px-6'>
+      <a href='/' className='mb-16'>
+        <Wordmark size='text-[36px]' />
+      </a>
+
+      <div className='w-full max-w-[480px] text-center'>
+        <h1 className='font-serif text-[clamp(42px,7vw,72px)] leading-[0.96] tracking-[-0.03em] m-0 text-ink mb-5'>
+          Welcome back.
+        </h1>
+        <p className='font-mono text-[14px] text-ink-mute m-0 mb-12 leading-relaxed'>
+          Sign in to track sessions, streaks,
+          <br className='hidden sm:block' /> and your place on the board.
         </p>
-      </div>
 
-      <div className='flex flex-col items-center justify-center px-6 py-16 md:py-0'>
-        <a href='/' className='md:hidden mb-12'>
-          <Wordmark size='text-[28px]' />
-        </a>
+        <button
+          type='button'
+          onClick={signIn}
+          className='group w-full inline-flex items-center justify-center gap-3 h-[56px] px-8 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium bg-ink text-paper border border-ink hover:bg-paper hover:text-ink transition-colors mb-5'
+        >
+          <GithubMark />
+          Sign in with GitHub
+        </button>
 
-        <div className='w-full max-w-[400px]'>
-          <h1 className='font-serif text-[clamp(36px,5vw,52px)] leading-[1.0] tracking-[-0.025em] m-0 text-ink mb-3'>
-            Welcome back.
-          </h1>
-          <p className='font-mono text-[13px] text-ink-mute m-0 mb-10'>
-            Sign in to see your sessions, streaks, and standing.
+        <p className='font-mono text-[12px] text-ink-faint m-0'>
+          No account needed — GitHub sign-in creates one automatically.
+        </p>
+
+        <div className='mt-14 pt-8 border-t border-rule'>
+          <p className='font-mono text-[11.5px] text-ink-faint m-0 leading-relaxed'>
+            <span className='text-ink-mute'>Privacy first.</span>{' '}
+            Only key counts and file paths leave your machine. Never code or content.
           </p>
-
-          <button
-            type='button'
-            onClick={signIn}
-            className='group w-full inline-flex items-center justify-center gap-3 h-[52px] px-6 rounded-full font-mono text-[13px] uppercase tracking-wider font-medium bg-ink text-paper border border-ink hover:bg-paper hover:text-ink transition-colors mb-4'
-          >
-            <GithubMark />
-            Sign in with GitHub
-          </button>
-
-          <p className='font-mono text-[11.5px] text-ink-faint text-center m-0 leading-relaxed'>
-            No account needed — GitHub sign-in creates one.
-          </p>
-
-          <div className='mt-12 pt-8 border-t border-rule'>
-            <p className='font-mono text-[11px] text-ink-faint m-0 leading-relaxed'>
-              <span className='text-ink-mute'>Privacy first.</span> Only key
-              counts and file paths are tracked. No code, no content, no
-              keystrokes ever leave your machine.
-            </p>
-          </div>
         </div>
       </div>
     </div>
