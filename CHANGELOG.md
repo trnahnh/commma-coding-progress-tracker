@@ -10,6 +10,18 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **API** — social endpoints: `GET /v1/users/:handle` (public profile —
+  handle/avatar/streak plus aggregated `total_sessions`/`total_duration_s`/
+  all-time `top_lang`; `badges` is `[]` until the Phase 4 badge system),
+  `GET /v1/users/:handle/sessions` (public, keyset-paginated session list),
+  `POST`/`DELETE /v1/users/:handle/follow` (auth, idempotent `204`; self-follow
+  is `400`, following a `privacy='off'` user is `404`), and `GET /v1/feed`
+  (auth; sessions from followed users, newest-first, keyset-paginated, excludes
+  followees now set to `privacy='off'`). Profile and session-list reads are
+  privacy-gated like `GET /v1/sessions/:id` (an `off` user is `404` to
+  non-owners). Shared keyset-cursor and session-summary helpers
+  (`lib/cursor.ts`, `lib/sessionSummary.ts`) now back `GET /v1/sessions`, the
+  user session list, and the feed.
 - **API** — `GET /v1/leaderboard` (public, no auth): top 100 users by coding
   time for `period` = `week` (default) / `month` / `alltime`, read from the Redis
   sorted sets and hydrated from PostgreSQL (handle, avatar, current streak, top

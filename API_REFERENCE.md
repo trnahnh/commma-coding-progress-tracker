@@ -158,6 +158,12 @@ Returns a public profile.
 }
 ```
 
+**Implementation status (Phase 2):** live. `stats` are aggregated from
+`sessions`/`session_langs` (`total_sessions`, `total_duration_s`, and the
+all-time `top_lang`). Gated by `privacy`: an `off` user is `404` to everyone but
+the owner (send a bearer). `badges` is always `[]` for now (the badge system is
+Phase 4).
+
 ---
 
 ### `GET /v1/users/:handle/sessions`
@@ -196,6 +202,12 @@ Unfollow a user.
 
 **Auth:** Required  
 **Response:** `204 No Content`
+
+**Implementation status (Phase 2):** both follow and unfollow are live and
+idempotent (re-following or unfollowing when no edge exists still returns
+`204`). Following yourself is `400 VALIDATION_ERROR`; following a `privacy='off'`
+user (invisible to you) is `404`. `GET /v1/users/:handle/sessions` is also live
+with the same privacy gating and keyset cursor as `GET /v1/sessions`.
 
 ---
 
@@ -409,6 +421,11 @@ Returns recent sessions from users the authenticated user follows.
   "next_cursor": "..."
 }
 ```
+
+**Implementation status (Phase 2):** live. Returns sessions from users the
+caller follows, newest first, keyset-paginated (`limit` default `20`, max `50`).
+Followees who later set `privacy='off'` are excluded from the feed. Each
+`session` is the same `SessionSummary` shape as `GET /v1/sessions`.
 
 ---
 
