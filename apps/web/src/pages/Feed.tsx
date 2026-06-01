@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Shell, StatusPanel } from '../components/chrome'
 import { ApiError, getFeed, type FeedEntry, type FeedPage } from '../lib/api'
 import { formatClock, formatDate, formatDuration } from '../lib/format'
@@ -17,10 +17,14 @@ function FeedCard({ entry }: { entry: FeedEntry }) {
   const { session, user } = entry
   const { id, started_at, duration_s, lines_delta, top_lang } = session
   const style = top_lang ? langStyle(top_lang) : null
+  const navigate = useNavigate()
   return (
-    <Link
-      to={`/sessions/${id}`}
-      className='block group border-b border-rule last:border-b-0 px-5 sm:px-8 py-4 sm:py-5 hover:bg-paper-2/40 transition-colors'
+    <div
+      role='link'
+      tabIndex={0}
+      onClick={() => navigate(`/sessions/${id}`)}
+      onKeyDown={(e) => e.key === 'Enter' && navigate(`/sessions/${id}`)}
+      className='group cursor-pointer border-b border-rule last:border-b-0 px-5 sm:px-8 py-4 sm:py-5 hover:bg-paper-2/40 transition-colors'
     >
       <div className='flex items-center gap-2.5 mb-3'>
         {user.avatar_url ? (
@@ -37,7 +41,7 @@ function FeedCard({ entry }: { entry: FeedEntry }) {
         <Link
           to={`/@${user.handle}`}
           onClick={(e) => e.stopPropagation()}
-          className='font-serif text-[14px] leading-none tracking-[-0.01em] text-ink hover:text-accent transition-colors'
+          className='relative z-10 font-serif text-[14px] leading-none tracking-[-0.01em] text-ink hover:text-accent transition-colors'
         >
           @{user.handle}
         </Link>
@@ -68,7 +72,7 @@ function FeedCard({ entry }: { entry: FeedEntry }) {
           →
         </span>
       </div>
-    </Link>
+    </div>
   )
 }
 
