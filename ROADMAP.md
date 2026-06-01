@@ -59,7 +59,7 @@ Goal: something a real user can experience end-to-end.
 - [ ] Streak calculation cron job
 - [ ] Profile page at `/@handle` (live data)
 - [x] Redis leaderboard sorted set (incremental `ZINCRBY` on session write — done in step 4)
-- [ ] `GET /v1/leaderboard` endpoint — **must include the cold-start rebuild summing `sessions.duration_s` (events are pruned, so rebuild from `sessions`, never `events`); see ADR-007/ADR-010**
+- [x] `GET /v1/leaderboard` endpoint — public; `period` week/month/alltime, top 100 from Redis sorted sets, hydrated from PostgreSQL (handle/avatar/streak/top-lang), `privacy='off'` excluded. Includes the cold-start rebuild summing `sessions.duration_s` over the period window (never `events`, which are pruned; ADR-007/ADR-010). Deferred: `lang` filter (needs per-language sorted sets) and `delta` rank change (needs period snapshots).
 - [ ] Follow/unfollow API
 - [ ] `GET /v1/feed` endpoint
 - [ ] Leaderboard page in web app

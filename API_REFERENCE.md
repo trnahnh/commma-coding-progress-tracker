@@ -374,6 +374,14 @@ Returns the top 100 users by coding time for the given period.
 
 `delta` — rank change since the previous period snapshot (`+N` up, `-N` down, `0` unchanged).
 
+**Implementation status (Phase 2):** live, public. Reads the period's Redis
+sorted set (top 100) and hydrates handle/avatar/streak/top-lang from PostgreSQL;
+users with `privacy = 'off'` are excluded. If the period's set is missing (Redis
+wiped), it is rebuilt by summing `sessions.duration_s` over the period window
+(ADR-007/ADR-010). **Not yet implemented:** the `lang` query param (requires
+per-language sorted sets, not maintained today) and the `delta` field (requires
+period snapshots) — both are omitted from the current response.
+
 ---
 
 ## Feed Endpoint

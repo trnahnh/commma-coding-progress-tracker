@@ -10,6 +10,15 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **API** — `GET /v1/leaderboard` (public, no auth): top 100 users by coding
+  time for `period` = `week` (default) / `month` / `alltime`, read from the Redis
+  sorted sets and hydrated from PostgreSQL (handle, avatar, current streak, top
+  language for the period). Implements the ADR-007/ADR-010 cold-start rebuild — if
+  the period's sorted set is missing (Redis wiped), it is rebuilt by summing
+  `sessions.duration_s` over the period window (never `events`, which are pruned).
+  Users with `privacy = 'off'` are excluded. Not yet implemented: the `lang`
+  filter (needs per-language sorted sets) and the `delta` rank-change field (needs
+  period snapshots).
 - **Extension (`@commma/extension`) 0.1.0** — real `commma: Sign in` /
   `commma: Sign out`, GitHub OAuth via a loopback redirect + one-time code
   (ADR-011), tokens stored in VSCode SecretStorage with transparent refresh, an
