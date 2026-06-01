@@ -95,13 +95,18 @@ Goal: production-safe. No known P0/P1 bugs. Published extension.
 - [ ] Structured error responses across all endpoints
 - [ ] Input validation hardening (edge cases, large payloads)
 - [ ] `POST /v1/sessions/:id/heatmap-card` (server-side `sharp` PNG for OG images)
-- [ ] Open Graph meta tags on public session and profile URLs
-- [ ] Web sign-in / sign-out — browser GitHub OAuth flow (`GET /v1/auth/github`
-  redirect, no `redirect_uri`; callback sets HTTP-only refresh cookie + returns
-  access token); store access token in memory, auto-refresh via `POST
-  /v1/auth/refresh` before expiry; `GET /v1/me` to hydrate current-user context;
-  sign-out calls `POST /v1/auth/signout`. Prerequisite for the items below.
-- [ ] Replace all mocked landing page data with live API
+- [x] Open Graph meta tags on public session and profile URLs — `og:title`,
+  `og:description`, `og:type`, `twitter:card` injected dynamically on
+  SessionDetail and Profile pages.
+- [x] Web sign-in / sign-out — API callback redirects to
+  `${WEB_ORIGIN}/auth/callback?code=…` (reuses `oauth:cli:code` + `POST
+  /v1/auth/cli/exchange`); `AuthProvider` context with refresh token in
+  `localStorage`, access token in memory, auto-refresh 60s before JWT expiry;
+  nav shows avatar + sign-out when authenticated.
+- [x] Replace all mocked landing page data with live API — leaderboard section
+  now fetches `GET /v1/leaderboard?period=week` (real avatars, lang colors,
+  streak, self-highlight); SESSION/CHART/TICKER sections remain mocked (no
+  suitable endpoint yet).
 - [ ] Extension published to VSCode Marketplace (unlisted)
 - [ ] `CONTRIBUTING.md`, `ONBOARDING.md`, `SECURITY.md` complete
 - [ ] `good-first-issue` label sweep
