@@ -1,7 +1,8 @@
 import { Hono } from 'hono'
+import { eq } from 'drizzle-orm'
 import { zValidator } from '@hono/zod-validator'
 import { heartbeatBatchSchema } from '@commma/shared'
-import { events, type KeyFreq } from '@commma/db'
+import { events, users, type KeyFreq } from '@commma/db'
 import { db } from '../db.js'
 import { apiError } from '../lib/errors.js'
 import { requireAuth } from '../middleware/auth.js'
@@ -27,17 +28,28 @@ ingestRoutes.post(
   async (c) => {
     const userId = c.get('userId')
     const { events: batch } = c.req.valid('json')
+    const received = batch.length
 
+    const [owner] = await db
+      .select({ privacy: users.privacy })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1)
+
+    if (!owner) return apiError(c, 'UNAUTHORIZED', 'Unknown user')
+    if (owner.privacy === 'off') return c.json({ received, duplicate: 0 }, 202)
+
+    const summary = owner.privacy === 'summary'
     const rows = batch.map((e) => ({
       id: e.id,
       userId,
       ts: new Date(e.ts),
       lang: e.lang ?? null,
-      file: e.file ?? null,
+      file: summary ? null : (e.file ?? null),
       project: e.project ?? null,
       keystrokes: e.keystrokes,
       lines: e.lines,
-      keyFreq: e.key_freq ? (e.key_freq as KeyFreq) : null,
+      keyFreq: summary ? null : e.key_freq ? (e.key_freq as KeyFreq) : null,
     }))
 
     const inserted = await db
@@ -46,7 +58,6 @@ ingestRoutes.post(
       .onConflictDoNothing({ target: [events.id, events.ts] })
       .returning({ id: events.id })
 
-    const received = rows.length
     return c.json({ received, duplicate: received - inserted.length }, 202)
   },
 )

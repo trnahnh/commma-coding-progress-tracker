@@ -88,6 +88,7 @@ sessionRoutes.get(
     if (owner.privacy === 'off' && !isOwner) {
       return apiError(c, 'NOT_FOUND', 'Session not found')
     }
+    const suppressDetail = owner.privacy === 'summary' && !isOwner
 
     const [langRows, fileRows] = await Promise.all([
       db
@@ -117,8 +118,12 @@ sessionRoutes.get(
         duration_s: l.durationS,
         pct: Number(l.pct),
       })),
-      files: fileRows.map((f) => ({ path: f.path, changes: f.changes })),
-      keyboard_heatmap: session.keyboardHeatmap ?? null,
+      files: suppressDetail
+        ? []
+        : fileRows.map((f) => ({ path: f.path, changes: f.changes })),
+      keyboard_heatmap: suppressDetail
+        ? null
+        : (session.keyboardHeatmap ?? null),
     })
   },
 )

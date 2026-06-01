@@ -63,12 +63,15 @@ Redis cost drivers: per-request rate limits + per-finalize `ZINCRBY` (no BullMQ)
 | --- | --- | --- | --- |
 | Key-content bytes | **0** (histogram only) | **0** forever | schema + audit |
 | `contentChanges.text` | never stored | never | `keyCounter.ts` |
-| PII (see note) | auth + optional paths | minimal modes | schema + privacy |
+| PII (see note) | server-enforced modes | minimal modes | schema + ingest |
 | Leaderboard drift | not measured | 0 | DB sum vs `ZSCORE` |
 
 Key-content: no content column; only `key_freq` label histograms (ADR-006).
 PII: emails always; file paths when `privacy = full`. `summary` drops paths +
-`key_freq`; `off` sends nothing.
+`key_freq`; `off` stores nothing. Enforced **server-side at ingest** (not just by
+the extension) — `summary` strips `file`/`key_freq` before insert, `off` persists
+no events; `GET /v1/sessions/:id` also withholds files/heatmap from non-owners of
+`summary` owners. Auditable via the `events`/`sessions` rows, independent of client.
 
 Leaderboard: `Σ sessions.duration_s` per period must match Redis ZSET score.
 Drift surfaces post-commit `ZINCRBY` failure (backlog B); Phase-2 rebuild fixes.

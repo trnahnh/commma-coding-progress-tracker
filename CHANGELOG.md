@@ -44,6 +44,14 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   key counter (`tallyChange`, `addKeyFreq`). API build now uses
   `tsconfig.build.json` so `test/` is typechecked but excluded from `dist/`.
 
+### Privacy
+
+- **API** — `privacy = summary` is now enforced server-side, not just by the
+  extension. Ingest drops `file` and `key_freq` before storing for `summary`
+  users and stores nothing for `off` users; `GET /v1/sessions/:id` additionally
+  suppresses `files` and `keyboard_heatmap` to non-owners for `summary` owners
+  (covers data captured before a switch to `summary`). Upholds ADR-006.
+
 
 
 - **API** — streak-reset cron: an in-process hourly interval (ADR-010 style,

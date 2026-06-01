@@ -237,7 +237,7 @@ Ingests a batch of heartbeat events from the extension.
 
 **Notes:**
 
-- `file` and `key_freq` are omitted when the user's privacy setting is `summary`
+- `file` and `key_freq` are dropped server-side (never stored) when the user's privacy is `summary`; an `off` user's events are discarded entirely — enforcement does not rely on the client
 - `id` is used for idempotency — duplicate event IDs are silently dropped
 - Maximum 500 events per batch
 - All `key_freq` keys must be normalized key labels (see [Key Label Reference](#key-label-reference))
@@ -289,7 +289,7 @@ Returns the authenticated user's sessions, paginated.
 
 Returns full session detail including language breakdown, top files, and keyboard heatmap.
 
-**Auth:** Optional. Public, gated by the owner's `privacy`: sessions of `full`/`summary` users are viewable by anyone; sessions of `off` users are owner-only (a valid bearer matching the owner). Non-owners requesting an `off` user's session receive `404`.
+**Auth:** Optional. Public, gated by the owner's `privacy`: sessions of `full`/`summary` users are viewable by anyone; sessions of `off` users are owner-only (a valid bearer matching the owner). Non-owners requesting an `off` user's session receive `404`. For `summary` owners, non-owners receive an empty `files` array and `keyboard_heatmap: null` (the owner still sees them); this covers data captured before the user switched to `summary`.
 
 **Response:**
 
