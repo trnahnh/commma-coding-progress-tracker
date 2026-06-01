@@ -43,6 +43,9 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `buildSession`, `applyActiveDate`/`streakBreakCutoff`) and the extension
   key counter (`tallyChange`, `addKeyFreq`). API build now uses
   `tsconfig.build.json` so `test/` is typechecked but excluded from `dist/`.
+- **API** — expired `refresh_tokens` cleanup: an in-process daily interval
+  (gated by `RUN_AGGREGATION`, started in `index.ts`) that deletes rows whose
+  `expires_at` has passed, so rotated/abandoned tokens no longer accumulate.
 
 ### Privacy
 

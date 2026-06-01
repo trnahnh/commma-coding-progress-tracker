@@ -90,7 +90,7 @@ Goal: production-safe. No known P0/P1 bugs. Published extension.
 - [x] Redis rate limiter middleware (built early in step 4) — **follow-up: trust the correct `x-forwarded-for` hop once an ALB/CloudFront fronts the API; see ADR-010 (B)**
 - [x] Privacy mode: `key_freq` and file paths suppressed when `privacy = summary` — enforced server-side: ingest drops `file`/`key_freq` for `summary` (stores nothing for `off`); `GET /v1/sessions/:id` also suppresses `files`/`keyboard_heatmap` to non-owners for `summary` owners.
 - [x] Unit tests (Vitest) for the pure aggregator functions (D) — Vitest runner wired (`pnpm test`); covers `splitIntoSessions`, `buildSession`, `streak`, and extension `tallyChange`/`addKeyFreq`. Route/integration tests still pending.
-- [ ] Expired `refresh_tokens` cleanup job (C) — periodic `DELETE WHERE expires_at < now()`; `rotateRefreshToken` only deletes the rotated row, so dead tokens accumulate otherwise.
+- [x] Expired `refresh_tokens` cleanup job (C) — in-process daily interval (gated by `RUN_AGGREGATION`) deletes rows past `expires_at`.
 - [ ] Extension offline queue with exponential backoff retry
 - [ ] Structured error responses across all endpoints
 - [ ] Input validation hardening (edge cases, large payloads)

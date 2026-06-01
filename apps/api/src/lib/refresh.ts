@@ -1,5 +1,5 @@
 import { createHmac, randomBytes } from 'node:crypto'
-import { and, eq, gt } from 'drizzle-orm'
+import { and, eq, gt, lt } from 'drizzle-orm'
 import { refreshTokens } from '@commma/db'
 import { db } from '../db.js'
 import { env } from '../env.js'
@@ -47,4 +47,14 @@ export async function revokeRefreshToken(raw: string): Promise<void> {
   await db
     .delete(refreshTokens)
     .where(eq(refreshTokens.tokenHash, hashToken(raw)))
+}
+
+export async function deleteExpiredRefreshTokens(
+  now = new Date(),
+): Promise<number> {
+  const deleted = await db
+    .delete(refreshTokens)
+    .where(lt(refreshTokens.expiresAt, now))
+    .returning({ id: refreshTokens.id })
+  return deleted.length
 }

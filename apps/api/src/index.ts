@@ -4,6 +4,7 @@ import { env } from './env.js'
 import { log } from './logger.js'
 import { startAggregation } from './aggregate/scheduler.js'
 import { startStreakReset } from './aggregate/streakScheduler.js'
+import { startRefreshTokenCleanup } from './maintenance/refreshTokenScheduler.js'
 
 const app = createApp()
 
@@ -12,5 +13,6 @@ serve({ fetch: app.fetch, port: env.PORT }, (info) => {
   if (env.RUN_AGGREGATION) {
     startAggregation()
     startStreakReset()
+    startRefreshTokenCleanup()
   }
 })
