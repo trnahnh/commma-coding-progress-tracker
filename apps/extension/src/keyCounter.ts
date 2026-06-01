@@ -6,9 +6,47 @@ export interface ChangeTally {
   keyFreq: KeyFreq
 }
 
+const SYMBOL_TO_KEY: Record<string, KeyLabel> = {
+  '`': '`',
+  '~': '`',
+  '!': '1',
+  '@': '2',
+  '#': '3',
+  $: '4',
+  '%': '5',
+  '^': '6',
+  '&': '7',
+  '*': '8',
+  '(': '9',
+  ')': '0',
+  '-': '-',
+  _: '-',
+  '=': '=',
+  '+': '=',
+  '[': '[',
+  '{': '[',
+  ']': ']',
+  '}': ']',
+  '\\': '\\',
+  '|': '\\',
+  ';': ';',
+  ':': ';',
+  "'": "'",
+  '"': "'",
+  ',': ',',
+  '<': ',',
+  '.': '.',
+  '>': '.',
+  '/': '/',
+  '?': '/',
+}
+
 function charToLabel(ch: string): KeyLabel {
   if (ch === '\n' || ch === '\r') return 'Enter'
   if (ch === '\t') return 'Tab'
+  if (ch === ' ') return 'Space'
+  const mapped = SYMBOL_TO_KEY[ch]
+  if (mapped) return mapped
   const lower = ch.toLowerCase()
   return isKeyLabel(lower) ? lower : 'Other'
 }
