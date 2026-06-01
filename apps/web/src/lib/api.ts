@@ -75,6 +75,55 @@ async function getJson<T>(path: string, init?: RequestInit): Promise<T> {
   return (await res.json()) as T
 }
 
+export interface SessionSummary {
+  id: string
+  started_at: string
+  ended_at: string
+  duration_s: number
+  lines_delta: number
+  pace_cpm: number | null
+  top_lang: string | null
+}
+
+export interface SessionPage {
+  sessions: SessionSummary[]
+  next_cursor: string | null
+}
+
+export interface UserStreak {
+  current_days: number
+  longest_days: number
+}
+
+export interface UserStats {
+  total_sessions: number
+  total_duration_s: number
+  top_lang: string | null
+}
+
+export interface UserProfile {
+  handle: string
+  avatar_url: string
+  created_at: string
+  streak: UserStreak
+  stats: UserStats
+  badges: never[]
+}
+
 export function getSession(id: string): Promise<SessionDetail> {
   return getJson<SessionDetail>(`/v1/sessions/${encodeURIComponent(id)}`)
+}
+
+export function getProfile(handle: string): Promise<UserProfile> {
+  return getJson<UserProfile>(`/v1/users/${encodeURIComponent(handle)}`)
+}
+
+export function getProfileSessions(
+  handle: string,
+  cursor?: string,
+): Promise<SessionPage> {
+  const qs = cursor ? `?cursor=${encodeURIComponent(cursor)}` : ''
+  return getJson<SessionPage>(
+    `/v1/users/${encodeURIComponent(handle)}/sessions${qs}`,
+  )
 }

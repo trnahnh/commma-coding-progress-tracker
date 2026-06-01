@@ -1,0 +1,328 @@
+import { useCallback, useEffect, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
+import { LiveDot, Shell, StatusPanel } from '../components/chrome'
+import {
+  ApiError,
+  getProfile,
+  getProfileSessions,
+  type SessionSummary,
+  type UserProfile,
+} from '../lib/api'
+import { formatClock, formatDate, formatDuration } from '../lib/format'
+import { langStyle } from '../lib/langColors'
+
+function ProfileHero({ profile }: { profile: UserProfile }) {
+  const { handle, avatar_url, streak, stats } = profile
+  const topStyle = stats.top_lang ? langStyle(stats.top_lang) : null
+  return (
+    <div className='border border-rule-strong rounded bg-linear-to-b from-paper-2 to-paper overflow-hidden'>
+      <div className='px-5 sm:px-8 py-6 sm:py-8 flex items-center gap-5 sm:gap-6 border-b border-rule'>
+        <img
+          src={avatar_url}
+          alt={handle}
+          width={80}
+          height={80}
+          className='w-16 sm:w-20 h-16 sm:h-20 rounded-full border border-rule-strong object-cover shrink-0'
+        />
+        <div className='min-w-0'>
+          <div className='font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-mute mb-1.5'>
+            profile
+          </div>
+          <h1 className='font-serif text-[clamp(28px,4.5vw,52px)] leading-[1.04] tracking-[-0.02em] m-0 text-ink break-all'>
+            @{handle}
+          </h1>
+          {streak.current_days > 0 && (
+            <p className='mt-2 m-0 font-mono text-[11.5px] text-live flex items-center gap-2'>
+              <LiveDot color='live' />
+              {streak.current_days} day streak
+            </p>
+          )}
+        </div>
+      </div>
+      <div className='grid grid-cols-2 sm:grid-cols-4 gap-px bg-rule'>
+        <StatCell
+          label='Sessions'
+          value={stats.total_sessions.toLocaleString()}
+        />
+        <StatCell
+          label='Total time'
+          value={formatDuration(stats.total_duration_s)}
+        />
+        <StatCell
+          label='Streak'
+          value={`${streak.current_days}`}
+          unit={streak.current_days === 1 ? 'day' : 'days'}
+          foot={
+            streak.longest_days > 0 ? `best ${streak.longest_days}d` : undefined
+          }
+        />
+        <StatCell
+          label='Top language'
+          value={topStyle ? topStyle.label : '—'}
+          dot={topStyle?.color}
+        />
+      </div>
+    </div>
+  )
+}
+
+function StatCell({
+  label,
+  value,
+  unit,
+  foot,
+  dot,
+}: {
+  label: string
+  value: string
+  unit?: string
+  foot?: string
+  dot?: string
+}) {
+  return (
+    <div className='bg-paper-2 px-5 sm:px-7 py-5 sm:py-6'>
+      <span className='block font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-mute mb-3.5'>
+        {label}
+      </span>
+      <span className='flex items-center gap-2 font-serif text-[clamp(22px,2.5vw,36px)] leading-none tracking-[-0.02em] text-ink tnum'>
+        {dot && (
+          <span
+            className='w-3 h-3 rounded-sm shrink-0'
+            style={{ background: dot }}
+          />
+        )}
+        {value}
+        {unit && (
+          <span className='font-mono text-[11px] tracking-wide text-ink-mute lowercase'>
+            {unit}
+          </span>
+        )}
+      </span>
+      {foot && (
+        <span className='block font-mono text-[10.5px] tracking-wide text-ink-mute mt-1.5 tnum'>
+          {foot}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function SessionRow({ session }: { session: SessionSummary }) {
+  const { top_lang, duration_s, lines_delta, started_at } = session
+  const style = top_lang ? langStyle(top_lang) : null
+  return (
+    <Link
+      to={`/sessions/${session.id}`}
+      className='flex items-center gap-4 px-5 sm:px-8 py-3.5 border-b border-rule last:border-b-0 hover:bg-paper-2/50 transition-colors group'
+    >
+      <div className='min-w-0 flex-1'>
+        <span className='font-mono text-[12.5px] text-ink'>
+          {formatDate(started_at)}
+        </span>
+        <span className='mx-2 text-ink-faint text-[11px]'>·</span>
+        <span className='font-mono text-[11px] text-ink-mute tnum'>
+          {formatClock(started_at)}
+        </span>
+      </div>
+      <div className='hidden sm:flex items-center gap-5'>
+        {style ? (
+          <span className='flex items-center gap-1.5 font-mono text-[12px] text-ink-soft'>
+            <span
+              className='w-2 h-2 rounded-sm'
+              style={{ background: style.color }}
+            />
+            {style.label}
+          </span>
+        ) : (
+          <span className='font-mono text-[12px] text-ink-faint'>—</span>
+        )}
+        <span className='font-mono text-[12px] text-ink-soft tnum'>
+          {formatDuration(duration_s)}
+        </span>
+        <span className='font-mono text-[12px] text-ink-mute tnum'>
+          {lines_delta.toLocaleString()}∆
+        </span>
+      </div>
+      <div className='flex items-center gap-2'>
+        <span className='font-mono text-[12px] text-ink-soft tnum sm:hidden'>
+          {formatDuration(duration_s)}
+        </span>
+        <span className='font-mono text-[12px] text-ink-faint group-hover:text-ink-soft group-hover:translate-x-0.5 transition-all'>
+          →
+        </span>
+      </div>
+    </Link>
+  )
+}
+
+function SessionFeed({
+  sessions,
+  nextCursor,
+  onLoadMore,
+  loadingMore,
+}: {
+  sessions: SessionSummary[]
+  nextCursor: string | null
+  onLoadMore: () => void
+  loadingMore: boolean
+}) {
+  return (
+    <div className='border border-rule-strong rounded overflow-hidden mt-6'>
+      <div className='px-5 sm:px-8 py-4 border-b border-rule flex items-center justify-between'>
+        <span className='font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-mute'>
+          Sessions
+        </span>
+        <span className='font-mono text-[11px] text-ink-faint tnum'>
+          {sessions.length.toLocaleString()}
+          {nextCursor ? '+' : ''}
+        </span>
+      </div>
+      {sessions.length === 0 ? (
+        <div className='px-5 sm:px-8 py-12 text-center font-mono text-[12px] text-ink-mute'>
+          No sessions yet.
+        </div>
+      ) : (
+        <>
+          {sessions.map((s) => (
+            <SessionRow key={s.id} session={s} />
+          ))}
+          {nextCursor && (
+            <div className='flex justify-center py-5 border-t border-rule'>
+              <button
+                type='button'
+                onClick={onLoadMore}
+                disabled={loadingMore}
+                className='font-mono text-[11px] uppercase tracking-wider text-ink-mute hover:text-ink disabled:opacity-40 transition-colors'
+              >
+                {loadingMore ? 'Loading…' : 'Load more'}
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+type LoadState =
+  | { phase: 'loading' }
+  | {
+      phase: 'ready'
+      profile: UserProfile
+      sessions: SessionSummary[]
+      nextCursor: string | null
+    }
+  | { phase: 'error'; error: ApiError }
+
+export default function Profile() {
+  const { handle = '' } = useParams<{ handle: string }>()
+  const [state, setState] = useState<LoadState>({ phase: 'loading' })
+  const [trackedHandle, setTrackedHandle] = useState(handle)
+  const [loadingMore, setLoadingMore] = useState(false)
+
+  if (trackedHandle !== handle) {
+    setTrackedHandle(handle)
+    setState({ phase: 'loading' })
+  }
+
+  useEffect(() => {
+    let cancelled = false
+    Promise.all([getProfile(handle), getProfileSessions(handle)])
+      .then(([profile, page]) => {
+        if (!cancelled) {
+          setState({
+            phase: 'ready',
+            profile,
+            sessions: page.sessions,
+            nextCursor: page.next_cursor,
+          })
+        }
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return
+        setState({
+          phase: 'error',
+          error:
+            err instanceof ApiError
+              ? err
+              : new ApiError(0, 'UNKNOWN', 'Something went wrong'),
+        })
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [handle])
+
+  useEffect(() => {
+    const label =
+      state.phase === 'ready'
+        ? `@${state.profile.handle}`
+        : state.phase === 'error'
+          ? 'Profile not found'
+          : 'Loading profile'
+    document.title = `${label} · commma`
+  }, [state])
+
+  const loadMore = useCallback(async () => {
+    if (state.phase !== 'ready' || !state.nextCursor || loadingMore) return
+    const cursor = state.nextCursor
+    setLoadingMore(true)
+    try {
+      const page = await getProfileSessions(handle, cursor)
+      setState((prev) =>
+        prev.phase === 'ready'
+          ? {
+              ...prev,
+              sessions: [...prev.sessions, ...page.sessions],
+              nextCursor: page.next_cursor,
+            }
+          : prev,
+      )
+    } catch {
+      void 0
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [state, handle, loadingMore])
+
+  if (state.phase === 'loading') {
+    return (
+      <Shell>
+        <StatusPanel
+          title='Loading profile…'
+          body='Fetching sessions and stats.'
+        />
+      </Shell>
+    )
+  }
+
+  if (state.phase === 'error') {
+    const { error } = state
+    const notFound = error.status === 404 || error.code === 'NOT_FOUND'
+    return (
+      <Shell>
+        <StatusPanel
+          title={notFound ? 'Profile not found' : 'Something went wrong'}
+          body={
+            notFound
+              ? 'This profile is private or does not exist.'
+              : error.message
+          }
+        />
+      </Shell>
+    )
+  }
+
+  const { profile, sessions, nextCursor } = state
+  return (
+    <Shell>
+      <ProfileHero profile={profile} />
+      <SessionFeed
+        sessions={sessions}
+        nextCursor={nextCursor}
+        onLoadMore={loadMore}
+        loadingMore={loadingMore}
+      />
+    </Shell>
+  )
+}
