@@ -10,6 +10,16 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **API** — streak-reset cron: an in-process hourly interval (ADR-010 style,
+  gated by `RUN_AGGREGATION`, started in `index.ts`) that zeroes `current_days`
+  for users whose `last_active_date` is older than yesterday (UTC), preserving
+  `longest_days` and `last_active_date`. The aggregator only *bumps* streaks on
+  activity and resets lazily on the next session, so without this a broken streak
+  read as stale (e.g. `/v1/me`, profiles) until the user coded again. Pure cutoff
+  helper `streakBreakCutoff` in `aggregate/streak.ts`; bulk `UPDATE … RETURNING`
+  in `aggregate/streakReset.ts`. Skips users with un-aggregated `events`
+  (`NOT EXISTS`) so a session ending near 00:00 UTC isn't mis-scored as broken
+  while aggregation is still catching up.
 - **API** — social endpoints: `GET /v1/users/:handle` (public profile —
   handle/avatar/streak plus aggregated `total_sessions`/`total_duration_s`/
   all-time `top_lang`; `badges` is `[]` until the Phase 4 badge system),

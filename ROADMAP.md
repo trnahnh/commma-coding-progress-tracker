@@ -56,7 +56,12 @@ Goal: something a real user can experience end-to-end.
 - [x] Keyboard heatmap Canvas renderer component (QWERTY layout in `@commma/shared` per ADR-005; purple freq ramp; basic transparent-PNG download — presets/OG render still deferred below)
 - [x] Heatmap completeness (E) — added a `Space` label (the single most-pressed key, previously invisible) and the eleven punctuation physical keys; shifted symbols now map to their physical key (e.g. `!`→`1`) instead of collapsing to `Other`; `@commma/shared` `KEY_LABELS` change. Full per-layout mapping (Dvorak/Colemak) still aligns with the Phase 4 keyboard-layout configs.
 - [ ] PNG export (9:16, 1:1, 16:9 presets, transparent background)
-- [ ] Streak calculation cron job
+- [x] Streak calculation cron job — in-process hourly interval (ADR-010 style,
+  gated by `RUN_AGGREGATION`) that zeroes `current_days` for users whose
+  `last_active_date` is older than yesterday (UTC), preserving `longest_days` and
+  `last_active_date` so the next session restarts the streak at 1. The aggregator
+  only *bumps* streaks on activity; this closes the missed-day gap so reads stop
+  showing a stale streak. Pure cutoff helper `streakBreakCutoff` (testable).
 - [ ] Profile page at `/@handle` (live data) — backing endpoints done: `GET
   /v1/users/:handle` (handle/avatar/streak + aggregated `total_sessions`/
   `total_duration_s`/all-time `top_lang`; `badges` is `[]` until Phase 4) and

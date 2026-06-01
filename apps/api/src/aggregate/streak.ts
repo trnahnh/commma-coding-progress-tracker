@@ -25,3 +25,10 @@ function isNextDay(prev: string, next: string): boolean {
     Date.parse(`${next}T00:00:00Z`) - Date.parse(`${prev}T00:00:00Z`) === DAY_MS
   )
 }
+
+export function streakBreakCutoff(now: number): string {
+  const today = new Date(now).toISOString().slice(0, 10)
+  return new Date(Date.parse(`${today}T00:00:00Z`) - DAY_MS)
+    .toISOString()
+    .slice(0, 10)
+}
