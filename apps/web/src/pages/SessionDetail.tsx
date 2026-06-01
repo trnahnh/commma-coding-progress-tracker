@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { QWERTY_LAYOUT } from '@commma/shared'
 import { LiveDot, Shell, StatusPanel } from '../components/chrome'
+import KeyboardHeatmapCanvas from '../components/KeyboardHeatmap'
 import {
   ApiError,
   getSession,
@@ -171,48 +173,72 @@ function FileList({ files }: { files: SessionFile[] }) {
   )
 }
 
-function HeatmapSlot({ heatmap }: { heatmap: KeyboardHeatmap | null }) {
-  const topKeys = heatmap
-    ? Object.entries(heatmap.counts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 14)
-    : []
+function HeatmapHeader() {
+  return (
+    <div className='flex items-baseline justify-between gap-3 mb-5 font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-mute'>
+      <span>Keyboard heatmap</span>
+    </div>
+  )
+}
+
+function HeatmapSlot({
+  heatmap,
+  sessionLabel,
+}: {
+  heatmap: KeyboardHeatmap | null
+  sessionLabel: string
+}) {
+  if (heatmap == null || heatmap.total === 0) {
+    return (
+      <div className='px-5 sm:px-8 py-6 sm:py-8'>
+        <HeatmapHeader />
+        <div className='rounded border border-dashed border-rule-strong bg-paper-2/60 px-5 sm:px-8 py-8 sm:py-10'>
+          <p className='font-mono text-[12px] text-ink-mute m-0 text-center'>
+            No keyboard data captured for this session.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  const mappedLabels = new Set<string>()
+  for (const key of QWERTY_LAYOUT.keys) {
+    if (key.label) mappedLabels.add(key.label)
+  }
+  let mapped = 0
+  let top: [string, number] = ['', 0]
+  for (const [label, count] of Object.entries(heatmap.counts)) {
+    if (!mappedLabels.has(label)) continue
+    mapped += count
+    if (count > top[1]) top = [label, count]
+  }
+  const other = Math.max(0, heatmap.total - mapped)
 
   return (
     <div className='px-5 sm:px-8 py-6 sm:py-8'>
       <div className='flex items-baseline justify-between gap-3 mb-5 font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-mute'>
         <span>Keyboard heatmap</span>
-        {heatmap && (
-          <span className='tnum text-ink'>
-            {heatmap.total.toLocaleString()} keys
+        <span className='tnum text-ink'>
+          {heatmap.total.toLocaleString()} keys
+        </span>
+      </div>
+      <p className='mb-5 font-mono text-[11.5px] tracking-wide text-ink-mute m-0 flex flex-wrap items-center gap-x-2 gap-y-1'>
+        {top[1] > 0 && (
+          <span className='inline-flex items-center gap-2'>
+            <span className='w-1.5 h-1.5 rounded-full bg-accent-2' />
+            Most-pressed
+            <strong className='text-ink font-medium'>{top[0]}</strong>
+            <span className='tnum text-ink-soft'>{top[1].toLocaleString()}</span>
           </span>
         )}
-      </div>
-      <div className='rounded border border-dashed border-rule-strong bg-paper-2/60 px-5 sm:px-8 py-8 sm:py-10'>
-        {heatmap && topKeys.length > 0 ? (
-          <>
-            <div className='flex flex-wrap gap-2 mb-6'>
-              {topKeys.map(([key, count]) => (
-                <span
-                  key={key}
-                  className='inline-flex items-center gap-2 rounded border border-rule-strong bg-paper px-2.5 py-1.5 font-mono text-[12px] text-ink-soft'
-                >
-                  <span className='text-ink font-medium'>{key}</span>
-                  <span className='tnum text-ink-mute'>{count}</span>
-                </span>
-              ))}
-            </div>
-            <p className='font-mono text-[11px] tracking-wide text-ink-mute m-0 flex items-center gap-2'>
-              <span className='w-1.5 h-1.5 rounded-full bg-accent-2' />
-              Visual key map renders here — Canvas heatmap coming next release.
-            </p>
-          </>
-        ) : (
-          <p className='font-mono text-[12px] text-ink-mute m-0 text-center'>
-            No keyboard data captured for this session.
-          </p>
+        {top[1] > 0 && other > 0 && <span className='text-ink-faint'>·</span>}
+        {other > 0 && (
+          <span className='tnum'>
+            +{other.toLocaleString()} other keystrokes
+          </span>
         )}
-      </div>
+      </p>
+      <KeyboardHeatmapCanvas heatmap={heatmap} sessionLabel={sessionLabel} />
     </div>
   )
 }
@@ -252,7 +278,10 @@ function SessionCard({ session }: { session: Session }) {
         </div>
       </div>
 
-      <HeatmapSlot heatmap={session.keyboard_heatmap} />
+      <HeatmapSlot
+        heatmap={session.keyboard_heatmap}
+        sessionLabel={formatDate(session.started_at)}
+      />
     </div>
   )
 }

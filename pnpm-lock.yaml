@@ -69,6 +69,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@commma/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       react:
         specifier: ^19.2.6
         version: 19.2.6
