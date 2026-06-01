@@ -50,7 +50,7 @@ const functionRow: LayoutKey[] = [
 ]
 
 const numberRow = buildRow(1, 0, [
-  [null, '`'],
+  ['`', '`'],
   ['1', '1'],
   ['2', '2'],
   ['3', '3'],
@@ -61,8 +61,8 @@ const numberRow = buildRow(1, 0, [
   ['8', '8'],
   ['9', '9'],
   ['0', '0'],
-  [null, '-'],
-  [null, '='],
+  ['-', '-'],
+  ['=', '='],
   ['Backspace', '⌫', 2],
 ])
 
@@ -78,9 +78,9 @@ const tabRow = buildRow(2, 0, [
   ['i', 'I'],
   ['o', 'O'],
   ['p', 'P'],
-  [null, '['],
-  [null, ']'],
-  [null, '\\', 1.5],
+  ['[', '['],
+  [']', ']'],
+  ['\\', '\\', 1.5],
 ])
 
 const capsRow = buildRow(3, 0, [
@@ -94,8 +94,8 @@ const capsRow = buildRow(3, 0, [
   ['j', 'J'],
   ['k', 'K'],
   ['l', 'L'],
-  [null, ';'],
-  [null, "'"],
+  [';', ';'],
+  ["'", "'"],
   ['Enter', '⏎', 2.25],
 ])
 
@@ -108,9 +108,9 @@ const shiftRow = buildRow(4, 0, [
   ['b', 'B'],
   ['n', 'N'],
   ['m', 'M'],
-  [null, ','],
-  [null, '.'],
-  [null, '/'],
+  [',', ','],
+  ['.', '.'],
+  ['/', '/'],
   ['Shift', '⇧', 2.75],
 ])
 
@@ -118,7 +118,7 @@ const bottomRow = buildRow(5, 0, [
   ['Control', 'Ctrl', 1.25],
   ['Meta', '⌘', 1.25],
   ['Alt', 'Alt', 1.25],
-  [null, '', 7.5],
+  ['Space', 'Space', 7.5],
   ['Alt', 'Alt', 1.25],
   ['Meta', '⌘', 1.25],
   ['Control', 'Ctrl', 1.25],
