@@ -2,6 +2,12 @@ import { useCallback, useLayoutEffect, useRef } from 'react'
 import { QWERTY_LAYOUT } from '@commma/shared'
 import type { KeyboardHeatmap as Heatmap } from '../lib/api'
 
+const PRESETS = [
+  { label: '1:1', w: 1080, h: 1080 },
+  { label: '9:16', w: 1080, h: 1920 },
+  { label: '16:9', w: 1920, h: 1080 },
+] as const
+
 const UNIT = 46
 const PAD = 16
 const GAP = 3
@@ -105,21 +111,39 @@ export default function KeyboardHeatmap({
     void document.fonts.ready.then(draw)
   }, [draw])
 
-  const download = useCallback(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    canvas.toBlob((blob) => {
-      if (!blob) return
-      const url = URL.createObjectURL(blob)
-      const anchor = document.createElement('a')
-      anchor.href = url
-      anchor.download = `commma-heatmap-${slugify(sessionLabel ?? 'session')}.png`
-      document.body.appendChild(anchor)
-      anchor.click()
-      anchor.remove()
-      URL.revokeObjectURL(url)
-    }, 'image/png')
-  }, [sessionLabel])
+  const exportPreset = useCallback(
+    (w: number, h: number, label: string) => {
+      const canvas = canvasRef.current
+      if (!canvas) return
+      const offscreen = document.createElement('canvas')
+      offscreen.width = w
+      offscreen.height = h
+      const ctx = offscreen.getContext('2d')
+      if (!ctx) return
+      ctx.clearRect(0, 0, w, h)
+      const margin = 0.08
+      const availW = w * (1 - margin * 2)
+      const availH = h * (1 - margin * 2)
+      const scale = Math.min(availW / LOGICAL_W, availH / LOGICAL_H)
+      const kw = LOGICAL_W * scale
+      const kh = LOGICAL_H * scale
+      const ox = (w - kw) / 2
+      const oy = (h - kh) / 2
+      ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height, ox, oy, kw, kh)
+      offscreen.toBlob((blob) => {
+        if (!blob) return
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `commma-${label.replace(':', 'x')}-${slugify(sessionLabel ?? 'session')}.png`
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+        URL.revokeObjectURL(url)
+      }, 'image/png')
+    },
+    [sessionLabel],
+  )
 
   return (
     <div>
@@ -130,17 +154,23 @@ export default function KeyboardHeatmap({
           style={{ width: '100%', height: 'auto', maxWidth: `${LOGICAL_W}px` }}
         />
       </div>
-      <div className='mt-4 flex justify-end'>
-        <button
-          type='button'
-          onClick={download}
-          className='group inline-flex items-center gap-2 h-[36px] px-4 rounded-full font-mono text-[11px] uppercase tracking-wider text-ink-soft border border-rule-strong hover:text-paper hover:bg-accent hover:border-accent transition-colors'
-        >
-          Download PNG
-          <span className='inline-block transition-transform group-hover:translate-y-0.5'>
-            ↓
-          </span>
-        </button>
+      <div className='mt-4 flex items-center justify-end gap-2'>
+        <span className='font-mono text-[10px] uppercase tracking-wider text-ink-faint'>
+          Export
+        </span>
+        {PRESETS.map(({ label, w, h }) => (
+          <button
+            key={label}
+            type='button'
+            onClick={() => exportPreset(w, h, label)}
+            className='group inline-flex items-center gap-1.5 h-[32px] px-3 rounded-full font-mono text-[11px] uppercase tracking-wider text-ink-soft border border-rule-strong hover:text-paper hover:bg-accent hover:border-accent transition-colors'
+          >
+            {label}
+            <span className='inline-block transition-transform group-hover:translate-y-0.5'>
+              ↓
+            </span>
+          </button>
+        ))}
       </div>
     </div>
   )
