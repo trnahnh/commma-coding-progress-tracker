@@ -114,6 +114,27 @@ export function getSession(id: string): Promise<SessionDetail> {
   return getJson<SessionDetail>(`/v1/sessions/${encodeURIComponent(id)}`)
 }
 
+export type LeaderboardPeriod = 'week' | 'month' | 'alltime'
+
+export interface LeaderboardEntry {
+  rank: number
+  handle: string
+  avatar_url: string | null
+  duration_s: number
+  top_lang: string | null
+  streak_days: number
+}
+
+export interface LeaderboardData {
+  period: LeaderboardPeriod
+  updated_at: string
+  entries: LeaderboardEntry[]
+}
+
+export function getLeaderboard(period: LeaderboardPeriod): Promise<LeaderboardData> {
+  return getJson<LeaderboardData>(`/v1/leaderboard?period=${period}`)
+}
+
 export function getProfile(handle: string): Promise<UserProfile> {
   return getJson<UserProfile>(`/v1/users/${encodeURIComponent(handle)}`)
 }
