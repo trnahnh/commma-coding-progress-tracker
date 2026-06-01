@@ -11,11 +11,11 @@ const LOGICAL_W = QWERTY_LAYOUT.cols * UNIT + PAD * 2
 const LOGICAL_H = QWERTY_LAYOUT.rows * UNIT + PAD * 2
 
 const COLD_FILL = '#1a1814'
-const HOT_FILL = '#863bff'
+const HOT_FILL = '#ff4d1a'
 const COLD_BORDER = '#2d2922'
-const HOT_BORDER = '#863bff'
+const HOT_BORDER = '#ff4d1a'
 const COLD_TEXT = '#7a746a'
-const HOT_TEXT = '#f3eeff'
+const HOT_TEXT = '#fff4ec'
 
 function hexToRgb(hex: string): [number, number, number] {
   const v = hex.replace('#', '')
@@ -134,7 +134,7 @@ export default function KeyboardHeatmap({
         <button
           type='button'
           onClick={download}
-          className='group inline-flex items-center gap-2 h-[36px] px-4 rounded-full font-mono text-[11px] uppercase tracking-wider text-ink-soft border border-rule-strong hover:text-paper hover:bg-accent-2 hover:border-accent-2 transition-colors'
+          className='group inline-flex items-center gap-2 h-[36px] px-4 rounded-full font-mono text-[11px] uppercase tracking-wider text-ink-soft border border-rule-strong hover:text-paper hover:bg-accent hover:border-accent transition-colors'
         >
           Download PNG
           <span className='inline-block transition-transform group-hover:translate-y-0.5'>

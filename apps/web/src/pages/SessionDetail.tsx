@@ -225,7 +225,7 @@ function HeatmapSlot({
       <p className='mb-5 font-mono text-[11.5px] tracking-wide text-ink-mute m-0 flex flex-wrap items-center gap-x-2 gap-y-1'>
         {top[1] > 0 && (
           <span className='inline-flex items-center gap-2'>
-            <span className='w-1.5 h-1.5 rounded-full bg-accent-2' />
+            <span className='w-1.5 h-1.5 rounded-full bg-accent' />
             Most-pressed
             <strong className='text-ink font-medium'>{top[0]}</strong>
             <span className='tnum text-ink-soft'>{top[1].toLocaleString()}</span>
