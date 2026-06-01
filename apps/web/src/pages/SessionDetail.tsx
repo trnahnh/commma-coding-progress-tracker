@@ -12,21 +12,7 @@ import {
   type SessionLang,
 } from '../lib/api'
 import { formatClock, formatDate, formatDuration } from '../lib/format'
-
-const LANG_COLORS = [
-  '#FF4D1A',
-  '#9CF76D',
-  '#EFEAD8',
-  '#863BFF',
-  '#7DD3FC',
-  '#FCA5A5',
-  '#C4B5FD',
-  '#7A746A',
-]
-
-function langColor(index: number): string {
-  return LANG_COLORS[index % LANG_COLORS.length]
-}
+import { langStyle } from '../lib/langColors'
 
 function splitPath(path: string): { dir: string; name: string } {
   const trimmed = path.replace(/\/+$/, '')
@@ -114,32 +100,38 @@ function LangBreakdown({ langs }: { langs: SessionLang[] }) {
   return (
     <div>
       <div className='flex h-3 w-full overflow-hidden rounded-full border border-rule bg-paper mb-5'>
-        {langs.map((l, i) => (
-          <span
-            key={l.lang}
-            className='h-full first:rounded-l-full last:rounded-r-full'
-            style={{ width: `${l.pct}%`, background: langColor(i) }}
-            title={`${l.lang} · ${l.pct}%`}
-          />
-        ))}
+        {langs.map((l) => {
+          const style = langStyle(l.lang)
+          return (
+            <span
+              key={l.lang}
+              className='h-full first:rounded-l-full last:rounded-r-full'
+              style={{ width: `${l.pct}%`, background: style.color }}
+              title={`${style.label} · ${l.pct}%`}
+            />
+          )
+        })}
       </div>
-      {langs.map((l, i) => (
-        <div
-          key={l.lang}
-          className='grid grid-cols-[10px_1fr_auto] items-center gap-3 py-2 font-mono text-[12.5px] text-ink-soft border-b border-dashed border-rule last:border-b-0'
-        >
-          <span
-            className='w-2.5 h-2.5 rounded-sm'
-            style={{ background: langColor(i) }}
-          />
-          <span>
-            <strong className='text-ink font-medium'>{l.lang}</strong>
-          </span>
-          <span className='tnum'>
-            {formatDuration(l.duration_s)} · {l.pct}%
-          </span>
-        </div>
-      ))}
+      {langs.map((l) => {
+        const style = langStyle(l.lang)
+        return (
+          <div
+            key={l.lang}
+            className='grid grid-cols-[10px_1fr_auto] items-center gap-3 py-2 font-mono text-[12.5px] text-ink-soft border-b border-dashed border-rule last:border-b-0'
+          >
+            <span
+              className='w-2.5 h-2.5 rounded-sm'
+              style={{ background: style.color }}
+            />
+            <span>
+              <strong className='text-ink font-medium'>{style.label}</strong>
+            </span>
+            <span className='tnum'>
+              {formatDuration(l.duration_s)} · {l.pct}%
+            </span>
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -228,7 +220,9 @@ function HeatmapSlot({
             <span className='w-1.5 h-1.5 rounded-full bg-accent' />
             Most-pressed
             <strong className='text-ink font-medium'>{top[0]}</strong>
-            <span className='tnum text-ink-soft'>{top[1].toLocaleString()}</span>
+            <span className='tnum text-ink-soft'>
+              {top[1].toLocaleString()}
+            </span>
           </span>
         )}
         {top[1] > 0 && other > 0 && <span className='text-ink-faint'>·</span>}
