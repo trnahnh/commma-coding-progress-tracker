@@ -96,6 +96,11 @@ Goal: production-safe. No known P0/P1 bugs. Published extension.
 - [ ] Input validation hardening (edge cases, large payloads)
 - [ ] `POST /v1/sessions/:id/heatmap-card` (server-side `sharp` PNG for OG images)
 - [ ] Open Graph meta tags on public session and profile URLs
+- [ ] Web sign-in / sign-out — browser GitHub OAuth flow (`GET /v1/auth/github`
+  redirect, no `redirect_uri`; callback sets HTTP-only refresh cookie + returns
+  access token); store access token in memory, auto-refresh via `POST
+  /v1/auth/refresh` before expiry; `GET /v1/me` to hydrate current-user context;
+  sign-out calls `POST /v1/auth/signout`. Prerequisite for the items below.
 - [ ] Replace all mocked landing page data with live API
 - [ ] Extension published to VSCode Marketplace (unlisted)
 - [ ] `CONTRIBUTING.md`, `ONBOARDING.md`, `SECURITY.md` complete
