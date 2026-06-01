@@ -54,7 +54,7 @@ Goal: something a real user can experience end-to-end.
 - [x] `GET /v1/sessions/:id` with lang breakdown, files, and heatmap data
 - [x] Session detail page in web app (lang-breakdown bar, file list; KPM line chart dropped — no time series in the endpoint, events pruned per ADR-010)
 - [x] Keyboard heatmap Canvas renderer component (QWERTY layout in `@commma/shared` per ADR-005; purple freq ramp; basic transparent-PNG download — presets/OG render still deferred below)
-- [ ] Heatmap completeness (E) — add a `Space` label (the single most-pressed key, currently invisible) and map shifted symbols to their physical key (e.g. `!`→`1`) instead of collapsing to `Other`; `@commma/shared` `KEY_LABELS` change. Full per-layout mapping aligns with the Phase 4 keyboard-layout configs.
+- [x] Heatmap completeness (E) — added a `Space` label (the single most-pressed key, previously invisible) and the eleven punctuation physical keys; shifted symbols now map to their physical key (e.g. `!`→`1`) instead of collapsing to `Other`; `@commma/shared` `KEY_LABELS` change. Full per-layout mapping (Dvorak/Colemak) still aligns with the Phase 4 keyboard-layout configs.
 - [ ] PNG export (9:16, 1:1, 16:9 presets, transparent background)
 - [ ] Streak calculation cron job
 - [ ] Profile page at `/@handle` (live data)

@@ -143,8 +143,9 @@ The shared layout config now lives at `packages/shared/src/keyboardLayout.ts`
 verbatim). The browser Canvas path is built (`apps/web/src/components/KeyboardHeatmap.tsx`)
 with a basic transparent-PNG download via `canvas.toBlob`. The server-side `sharp`
 renderer (OG images) and the multi-aspect-ratio export presets remain pending —
-they consume the same `QWERTY_LAYOUT`. The spacebar/punctuation caps render inert
-until `KEY_LABELS` gains `Space` + shifted-symbol mapping (ROADMAP item E).
+they consume the same `QWERTY_LAYOUT`. The spacebar/punctuation caps now light up:
+`KEY_LABELS` gained `Space` + the punctuation physical keys and shifted symbols map
+to their physical key (ROADMAP item E, done).
 
 ---
 

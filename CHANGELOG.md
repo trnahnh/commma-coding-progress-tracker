@@ -31,6 +31,13 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
+- **Heatmap completeness (`@commma/shared` `KEY_LABELS`).** Added `Space` and the
+  eleven punctuation physical keys (`` ` `` `-` `=` `[` `]` `\` `;` `'` `,` `.`
+  `/`). The extension now maps the space character to `Space` and every shifted
+  symbol to its physical key (`!`→`1`, `:`→`;`, `?`→`/`, …) instead of collapsing
+  them into `Other`, so the most-pressed key (Space) and the full board now render
+  on the heatmap. Still an order-destroyed histogram of physical-key identity —
+  ADR-006 is unchanged (a physical-key map is not content).
 - **Privacy — ADR-006 amended.** The key-label heatmap is built by reading
   `contentChanges.text` **solely to increment a frequency counter, then discarding
   the string** — never stored, logged, or transmitted; only the final
