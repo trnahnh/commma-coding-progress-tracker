@@ -27,7 +27,12 @@
   --animate-rise-900: rise 900ms ease forwards;
   --animate-marquee: marquee 60s linear infinite;
   --animate-pulse-dot: pulse-dot 1800ms ease-out infinite;
+  --animate-page-in: page-in 180ms ease-out forwards;
 
+  @keyframes page-in {
+    from { opacity: 0; transform: translateY(5px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
   @keyframes rise {
     from { transform: translateY(110%); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }

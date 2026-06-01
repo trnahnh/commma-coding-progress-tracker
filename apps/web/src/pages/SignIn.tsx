@@ -42,7 +42,7 @@ export default function SignIn() {
   }, [isLoading, token, navigate])
 
   return (
-    <div className='min-h-screen bg-paper flex flex-col items-center justify-center px-6'>
+    <div className='min-h-screen bg-paper flex flex-col items-center justify-center px-6 animate-page-in'>
       <a href='/' className='mb-16'>
         <Wordmark size='text-[36px]' />
       </a>

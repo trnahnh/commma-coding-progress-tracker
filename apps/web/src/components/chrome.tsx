@@ -107,7 +107,7 @@ export function Shell({ children }: { children: ReactNode }) {
   return (
     <>
       <Nav />
-      <main className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)] py-[clamp(40px,7vw,96px)]'>
+      <main className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)] py-[clamp(40px,7vw,96px)] animate-page-in'>
         {children}
       </main>
       <Footer />
