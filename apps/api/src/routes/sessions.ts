@@ -142,7 +142,7 @@ sessionRoutes.get(
 sessionRoutes.post(
   '/:id/heatmap-card',
   requireAuth,
-  rateLimit({ scope: 'read', limit: 300, windowS: 3600, key: userKey }),
+  rateLimit({ scope: 'card', limit: 120, windowS: 3600, key: userKey }),
   zValidator('json', heatmapCardSchema, (result, c) => {
     if (!result.success) {
       return apiError(

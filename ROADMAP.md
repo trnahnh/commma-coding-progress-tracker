@@ -94,7 +94,11 @@ Goal: production-safe. No known P0/P1 bugs. Published extension.
 - [ ] Extension offline queue with exponential backoff retry
 - [ ] Structured error responses across all endpoints
 - [x] Input validation hardening (edge cases, large payloads) — 1 MB `/v1/*` body limit (`413`); bounded `lang`/`file`/`project` lengths and `keystrokes`/`lines`/`ts` ranges in the heartbeat contract; `:handle` path param validated before DB lookup.
-- [x] `POST /v1/sessions/:id/heatmap-card` (server-side `sharp` PNG for OG images) — SVG (reuses `QWERTY_LAYOUT` + the cold→`accent` ramp) rasterized by `sharp`; auth-required, privacy-gated (non-`full` owners are owner-only); `aspect` 9:16/1:1/16:9; `layout` only `qwerty` (dvorak/colemak are Phase 4).
+- [x] `POST /v1/sessions/:id/heatmap-card` (server-side `sharp` PNG for OG images) — SVG (reuses `QWERTY_LAYOUT` + the cold→`accent` ramp) rasterized by `sharp`; auth-required, privacy-gated (non-`full` owners are owner-only); `aspect` 9:16/1:1/16:9; `layout` only `qwerty` (dvorak/colemak are Phase 4); own `card` rate bucket (120/hr).
+  - [ ] **Follow-up:** heatmap-card PNG cache (Redis/disk, privacy re-checked per request) — land before the feed renders thumbnails at scale; re-rendering per request is fine until then.
+  - [ ] **Follow-up:** public `GET` heatmap-card variant for crawler `og:image` (needs its own privacy + anti-DoS caching) — the auth-required `POST` serves in-app thumbnails, not crawlers.
+  - [ ] **Deploy note:** the API host must provide a monospace font (e.g. DejaVu/Liberation) for server-side text; `⌘` already renders as `Cmd` to avoid a glyph gap.
+- [ ] Route/integration test harness (throwaway Postgres) — privacy gates, ingest suppression, and the heatmap-card endpoint are currently only live-verified, not in CI.
 - [x] Open Graph meta tags on public session and profile URLs — `og:title`,
   `og:description`, `og:type`, `twitter:card` injected dynamically on
   SessionDetail and Profile pages.

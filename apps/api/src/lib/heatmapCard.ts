@@ -28,6 +28,12 @@ const INK_MUTE = '#7a746a'
 const LOGICAL_W = QWERTY_LAYOUT.cols * UNIT + PAD * 2
 const LOGICAL_H = QWERTY_LAYOUT.rows * UNIT + PAD * 2
 
+const CAP_OVERRIDES: Record<string, string> = { '⌘': 'Cmd' }
+
+function serverCap(cap: string): string {
+  return CAP_OVERRIDES[cap] ?? cap
+}
+
 export function aspectDimensions(aspect: CardAspect) {
   return DIMENSIONS[aspect]
 }
@@ -80,10 +86,11 @@ function keyboardKeys(counts: Record<string, number>): string {
     )
 
     if (key.cap) {
-      const fontSize = key.cap.length > 2 ? 11 : 15
+      const cap = serverCap(key.cap)
+      const fontSize = cap.length > 2 ? 11 : 15
       const textFill = t > 0 ? lerpColor(COLD_TEXT, HOT_TEXT, t) : COLD_TEXT
       parts.push(
-        `<text x="${px + pw / 2}" y="${py + ph / 2}" font-family="ui-monospace, monospace" font-size="${fontSize}" fill="${textFill}" text-anchor="middle" dominant-baseline="central">${xmlEscape(key.cap)}</text>`,
+        `<text x="${px + pw / 2}" y="${py + ph / 2}" font-family="ui-monospace, monospace" font-size="${fontSize}" fill="${textFill}" text-anchor="middle" dominant-baseline="central">${xmlEscape(cap)}</text>`,
       )
     }
   }

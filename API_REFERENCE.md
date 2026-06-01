@@ -346,9 +346,14 @@ All fields are optional; an empty `{}` body uses the defaults.
 
 **Privacy:** gated like `GET /v1/sessions/:id` — a session whose owner is not `full` is renderable only by the owner; otherwise `404`. A session with no heatmap returns `404`.
 
-**Caching:** `Cache-Control: private, max-age=300`.
+**Caching:** `Cache-Control: private, max-age=300`. The PNG is re-rendered per request (no server-side cache yet — add one before the feed renders thumbnails at scale).
 
 **Response:** `image/png` (binary)
+
+> **Notes / limitations:**
+> - Rate-limited on its own `card` bucket (120/hr/user), separate from reads.
+> - Server-side text uses the host's fonts; the deploy must provide a monospace font (e.g. DejaVu/Liberation). The `⌘` cap is drawn as `Cmd` so it never depends on a glyph missing from common Linux fonts.
+> - Because it is auth-required `POST`, it is **not** a literal `og:image` source (crawlers issue unauthenticated `GET`); it serves in-app (e.g. feed) thumbnails. A public `GET` variant would be needed for crawler OG.
 
 ---
 
@@ -461,6 +466,7 @@ All errors follow this shape:
 | ---------------- | ------- | -------- |
 | `POST /v1/ingest` | 1,000 requests | 1 hour (per user) |
 | All read endpoints | 300 requests | 1 hour (per user) |
+| `POST /v1/sessions/:id/heatmap-card` | 120 requests | 1 hour (per user) |
 | Auth endpoints | 20 requests | 1 hour (per IP) |
 
 **Rate limit headers:**

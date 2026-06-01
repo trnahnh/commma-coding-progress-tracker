@@ -50,6 +50,12 @@ describe('renderHeatmapCardSvg', () => {
     expect(svg).not.toContain('@')
   })
 
+  it('renders the Meta key as ASCII so it survives any server font', () => {
+    const svg = renderHeatmapCardSvg({ heatmap, aspect: '16:9' })
+    expect(svg).toContain('Cmd')
+    expect(svg).not.toContain('⌘')
+  })
+
   it('xml-escapes overlay text', () => {
     const svg = renderHeatmapCardSvg({
       heatmap,

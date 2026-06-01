@@ -54,7 +54,9 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   PNG via `sharp` (SVG built from `QWERTY_LAYOUT` + the cold→`accent` ramp,
   optional `@handle`/stats overlays). Auth-required, privacy-gated (non-`full`
   owners are owner-only); `aspect` 9:16/1:1/16:9; only the `qwerty` layout for
-  now. Unblocks feed heatmap thumbnails.
+  now. Rate-limited on its own `card` bucket (120/hr/user); the `⌘` cap renders
+  as `Cmd` so the card doesn't depend on a glyph missing from common Linux
+  fonts. Unblocks feed heatmap thumbnails.
 
 ### Privacy
 
