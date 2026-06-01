@@ -87,7 +87,7 @@ Goal: production-safe. No known P0/P1 bugs. Published extension.
 
 ### Planned
 
-- [x] Redis rate limiter middleware (built early in step 4) — **follow-up: trust the correct `x-forwarded-for` hop once an ALB/CloudFront fronts the API; see ADR-010 (B)**
+- [x] Redis rate limiter middleware (built early in step 4) — XFF-trust now configurable via `TRUST_PROXY_HOPS` (0=direct, 1=ALB, 2=CloudFront→ALB); `selectClientIp` counts hops from the trusted right end so a forged `x-forwarded-for` can't spoof the client IP. Deploy must also lock the security group so only the LB reaches the instance (ADR-010 (B) resolved).
 - [x] Privacy mode: `key_freq` and file paths suppressed when `privacy = summary` — enforced server-side: ingest drops `file`/`key_freq` for `summary` (stores nothing for `off`); `GET /v1/sessions/:id` also suppresses `files`/`keyboard_heatmap` to non-owners for `summary` owners.
 - [x] Unit tests (Vitest) for the pure aggregator functions (D) — Vitest runner wired (`pnpm test`); covers `splitIntoSessions`, `buildSession`, `streak`, and extension `tallyChange`/`addKeyFreq`. Route/integration tests still pending.
 - [x] Expired `refresh_tokens` cleanup job (C) — in-process daily interval (gated by `RUN_AGGREGATION`) deletes rows past `expires_at`.

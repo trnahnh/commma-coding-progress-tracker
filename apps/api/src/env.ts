@@ -15,6 +15,7 @@ const envSchema = z.object({
     .enum(['true', 'false'])
     .default('true')
     .transform((v) => v === 'true'),
+  TRUST_PROXY_HOPS: z.coerce.number().int().nonnegative().default(0),
 })
 
 export const env = envSchema.parse(process.env)

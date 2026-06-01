@@ -50,6 +50,11 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   (`413 PAYLOAD_TOO_LARGE`); the heartbeat contract now bounds `lang`/`file`/
   `project` lengths and `keystrokes`/`lines`/`ts` ranges; the `:handle` path
   param is validated before any DB lookup.
+- **API** — configurable proxy trust for IP rate limiting: `TRUST_PROXY_HOPS`
+  (default `0`) controls how many proxies front the API; `ipKey` now resolves the
+  client IP from the trusted (right) end of `x-forwarded-for` instead of the
+  spoofable leftmost hop, closing ADR-010 (B). Set `1` behind an ALB, `2` behind
+  CloudFront→ALB, and restrict the security group so only the LB reaches the host.
 - **API** — `POST /v1/sessions/:id/heatmap-card`: server-side keyboard-heatmap
   PNG via `sharp` (SVG built from `QWERTY_LAYOUT` + the cold→`accent` ramp,
   optional `@handle`/stats overlays). Auth-required, privacy-gated (non-`full`

@@ -2,7 +2,9 @@ import type { Context } from 'hono'
 import { createMiddleware } from 'hono/factory'
 import { getConnInfo } from '@hono/node-server/conninfo'
 import { redis } from '../redis.js'
+import { env } from '../env.js'
 import { apiError } from '../lib/errors.js'
+import { selectClientIp } from '../lib/clientIp.js'
 import { log } from '../logger.js'
 import type { AppEnv } from '../types.js'
 
@@ -66,7 +68,10 @@ export function userKey(c: Context<AppEnv>): string {
 }
 
 export function ipKey(c: Context<AppEnv>): string {
-  const forwarded = c.req.header('x-forwarded-for')
-  if (forwarded) return forwarded.split(',')[0].trim()
-  return getConnInfo(c).remote.address ?? 'unknown'
+  const remote = getConnInfo(c).remote.address ?? 'unknown'
+  return selectClientIp(
+    c.req.header('x-forwarded-for') ?? null,
+    remote,
+    env.TRUST_PROXY_HOPS,
+  )
 }

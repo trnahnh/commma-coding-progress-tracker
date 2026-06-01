@@ -477,6 +477,12 @@ X-RateLimit-Remaining: 847
 X-RateLimit-Reset: 1748394000
 ```
 
+IP-keyed limits (auth endpoints, public `GET /v1/sessions/:id`) resolve the
+client IP via `TRUST_PROXY_HOPS` (see `apps/api/.env.example`): `0` trusts the
+socket address, `N` trusts the Nth hop from the right of `x-forwarded-for`. Set
+it to the number of proxies in front (1 = ALB, 2 = CloudFront→ALB) so a forged
+`x-forwarded-for` cannot spoof or exhaust another visitor's bucket.
+
 ---
 
 ## Key Label Reference
