@@ -26,21 +26,19 @@ export function Nav() {
           </Link>
           <div className='hidden md:flex gap-7 font-mono text-[12px] tracking-wider text-ink-soft'>
             {[
-              'Activity',
-              'Leaderboards',
-              'Profile',
-              'Pricing',
-              'Changelog',
-            ].map((l) => (
-              <a
-                key={l}
-                href='#'
+              { label: 'Activity', to: '/' },
+              { label: 'Feed', to: '/feed' },
+              { label: 'Leaderboard', to: '/leaderboard' },
+            ].map(({ label, to }) => (
+              <Link
+                key={label}
+                to={to}
                 className='relative py-1 transition-colors hover:text-ink
                     after:absolute after:left-0 after:right-0 after:-bottom-0.5 after:h-px after:bg-accent
                     after:scale-x-0 after:origin-left after:transition-transform hover:after:scale-x-100'
               >
-                {l}
-              </a>
+                {label}
+              </Link>
             ))}
           </div>
           <div className='justify-self-end flex items-center gap-3'>
@@ -109,15 +107,15 @@ export function Footer() {
         </div>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-[11px] uppercase tracking-wider text-ink-mute pt-6 border-t border-rule'>
           <div className='space-x-5'>
-            <a href='#' className='hover:text-ink'>
+            <Link to='/' className='hover:text-ink'>
               Activity
-            </a>
-            <a href='#' className='hover:text-ink'>
-              Leaderboards
-            </a>
-            <a href='#' className='hover:text-ink'>
-              Profile
-            </a>
+            </Link>
+            <Link to='/feed' className='hover:text-ink'>
+              Feed
+            </Link>
+            <Link to='/leaderboard' className='hover:text-ink'>
+              Leaderboard
+            </Link>
           </div>
           <div className='md:text-center'>
             © 2026 commma labs · built in vscode (obviously)

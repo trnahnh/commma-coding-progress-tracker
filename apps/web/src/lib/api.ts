@@ -131,8 +131,27 @@ export interface LeaderboardData {
   entries: LeaderboardEntry[]
 }
 
-export function getLeaderboard(period: LeaderboardPeriod): Promise<LeaderboardData> {
+export function getLeaderboard(
+  period: LeaderboardPeriod,
+): Promise<LeaderboardData> {
   return getJson<LeaderboardData>(`/v1/leaderboard?period=${period}`)
+}
+
+export interface FeedEntry {
+  session: SessionSummary
+  user: { handle: string; avatar_url: string | null }
+}
+
+export interface FeedPage {
+  entries: FeedEntry[]
+  next_cursor: string | null
+}
+
+export function getFeed(token: string, cursor?: string): Promise<FeedPage> {
+  const qs = cursor ? `?cursor=${encodeURIComponent(cursor)}` : ''
+  return getJson<FeedPage>(`/v1/feed${qs}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
 }
 
 export function getProfile(handle: string): Promise<UserProfile> {

@@ -6,6 +6,7 @@ import App from './App.tsx'
 import SessionDetail from './pages/SessionDetail.tsx'
 import Profile from './pages/Profile.tsx'
 import Leaderboard from './pages/Leaderboard.tsx'
+import Feed from './pages/Feed.tsx'
 import NotFound from './pages/NotFound.tsx'
 
 const router = createBrowserRouter([
@@ -13,6 +14,7 @@ const router = createBrowserRouter([
   { path: '/sessions/:id', element: <SessionDetail /> },
   { path: '/@:handle', element: <Profile /> },
   { path: '/leaderboard', element: <Leaderboard /> },
+  { path: '/feed', element: <Feed /> },
   { path: '*', element: <NotFound /> },
 ])
 
