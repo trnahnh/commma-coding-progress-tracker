@@ -136,6 +136,16 @@ Use the browser Canvas API as the primary rendering path. A server-side path usi
 - **Server-side only (Puppeteer/headless Chrome)** — expensive, slow, heavy dependency
 - **SVG export** — inconsistent transparency handling across social platforms; PNG is universally supported for story/post sharing
 
+### Amendment — 2026-05 (Phase 2 step 3, Canvas renderer shipped)
+
+The shared layout config now lives at `packages/shared/src/keyboardLayout.ts`
+(`QWERTY_LAYOUT`: unit-grid keycap coordinates, pure data so `sharp` can reuse it
+verbatim). The browser Canvas path is built (`apps/web/src/components/KeyboardHeatmap.tsx`)
+with a basic transparent-PNG download via `canvas.toBlob`. The server-side `sharp`
+renderer (OG images) and the multi-aspect-ratio export presets remain pending —
+they consume the same `QWERTY_LAYOUT`. The spacebar/punctuation caps render inert
+until `KEY_LABELS` gains `Space` + shifted-symbol mapping (ROADMAP item E).
+
 ---
 
 ## ADR-006: Key Label Tracking (No Key Content)
