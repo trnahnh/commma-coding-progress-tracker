@@ -71,8 +71,8 @@ export default function SignIn() {
 
         <div className='mt-14 pt-8 border-t border-rule'>
           <p className='font-mono text-[11.5px] text-ink-faint m-0 leading-relaxed'>
-            <span className='text-ink-mute'>Privacy first.</span>{' '}
-            Only key counts and file paths leave your machine. Never code or content.
+            <span className='text-ink-mute'>Privacy first.</span> Only key
+            counts and file paths leave your machine. Never code or content.
           </p>
         </div>
       </div>
