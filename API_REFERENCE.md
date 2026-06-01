@@ -239,7 +239,8 @@ Ingests a batch of heartbeat events from the extension.
 
 - `file` and `key_freq` are dropped server-side (never stored) when the user's privacy is `summary`; an `off` user's events are discarded entirely — enforcement does not rely on the client
 - `id` is used for idempotency — duplicate event IDs are silently dropped
-- Maximum 500 events per batch
+- Maximum 500 events per batch; the whole request body is capped at 1 MB (`413 PAYLOAD_TOO_LARGE` over that)
+- Field caps: `lang` ≤ 64, `file` ≤ 1024, `project` ≤ 256 chars; `keystrokes` 0–1,000,000; `lines` −1,000,000–1,000,000; `ts` ≤ `4102444800000` — anything over fails `400 VALIDATION_ERROR`
 - All `key_freq` keys must be normalized key labels (see [Key Label Reference](#key-label-reference))
 
 **Response:** `202 Accepted`
@@ -441,6 +442,7 @@ All errors follow this shape:
 | `FORBIDDEN` | 403 | Valid JWT but insufficient permissions |
 | `NOT_FOUND` | 404 | Resource does not exist |
 | `VALIDATION_ERROR` | 400 | Request body/params failed Zod validation |
+| `PAYLOAD_TOO_LARGE` | 413 | Request body exceeded the 1 MB `/v1/*` limit |
 | `RATE_LIMITED` | 429 | Per-user rate limit exceeded |
 | `INTERNAL_ERROR` | 500 | Unexpected server error |
 

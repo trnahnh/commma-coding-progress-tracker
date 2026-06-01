@@ -93,7 +93,7 @@ Goal: production-safe. No known P0/P1 bugs. Published extension.
 - [x] Expired `refresh_tokens` cleanup job (C) — in-process daily interval (gated by `RUN_AGGREGATION`) deletes rows past `expires_at`.
 - [ ] Extension offline queue with exponential backoff retry
 - [ ] Structured error responses across all endpoints
-- [ ] Input validation hardening (edge cases, large payloads)
+- [x] Input validation hardening (edge cases, large payloads) — 1 MB `/v1/*` body limit (`413`); bounded `lang`/`file`/`project` lengths and `keystrokes`/`lines`/`ts` ranges in the heartbeat contract; `:handle` path param validated before DB lookup.
 - [ ] `POST /v1/sessions/:id/heatmap-card` (server-side `sharp` PNG for OG images)
 - [x] Open Graph meta tags on public session and profile URLs — `og:title`,
   `og:description`, `og:type`, `twitter:card` injected dynamically on

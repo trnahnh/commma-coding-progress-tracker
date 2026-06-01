@@ -46,6 +46,10 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 - **API** — expired `refresh_tokens` cleanup: an in-process daily interval
   (gated by `RUN_AGGREGATION`, started in `index.ts`) that deletes rows whose
   `expires_at` has passed, so rotated/abandoned tokens no longer accumulate.
+- **API** — input-validation hardening: a 1 MB body limit on `/v1/*`
+  (`413 PAYLOAD_TOO_LARGE`); the heartbeat contract now bounds `lang`/`file`/
+  `project` lengths and `keystrokes`/`lines`/`ts` ranges; the `:handle` path
+  param is validated before any DB lookup.
 
 ### Privacy
 

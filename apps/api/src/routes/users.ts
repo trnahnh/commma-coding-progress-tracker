@@ -24,7 +24,10 @@ async function requesterFrom(authorization: string | undefined) {
   return token ? await verifyAccessToken(token) : null
 }
 
+const HANDLE_RE = /^[a-zA-Z0-9-]{1,39}$/
+
 async function findUser(handle: string) {
+  if (!HANDLE_RE.test(handle)) return null
   const rows = await db
     .select()
     .from(users)

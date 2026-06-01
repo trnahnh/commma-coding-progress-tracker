@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { bodyLimit } from 'hono/body-limit'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { env } from './env.js'
@@ -27,6 +28,14 @@ export function createApp() {
       credentials: true,
       allowHeaders: ['Authorization', 'Content-Type'],
       allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+    }),
+  )
+  app.use(
+    '/v1/*',
+    bodyLimit({
+      maxSize: 1024 * 1024,
+      onError: (c) =>
+        apiError(c, 'PAYLOAD_TOO_LARGE', 'Request body too large'),
     }),
   )
 
