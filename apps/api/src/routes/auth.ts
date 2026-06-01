@@ -49,7 +49,12 @@ export const authRoutes = new Hono<AppEnv>()
 
 authRoutes.use(
   '*',
-  rateLimit({ scope: 'auth', limit: 20, windowS: 3600, key: ipKey }),
+  rateLimit({
+    scope: 'auth',
+    limit: process.env.NODE_ENV === 'production' ? 20 : 100,
+    windowS: 3600,
+    key: ipKey,
+  }),
 )
 
 authRoutes.get('/github', async (c) => {
