@@ -110,6 +110,69 @@ export interface UserProfile {
   badges: never[]
 }
 
+export interface AuthUser {
+  id: string
+  handle: string
+  email: string
+  avatar_url: string
+}
+
+export interface ExchangeResult {
+  access_token: string
+  refresh_token: string
+  user: AuthUser
+}
+
+export interface RefreshResult {
+  access_token: string
+  refresh_token?: string
+}
+
+export interface MeResult extends AuthUser {
+  privacy: string
+  created_at: string
+  streak: {
+    current_days: number
+    longest_days: number
+    last_active_date: string | null
+  }
+}
+
+export function exchangeCode(code: string): Promise<ExchangeResult> {
+  return getJson<ExchangeResult>('/v1/auth/cli/exchange', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code }),
+  })
+}
+
+export function refreshAccessToken(
+  refreshToken: string,
+): Promise<RefreshResult> {
+  return getJson<RefreshResult>('/v1/auth/refresh', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  })
+}
+
+export function signOut(token: string, refreshToken: string): Promise<void> {
+  return getJson<void>('/v1/auth/signout', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  })
+}
+
+export function getMe(token: string): Promise<MeResult> {
+  return getJson<MeResult>('/v1/me', {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+}
+
 export function getSession(id: string): Promise<SessionDetail> {
   return getJson<SessionDetail>(`/v1/sessions/${encodeURIComponent(id)}`)
 }

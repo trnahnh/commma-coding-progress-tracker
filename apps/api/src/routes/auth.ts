@@ -134,19 +134,14 @@ authRoutes.get('/github/callback', async (c) => {
     return c.redirect(target.toString())
   }
 
-  const accessToken = await signAccessToken(user.id)
-  const refreshToken = await mintRefreshToken(user.id)
-  setRefreshCookie(c, refreshToken)
-
-  return c.json({
-    access_token: accessToken,
-    user: {
-      id: user.id,
-      handle: user.handle,
-      email: user.email,
-      avatar_url: user.avatarUrl,
-    },
-  })
+  const oneTimeCode = randomBytes(32).toString('base64url')
+  await redis.set(
+    `oauth:cli:code:${oneTimeCode}`,
+    user.id,
+    'EX',
+    CLI_CODE_TTL_SECONDS,
+  )
+  return c.redirect(`${env.WEB_ORIGIN}/auth/callback?code=${oneTimeCode}`)
 })
 
 authRoutes.post(

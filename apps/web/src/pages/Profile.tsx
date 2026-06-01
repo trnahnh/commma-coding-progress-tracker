@@ -261,6 +261,37 @@ export default function Profile() {
           ? 'Profile not found'
           : 'Loading profile'
     document.title = `${label} · commma`
+
+    const setMeta = (property: string, content: string) => {
+      let el = document.querySelector<HTMLMetaElement>(
+        `meta[property="${property}"]`,
+      )
+      if (!el) {
+        el = document.createElement('meta')
+        el.setAttribute('property', property)
+        document.head.appendChild(el)
+      }
+      el.setAttribute('content', content)
+    }
+
+    if (state.phase === 'ready') {
+      const { profile } = state
+      const desc = [
+        `${profile.stats.total_sessions} sessions`,
+        profile.streak.current_days > 0
+          ? `${profile.streak.current_days}d streak`
+          : null,
+        profile.stats.top_lang ? `· ${profile.stats.top_lang}` : null,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+      setMeta('og:type', 'profile')
+      setMeta('og:title', `${label} · commma`)
+      setMeta('og:description', desc)
+      setMeta('twitter:card', 'summary')
+      setMeta('twitter:title', `${label} · commma`)
+      setMeta('twitter:description', desc)
+    }
   }, [state])
 
   const loadMore = useCallback(async () => {

@@ -324,6 +324,38 @@ export default function SessionDetail() {
           ? 'Session not found'
           : 'Loading session'
     document.title = `${label} · commma`
+
+    const setMeta = (property: string, content: string) => {
+      let el = document.querySelector<HTMLMetaElement>(
+        `meta[property="${property}"]`,
+      )
+      if (!el) {
+        el = document.createElement('meta')
+        el.setAttribute('property', property)
+        document.head.appendChild(el)
+      }
+      el.setAttribute('content', content)
+    }
+
+    if (state.phase === 'ready') {
+      const { session } = state
+      const topLang = session.langs[0]?.lang ?? null
+      const desc = [
+        formatDuration(session.duration_s),
+        topLang ? `in ${topLang}` : null,
+        session.lines_delta
+          ? `· ${session.lines_delta.toLocaleString()} loc`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(' ')
+      setMeta('og:type', 'article')
+      setMeta('og:title', `${label} · commma`)
+      setMeta('og:description', desc)
+      setMeta('twitter:card', 'summary')
+      setMeta('twitter:title', `${label} · commma`)
+      setMeta('twitter:description', desc)
+    }
   }, [state])
 
   if (state.phase === 'loading') {

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../lib/auth'
 
 export function Wordmark({ size = 'text-[28px]' }: { size?: string }) {
   return (
@@ -13,6 +14,61 @@ export function LiveDot({ color = 'live' }: { color?: 'live' | 'accent' }) {
   const cls = color === 'live' ? 'bg-live' : 'bg-accent'
   return (
     <span className={`w-[7px] h-[7px] rounded-full ${cls} animate-pulse-dot`} />
+  )
+}
+
+function NavActions() {
+  const { user, token, isLoading, signIn, signOut } = useAuth()
+  if (isLoading) return <div className='justify-self-end w-[38px]' />
+  if (token && user) {
+    return (
+      <div className='justify-self-end flex items-center gap-3'>
+        <Link
+          to={`/@${user.handle}`}
+          className='flex items-center gap-2 group'
+          title={`@${user.handle}`}
+        >
+          <img
+            src={user.avatar_url}
+            alt={user.handle}
+            width={32}
+            height={32}
+            className='w-8 h-8 rounded-full border border-rule group-hover:border-accent transition-colors object-cover'
+          />
+        </Link>
+        <button
+          type='button'
+          onClick={() => void signOut()}
+          className='hidden sm:inline-flex items-center h-[38px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
+            text-ink-soft hover:text-ink border border-transparent hover:border-rule-strong transition-colors'
+        >
+          Sign out
+        </button>
+      </div>
+    )
+  }
+  return (
+    <div className='justify-self-end flex items-center gap-3'>
+      <button
+        type='button'
+        onClick={signIn}
+        className='hidden sm:inline-flex items-center h-[38px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
+          text-ink-soft hover:text-ink border border-transparent hover:border-rule-strong transition-colors'
+      >
+        Sign in
+      </button>
+      <a
+        href='https://marketplace.visualstudio.com'
+        className='group inline-flex items-center gap-2.5 h-[38px] px-3.5 sm:px-4 rounded-full font-mono text-[11px] sm:text-[12px] uppercase tracking-wider font-medium
+          bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors whitespace-nowrap'
+      >
+        <span className='hidden sm:inline'>Install for VSCode</span>
+        <span className='sm:hidden'>Install</span>
+        <span className='inline-block transition-transform group-hover:translate-x-1'>
+          →
+        </span>
+      </a>
+    </div>
   )
 }
 
@@ -41,26 +97,7 @@ export function Nav() {
               </Link>
             ))}
           </div>
-          <div className='justify-self-end flex items-center gap-3'>
-            <a
-              href='#'
-              className='hidden sm:inline-flex items-center h-[38px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
-                text-ink-soft hover:text-ink border border-transparent hover:border-rule-strong transition-colors'
-            >
-              Sign in
-            </a>
-            <a
-              href='#'
-              className='group inline-flex items-center gap-2.5 h-[38px] px-3.5 sm:px-4 rounded-full font-mono text-[11px] sm:text-[12px] uppercase tracking-wider font-medium
-                bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors whitespace-nowrap'
-            >
-              <span className='hidden sm:inline'>Install for VSCode</span>
-              <span className='sm:hidden'>Install</span>
-              <span className='inline-block transition-transform group-hover:translate-x-1'>
-                →
-              </span>
-            </a>
-          </div>
+          <NavActions />
         </div>
       </div>
     </nav>

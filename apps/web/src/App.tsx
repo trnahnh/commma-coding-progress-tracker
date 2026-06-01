@@ -1,5 +1,10 @@
 import { useEffect, useState, type ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { Footer, LiveDot, Nav } from './components/chrome'
+import { getLeaderboard, type LeaderboardEntry } from './lib/api'
+import { useAuth } from './lib/auth'
+import { formatDuration } from './lib/format'
+import { langStyle } from './lib/langColors'
 
 const SESSION = {
   date: 'Tue · May 26, 2026',
@@ -28,64 +33,6 @@ const CHART = [
   115, 100, 85, 70, 55, 40, 35, 30, 35, 40, 50, 60, 75, 90, 105, 115, 125, 135,
   140, 145, 140, 130, 120, 110, 100, 95, 100, 110, 120, 130, 135, 130, 120, 105,
   90, 75, 60, 50, 45, 50, 65, 80,
-]
-
-const LEADERS = [
-  {
-    rank: 1,
-    handle: 'falsetto',
-    sub: 'Berlin',
-    time: '42:18:04',
-    lang: 'Rust',
-    langDot: '#FF4D1A',
-    streak: 87,
-  },
-  {
-    rank: 2,
-    handle: 'lumen.dev',
-    sub: 'Lisbon',
-    time: '38:51:22',
-    lang: 'TypeScript',
-    langDot: '#9CF76D',
-    streak: 54,
-  },
-  {
-    rank: 3,
-    handle: 'northbound',
-    sub: 'Oslo',
-    time: '35:47:09',
-    lang: 'Go',
-    langDot: '#7DD3FC',
-    streak: 211,
-  },
-  {
-    rank: 4,
-    handle: 'yoursquid',
-    sub: 'you',
-    time: '32:12:55',
-    lang: 'Python',
-    langDot: '#EFEAD8',
-    streak: 12,
-    self: true,
-  },
-  {
-    rank: 5,
-    handle: 'inkpaper',
-    sub: 'Tokyo',
-    time: '30:44:01',
-    lang: 'Swift',
-    langDot: '#FCA5A5',
-    streak: 31,
-  },
-  {
-    rank: 6,
-    handle: 'aprilsink',
-    sub: 'Mexico City',
-    time: '28:18:33',
-    lang: 'Elixir',
-    langDot: '#C4B5FD',
-    streak: 9,
-  },
 ]
 
 const TICKER = [
@@ -542,7 +489,95 @@ function HowItWorks() {
   )
 }
 
+function LeaderRow({
+  entry,
+  isSelf,
+}: {
+  entry: LeaderboardEntry
+  isSelf: boolean
+}) {
+  const style = entry.top_lang ? langStyle(entry.top_lang) : null
+  return (
+    <Link
+      to={`/@${entry.handle}`}
+      className={`group grid grid-cols-[40px_1fr_auto] md:grid-cols-[56px_1.4fr_1fr_1fr_32px] items-center px-4 sm:px-6 py-4 gap-3 border-b border-rule last:border-b-0 font-mono text-[13px] text-ink-soft relative transition-colors ${isSelf ? 'bg-accent-soft' : 'hover:bg-paper-2'}`}
+    >
+      {isSelf && (
+        <span className='absolute left-0 top-0 bottom-0 w-0.5 bg-accent' />
+      )}
+      <span
+        className={`font-serif text-[20px] sm:text-[22px] tracking-[-0.02em] tnum ${entry.rank === 1 ? 'text-accent' : 'text-ink'}`}
+      >
+        {entry.rank.toString().padStart(2, '0')}
+      </span>
+      <span className='flex items-center gap-2.5 sm:gap-3.5 min-w-0'>
+        {entry.avatar_url ? (
+          <img
+            src={entry.avatar_url}
+            alt={entry.handle}
+            width={32}
+            height={32}
+            className='shrink-0 w-8 h-8 rounded-full border border-rule object-cover'
+          />
+        ) : (
+          <span className='shrink-0 w-8 h-8 rounded-full bg-paper-3 border border-rule-strong font-serif text-[14px] text-ink grid place-items-center'>
+            {entry.handle[0].toUpperCase()}
+          </span>
+        )}
+        <span className='min-w-0'>
+          <span className='block text-ink font-medium truncate'>
+            @{entry.handle}
+          </span>
+          <span className='block md:hidden text-[11px] text-ink-mute mt-0.5 tnum'>
+            {style?.label}
+            {entry.streak_days > 0 ? ` · ${entry.streak_days}d` : ''}
+          </span>
+        </span>
+      </span>
+      <span className='tnum text-ink text-right md:text-left whitespace-nowrap'>
+        {formatDuration(entry.duration_s)}
+      </span>
+      <span className='hidden md:flex items-center gap-4'>
+        {style && (
+          <span className='flex items-center gap-2 text-[12px]'>
+            <span
+              className='w-2 h-2 rounded-sm'
+              style={{ background: style.color }}
+            />
+            {style.label}
+          </span>
+        )}
+        {entry.streak_days > 0 && (
+          <span className='flex items-center gap-1.5 text-ink'>
+            <span className='w-1.5 h-1.5 bg-live rounded-full' />
+            <span className='tnum'>{entry.streak_days}d</span>
+          </span>
+        )}
+      </span>
+      <span className='hidden md:block text-accent font-mono text-[14px] text-right opacity-0 -translate-x-1 transition group-hover:opacity-100 group-hover:translate-x-0'>
+        →
+      </span>
+    </Link>
+  )
+}
+
 function Leaderboard() {
+  const { user } = useAuth()
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([])
+  const [aside, setAside] = useState('loading…')
+
+  useEffect(() => {
+    getLeaderboard('week')
+      .then((data) => {
+        setEntries(data.entries.slice(0, 6))
+        const minAgo = Math.round(
+          (Date.now() - new Date(data.updated_at).getTime()) / 60000,
+        )
+        setAside(`updated · ${minAgo} min ago`)
+      })
+      .catch(() => void 0)
+  }, [])
+
   return (
     <section className='py-[clamp(56px,9vw,140px)] border-t border-rule'>
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
@@ -553,71 +588,29 @@ function Leaderboard() {
               This week's <em className='italic text-accent'>podium.</em>
             </>
           }
-          aside='updated · 14 min ago'
+          aside={aside}
         />
         <div className='border-y border-rule-strong'>
-          <div className='grid grid-cols-[40px_1fr_auto] md:grid-cols-[56px_1.4fr_1fr_1fr_1fr_0.6fr_32px] items-center px-4 sm:px-6 py-3.5 gap-3 font-mono text-[10.5px] tracking-[0.14em] uppercase text-ink-mute bg-paper-2 border-b border-rule'>
+          <div className='grid grid-cols-[40px_1fr_auto] md:grid-cols-[56px_1.4fr_1fr_1fr_32px] items-center px-4 sm:px-6 py-3.5 gap-3 font-mono text-[10.5px] tracking-[0.14em] uppercase text-ink-mute bg-paper-2 border-b border-rule'>
             <span>Rank</span>
             <span>Athlete</span>
             <span className='text-right md:text-left'>Time</span>
-            <span className='hidden md:block'>Top language</span>
-            <span className='hidden md:block'>Streak</span>
-            <span className='hidden md:block'>Region</span>
+            <span className='hidden md:block'>Lang · Streak</span>
             <span className='hidden md:block' />
           </div>
-          {LEADERS.map((row) => (
-            <div
-              key={row.handle}
-              className={`group grid grid-cols-[40px_1fr_auto] md:grid-cols-[56px_1.4fr_1fr_1fr_1fr_0.6fr_32px] items-center px-4 sm:px-6 py-4 gap-3 border-b border-rule last:border-b-0 font-mono text-[13px] text-ink-soft relative transition-colors
-                ${row.self ? 'bg-accent-soft' : 'hover:bg-paper-2'}`}
-            >
-              {row.self && (
-                <span className='absolute left-0 top-0 bottom-0 w-0.5 bg-accent' />
-              )}
-              <span
-                className={`font-serif text-[20px] sm:text-[22px] tracking-[-0.02em] tnum ${row.rank === 1 ? 'text-accent' : 'text-ink'}`}
-              >
-                {row.rank.toString().padStart(2, '0')}
-              </span>
-              <span className='flex items-center gap-2.5 sm:gap-3.5 min-w-0'>
-                <span className='shrink-0 w-8 h-8 rounded-full bg-paper-3 border border-rule-strong font-serif text-[14px] text-ink grid place-items-center'>
-                  {row.handle[0].toUpperCase()}
-                </span>
-                <span className='min-w-0'>
-                  <span className='block text-ink font-medium truncate'>
-                    @{row.handle}
-                  </span>
-                  <span className='block text-[11px] text-ink-mute mt-0.5 truncate'>
-                    {row.sub}
-                    <span className='md:hidden'>
-                      {' · '}
-                      {row.lang} · {row.streak}d
-                    </span>
-                  </span>
-                </span>
-              </span>
-              <span className='tnum text-ink text-right md:text-left whitespace-nowrap'>
-                {row.time}
-              </span>
-              <span className='hidden md:inline-flex items-center gap-2 text-[12px]'>
-                <span
-                  className='w-2 h-2 rounded-sm'
-                  style={{ background: row.langDot }}
-                />
-                {row.lang}
-              </span>
-              <span className='hidden md:inline-flex items-center gap-1.5 text-ink'>
-                <span className='w-1.5 h-1.5 bg-accent rounded-full' />
-                <span className='tnum'>{row.streak}d</span>
-              </span>
-              <span className='hidden md:block text-[11px] text-ink-mute uppercase tracking-wider'>
-                {row.sub}
-              </span>
-              <span className='hidden md:block text-accent font-mono text-[14px] text-right opacity-0 -translate-x-1 transition group-hover:opacity-100 group-hover:translate-x-0'>
-                →
-              </span>
+          {entries.length === 0 ? (
+            <div className='px-4 sm:px-6 py-10 font-mono text-[12px] text-ink-mute text-center'>
+              No data yet — be the first to log a session.
             </div>
-          ))}
+          ) : (
+            entries.map((entry) => (
+              <LeaderRow
+                key={entry.handle}
+                entry={entry}
+                isSelf={user?.handle === entry.handle}
+              />
+            ))
+          )}
         </div>
       </div>
     </section>

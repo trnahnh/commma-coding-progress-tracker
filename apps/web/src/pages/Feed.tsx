@@ -2,16 +2,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Shell, StatusPanel } from '../components/chrome'
 import { ApiError, getFeed, type FeedEntry, type FeedPage } from '../lib/api'
+import { useAuth } from '../lib/auth'
 import { formatClock, formatDate, formatDuration } from '../lib/format'
 import { langStyle } from '../lib/langColors'
-
-function getStoredToken(): string | null {
-  try {
-    return localStorage.getItem('commma_access_token')
-  } catch {
-    return null
-  }
-}
 
 function FeedCard({ entry }: { entry: FeedEntry }) {
   const { session, user } = entry
@@ -125,7 +118,7 @@ type LoadState =
   | { phase: 'error'; error: ApiError }
 
 export default function Feed() {
-  const token = getStoredToken()
+  const { token, isLoading: authLoading, signIn } = useAuth()
   const [state, setState] = useState<LoadState>({ phase: 'loading' })
   const [loadingMore, setLoadingMore] = useState(false)
 
@@ -194,18 +187,35 @@ export default function Feed() {
     </div>
   )
 
+  if (authLoading) {
+    return (
+      <Shell>
+        <div className='border border-rule-strong rounded bg-linear-to-b from-paper-2 to-paper overflow-hidden'>
+          {header}
+          <div className='px-5 sm:px-8 py-16 text-center font-mono text-[12px] text-ink-mute'>
+            Loading…
+          </div>
+        </div>
+      </Shell>
+    )
+  }
+
   if (!token) {
     return (
       <Shell>
         <div className='border border-rule-strong rounded bg-linear-to-b from-paper-2 to-paper overflow-hidden'>
           {header}
-          <div className='px-5 sm:px-8 py-16 text-center space-y-4'>
+          <div className='px-5 sm:px-8 py-16 text-center space-y-5'>
             <p className='font-mono text-[12px] text-ink-mute m-0'>
               Sign in to see sessions from the coders you follow.
             </p>
-            <p className='font-mono text-[11px] text-ink-faint m-0'>
-              Use the commma extension to sign in with GitHub.
-            </p>
+            <button
+              type='button'
+              onClick={signIn}
+              className='inline-flex items-center gap-2.5 h-[38px] px-5 rounded-full font-mono text-[12px] uppercase tracking-wider bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors'
+            >
+              Sign in with GitHub
+            </button>
           </div>
         </div>
       </Shell>
