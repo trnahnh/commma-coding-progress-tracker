@@ -8,6 +8,7 @@ import { authRoutes } from './routes/auth.js'
 import { meRoutes } from './routes/me.js'
 import { ingestRoutes } from './routes/ingest.js'
 import { sessionRoutes } from './routes/sessions.js'
+import { leaderboardRoutes } from './routes/leaderboard.js'
 import type { AppEnv } from './types.js'
 
 export function createApp() {
@@ -33,6 +34,7 @@ export function createApp() {
   app.route('/v1/me', meRoutes)
   app.route('/v1/ingest', ingestRoutes)
   app.route('/v1/sessions', sessionRoutes)
+  app.route('/v1/leaderboard', leaderboardRoutes)
 
   app.notFound((c) => apiError(c, 'NOT_FOUND', 'Resource not found'))
   app.onError((err, c) => {
