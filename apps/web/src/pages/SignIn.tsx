@@ -9,7 +9,7 @@ function GithubMark() {
       viewBox='0 0 20 20'
       fill='currentColor'
       aria-hidden='true'
-      className='w-[18px] h-[18px]'
+      className='w-5 h-5'
     >
       <path
         fillRule='evenodd'
@@ -42,45 +42,63 @@ export default function SignIn() {
   }, [isLoading, token, navigate])
 
   return (
-    <div className='min-h-screen bg-paper flex flex-col items-center justify-center px-5 py-16'>
-      <a href='/' className='mb-12'>
-        <Wordmark size='text-[32px]' />
-      </a>
-
-      <div className='w-full max-w-[360px] border border-rule-strong rounded bg-linear-to-b from-paper-2 to-paper overflow-hidden'>
-        <div className='px-8 py-8 border-b border-rule text-center'>
-          <h1 className='font-serif text-[28px] leading-tight tracking-[-0.02em] m-0 text-ink'>
-            Welcome back
-          </h1>
-          <p className='font-mono text-[12px] text-ink-mute mt-3 m-0'>
-            Sign in to track your sessions, streaks, and pace.
+    <div className='min-h-screen bg-paper grid md:grid-cols-[1fr_1fr]'>
+      <div className='hidden md:flex flex-col justify-between p-[clamp(32px,4vw,56px)] border-r border-rule bg-linear-to-b from-paper-2 to-paper'>
+        <a href='/'>
+          <Wordmark size='text-[28px]' />
+        </a>
+        <div>
+          <p className='font-serif text-[clamp(36px,4.5vw,64px)] leading-[1.0] tracking-[-0.03em] text-ink m-0'>
+            Every session
+            <br />
+            <em className='italic text-accent'>logged.</em>
+          </p>
+          <p className='font-mono text-[13px] text-ink-mute mt-6 m-0 max-w-[36ch] leading-relaxed'>
+            commma turns your editor into a sport. Pace, splits, streaks,
+            podiums — all the rituals of a real athlete, for the work you
+            already do.
           </p>
         </div>
+        <p className='font-mono text-[11px] text-ink-faint m-0'>
+          © 2026 commma labs
+        </p>
+      </div>
 
-        <div className='px-8 py-8 flex flex-col gap-4'>
+      <div className='flex flex-col items-center justify-center px-6 py-16 md:py-0'>
+        <a href='/' className='md:hidden mb-12'>
+          <Wordmark size='text-[28px]' />
+        </a>
+
+        <div className='w-full max-w-[400px]'>
+          <h1 className='font-serif text-[clamp(36px,5vw,52px)] leading-[1.0] tracking-[-0.025em] m-0 text-ink mb-3'>
+            Welcome back.
+          </h1>
+          <p className='font-mono text-[13px] text-ink-mute m-0 mb-10'>
+            Sign in to see your sessions, streaks, and standing.
+          </p>
+
           <button
             type='button'
             onClick={signIn}
-            className='group w-full inline-flex items-center justify-center gap-3 h-[44px] px-5 rounded-full font-mono text-[13px] uppercase tracking-wider font-medium bg-ink text-paper border border-ink hover:bg-paper hover:text-ink transition-colors'
+            className='group w-full inline-flex items-center justify-center gap-3 h-[52px] px-6 rounded-full font-mono text-[13px] uppercase tracking-wider font-medium bg-ink text-paper border border-ink hover:bg-paper hover:text-ink transition-colors mb-4'
           >
             <GithubMark />
             Sign in with GitHub
           </button>
 
-          <p className='font-mono text-[11px] text-ink-faint text-center m-0 leading-relaxed'>
-            Only key counts and file paths are tracked.
-            <br />
-            No code ever leaves your machine.
+          <p className='font-mono text-[11.5px] text-ink-faint text-center m-0 leading-relaxed'>
+            No account needed — GitHub sign-in creates one.
           </p>
+
+          <div className='mt-12 pt-8 border-t border-rule'>
+            <p className='font-mono text-[11px] text-ink-faint m-0 leading-relaxed'>
+              <span className='text-ink-mute'>Privacy first.</span> Only key
+              counts and file paths are tracked. No code, no content, no
+              keystrokes ever leave your machine.
+            </p>
+          </div>
         </div>
       </div>
-
-      <p className='mt-8 font-mono text-[11px] text-ink-faint text-center'>
-        Don't have an account?{' '}
-        <span className='text-ink-mute'>
-          GitHub sign-in creates one automatically.
-        </span>
-      </p>
     </div>
   )
 }
