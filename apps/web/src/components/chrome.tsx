@@ -39,7 +39,7 @@ function NavActions() {
         <button
           type='button'
           onClick={() => void signOut()}
-          className='hidden sm:inline-flex items-center h-[38px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
+          className='inline-flex items-center h-[34px] sm:h-[38px] px-3 sm:px-4 rounded-full font-mono text-[11px] sm:text-[12px] uppercase tracking-wider
             text-ink-soft hover:text-ink border border-transparent hover:border-rule-strong transition-colors'
         >
           Sign out
@@ -51,7 +51,7 @@ function NavActions() {
     <div className='justify-self-end flex items-center gap-3'>
       <Link
         to='/signin'
-        className='hidden sm:inline-flex items-center h-[38px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
+        className='inline-flex items-center h-[34px] sm:h-[38px] px-3 sm:px-4 rounded-full font-mono text-[11px] sm:text-[12px] uppercase tracking-wider
           text-ink-soft hover:text-ink border border-transparent hover:border-rule-strong transition-colors'
       >
         Sign in
