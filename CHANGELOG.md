@@ -10,6 +10,37 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Web** — GitHub OAuth sign-in flow: `GET /v1/auth/github/callback` now
+  redirects to `${WEB_ORIGIN}/auth/callback?code=…` (reuses the CLI one-time
+  code mechanism); web `/auth/callback` route exchanges the code via `POST
+  /v1/auth/cli/exchange`. `AuthProvider` context stores the refresh token in
+  `localStorage` and the access token in memory; auto-refresh fires 60 s before
+  JWT expiry. Nav shows avatar + sign-out when authenticated; `/signin` page
+  is the entry point.
+- **Web** — `/signin` page: centered full-screen layout with "Sign in with
+  GitHub" button and privacy note.
+- **Web** — PNG export presets on the keyboard heatmap: three buttons (1:1
+  1080×1080, 9:16 1080×1920, 16:9 1920×1080) — offscreen canvas letterboxes
+  the keyboard into the target dimensions with 8% margin, transparent
+  background.
+- **Web** — Profile page `/@handle`: avatar, 4-stat grid (sessions / time /
+  streak / top lang), keyset-paginated session feed with "Load more".
+- **Web** — Leaderboard page `/leaderboard`: period tabs (week/month/alltime),
+  ranked rows, linked to `/@handle`.
+- **Web** — Feed page `/feed`: auth-gated; session cards with user attribution
+  and pagination; unauthenticated state links to `/signin`.
+- **Web** — OG meta tags (`og:title`, `og:description`, `og:type`,
+  `twitter:card`) injected dynamically on session-detail and profile pages.
+- **Web** — Landing page leaderboard section wired to live
+  `GET /v1/leaderboard?period=week`; self-highlight for signed-in user.
+- **Infra** — `vercel.json` SPA rewrite so all react-router paths resolve to
+  `index.html` on Vercel.
+- **Infra** — `apps/web/.env.example` documenting `VITE_API_BASE_URL`.
+- **API** — Auth rate limit raised to 100/hr outside `NODE_ENV=production`
+  (was 20/hr in all environments).
+
+
+
 - **API** — streak-reset cron: an in-process hourly interval (ADR-010 style,
   gated by `RUN_AGGREGATION`, started in `index.ts`) that zeroes `current_days`
   for users whose `last_active_date` is older than yesterday (UTC), preserving

@@ -37,25 +37,17 @@ Redirects the browser to GitHub OAuth. Use from a browser-based sign-in flow or 
 
 Exchanges the GitHub code for a user identity. Behaviour depends on the flow:
 
-- **Browser flow** (no `redirect_uri` was sent to `/github`): issues a JWT and sets the refresh token cookie, returns the JSON below.
-- **Extension/CLI flow** (`redirect_uri` was sent): mints a single-use one-time code (60s TTL, Redis) and `302`-redirects the browser to `redirect_uri?code=<code>`. No tokens or cookie are returned to the browser; the extension exchanges the code at `POST /v1/auth/cli/exchange`.
+- **Browser flow** (no `redirect_uri` was sent to `/github`): mints a single-use
+  one-time code (60s TTL, Redis) and `302`-redirects to
+  `${WEB_ORIGIN}/auth/callback?code=<code>`. The web app exchanges the code at
+  `POST /v1/auth/cli/exchange` to receive tokens.
+- **Extension/CLI flow** (`redirect_uri` was sent): same one-time code mechanism,
+  but redirects to the loopback `redirect_uri?code=<code>`.
 
 **Auth:** None  
 **Query params:** `code` — GitHub authorization code; `state` — CSRF state
 
-**Response (browser flow):**
-
-```json
-{
-  "access_token": "eyJ...",
-  "user": {
-    "id": "uuid",
-    "handle": "yoursquid",
-    "email": "user@example.com",
-    "avatar_url": "https://avatars.githubusercontent.com/..."
-  }
-}
-```
+**Response:** `302` redirect in both flows — no JSON body.
 
 ---
 
