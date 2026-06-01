@@ -94,7 +94,7 @@ Goal: production-safe. No known P0/P1 bugs. Published extension.
 - [ ] Extension offline queue with exponential backoff retry
 - [ ] Structured error responses across all endpoints
 - [x] Input validation hardening (edge cases, large payloads) — 1 MB `/v1/*` body limit (`413`); bounded `lang`/`file`/`project` lengths and `keystrokes`/`lines`/`ts` ranges in the heartbeat contract; `:handle` path param validated before DB lookup.
-- [ ] `POST /v1/sessions/:id/heatmap-card` (server-side `sharp` PNG for OG images)
+- [x] `POST /v1/sessions/:id/heatmap-card` (server-side `sharp` PNG for OG images) — SVG (reuses `QWERTY_LAYOUT` + the cold→`accent` ramp) rasterized by `sharp`; auth-required, privacy-gated (non-`full` owners are owner-only); `aspect` 9:16/1:1/16:9; `layout` only `qwerty` (dvorak/colemak are Phase 4).
 - [x] Open Graph meta tags on public session and profile URLs — `og:title`,
   `og:description`, `og:type`, `twitter:card` injected dynamically on
   SessionDetail and Profile pages.

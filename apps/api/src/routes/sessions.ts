@@ -1,5 +1,8 @@
 import { Hono } from 'hono'
 import { and, desc, eq } from 'drizzle-orm'
+import { zValidator } from '@hono/zod-validator'
+import { z } from 'zod'
+import sharp from 'sharp'
 import { sessionFiles, sessionLangs, sessions, users } from '@commma/db'
 import { db } from '../db.js'
 import { apiError } from '../lib/errors.js'
@@ -10,10 +13,18 @@ import {
   parseLimit,
   sessionKeyset,
 } from '../lib/cursor.js'
+import { renderHeatmapCardSvg } from '../lib/heatmapCard.js'
 import { toSessionSummary, topLangBySession } from '../lib/sessionSummary.js'
 import { requireAuth } from '../middleware/auth.js'
 import { ipKey, rateLimit, userKey } from '../middleware/rateLimit.js'
 import type { AppEnv } from '../types.js'
+
+const heatmapCardSchema = z.object({
+  layout: z.enum(['qwerty', 'dvorak', 'colemak']).default('qwerty'),
+  aspect: z.enum(['9:16', '1:1', '16:9']).default('16:9'),
+  show_handle: z.boolean().default(true),
+  show_stats: z.boolean().default(true),
+})
 
 export const sessionRoutes = new Hono<AppEnv>()
 
@@ -124,6 +135,86 @@ sessionRoutes.get(
       keyboard_heatmap: suppressDetail
         ? null
         : (session.keyboardHeatmap ?? null),
+    })
+  },
+)
+
+sessionRoutes.post(
+  '/:id/heatmap-card',
+  requireAuth,
+  rateLimit({ scope: 'read', limit: 300, windowS: 3600, key: userKey }),
+  zValidator('json', heatmapCardSchema, (result, c) => {
+    if (!result.success) {
+      return apiError(
+        c,
+        'VALIDATION_ERROR',
+        'Invalid heatmap card request',
+        result.error.issues,
+      )
+    }
+  }),
+  async (c) => {
+    const id = c.req.param('id')
+    if (!UUID_RE.test(id)) return apiError(c, 'NOT_FOUND', 'Session not found')
+
+    const opts = c.req.valid('json')
+    if (opts.layout !== 'qwerty') {
+      return apiError(
+        c,
+        'VALIDATION_ERROR',
+        'Only the qwerty layout is supported',
+      )
+    }
+
+    const requesterId = c.get('userId')
+    const rows = await db
+      .select()
+      .from(sessions)
+      .innerJoin(users, eq(users.id, sessions.userId))
+      .where(eq(sessions.id, id))
+      .limit(1)
+
+    const row = rows[0]
+    if (!row) return apiError(c, 'NOT_FOUND', 'Session not found')
+
+    const { sessions: session, users: owner } = row
+    const isOwner = requesterId === session.userId
+    if (owner.privacy !== 'full' && !isOwner) {
+      return apiError(c, 'NOT_FOUND', 'Session not found')
+    }
+
+    const heatmap = session.keyboardHeatmap
+    if (!heatmap || heatmap.total === 0) {
+      return apiError(c, 'NOT_FOUND', 'Session has no heatmap')
+    }
+
+    let stats: string | undefined
+    if (opts.show_stats) {
+      const [topLang] = await db
+        .select({ lang: sessionLangs.lang })
+        .from(sessionLangs)
+        .where(eq(sessionLangs.sessionId, id))
+        .orderBy(desc(sessionLangs.pct))
+        .limit(1)
+      const parts = [`${session.paceCpm ?? 0} cpm`]
+      if (topLang) parts.push(topLang.lang)
+      stats = parts.join('  ·  ')
+    }
+
+    const svg = renderHeatmapCardSvg({
+      heatmap,
+      aspect: opts.aspect,
+      handle: opts.show_handle ? `@${owner.handle}` : undefined,
+      stats,
+    })
+    const png = await sharp(Buffer.from(svg)).png().toBuffer()
+
+    return new Response(new Uint8Array(png), {
+      status: 200,
+      headers: {
+        'Content-Type': 'image/png',
+        'Cache-Control': 'private, max-age=300',
+      },
     })
   },
 )

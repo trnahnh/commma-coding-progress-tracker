@@ -338,8 +338,15 @@ Generates a server-side PNG of the keyboard heatmap card for OG image use.
 }
 ```
 
-`layout`: `qwerty` | `dvorak` | `colemak`  
-`aspect`: `9:16` | `1:1` | `16:9`
+`layout`: `qwerty` | `dvorak` | `colemak` — only `qwerty` is implemented; others return `400 VALIDATION_ERROR` (dvorak/colemak are Phase 4)  
+`aspect`: `9:16` (1080×1920) | `1:1` (1080×1080) | `16:9` (1920×1080, default)  
+`show_handle` / `show_stats`: default `true` — overlay `@handle` and `<pace> cpm · <top lang>`
+
+All fields are optional; an empty `{}` body uses the defaults.
+
+**Privacy:** gated like `GET /v1/sessions/:id` — a session whose owner is not `full` is renderable only by the owner; otherwise `404`. A session with no heatmap returns `404`.
+
+**Caching:** `Cache-Control: private, max-age=300`.
 
 **Response:** `image/png` (binary)
 
