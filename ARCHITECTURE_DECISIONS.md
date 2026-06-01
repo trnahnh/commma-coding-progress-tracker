@@ -147,6 +147,18 @@ they consume the same `QWERTY_LAYOUT`. The spacebar/punctuation caps now light u
 `KEY_LABELS` gained `Space` + the punctuation physical keys and shifted symbols map
 to their physical key (ROADMAP item E, done).
 
+### Amendment — 2026-06 (Phase 3, server-side `sharp` path shipped)
+
+Both pending pieces are now built. The multi-aspect export presets shipped in
+Phase 2, and the server-side renderer landed in Phase 3 as `POST
+/v1/sessions/:id/heatmap-card`: `lib/heatmapCard.ts` builds an **SVG** from the
+same `QWERTY_LAYOUT` + cold→`accent` ramp and `sharp` rasterizes it to PNG (no
+headless browser / `node-canvas`). The "two implementations kept in sync"
+consequence is now live — the Canvas and SVG renderers must track each other.
+One deliberate divergence: the server draws the Meta cap as `Cmd` (not `⌘`) so the
+PNG never depends on a glyph missing from common Linux fonts; the host must still
+provide a monospace font for the remaining text.
+
 ---
 
 ## ADR-006: Key Label Tracking (No Key Content)
@@ -307,7 +319,7 @@ Replace the BullMQ queue with an **in-process interval scan**. A `setInterval` (
 These are the tweaks this design will need as load grows. None are needed at MVP; they are recorded so they are not rediscovered later.
 
 - **(A) Trigger → queue + dedicated worker.** The interval scan (one `setInterval` in the web process, sequential per user, `SELECT DISTINCT user_id` each tick) caps out as active users grow — the scan widens and per-user work serializes on the request event loop. At the horizontal-scale / ElastiCache tier (where Redis is no longer billed per command, so the ADR-010 cost objection disappears), move aggregation to a separate worker process behind a real queue. This also dissolves the multi-instance duplication risk (today only an in-process guard + `RUN_AGGREGATION` prevent two instances aggregating the same users). **Pre-seamed:** `run.ts` already exposes `aggregateUser(userId)` as a standalone unit and the logic lives in pure modules (`boundaries`/`build`/`streak`), so this swap replaces `scheduler.ts` and enqueues one job per user — `aggregateUser` becomes the job processor unchanged. No work now.
-- **(B) Rate-limit client IP behind a proxy.** `ipKey` takes the first `x-forwarded-for` hop. Once an ALB/CloudFront fronts the API (the 10k-DAU tier), that hop is the proxy's view and is spoofable unless the chain is trusted. When the LB lands, trust the correct XFF index / the proxy's real-client header.
+- **(B) Rate-limit client IP behind a proxy. — RESOLVED (Phase 3).** `ipKey` no longer trusts the leftmost `x-forwarded-for` hop. `TRUST_PROXY_HOPS` (env, default `0`) configures how many proxies front the API, and the pure `selectClientIp` (`lib/clientIp.ts`) resolves the client IP by counting that many hops in from the trusted (right) end, so a forged header can't spoof or exhaust a victim's bucket. Set `1` behind an ALB, `2` behind CloudFront→ALB. Still requires the deploy to lock the security group so only the LB can reach the host (otherwise XFF is forgeable regardless).
 - **(C) Leaderboard rebuild source.** Because this step **prunes (deletes) events** after aggregating, the Redis-wipe rebuild promised in ADR-007 must sum from the `sessions` table, not `events`. Fine to mid-scale; at large session volume, rebuild from a periodic user-rollup table rather than scanning all sessions. See ADR-007.
 
 **Not scale issues (do not tweak for scale):** `duration_s` accuracy (addressed in step 5 — `buildSession` floors duration to `span + one heartbeat window`, since each heartbeat represents up to ~60s of activity; a single-event session is 60s not 0s, so it earns real leaderboard credit and non-zero lang splits), event pruning (already the scale win — keeps `events` tiny regardless of history), streak UTC day boundaries (correctness/UX, scale-invariant).

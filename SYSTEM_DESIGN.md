@@ -311,6 +311,15 @@ CREATE INDEX follows_followee ON follows(followee_id);
   aggregates. This prevents a midnight-spanning session from being mis-scored
   as a broken streak.
 
+### Refresh Token Cleanup Job
+
+- **Trigger:** in-process `setInterval` (daily) in the API process, gated by
+  `RUN_AGGREGATION` like the other loops (no external cron); an in-process guard
+  prevents overlapping runs.
+- **Logic:** one `DELETE FROM refresh_tokens WHERE expires_at < now()`.
+  `rotateRefreshToken` only deletes the row it rotates, so expired/abandoned
+  tokens would otherwise accumulate. Idempotent.
+
 ### Weekly Recap Email Job
 
 - **Trigger:** cron every Sunday 09:00 UTC

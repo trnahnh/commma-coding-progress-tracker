@@ -139,8 +139,13 @@ pnpm test        # all tests
 ### @commma/api
 
 - All new endpoints must have Zod validation on request body/params
-- All new endpoints must have at least one integration test in `src/routes/__tests__/`
-- Background jobs go in `src/workers/`
+- Tests run on Vitest from the repo root (`pnpm test`); specs live in each
+  package's `test/` tree (e.g. `apps/api/test/**`). Cover pure logic with unit
+  tests today; a route/integration harness (throwaway Postgres) is still pending,
+  so route behaviour is currently proven by live verification — see ROADMAP
+- Background jobs are in-process intervals gated by `RUN_AGGREGATION`: schedulers
+  live in `src/aggregate/` (aggregation, streak reset) and `src/maintenance/`
+  (token cleanup), started in `src/index.ts`
 
 ### @commma/extension
 
