@@ -41,6 +41,9 @@ Each metric lists:
 
 Read p95 routes: `/v1/me`, `/v1/sessions`, `/v1/sessions/:id`, `/v1/leaderboard`.
 Targets: <200 ms @ 100 concurrent (Phase 2 DoD); <150 ms @ 1k (Phase 3 DoD).
+`POST /v1/sessions/:id/heatmap-card` is **render-bound** (`sharp` rasterize) — it
+is excluded from the read-p95 target and carries its own `card` rate bucket; the
+load test must not hold it to `<150 ms`.
 
 Aggregation lag: 5-min interval + 15-min idle gap (ADR-010); event `ts` →
 `sessions.created_at`.
@@ -55,7 +58,11 @@ Aggregation lag: 5-min interval + 15-min idle gap (ADR-010); event `ts` →
 | Postgres storage | not measured | ~$5 MVP plan | Railway console |
 
 Redis cost drivers: per-request rate limits + per-finalize `ZINCRBY` (no BullMQ).
-`events` holds only open/recent sessions after aggregation prunes finalized rows.
+`events` holds only open/recent sessions after aggregation prunes finalized rows;
+bounded heartbeat field sizes + the 1 MB ingest body cap keep per-event/per-batch
+storage bounded. Heatmap-card renders per request (no Redis/disk PNG cache yet —
+deferred to stay under the command budget; add it before the feed serves
+thumbnails at scale).
 
 ## 3. Privacy / trust (invariants — verifiable, brand-defining)
 
@@ -71,7 +78,9 @@ PII: emails always; file paths when `privacy = full`. `summary` drops paths +
 `key_freq`; `off` stores nothing. Enforced **server-side at ingest** (not just by
 the extension) — `summary` strips `file`/`key_freq` before insert, `off` persists
 no events; `GET /v1/sessions/:id` also withholds files/heatmap from non-owners of
-`summary` owners. Auditable via the `events`/`sessions` rows, independent of client.
+`summary` owners. The `heatmap-card` endpoint applies the same gate (non-`full`
+owners' cards are owner-only). Auditable via the `events`/`sessions` rows,
+independent of client.
 
 Leaderboard: `Σ sessions.duration_s` per period must match Redis ZSET score.
 Drift surfaces post-commit `ZINCRBY` failure (backlog B); Phase-2 rebuild fixes.
