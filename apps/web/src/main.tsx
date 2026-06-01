@@ -9,6 +9,7 @@ import Profile from './pages/Profile.tsx'
 import Leaderboard from './pages/Leaderboard.tsx'
 import Feed from './pages/Feed.tsx'
 import AuthCallback from './pages/AuthCallback.tsx'
+import SignIn from './pages/SignIn.tsx'
 import NotFound from './pages/NotFound.tsx'
 
 const router = createBrowserRouter([
@@ -17,6 +18,7 @@ const router = createBrowserRouter([
   { path: '/@:handle', element: <Profile /> },
   { path: '/leaderboard', element: <Leaderboard /> },
   { path: '/feed', element: <Feed /> },
+  { path: '/signin', element: <SignIn /> },
   { path: '/auth/callback', element: <AuthCallback /> },
   { path: '*', element: <NotFound /> },
 ])

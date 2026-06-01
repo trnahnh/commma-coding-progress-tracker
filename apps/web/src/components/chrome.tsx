@@ -18,7 +18,7 @@ export function LiveDot({ color = 'live' }: { color?: 'live' | 'accent' }) {
 }
 
 function NavActions() {
-  const { user, token, isLoading, signIn, signOut } = useAuth()
+  const { user, token, isLoading, signOut } = useAuth()
   if (isLoading) return <div className='justify-self-end w-[38px]' />
   if (token && user) {
     return (
@@ -49,14 +49,13 @@ function NavActions() {
   }
   return (
     <div className='justify-self-end flex items-center gap-3'>
-      <button
-        type='button'
-        onClick={signIn}
+      <Link
+        to='/signin'
         className='hidden sm:inline-flex items-center h-[38px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
           text-ink-soft hover:text-ink border border-transparent hover:border-rule-strong transition-colors'
       >
         Sign in
-      </button>
+      </Link>
       <a
         href='https://marketplace.visualstudio.com'
         className='group inline-flex items-center gap-2.5 h-[38px] px-3.5 sm:px-4 rounded-full font-mono text-[11px] sm:text-[12px] uppercase tracking-wider font-medium
