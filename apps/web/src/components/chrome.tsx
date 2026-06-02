@@ -248,7 +248,7 @@ export function Footer() {
         </div>
 
         <div className='pb-10 border-b border-rule'>
-          <div className='flex flex-wrap justify-center gap-10 sm:gap-16'>
+          <div className='flex flex-wrap justify-center gap-[clamp(40px,6vw,140px)]'>
             <div>
               <p className='font-mono text-[11px] tracking-[0.18em] uppercase text-ink-mute mb-4 m-0'>
                 Product
