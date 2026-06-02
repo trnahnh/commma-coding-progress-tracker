@@ -1,12 +1,62 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Footer, LiveDot, Nav } from './components/chrome'
-import { getLeaderboard, type LeaderboardEntry } from './lib/api'
+import {
+  getActivityStats,
+  getActivityStream,
+  getFeaturedSession,
+  getLeaderboard,
+  type FeaturedSession,
+  type LeaderboardEntry,
+  type StreamEntry,
+} from './lib/api'
 import { useAuth } from './lib/auth'
-import { formatDuration } from './lib/format'
+import { formatClock, formatDate, formatDuration } from './lib/format'
 import { langStyle } from './lib/langColors'
 
-const SESSION = {
+interface SessionView {
+  id: string | null
+  date: string
+  startedAt: string
+  title: string
+  subtitle: string
+  duration: string
+  lines: number
+  pace: number | null
+  peakCpm: number | null
+  langs: { name: string; time: string; pct: number; swatch: string }[]
+  files: { name: string; path: string; changes: number }[]
+}
+
+function toSessionView(s: FeaturedSession): SessionView {
+  const topLang = s.langs[0]?.lang ?? null
+  return {
+    id: s.id,
+    date: formatDate(s.started_at),
+    startedAt: formatClock(s.started_at),
+    title: topLang ? `${topLang} session` : 'Coding session',
+    subtitle: `by @${s.user.handle}`,
+    duration: formatDuration(s.duration_s),
+    lines: s.lines_delta,
+    pace: s.pace_cpm,
+    peakCpm: s.peak_cpm,
+    langs: s.langs.map((l) => ({
+      name: l.lang,
+      time: formatDuration(l.duration_s),
+      pct: Math.round(l.pct),
+      swatch: langStyle(l.lang)?.color ?? '#7a746a',
+    })),
+    files: s.files.map((f) => {
+      const parts = f.path.split('/')
+      const name = parts.at(-1) ?? f.path
+      const dir = parts.length > 1 ? parts.slice(0, -1).join('/') + '/' : ''
+      return { name, path: dir, changes: f.changes }
+    }),
+  }
+}
+
+const MOCK_SESSION: SessionView = {
+  id: null,
   date: 'Tue · May 26, 2026',
   startedAt: '08:42',
   title: 'Long base — ingest pipeline refactor',
@@ -14,6 +64,7 @@ const SESSION = {
   duration: '2h 18m',
   lines: 1247,
   pace: 184,
+  peakCpm: 241,
   langs: [
     { name: 'TypeScript', time: '1h 12m', pct: 52, swatch: '#FF4D1A' },
     { name: 'Python', time: '31m', pct: 22, swatch: '#9CF76D' },
@@ -28,14 +79,14 @@ const SESSION = {
   ],
 }
 
-const CHART = [
+const MOCK_CHART = [
   20, 15, 25, 40, 55, 70, 85, 90, 75, 60, 50, 65, 80, 95, 110, 120, 130, 125,
   115, 100, 85, 70, 55, 40, 35, 30, 35, 40, 50, 60, 75, 90, 105, 115, 125, 135,
   140, 145, 140, 130, 120, 110, 100, 95, 100, 110, 120, 130, 135, 130, 120, 105,
   90, 75, 60, 50, 45, 50, 65, 80,
 ]
 
-const TICKER = [
+const MOCK_TICKER: Pick<StreamEntry, 'who' | 'what' | 'em'>[] = [
   { who: 'northbound', what: 'finished a 2h 14m session in', em: 'Go' },
   { who: 'lumen.dev', what: 'hit a', em: '54-day streak' },
   { who: 'inkpaper', what: 'shipped', em: 'feat: shimmer transitions' },
@@ -44,8 +95,17 @@ const TICKER = [
   { who: 'yoursquid', what: 'started a session in', em: 'TypeScript' },
 ]
 
+const CHART_DATE_LABELS = Array.from({ length: 8 }, (_, i) => {
+  const daysAgo = Math.round((7 - i) * 59 / 7)
+  return new Intl.DateTimeFormat(undefined, {
+    month: 'short',
+    day: 'numeric',
+  }).format(new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000))
+})
+
 function buildChartPath(data: number[], w: number, h: number, pad = 4) {
   const max = Math.max(...data)
+  if (max === 0) return `M ${pad} ${h - pad} L ${w - pad} ${h - pad}`
   const stepX = (w - pad * 2) / (data.length - 1)
   const scaleY = (h - pad * 2) / max
   return data
@@ -174,7 +234,18 @@ function Hero() {
 }
 
 function Ticker() {
-  const items = [...TICKER, ...TICKER, ...TICKER, ...TICKER]
+  const [entries, setEntries] =
+    useState<Pick<StreamEntry, 'who' | 'what' | 'em'>[]>(MOCK_TICKER)
+
+  useEffect(() => {
+    getActivityStream()
+      .then(({ entries: live }) => {
+        if (live.length >= 4) setEntries(live)
+      })
+      .catch(() => void 0)
+  }, [])
+
+  const items = [...entries, ...entries, ...entries, ...entries]
   return (
     <div className='border-y border-rule bg-paper-2 overflow-hidden whitespace-nowrap'>
       <div className='inline-flex gap-14 py-3.5 animate-marquee font-mono text-[15px] tracking-wide text-ink-mute'>
@@ -217,34 +288,44 @@ function SectionHead({
   )
 }
 
-function ActivityCard() {
+function ActivityCard({
+  session,
+  chart,
+  isLive,
+}: {
+  session: SessionView
+  chart: number[]
+  isLive: boolean
+}) {
   const W = 800
   const H = 180
-  const line = buildChartPath(CHART, W, H)
-  const area = buildAreaPath(CHART, W, H)
+  const line = buildChartPath(chart, W, H)
+  const area = buildAreaPath(chart, W, H)
+  const peakMin = Math.max(0, ...chart)
+
   return (
     <div className='relative border border-rule-strong bg-linear-to-b from-paper-2 to-paper rounded overflow-hidden'>
       <div className='grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto] sm:gap-6 items-start px-5 sm:px-8 py-6 sm:py-7 border-b border-rule'>
         <div>
           <div className='font-mono text-[15px] tracking-[0.16em] text-accent uppercase mb-2.5 flex items-center gap-2.5'>
             <LiveDot color='accent' />
-            session · 2026-05-26
+            session · {session.date.split('·')[1]?.trim() ?? session.date}
           </div>
           <h3 className='font-serif text-[clamp(26px,3vw,42px)] leading-[1.05] tracking-[-0.02em] m-0 text-ink'>
-            {SESSION.title}
+            {session.title}
             <span className='block italic text-ink-mute text-[0.6em] mt-1.5'>
-              {SESSION.subtitle}
+              {session.subtitle}
             </span>
           </h3>
         </div>
         <div className='font-mono text-[15px] text-ink-mute flex flex-row sm:flex-col flex-wrap gap-x-4 gap-y-1.5 items-start sm:items-end whitespace-nowrap'>
           <span>
-            <strong className='text-ink font-medium'>{SESSION.date}</strong>
+            <strong className='text-ink font-medium'>{session.date}</strong>
           </span>
           <span>
             started{' '}
             <strong className='text-ink font-medium tnum'>
-              {SESSION.startedAt}
+              {session.startedAt}
             </strong>
           </span>
           <span>
@@ -255,20 +336,25 @@ function ActivityCard() {
 
       <div className='grid grid-cols-2 md:grid-cols-4 border-b border-rule'>
         {[
-          { label: 'Duration', value: SESSION.duration, delta: null },
+          { label: 'Duration', value: session.duration, delta: null },
           {
             label: 'Lines moved',
-            value: SESSION.lines.toLocaleString(),
+            value: session.lines.toLocaleString(),
             unit: 'loc',
-            delta: '+12%',
+            delta: null,
           },
           {
             label: 'Pace',
-            value: SESSION.pace.toString(),
-            unit: 'char/min',
+            value: session.pace?.toString() ?? '—',
+            unit: session.pace ? 'char/min' : undefined,
             delta: null,
           },
-          { label: 'Languages', value: '4', unit: '', delta: null },
+          {
+            label: 'Languages',
+            value: session.langs.length.toString(),
+            unit: '',
+            delta: null,
+          },
         ].map((s, i) => (
           <div
             key={s.label}
@@ -284,11 +370,6 @@ function ActivityCard() {
                   {s.unit}
                 </span>
               )}
-              {s.delta && (
-                <span className='font-mono text-[15px] text-live tracking-wide ml-1.5'>
-                  {s.delta}
-                </span>
-              )}
             </span>
           </div>
         ))}
@@ -296,11 +377,16 @@ function ActivityCard() {
 
       <div className='px-5 sm:px-8 py-6 sm:py-8'>
         <div className='flex justify-between items-baseline gap-3 mb-4 font-mono text-[15px] tracking-[0.14em] uppercase text-ink-mute'>
-          <span>Keystrokes / minute</span>
-          <span className='text-right'>
-            peak <span className='text-ink tnum'>241</span> at{' '}
-            <span className='text-ink tnum'>09:51</span>
-          </span>
+          <span>Daily coding activity</span>
+          {peakMin > 0 && (
+            <span className='text-right'>
+              peak{' '}
+              <span className='text-ink tnum'>
+                {formatDuration(peakMin * 60)}
+              </span>{' '}
+              / day
+            </span>
+          )}
         </div>
         <svg
           viewBox={`0 0 ${W} ${H}`}
@@ -331,21 +417,12 @@ function ActivityCard() {
           <path d={line} fill='none' stroke='#FF4D1A' strokeWidth='1.5' />
         </svg>
         <div className='grid grid-cols-4 sm:grid-cols-8 mt-2.5 font-mono text-[15px] text-ink-faint tracking-wider'>
-          {[
-            '08:42',
-            '09:00',
-            '09:20',
-            '09:40',
-            '10:00',
-            '10:20',
-            '10:40',
-            '11:00',
-          ].map((t, i) => (
+          {(isLive ? CHART_DATE_LABELS : CHART_DATE_LABELS).map((label, i) => (
             <span
-              key={t}
+              key={label + i}
               className={`tnum ${i % 2 === 1 ? 'hidden sm:block' : ''}`}
             >
-              {t}
+              {label}
             </span>
           ))}
         </div>
@@ -356,7 +433,7 @@ function ActivityCard() {
           <div className='font-mono text-[15px] tracking-[0.16em] uppercase text-ink-mute mb-3.5'>
             Languages
           </div>
-          {SESSION.langs.map((l) => (
+          {session.langs.map((l) => (
             <div
               key={l.name}
               className='grid grid-cols-[10px_1fr_auto] items-center gap-3 py-2 font-mono text-[15px] text-ink-soft border-b border-dashed border-rule last:border-b-0'
@@ -378,9 +455,9 @@ function ActivityCard() {
           <div className='font-mono text-[15px] tracking-[0.16em] uppercase text-ink-mute mb-3.5'>
             Most-touched files
           </div>
-          {SESSION.files.map((f) => (
+          {session.files.map((f) => (
             <div
-              key={f.name}
+              key={f.path + f.name}
               className='grid grid-cols-[1fr_auto] items-baseline gap-3 py-2 font-mono text-[15px] text-ink-soft border-b border-dashed border-rule last:border-b-0'
             >
               <span className='truncate'>
@@ -397,6 +474,21 @@ function ActivityCard() {
 }
 
 function Activity() {
+  const [session, setSession] = useState<SessionView>(MOCK_SESSION)
+  const [chart, setChart] = useState<number[]>(MOCK_CHART)
+  const [isLive, setIsLive] = useState(false)
+
+  useEffect(() => {
+    Promise.all([getFeaturedSession(), getActivityStats()])
+      .then(([feat, stats]) => {
+        setSession(toSessionView(feat))
+        const minutes = stats.days.map((d) => Math.round(d.duration_s / 60))
+        if (minutes.some((v) => v > 0)) setChart(minutes)
+        setIsLive(true)
+      })
+      .catch(() => void 0)
+  }, [])
+
   return (
     <section className='py-[clamp(56px,9vw,140px)]'>
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
@@ -408,9 +500,9 @@ function Activity() {
               screenshot.
             </>
           }
-          aside='rendered live · sample data'
+          aside={isLive ? 'rendered live · real data' : 'rendered live · sample data'}
         />
-        <ActivityCard />
+        <ActivityCard session={session} chart={chart} isLive={isLive} />
       </div>
     </section>
   )

@@ -221,6 +221,45 @@ export function getProfile(handle: string): Promise<UserProfile> {
   return getJson<UserProfile>(`/v1/users/${encodeURIComponent(handle)}`)
 }
 
+export interface FeaturedSession {
+  id: string
+  started_at: string
+  ended_at: string
+  duration_s: number
+  lines_delta: number
+  pace_cpm: number | null
+  peak_cpm: number | null
+  user: { handle: string; avatar_url: string | null }
+  langs: SessionLang[]
+  files: SessionFile[]
+  keyboard_heatmap: KeyboardHeatmap | null
+}
+
+export interface ActivityDay {
+  date: string
+  duration_s: number
+}
+
+export interface StreamEntry {
+  who: string
+  what: string
+  em: string
+  session_id: string
+  ts: string
+}
+
+export function getFeaturedSession(): Promise<FeaturedSession> {
+  return getJson<FeaturedSession>('/v1/sessions/featured')
+}
+
+export function getActivityStats(): Promise<{ days: ActivityDay[] }> {
+  return getJson<{ days: ActivityDay[] }>('/v1/stats/activity')
+}
+
+export function getActivityStream(): Promise<{ entries: StreamEntry[] }> {
+  return getJson<{ entries: StreamEntry[] }>('/v1/activity/stream')
+}
+
 export function getProfileSessions(
   handle: string,
   cursor?: string,
