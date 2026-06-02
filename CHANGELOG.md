@@ -11,6 +11,12 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Shared + Web** — Dvorak and Colemak keyboard layouts: `DVORAK_LAYOUT`,
+  `COLEMAK_LAYOUT`, `KEYBOARD_LAYOUTS` record, and `LayoutName` type exported
+  from `@commma/shared`. The session-detail keyboard heatmap gains a QWERTY /
+  Dvorak / Colemak layout toggle so users on alternate layouts see their actual
+  finger-travel patterns; export presets render the active layout. (Phase 4 —
+  ROADMAP #247/#248 ✔)
 - **Web** — Scroll restoration via `<ScrollRestoration />` (React Router v6):
   navigating to a new route resets scroll to top; browser back/forward restores
   the saved position. All routes wrapped in a `RootLayout` component.
