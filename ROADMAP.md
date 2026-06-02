@@ -246,7 +246,7 @@ Goal: growth mechanics live. First external contributors merged.
 - [ ] Team aggregate heatmap visualization
 - [x] Dvorak keyboard layout config
 - [x] Colemak keyboard layout config
-- [ ] Wire the landing page `SESSION`/`CHART`/`TICKER` sections to live data
+- [x] Wire the landing page `SESSION`/`CHART`/`TICKER` sections to live data
       (currently mocked in `App.tsx`) — needs new read endpoints: a featured
       public session for `SESSION`, a daily activity time-series for `CHART`
       (derived from `sessions`, not `events`, which are pruned per ADR-010), and
