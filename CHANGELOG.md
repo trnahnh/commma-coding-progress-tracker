@@ -11,6 +11,42 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Web** — Scroll restoration via `<ScrollRestoration />` (React Router v6):
+  navigating to a new route resets scroll to top; browser back/forward restores
+  the saved position. All routes wrapped in a `RootLayout` component.
+- **Web** — Reading progress bar: 2 px accent stripe fixed at `top-0 z-[60]`,
+  driven by a passive scroll listener with direct DOM mutation (no React
+  re-renders). Landing page only.
+- **Web** — Back-to-top button: floating `↑` on the landing page, fades in after
+  500 px of scroll, smooth-scrolls to top on click. Also DOM-driven.
+- **Web** — Nav active-link indicator: the current route renders `text-ink` with
+  a full-width accent underline; inactive links retain hover-only behaviour.
+  Wordmark and Activity link smooth-scroll to top when already on `/`.
+- **Web** — Mobile hamburger nav: `md:hidden` icon (lines↔X) opens a dropdown
+  below the sticky nav showing all four nav links with 56 px tap targets.
+  Collapses automatically on route change.
+- **Web** — Footer redesigned: three-column layout (Product / Company / Legal),
+  `max-w-2xl mx-auto` columns centred within the container, GitHub linked to the
+  real repo, `© 2026 commma · All rights reserved`.
+- **Web** — Five new footer pages: `/careers` (expanding-soon placeholder),
+  `/contact` (founder name + email), `/privacy` (full policy covering key-label
+  collection, privacy modes, data retention), `/api` (endpoint reference with
+  rate limits; all routes marked pending), `/status` (invite-only early-access
+  status board). All content centred via `mx-auto`.
+
+### Changed
+
+- **Web** — Text sizes bumped across all pages for readability: 10 px→11, 10.5
+  px→12, 11 px→12, 12 px→13, 12.5 px→14, 13 px→14 px. Covers App, chrome, Feed,
+  Leaderboard, Pricing, Profile, SessionDetail, SignIn, and all new footer
+  pages.
+- **Web** — Feed unauthenticated state and Leaderboard empty state: outer
+  padding increased to `py-24`, text to 15 px, sign-in button to `h-[46px] px-7`
+  for clearer mobile CTAs.
+- **Web** — Pricing billing-toggle buttons: `h-[34px]` → `h-[40px] px-5`.
+- **Web** — Footer wordmark minimum size reduced (`clamp(52px,16vw,440px)`) to
+  prevent overflow on narrow mobile viewports.
+
 - **Web** — GitHub OAuth sign-in flow: `GET /v1/auth/github/callback` now
   redirects to `${WEB_ORIGIN}/auth/callback?code=…` (reuses the CLI one-time
   code mechanism); web `/auth/callback` route exchanges the code via
@@ -148,7 +184,7 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   seconds; they now earn leaderboard credit and produce non-zero language
   splits.
 
-### Changed
+### Heatmap
 
 - **Heatmap completeness (`@commma/shared` `KEY_LABELS`).** Added `Space` and
   the eleven punctuation physical keys (`` ` `` `-` `=` `[` `]` `\` `;` `'` `,`
