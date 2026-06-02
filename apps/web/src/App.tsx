@@ -17,6 +17,7 @@ import { langStyle } from './lib/langColors'
 interface SessionView {
   id: string | null
   date: string
+  shortDate: string
   startedAt: string
   title: string
   subtitle: string
@@ -28,11 +29,18 @@ interface SessionView {
   files: { name: string; path: string; changes: number }[]
 }
 
+const shortDateFmt = new Intl.DateTimeFormat(undefined, {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+})
+
 function toSessionView(s: FeaturedSession): SessionView {
   const topLang = s.langs[0]?.lang ?? null
   return {
     id: s.id,
     date: formatDate(s.started_at),
+    shortDate: shortDateFmt.format(new Date(s.started_at)),
     startedAt: formatClock(s.started_at),
     title: topLang ? `${topLang} session` : 'Coding session',
     subtitle: `by @${s.user.handle}`,
@@ -58,6 +66,7 @@ function toSessionView(s: FeaturedSession): SessionView {
 const MOCK_SESSION: SessionView = {
   id: null,
   date: 'Tue · May 26, 2026',
+  shortDate: 'May 26, 2026',
   startedAt: '08:42',
   title: 'Long base — ingest pipeline refactor',
   subtitle: 'with a brief detour through the schema package',
@@ -291,11 +300,9 @@ function SectionHead({
 function ActivityCard({
   session,
   chart,
-  isLive,
 }: {
   session: SessionView
   chart: number[]
-  isLive: boolean
 }) {
   const W = 800
   const H = 180
@@ -309,7 +316,7 @@ function ActivityCard({
         <div>
           <div className='font-mono text-[15px] tracking-[0.16em] text-accent uppercase mb-2.5 flex items-center gap-2.5'>
             <LiveDot color='accent' />
-            session · {session.date.split('·')[1]?.trim() ?? session.date}
+            session · {session.shortDate}
           </div>
           <h3 className='font-serif text-[clamp(26px,3vw,42px)] leading-[1.05] tracking-[-0.02em] m-0 text-ink'>
             {session.title}
@@ -417,7 +424,7 @@ function ActivityCard({
           <path d={line} fill='none' stroke='#FF4D1A' strokeWidth='1.5' />
         </svg>
         <div className='grid grid-cols-4 sm:grid-cols-8 mt-2.5 font-mono text-[15px] text-ink-faint tracking-wider'>
-          {(isLive ? CHART_DATE_LABELS : CHART_DATE_LABELS).map((label, i) => (
+          {CHART_DATE_LABELS.map((label, i) => (
             <span
               key={label + i}
               className={`tnum ${i % 2 === 1 ? 'hidden sm:block' : ''}`}
@@ -502,7 +509,7 @@ function Activity() {
           }
           aside={isLive ? 'rendered live · real data' : 'rendered live · sample data'}
         />
-        <ActivityCard session={session} chart={chart} isLive={isLive} />
+        <ActivityCard session={session} chart={chart} />
       </div>
     </section>
   )

@@ -72,6 +72,6 @@ activityRoutes.get(
     })
 
     c.header('Cache-Control', 'public, max-age=60')
-    return c.json({ entries })
+    return c.json({ entries: entries.slice(0, 30) })
   },
 )
