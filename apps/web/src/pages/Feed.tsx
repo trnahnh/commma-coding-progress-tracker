@@ -205,15 +205,15 @@ export default function Feed() {
       <Shell>
         <div className='border border-rule-strong rounded bg-linear-to-b from-paper-2 to-paper overflow-hidden'>
           {header}
-          <div className='px-5 sm:px-8 py-16 text-center space-y-5'>
-            <p className='font-mono text-[12px] text-ink-mute m-0'>
+          <div className='px-5 sm:px-8 py-24 flex flex-col items-center gap-14'>
+            <p className='font-mono text-[15px] text-ink-mute m-0 text-center max-w-[36ch]'>
               Sign in to see sessions from the coders you follow.
             </p>
             <Link
               to='/signin'
-              className='inline-flex items-center gap-2.5 h-[38px] px-5 rounded-full font-mono text-[12px] uppercase tracking-wider bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors'
+              className='inline-flex items-center gap-2.5 h-[46px] px-7 rounded-full font-mono text-[13px] uppercase tracking-wider bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors'
             >
-              Sign in
+              Sign in →
             </Link>
           </div>
         </div>

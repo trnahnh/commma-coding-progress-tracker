@@ -25,7 +25,7 @@ function BackLink() {
   return (
     <Link
       to='/'
-      className='group inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.16em] uppercase text-ink-mute hover:text-ink transition-colors mb-8'
+      className='group inline-flex items-center gap-2 font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute hover:text-ink transition-colors mb-8'
     >
       <span className='inline-block transition-transform group-hover:-translate-x-1'>
         ←
@@ -67,19 +67,19 @@ function StatGrid({ session }: { session: Session }) {
     <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-px bg-rule border-b border-rule'>
       {stats.map((s) => (
         <div key={s.label} className='bg-paper-2 px-5 sm:px-7 py-5 sm:py-6'>
-          <span className='block font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-mute mb-3.5'>
+          <span className='block font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute mb-3.5'>
             {s.label}
           </span>
           <span className='flex items-baseline gap-1.5 font-serif text-[clamp(26px,3vw,42px)] leading-none tracking-[-0.02em] text-ink tnum'>
             {s.value}
             {s.unit && (
-              <span className='font-mono text-[12px] tracking-wide text-ink-mute lowercase'>
+              <span className='font-mono text-[13px] tracking-wide text-ink-mute lowercase'>
                 {s.unit}
               </span>
             )}
           </span>
           {'foot' in s && s.foot && (
-            <span className='block font-mono text-[11px] tracking-wide text-ink-mute mt-2 tnum'>
+            <span className='block font-mono text-[13px] tracking-wide text-ink-mute mt-2 tnum'>
               {s.foot}
             </span>
           )}
@@ -92,7 +92,7 @@ function StatGrid({ session }: { session: Session }) {
 function LangBreakdown({ langs }: { langs: SessionLang[] }) {
   if (langs.length === 0) {
     return (
-      <div className='font-mono text-[12.5px] text-ink-mute'>
+      <div className='font-mono text-[14px] text-ink-mute'>
         No language data for this session.
       </div>
     )
@@ -117,7 +117,7 @@ function LangBreakdown({ langs }: { langs: SessionLang[] }) {
         return (
           <div
             key={l.lang}
-            className='grid grid-cols-[10px_1fr_auto] items-center gap-3 py-2 font-mono text-[12.5px] text-ink-soft border-b border-dashed border-rule last:border-b-0'
+            className='grid grid-cols-[10px_1fr_auto] items-center gap-3 py-2 font-mono text-[14px] text-ink-soft border-b border-dashed border-rule last:border-b-0'
           >
             <span
               className='w-2.5 h-2.5 rounded-sm'
@@ -139,7 +139,7 @@ function LangBreakdown({ langs }: { langs: SessionLang[] }) {
 function FileList({ files }: { files: SessionFile[] }) {
   if (files.length === 0) {
     return (
-      <div className='font-mono text-[12.5px] text-ink-mute'>
+      <div className='font-mono text-[14px] text-ink-mute'>
         No file activity recorded.
       </div>
     )
@@ -151,7 +151,7 @@ function FileList({ files }: { files: SessionFile[] }) {
         return (
           <div
             key={f.path}
-            className='grid grid-cols-[1fr_auto] items-baseline gap-3 py-2 font-mono text-[12.5px] text-ink-soft border-b border-dashed border-rule last:border-b-0'
+            className='grid grid-cols-[1fr_auto] items-baseline gap-3 py-2 font-mono text-[14px] text-ink-soft border-b border-dashed border-rule last:border-b-0'
           >
             <span className='truncate'>
               <span className='text-ink-mute'>{dir}</span>
@@ -167,7 +167,7 @@ function FileList({ files }: { files: SessionFile[] }) {
 
 function HeatmapHeader() {
   return (
-    <div className='flex items-baseline justify-between gap-3 mb-5 font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-mute'>
+    <div className='flex items-baseline justify-between gap-3 mb-5 font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute'>
       <span>Keyboard heatmap</span>
     </div>
   )
@@ -185,7 +185,7 @@ function HeatmapSlot({
       <div className='px-5 sm:px-8 py-6 sm:py-8'>
         <HeatmapHeader />
         <div className='rounded border border-dashed border-rule-strong bg-paper-2/60 px-5 sm:px-8 py-8 sm:py-10'>
-          <p className='font-mono text-[12px] text-ink-mute m-0 text-center'>
+          <p className='font-mono text-[13px] text-ink-mute m-0 text-center'>
             No keyboard data captured for this session.
           </p>
         </div>
@@ -208,7 +208,7 @@ function HeatmapSlot({
 
   return (
     <div className='px-5 sm:px-8 py-6 sm:py-8'>
-      <div className='flex items-baseline justify-between gap-3 mb-5 font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-mute'>
+      <div className='flex items-baseline justify-between gap-3 mb-5 font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute'>
         <span>Keyboard heatmap</span>
         <span className='tnum text-ink'>
           {heatmap.total.toLocaleString()} keys
@@ -241,14 +241,14 @@ function SessionCard({ session }: { session: Session }) {
   return (
     <div className='relative border border-rule-strong bg-linear-to-b from-paper-2 to-paper rounded overflow-hidden'>
       <div className='px-5 sm:px-8 py-6 sm:py-7 border-b border-rule'>
-        <div className='font-mono text-[11px] tracking-[0.16em] text-accent uppercase mb-2.5 flex items-center gap-2.5'>
+        <div className='font-mono text-[13px] tracking-[0.16em] text-accent uppercase mb-2.5 flex items-center gap-2.5'>
           <LiveDot color='accent' />
           session
         </div>
         <h1 className='font-serif text-[clamp(28px,4vw,52px)] leading-[1.04] tracking-[-0.02em] m-0 text-ink'>
           {formatDate(session.started_at)}
         </h1>
-        <p className='font-mono text-[12.5px] text-ink-mute mt-3 m-0 tnum'>
+        <p className='font-mono text-[14px] text-ink-mute mt-3 m-0 tnum'>
           {formatClock(session.started_at)}–{formatClock(session.ended_at)}
           <span className='text-ink-faint'> · </span>
           {formatDuration(session.duration_s)}
@@ -259,13 +259,13 @@ function SessionCard({ session }: { session: Session }) {
 
       <div className='grid grid-cols-1 md:grid-cols-2 border-b border-rule'>
         <div className='px-5 sm:px-8 py-6 border-b md:border-b-0 md:border-r border-rule'>
-          <div className='font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-mute mb-5'>
+          <div className='font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute mb-5'>
             Languages
           </div>
           <LangBreakdown langs={session.langs} />
         </div>
         <div className='px-5 sm:px-8 py-6'>
-          <div className='font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-mute mb-5'>
+          <div className='font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute mb-5'>
             Most-touched files
           </div>
           <FileList files={session.files} />

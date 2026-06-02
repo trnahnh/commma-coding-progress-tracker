@@ -65,12 +65,12 @@ export default function SignIn() {
           Sign in with GitHub
         </button>
 
-        <p className='font-mono text-[12px] text-ink-faint m-0'>
+        <p className='font-mono text-[13px] text-ink-faint m-0'>
           No account needed — GitHub sign-in creates one automatically.
         </p>
 
         <div className='mt-14 pt-8 border-t border-rule'>
-          <p className='font-mono text-[11.5px] text-ink-faint m-0 leading-relaxed'>
+          <p className='font-mono text-[13px] text-ink-faint m-0 leading-relaxed'>
             <span className='text-ink-mute'>Privacy first.</span> Only key
             counts and file paths leave your machine. Never code or content.
           </p>
