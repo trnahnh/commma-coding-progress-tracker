@@ -184,7 +184,7 @@ Goal: production-safe. No known P0/P1 bugs. Published extension.
 - [x] Replace all mocked landing page data with live API — leaderboard section
       now fetches `GET /v1/leaderboard?period=week` (real avatars, lang colors,
       streak, self-highlight); SESSION/CHART/TICKER sections remain mocked (no
-      suitable endpoint yet).
+      suitable endpoint yet — scheduled in Phase 4).
 - [ ] Extension published to VSCode Marketplace (unlisted)
 - [x] `CONTRIBUTING.md`, `ONBOARDING.md`, `SECURITY.md` complete — added
       `SECURITY.md` (private reporting, scope, safe harbor, the no-keylogging
@@ -218,6 +218,12 @@ Goal: growth mechanics live. First external contributors merged.
 - [ ] Team aggregate heatmap visualization
 - [ ] Dvorak keyboard layout config
 - [ ] Colemak keyboard layout config
+- [ ] Wire the landing page `SESSION`/`CHART`/`TICKER` sections to live data
+      (currently mocked in `App.tsx`) — needs new read endpoints: a featured
+      public session for `SESSION`, a daily activity time-series for `CHART`
+      (derived from `sessions`, not `events`, which are pruned per ADR-010), and
+      a recent public-activity feed for `TICKER`. Land before public launch so
+      the landing page is fully real.
 - [ ] Contributor onboarding: Dockerfile for dev environment
 - [ ] First 3 external PR merges
 - [ ] Public launch: Product Hunt, social posts
