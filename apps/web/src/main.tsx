@@ -11,9 +11,11 @@ import Feed from './pages/Feed.tsx'
 import AuthCallback from './pages/AuthCallback.tsx'
 import SignIn from './pages/SignIn.tsx'
 import NotFound from './pages/NotFound.tsx'
+import Pricing from './pages/Pricing.tsx'
 
 const router = createBrowserRouter([
   { path: '/', element: <App /> },
+  { path: '/pricing', element: <Pricing /> },
   { path: '/sessions/:id', element: <SessionDetail /> },
   { path: '/@:handle', element: <Profile /> },
   { path: '/leaderboard', element: <Leaderboard /> },
