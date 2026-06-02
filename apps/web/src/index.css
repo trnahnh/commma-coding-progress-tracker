@@ -13,9 +13,9 @@
   --color-accent: #ff4d1a;
   --color-accent-soft: rgba(255, 77, 26, 0.14);
   --color-accent-line: rgba(255, 77, 26, 0.45);
-  --color-accent-2: #863bff;
-  --color-accent-2-soft: rgba(134, 59, 255, 0.14);
-  --color-accent-2-line: rgba(134, 59, 255, 0.45);
+  --color-accent-2: #efead8;
+  --color-accent-2-soft: rgba(239, 234, 216, 0.14);
+  --color-accent-2-line: rgba(239, 234, 216, 0.45);
   --color-live: #9cf76d;
 
   --font-serif: "Instrument Serif", "Times New Roman", serif;
