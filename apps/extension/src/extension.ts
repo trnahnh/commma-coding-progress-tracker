@@ -1,13 +1,20 @@
 import * as vscode from 'vscode'
+import type { HeartbeatEvent } from '@commma/shared'
 import { Auth } from './auth.js'
-import { IngestClient } from './client.js'
+import { IngestClient, type QueueStore } from './client.js'
 import { Tracker } from './tracker.js'
 import { StatusBar } from './statusBar.js'
 import { getPrivacyMode } from './privacy.js'
 
+const QUEUE_KEY = 'commma.queue'
+
 export async function activate(context: vscode.ExtensionContext) {
   const auth = new Auth(context)
-  const client = new IngestClient(auth)
+  const store: QueueStore = {
+    load: () => context.globalState.get<HeartbeatEvent[]>(QUEUE_KEY) ?? [],
+    save: (events) => context.globalState.update(QUEUE_KEY, events),
+  }
+  const client = new IngestClient(auth, store)
   const statusBar = new StatusBar()
   const tracker = new Tracker(client, (state) => statusBar.set(state))
 
@@ -48,13 +55,16 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   })
 
-  const signOut = vscode.commands.registerCommand('commma.signOut', async () => {
-    await auth.signOut()
-    paused = false
-    tracker.stop()
-    statusBar.set('signedOut')
-    vscode.window.showInformationMessage('commma: signed out')
-  })
+  const signOut = vscode.commands.registerCommand(
+    'commma.signOut',
+    async () => {
+      await auth.signOut()
+      paused = false
+      tracker.stop()
+      statusBar.set('signedOut')
+      vscode.window.showInformationMessage('commma: signed out')
+    },
+  )
 
   const toggleTracking = vscode.commands.registerCommand(
     'commma.toggleTracking',
@@ -71,9 +81,16 @@ export async function activate(context: vscode.ExtensionContext) {
     if (e.affectsConfiguration('commma')) void refreshState()
   })
 
-  context.subscriptions.push(signIn, signOut, toggleTracking, statusBar, configSub, {
-    dispose: () => tracker.stop(),
-  })
+  context.subscriptions.push(
+    signIn,
+    signOut,
+    toggleTracking,
+    statusBar,
+    configSub,
+    {
+      dispose: () => tracker.stop(),
+    },
+  )
 
   await refreshState()
 }
