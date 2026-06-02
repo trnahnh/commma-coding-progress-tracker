@@ -1,6 +1,13 @@
-import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState, type ReactNode } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
+
+const NAV_LINKS = [
+  { label: 'Activity', to: '/' },
+  { label: 'Feed', to: '/feed' },
+  { label: 'Leaderboard', to: '/leaderboard' },
+  { label: 'Pricing', to: '/pricing' },
+]
 
 export function Wordmark({ size = 'text-[28px]' }: { size?: string }) {
   return (
@@ -19,10 +26,10 @@ export function LiveDot({ color = 'live' }: { color?: 'live' | 'accent' }) {
 
 function NavActions() {
   const { user, token, isLoading, signOut } = useAuth()
-  if (isLoading) return <div className='justify-self-end w-[38px]' />
+  if (isLoading) return <div className='w-[38px]' />
   if (token && user) {
     return (
-      <div className='justify-self-end flex items-center gap-3'>
+      <div className='flex items-center gap-3'>
         <Link
           to={`/@${user.handle}`}
           className='flex items-center gap-2 group'
@@ -39,7 +46,7 @@ function NavActions() {
         <button
           type='button'
           onClick={() => void signOut()}
-          className='inline-flex items-center h-[34px] sm:h-[38px] px-3 sm:px-4 rounded-full font-mono text-[11px] sm:text-[12px] uppercase tracking-wider
+          className='inline-flex items-center h-[34px] sm:h-[38px] px-3 sm:px-4 rounded-full font-mono text-[12px] sm:text-[13px] uppercase tracking-wider
             text-ink-soft hover:text-ink border border-transparent hover:border-rule-strong transition-colors'
         >
           Sign out
@@ -48,17 +55,17 @@ function NavActions() {
     )
   }
   return (
-    <div className='justify-self-end flex items-center gap-3'>
+    <div className='flex items-center gap-3'>
       <Link
         to='/signin'
-        className='inline-flex items-center h-[34px] sm:h-[38px] px-3 sm:px-4 rounded-full font-mono text-[11px] sm:text-[12px] uppercase tracking-wider
+        className='inline-flex items-center h-[34px] sm:h-[38px] px-3 sm:px-4 rounded-full font-mono text-[12px] sm:text-[13px] uppercase tracking-wider
           text-ink-soft hover:text-ink border border-transparent hover:border-rule-strong transition-colors'
       >
         Sign in
       </Link>
       <a
         href='https://marketplace.visualstudio.com'
-        className='group inline-flex items-center gap-2.5 h-[38px] px-3.5 sm:px-4 rounded-full font-mono text-[11px] sm:text-[12px] uppercase tracking-wider font-medium
+        className='group inline-flex items-center gap-2.5 h-[38px] px-3.5 sm:px-4 rounded-full font-mono text-[12px] sm:text-[13px] uppercase tracking-wider font-medium
           bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors whitespace-nowrap'
       >
         <span className='hidden sm:inline'>Install for VSCode</span>
@@ -72,34 +79,107 @@ function NavActions() {
 }
 
 export function Nav() {
+  const { pathname } = useLocation()
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [pathname])
+
+  const homeClick = (e: React.MouseEvent) => {
+    if (pathname === '/') {
+      e.preventDefault()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
   return (
     <nav className='sticky top-0 z-50 border-b border-rule backdrop-blur-xl backdrop-saturate-150 bg-paper/70'>
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
         <div className='grid grid-cols-[1fr_auto] md:grid-cols-[1fr_auto_1fr] items-center h-16'>
-          <Link to='/' className='justify-self-start'>
+          <Link to='/' className='justify-self-start' onClick={homeClick}>
             <Wordmark />
           </Link>
-          <div className='hidden md:flex gap-7 font-mono text-[12px] tracking-wider text-ink-soft'>
-            {[
-              { label: 'Activity', to: '/' },
-              { label: 'Feed', to: '/feed' },
-              { label: 'Leaderboard', to: '/leaderboard' },
-              { label: 'Pricing', to: '/pricing' },
-            ].map(({ label, to }) => (
-              <Link
-                key={label}
-                to={to}
-                className='relative py-1 transition-colors hover:text-ink
+
+          <div className='hidden md:flex gap-7 font-mono text-[13px] tracking-wider text-ink-soft'>
+            {NAV_LINKS.map(({ label, to }) => {
+              const active =
+                to === '/' ? pathname === '/' : pathname.startsWith(to)
+              return (
+                <Link
+                  key={label}
+                  to={to}
+                  onClick={to === '/' ? homeClick : undefined}
+                  className={`relative py-1 transition-colors hover:text-ink
                     after:absolute after:left-0 after:right-0 after:-bottom-0.5 after:h-px after:bg-accent
-                    after:scale-x-0 after:origin-left after:transition-transform hover:after:scale-x-100'
-              >
-                {label}
-              </Link>
-            ))}
+                    after:origin-left after:transition-transform
+                    ${active ? 'text-ink after:scale-x-100' : 'after:scale-x-0 hover:after:scale-x-100'}`}
+                >
+                  {label}
+                </Link>
+              )
+            })}
           </div>
-          <NavActions />
+
+          <div className='justify-self-end flex items-center gap-2'>
+            <NavActions />
+            <button
+              type='button'
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              onClick={() => setMobileOpen((o) => !o)}
+              className='md:hidden flex items-center justify-center w-9 h-9 text-ink-mute hover:text-ink transition-colors'
+            >
+              {mobileOpen ? (
+                <svg
+                  viewBox='0 0 16 16'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='1.5'
+                  strokeLinecap='round'
+                  className='w-5 h-5'
+                >
+                  <path d='M3 3l10 10M13 3L3 13' />
+                </svg>
+              ) : (
+                <svg
+                  viewBox='0 0 16 16'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='1.5'
+                  strokeLinecap='round'
+                  className='w-5 h-5'
+                >
+                  <path d='M2 4h12M2 8h12M2 12h12' />
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
       </div>
+
+      {mobileOpen && (
+        <div className='md:hidden border-t border-rule bg-paper/95 backdrop-blur-xl'>
+          <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)] flex flex-col py-2'>
+            {NAV_LINKS.map(({ label, to }) => {
+              const active =
+                to === '/' ? pathname === '/' : pathname.startsWith(to)
+              return (
+                <Link
+                  key={label}
+                  to={to}
+                  onClick={(e) => {
+                    if (to === '/') homeClick(e)
+                    setMobileOpen(false)
+                  }}
+                  className={`font-mono text-[15px] tracking-wide py-4 border-b border-rule last:border-b-0 transition-colors ${active ? 'text-ink' : 'text-ink-soft hover:text-ink'}`}
+                >
+                  {label}
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </nav>
   )
 }
@@ -128,7 +208,7 @@ export function StatusPanel({
       <h1 className='font-serif text-[clamp(30px,5vw,56px)] leading-none tracking-[-0.02em] m-0 mb-5 text-ink'>
         {title}
       </h1>
-      <p className='font-mono text-[12.5px] tracking-wide text-ink-mute m-0'>
+      <p className='font-mono text-[14px] tracking-wide text-ink-mute m-0'>
         {body}
       </p>
     </div>
@@ -136,41 +216,101 @@ export function StatusPanel({
 }
 
 export function Footer() {
+  const platform = [
+    { label: 'Activity', to: '/' },
+    { label: 'Feed', to: '/feed' },
+    { label: 'Leaderboard', to: '/leaderboard' },
+    { label: 'Pricing', to: '/pricing' },
+    { label: 'API', to: '/api' },
+  ]
+  const company = [
+    { label: 'Careers', to: '/careers' },
+    { label: 'Contact', to: '/contact' },
+  ]
+  const legal = [
+    { label: 'Privacy', to: '/privacy' },
+    { label: 'Status', to: '/status' },
+    { label: '404', to: '/404' },
+  ]
+
   return (
     <footer className='border-t border-rule pt-14 pb-8'>
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
-        <div className='font-serif text-[clamp(120px,28vw,440px)] leading-[0.78] tracking-[-0.06em] text-ink m-0 mb-10'>
+        <div className='font-serif text-[clamp(52px,16vw,440px)] leading-[0.78] tracking-[-0.06em] text-ink m-0 mb-12'>
           commma<span className='text-accent'>.</span>
         </div>
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-[11px] uppercase tracking-wider text-ink-mute pt-6 border-t border-rule'>
-          <div className='space-x-5'>
-            <Link to='/' className='hover:text-ink'>
-              Activity
-            </Link>
-            <Link to='/feed' className='hover:text-ink'>
-              Feed
-            </Link>
-            <Link to='/leaderboard' className='hover:text-ink'>
-              Leaderboard
-            </Link>
-            <Link to='/pricing' className='hover:text-ink'>
-              Pricing
-            </Link>
+
+        <div className='pb-10 border-b border-rule'>
+          <div className='grid grid-cols-2 sm:grid-cols-3 gap-8 sm:gap-12 max-w-2xl mx-auto'>
+            <div>
+              <p className='font-mono text-[11px] tracking-[0.18em] uppercase text-ink-mute mb-4 m-0'>
+                Product
+              </p>
+              <ul className='m-0 p-0 list-none flex flex-col gap-3'>
+                {platform.map(({ label, to }) => (
+                  <li key={label}>
+                    <Link
+                      to={to}
+                      className='font-mono text-[13px] text-ink-soft hover:text-ink transition-colors'
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <p className='font-mono text-[11px] tracking-[0.18em] uppercase text-ink-mute mb-4 m-0'>
+                Company
+              </p>
+              <ul className='m-0 p-0 list-none flex flex-col gap-3'>
+                {company.map(({ label, to }) => (
+                  <li key={label}>
+                    <Link
+                      to={to}
+                      className='font-mono text-[13px] text-ink-soft hover:text-ink transition-colors'
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+                <li>
+                  <a
+                    href='https://github.com/NauriFive/commma-coding-progress-tracker'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='font-mono text-[13px] text-ink-soft hover:text-ink transition-colors inline-flex items-center gap-1'
+                  >
+                    GitHub
+                    <span className='text-[11px] text-ink-mute'>↗</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <p className='font-mono text-[11px] tracking-[0.18em] uppercase text-ink-mute mb-4 m-0'>
+                Legal
+              </p>
+              <ul className='m-0 p-0 list-none flex flex-col gap-3'>
+                {legal.map(({ label, to }) => (
+                  <li key={label}>
+                    <Link
+                      to={to}
+                      className='font-mono text-[13px] text-ink-soft hover:text-ink transition-colors'
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-          <div className='md:text-center'>
-            © 2026 commma labs · built in vscode (obviously)
-          </div>
-          <div className='md:text-right space-x-5'>
-            <a href='#' className='hover:text-ink'>
-              GitHub
-            </a>
-            <a href='#' className='hover:text-ink'>
-              Privacy
-            </a>
-            <a href='#' className='hover:text-ink'>
-              Status
-            </a>
-          </div>
+        </div>
+
+        <div className='pt-6 font-mono text-[12px] tracking-wider uppercase text-ink-mute text-center'>
+          © 2026 commma · All rights reserved
         </div>
       </div>
     </footer>
