@@ -38,7 +38,7 @@ Each metric lists:
 | Aggregation lag                | not measured     | ≤~20 min       | `created_at − max(ts)` |
 | Ingest success (`202`/total)   | not measured     | ≥99.9%         | request logger         |
 | Server errors (`5xx`/total)    | not measured     | <0.1%          | logger / unhandled     |
-| Availability                   | not measured     | 99.5% (MVP)    | `/healthz` uptime      |
+| Availability                   | not measured     | 99.5% (MVP)    | `/health` uptime       |
 
 Read p95 routes: `/v1/me`, `/v1/sessions`, `/v1/sessions/:id`,
 `/v1/leaderboard`. Targets: <200 ms @ 100 concurrent (Phase 2 DoD); <150 ms @ 1k

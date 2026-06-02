@@ -41,7 +41,7 @@ export function createApp() {
     }),
   )
 
-  app.get('/healthz', (c) => c.json({ status: 'ok', ts: Date.now() }))
+  app.get('/health', (c) => c.json({ status: 'ok', ts: Date.now() }))
 
   app.route('/v1/auth', authRoutes)
   app.route('/v1/me', meRoutes)
