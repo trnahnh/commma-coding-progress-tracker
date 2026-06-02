@@ -204,12 +204,40 @@ Goal: production-safe. No known P0/P1 bugs. Published extension.
 
 ---
 
+## Pricing Model
+
+Free, Pro, and Team tiers ship at public launch (Phase 4). The free tier is
+intentionally generous — free users on the leaderboard are the primary
+conversion surface.
+
+| Tier | Price           | Features                                                                  |
+| ---- | --------------- | ------------------------------------------------------------------------- |
+| Free | $0              | Last 7 days of sessions · public profile · leaderboard                    |
+| Pro  | $5/mo or $50/yr | Full history · heatmap PNG export · private sessions · weekly recap email |
+| Team | Later           | Private team leaderboard · team aggregate stats                           |
+
+$50/yr ($4.17/mo) is a 17% annual discount.
+
+Conversion pressure is built into the product: free users see Pro users with
+longer streaks and full history in the same leaderboard — no separate free vs
+paid views needed.
+
+---
+
 ## Phase 4 — Scale & Community (Weeks 7–10)
 
 Goal: growth mechanics live. First external contributors merged.
 
 ### Planned
 
+- [x] `/pricing` page — Free / Pro / Team tier comparison with monthly/annual
+      toggle; `Pricing` nav + footer links wired
+- [ ] Pro tier enforcement — 7-day session-history window for free accounts,
+      heatmap PNG export gate, private-session gate
+- [ ] Stripe integration — subscription billing for Pro; webhook handler to flip
+      `users.plan` on checkout and cancellation
+- [ ] Waitlist-to-paid conversion — replace the landing-page email-capture CTA
+      with an early-access purchase / waitlist join flow
 - [ ] Weekly recap email: session count, best session, streak, top lang
 - [ ] Style badges: Vim athlete, Mouse-free, Backspace heavy, Arrow navigator
 - [ ] Badge display on profile page
