@@ -105,7 +105,7 @@ const MOCK_TICKER: Pick<StreamEntry, 'who' | 'what' | 'em'>[] = [
 ]
 
 const CHART_DATE_LABELS = Array.from({ length: 8 }, (_, i) => {
-  const daysAgo = Math.round((7 - i) * 59 / 7)
+  const daysAgo = Math.round(((7 - i) * 59) / 7)
   return new Intl.DateTimeFormat(undefined, {
     month: 'short',
     day: 'numeric',
@@ -507,7 +507,9 @@ function Activity() {
               screenshot.
             </>
           }
-          aside={isLive ? 'rendered live · real data' : 'rendered live · sample data'}
+          aside={
+            isLive ? 'rendered live · real data' : 'rendered live · sample data'
+          }
         />
         <ActivityCard session={session} chart={chart} />
       </div>
@@ -810,6 +812,10 @@ function BackToTop() {
 }
 
 export default function App() {
+  useEffect(() => {
+    document.title = 'commma — every commit is a step'
+  }, [])
+
   return (
     <div className='min-h-screen flex flex-col'>
       <Nav />

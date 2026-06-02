@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Shell } from '../components/chrome'
 
@@ -49,6 +49,10 @@ function FeatureList({ features }: { features: string[] }) {
 
 export default function Pricing() {
   const [annual, setAnnual] = useState(false)
+
+  useEffect(() => {
+    document.title = 'Pricing · commma'
+  }, [])
 
   return (
     <Shell>

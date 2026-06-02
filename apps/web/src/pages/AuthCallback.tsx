@@ -11,6 +11,10 @@ export default function AuthCallback() {
   const ran = useRef(false)
 
   useEffect(() => {
+    document.title = 'Signing in · commma'
+  }, [])
+
+  useEffect(() => {
     if (ran.current) return
     ran.current = true
 
