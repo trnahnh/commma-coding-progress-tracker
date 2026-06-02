@@ -112,11 +112,11 @@ export default function Pricing() {
                   forever
                 </span>
               </div>
-              <p className='font-mono text-[14px] mt-1 m-0 invisible'>
-                &nbsp;
-              </p>
               <p className='font-mono text-[14px] text-ink-mute mt-2.5 m-0'>
                 Everything you need to start.
+              </p>
+              <p className='font-mono text-[14px] mt-1 m-0 invisible'>
+                &nbsp;
               </p>
             </div>
             <FeatureList features={FEATURES_FREE} />
