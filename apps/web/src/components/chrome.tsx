@@ -84,6 +84,7 @@ export function Nav() {
               { label: 'Activity', to: '/' },
               { label: 'Feed', to: '/feed' },
               { label: 'Leaderboard', to: '/leaderboard' },
+              { label: 'Pricing', to: '/pricing' },
             ].map(({ label, to }) => (
               <Link
                 key={label}
@@ -151,6 +152,9 @@ export function Footer() {
             </Link>
             <Link to='/leaderboard' className='hover:text-ink'>
               Leaderboard
+            </Link>
+            <Link to='/pricing' className='hover:text-ink'>
+              Pricing
             </Link>
           </div>
           <div className='md:text-center'>
