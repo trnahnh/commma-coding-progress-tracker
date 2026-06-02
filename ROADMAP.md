@@ -232,15 +232,18 @@ Goal: growth mechanics live. First external contributors merged.
 
 - [x] `/pricing` page — Free / Pro / Team tier comparison with monthly/annual
       toggle; `Pricing` nav + footer links wired
-- [ ] Pro tier enforcement — 7-day session-history window for free accounts,
-      heatmap PNG export gate, private-session gate
+- [x] Pro tier enforcement — 7-day session-history window for free accounts,
+      heatmap PNG export gate (`isPro` prop on `KeyboardHeatmap`), session
+      history gate on own free-plan profile; `MeResult.plan` field added
 - [ ] Stripe integration — subscription billing for Pro; webhook handler to flip
       `users.plan` on checkout and cancellation
-- [ ] Waitlist-to-paid conversion — replace the landing-page email-capture CTA
-      with an early-access purchase / waitlist join flow
+- [x] Waitlist-to-paid conversion — landing-page email-capture CTA replaced with
+      two-button row: Get early access (→ /pricing) + Install free (→
+      marketplace); all `href='#'` removed site-wide
 - [ ] Weekly recap email: session count, best session, streak, top lang
-- [ ] Style badges: Vim athlete, Mouse-free, Backspace heavy, Arrow navigator
-- [ ] Badge display on profile page
+- [x] Style badges: Vim athlete, Mouse-free, Backspace heavy, Arrow navigator —
+      defined in `BadgeRow` (Profile.tsx); earned=accent-2, unearned=dim
+- [x] Badge display on profile page
 - [ ] Team model: create team, invite members, team role
 - [ ] Private team leaderboard
 - [ ] Team aggregate heatmap visualization
