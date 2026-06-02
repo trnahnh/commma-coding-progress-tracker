@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 
@@ -81,10 +81,12 @@ function NavActions() {
 export function Nav() {
   const { pathname } = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [lastPathname, setLastPathname] = useState(pathname)
 
-  useEffect(() => {
+  if (lastPathname !== pathname) {
+    setLastPathname(pathname)
     setMobileOpen(false)
-  }, [pathname])
+  }
 
   const homeClick = (e: React.MouseEvent) => {
     if (pathname === '/') {
