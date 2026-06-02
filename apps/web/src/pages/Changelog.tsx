@@ -11,7 +11,7 @@ const ENTRIES = [
       'PNG export gated behind Pro plan',
       'Badge display on profile (Vim athlete, Mouse-free, Backspace heavy, Arrow navigator)',
       'Landing page wired to live session, chart, and activity data',
-      'Pro and Free tier pricing page',
+      'Free / Pro ($5/mo) / Team ($20/mo, up to 5) pricing page',
     ],
   },
   {

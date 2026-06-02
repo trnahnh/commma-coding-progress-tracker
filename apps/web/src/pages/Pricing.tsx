@@ -174,12 +174,20 @@ export default function Pricing() {
             </span>
             <div className='mb-7'>
               <div className='flex items-baseline gap-1.5'>
-                <span className='font-serif text-[clamp(36px,4vw,52px)] leading-none tracking-[-0.04em] text-ink-mute'>
-                  Later
+                <span className='font-serif text-[clamp(44px,5vw,64px)] leading-none tracking-[-0.04em] text-ink tnum'>
+                  {annual ? '$200' : '$20'}
+                </span>
+                <span className='font-mono text-[14px] text-ink-mute'>
+                  {annual ? '/ year' : '/ month'}
                 </span>
               </div>
+              {annual && (
+                <p className='font-mono text-[14px] text-live mt-1 m-0'>
+                  $16.67 / month · save $40
+                </p>
+              )}
               <p className='font-mono text-[14px] text-ink-mute mt-2.5 m-0'>
-                Compete as a crew.
+                Up to 5 members. Compete as a crew.
               </p>
             </div>
             <FeatureList features={FEATURES_TEAM} />

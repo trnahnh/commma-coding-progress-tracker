@@ -210,13 +210,14 @@ Free, Pro, and Team tiers ship at public launch (Phase 4). The free tier is
 intentionally generous — free users on the leaderboard are the primary
 conversion surface.
 
-| Tier | Price           | Features                                                                  |
-| ---- | --------------- | ------------------------------------------------------------------------- |
-| Free | $0              | Last 7 days of sessions · public profile · leaderboard                    |
-| Pro  | $5/mo or $50/yr | Full history · heatmap PNG export · private sessions · weekly recap email |
-| Team | Later           | Private team leaderboard · team aggregate stats                           |
+| Tier | Price             | Features                                                                  |
+| ---- | ----------------- | ------------------------------------------------------------------------- |
+| Free | $0                | Last 7 days of sessions · public profile · leaderboard                    |
+| Pro  | $5/mo or $50/yr   | Full history · heatmap PNG export · private sessions · weekly recap email |
+| Team | $20/mo or $200/yr | Up to 5 members · private team leaderboard · team aggregate stats         |
 
-$50/yr ($4.17/mo) is a 17% annual discount.
+$50/yr ($4.17/mo) is a 17% annual discount for Pro. $200/yr ($16.67/mo) is a 17%
+annual discount for Team, saving $40 versus monthly.
 
 Conversion pressure is built into the product: free users see Pro users with
 longer streaks and full history in the same leaderboard — no separate free vs
