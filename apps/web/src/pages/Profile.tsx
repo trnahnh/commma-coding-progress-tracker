@@ -5,11 +5,44 @@ import {
   ApiError,
   getProfile,
   getProfileSessions,
+  type Badge,
   type SessionSummary,
   type UserProfile,
 } from '../lib/api'
+import { useAuth } from '../lib/auth'
 import { formatClock, formatDate, formatDuration } from '../lib/format'
 import { langStyle } from '../lib/langColors'
+
+const BADGE_CATALOG = [
+  { id: 'vim-athlete', label: 'Vim athlete' },
+  { id: 'mouse-free', label: 'Mouse-free' },
+  { id: 'backspace-heavy', label: 'Backspace heavy' },
+  { id: 'arrow-navigator', label: 'Arrow navigator' },
+] as const
+
+function BadgeRow({ badges }: { badges: Badge[] }) {
+  const earnedIds = new Set(badges.map((b) => b.id))
+  return (
+    <div className='mt-4 flex flex-wrap gap-2'>
+      {BADGE_CATALOG.map(({ id, label }) => {
+        const earned = earnedIds.has(id)
+        return (
+          <span
+            key={id}
+            className={[
+              'inline-flex items-center h-[28px] px-3 rounded-full font-mono text-[11px] uppercase tracking-wider border',
+              earned
+                ? 'text-accent-2 border-accent-2-line bg-accent-2-soft'
+                : 'text-ink-faint border-rule opacity-25 select-none',
+            ].join(' ')}
+          >
+            {label}
+          </span>
+        )
+      })}
+    </div>
+  )
+}
 
 function ProfileHero({ profile }: { profile: UserProfile }) {
   const { handle, avatar_url, streak, stats } = profile
@@ -160,11 +193,13 @@ function SessionFeed({
   nextCursor,
   onLoadMore,
   loadingMore,
+  showHistoryGate,
 }: {
   sessions: SessionSummary[]
   nextCursor: string | null
   onLoadMore: () => void
   loadingMore: boolean
+  showHistoryGate: boolean
 }) {
   return (
     <div className='border border-rule-strong rounded overflow-hidden mt-6'>
@@ -198,6 +233,22 @@ function SessionFeed({
               </button>
             </div>
           )}
+          {showHistoryGate && (
+            <div className='border-t border-rule px-5 sm:px-8 py-5 text-center bg-paper-2/40'>
+              <p className='font-mono text-[12px] text-ink-mute m-0 mb-3'>
+                Free plan · last 7 days of sessions
+              </p>
+              <Link
+                to='/pricing'
+                className='group inline-flex items-center gap-2 font-mono text-[12px] uppercase tracking-wider text-ink-soft hover:text-ink transition-colors'
+              >
+                Upgrade for full history
+                <span className='inline-block transition-transform group-hover:translate-x-0.5'>
+                  →
+                </span>
+              </Link>
+            </div>
+          )}
         </>
       )}
     </div>
@@ -216,6 +267,7 @@ type LoadState =
 
 export default function Profile() {
   const { handle = '' } = useParams<{ handle: string }>()
+  const { user } = useAuth()
   const [state, setState] = useState<LoadState>({ phase: 'loading' })
   const [trackedHandle, setTrackedHandle] = useState(handle)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -345,14 +397,19 @@ export default function Profile() {
   }
 
   const { profile, sessions, nextCursor } = state
+  const isOwnProfile = user?.handle === handle
+  const isFree = !user?.plan || user.plan === 'free'
+  const showHistoryGate = isOwnProfile && isFree
   return (
     <Shell>
       <ProfileHero profile={profile} />
+      <BadgeRow badges={profile.badges} />
       <SessionFeed
         sessions={sessions}
         nextCursor={nextCursor}
         onLoadMore={loadMore}
         loadingMore={loadingMore}
+        showHistoryGate={showHistoryGate}
       />
     </Shell>
   )

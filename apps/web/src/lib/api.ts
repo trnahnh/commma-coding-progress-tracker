@@ -101,13 +101,20 @@ export interface UserStats {
   top_lang: string | null
 }
 
+export interface Badge {
+  id: string
+  name: string
+  description: string
+  earned_at: string
+}
+
 export interface UserProfile {
   handle: string
   avatar_url: string
   created_at: string
   streak: UserStreak
   stats: UserStats
-  badges: never[]
+  badges: Badge[]
 }
 
 export interface AuthUser {
@@ -131,6 +138,7 @@ export interface RefreshResult {
 export interface MeResult extends AuthUser {
   privacy: string
   created_at: string
+  plan?: 'free' | 'pro' | 'team'
   streak: {
     current_days: number
     longest_days: number

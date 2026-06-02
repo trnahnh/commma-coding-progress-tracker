@@ -11,6 +11,7 @@ import {
   type SessionFile,
   type SessionLang,
 } from '../lib/api'
+import { useAuth } from '../lib/auth'
 import { formatClock, formatDate, formatDuration } from '../lib/format'
 import { langStyle } from '../lib/langColors'
 
@@ -176,9 +177,11 @@ function HeatmapHeader() {
 function HeatmapSlot({
   heatmap,
   sessionLabel,
+  isPro,
 }: {
   heatmap: KeyboardHeatmap | null
   sessionLabel: string
+  isPro: boolean
 }) {
   if (heatmap == null || heatmap.total === 0) {
     return (
@@ -232,12 +235,18 @@ function HeatmapSlot({
           </span>
         )}
       </p>
-      <KeyboardHeatmapCanvas heatmap={heatmap} sessionLabel={sessionLabel} />
+      <KeyboardHeatmapCanvas heatmap={heatmap} sessionLabel={sessionLabel} isPro={isPro} />
     </div>
   )
 }
 
-function SessionCard({ session }: { session: Session }) {
+function SessionCard({
+  session,
+  isPro,
+}: {
+  session: Session
+  isPro: boolean
+}) {
   return (
     <div className='relative border border-rule-strong bg-linear-to-b from-paper-2 to-paper rounded overflow-hidden'>
       <div className='px-5 sm:px-8 py-6 sm:py-7 border-b border-rule'>
@@ -275,6 +284,7 @@ function SessionCard({ session }: { session: Session }) {
       <HeatmapSlot
         heatmap={session.keyboard_heatmap}
         sessionLabel={formatDate(session.started_at)}
+        isPro={isPro}
       />
     </div>
   )
@@ -287,6 +297,8 @@ type LoadState =
 
 export default function SessionDetail() {
   const { id = '' } = useParams()
+  const { user } = useAuth()
+  const isPro = user?.plan === 'pro' || user?.plan === 'team'
   const [state, setState] = useState<LoadState>({ phase: 'loading' })
   const [trackedId, setTrackedId] = useState(id)
 
@@ -391,7 +403,7 @@ export default function SessionDetail() {
   return (
     <Shell>
       <BackLink />
-      <SessionCard session={state.session} />
+      <SessionCard session={state.session} isPro={isPro} />
     </Shell>
   )
 }

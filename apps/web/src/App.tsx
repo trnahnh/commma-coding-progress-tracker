@@ -726,27 +726,27 @@ function Final() {
         <h2 className='font-serif font-normal text-[clamp(44px,9vw,140px)] leading-[0.95] tracking-[-0.035em] m-0 mb-10 mx-auto max-w-[14ch] text-ink'>
           Stop coding into the <em className='italic text-accent'>void.</em>
         </h2>
-        <form
-          onSubmit={(e) => e.preventDefault()}
-          className='flex items-center gap-2 border border-rule-strong rounded-full p-1.5 pl-5 sm:pl-6 bg-paper-2 w-full max-w-[440px] mx-auto'
-        >
-          <input
-            type='email'
-            placeholder='you@dev.local'
-            className='flex-1 min-w-0 bg-transparent border-0 outline-none text-ink font-mono text-[15px] py-3'
-          />
-          <button
-            type='submit'
-            className='group shrink-0 inline-flex items-center gap-2.5 h-[42px] px-4 sm:px-5 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors'
+        <div className='flex flex-col sm:flex-row items-center justify-center gap-3'>
+          <Link
+            to='/pricing'
+            className='group inline-flex items-center gap-2.5 h-[52px] px-8 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors'
           >
-            <span className='hidden sm:inline'>Request access</span>
-            <span className='sm:hidden'>Join</span>
+            Get early access
             <span className='inline-block transition-transform group-hover:translate-x-1'>
               →
             </span>
-          </button>
-        </form>
-        <p className='font-mono text-[15px] tracking-wider uppercase text-ink-mute mt-6'>
+          </Link>
+          <a
+            href='https://marketplace.visualstudio.com'
+            className='group inline-flex items-center gap-2.5 h-[52px] px-8 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint transition-colors'
+          >
+            Install free
+            <span className='inline-block transition-transform group-hover:translate-x-1'>
+              →
+            </span>
+          </a>
+        </div>
+        <p className='font-mono text-[15px] tracking-wider uppercase text-ink-mute mt-8'>
           free during early access · no card · leave anytime
         </p>
       </div>

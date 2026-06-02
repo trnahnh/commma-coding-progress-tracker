@@ -1,4 +1,5 @@
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   KEYBOARD_LAYOUTS,
   type KeyboardLayout,
@@ -109,11 +110,13 @@ function drawHeatmap(
 interface KeyboardHeatmapProps {
   heatmap: Heatmap
   sessionLabel?: string
+  isPro?: boolean
 }
 
 export default function KeyboardHeatmap({
   heatmap,
   sessionLabel,
+  isPro,
 }: KeyboardHeatmapProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [layoutName, setLayoutName] = useState<LayoutName>('qwerty')
@@ -192,24 +195,41 @@ export default function KeyboardHeatmap({
           style={{ width: '100%', height: 'auto', maxWidth: `${logicalW}px` }}
         />
       </div>
-      <div className='mt-4 flex items-center justify-end gap-2'>
-        <span className='font-mono text-[10px] uppercase tracking-wider text-ink-faint'>
-          Export
-        </span>
-        {PRESETS.map(({ label, w, h }) => (
-          <button
-            key={label}
-            type='button'
-            onClick={() => exportPreset(w, h, label)}
-            className='group inline-flex items-center gap-1.5 h-[32px] px-3 rounded-full font-mono text-[11px] uppercase tracking-wider text-ink-soft border border-rule-strong hover:text-paper hover:bg-accent hover:border-accent transition-colors'
+      {isPro ? (
+        <div className='mt-4 flex items-center justify-end gap-2'>
+          <span className='font-mono text-[10px] uppercase tracking-wider text-ink-faint'>
+            Export
+          </span>
+          {PRESETS.map(({ label, w, h }) => (
+            <button
+              key={label}
+              type='button'
+              onClick={() => exportPreset(w, h, label)}
+              className='group inline-flex items-center gap-1.5 h-[32px] px-3 rounded-full font-mono text-[11px] uppercase tracking-wider text-ink-soft border border-rule-strong hover:text-paper hover:bg-accent hover:border-accent transition-colors'
+            >
+              {label}
+              <span className='inline-block transition-transform group-hover:translate-y-0.5'>
+                ↓
+              </span>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div className='mt-4 flex items-center justify-end'>
+          <Link
+            to='/pricing'
+            className='group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-ink-mute hover:text-ink transition-colors'
           >
-            {label}
-            <span className='inline-block transition-transform group-hover:translate-y-0.5'>
-              ↓
+            PNG export
+            <span className='font-mono text-[10px] tracking-[0.18em] uppercase text-accent-2 border border-accent-2-line bg-accent-2-soft px-2 py-0.5 rounded-full'>
+              Pro
             </span>
-          </button>
-        ))}
-      </div>
+            <span className='inline-block transition-transform group-hover:translate-x-0.5'>
+              →
+            </span>
+          </Link>
+        </div>
+      )}
     </div>
   )
 }
