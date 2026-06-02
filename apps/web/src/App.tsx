@@ -175,7 +175,7 @@ function Hero() {
             </p>
             <div className='flex gap-3 items-center flex-wrap opacity-0 animate-rise-700 delay-640'>
               <a
-                href='#'
+                href='https://marketplace.visualstudio.com'
                 className='group inline-flex items-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium
                   bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors'
               >
@@ -184,13 +184,13 @@ function Hero() {
                   →
                 </span>
               </a>
-              <a
-                href='#'
+              <Link
+                to='/leaderboard'
                 className='inline-flex items-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[15px] uppercase tracking-wider
                   text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint transition-colors'
               >
                 See a sample profile
-              </a>
+              </Link>
             </div>
           </div>
 
