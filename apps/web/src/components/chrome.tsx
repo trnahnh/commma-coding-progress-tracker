@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 
 const NAV_LINKS = [
@@ -80,6 +80,7 @@ function NavActions() {
 
 export function Nav() {
   const { pathname } = useLocation()
+  const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [lastPathname, setLastPathname] = useState(pathname)
 
@@ -89,9 +90,11 @@ export function Nav() {
   }
 
   const homeClick = (e: React.MouseEvent) => {
+    e.preventDefault()
     if (pathname === '/') {
-      e.preventDefault()
       window.scrollTo({ top: 0, behavior: 'smooth' })
+    } else {
+      navigate('/')
     }
   }
 
@@ -238,7 +241,7 @@ export function Footer() {
   return (
     <footer className='border-t border-rule pt-14 pb-8'>
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
-        <div className='font-serif text-[clamp(52px,16vw,440px)] leading-[0.78] tracking-[-0.06em] text-ink m-0 mb-12'>
+        <div className='font-serif text-[clamp(52px,16vw,440px)] leading-[0.78] tracking-[-0.06em] text-ink m-0 mb-12 text-center'>
           commma<span className='text-accent'>.</span>
         </div>
 

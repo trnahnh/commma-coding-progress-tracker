@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Shell } from '../components/chrome'
 
 const FEATURES_FREE = [
@@ -152,15 +153,15 @@ export default function Pricing() {
               </p>
             </div>
             <FeatureList features={FEATURES_PRO} />
-            <a
-              href='#'
+            <Link
+              to='/signin'
               className='group inline-flex items-center justify-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors bg-accent text-paper border border-accent hover:bg-ink hover:border-ink'
             >
               Get early access
               <span className='inline-block transition-transform group-hover:translate-x-1'>
                 →
               </span>
-            </a>
+            </Link>
           </div>
 
           <div className='relative flex flex-col px-6 sm:px-8 pt-8 sm:pt-10 pb-8 sm:pb-10 bg-paper'>
@@ -178,15 +179,15 @@ export default function Pricing() {
               </p>
             </div>
             <FeatureList features={FEATURES_TEAM} />
-            <a
-              href='#'
+            <Link
+              to='/contact'
               className='group inline-flex items-center justify-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint'
             >
               Join waitlist
               <span className='inline-block transition-transform group-hover:translate-x-1'>
                 →
               </span>
-            </a>
+            </Link>
           </div>
         </div>
 
