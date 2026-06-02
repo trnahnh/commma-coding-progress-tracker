@@ -657,15 +657,17 @@ function Final() {
 
 export default function App() {
   return (
-    <>
+    <div className='min-h-screen flex flex-col'>
       <Nav />
-      <Hero />
-      <Ticker />
-      <Activity />
-      <HowItWorks />
-      <Leaderboard />
-      <Final />
+      <main className='flex-1'>
+        <Hero />
+        <Ticker />
+        <Activity />
+        <HowItWorks />
+        <Leaderboard />
+        <Final />
+      </main>
       <Footer />
-    </>
+    </div>
   )
 }
