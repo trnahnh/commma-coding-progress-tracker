@@ -11,6 +11,27 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Web** — `/terms` page: Terms of Service with seven sections (acceptance,
+  data collected, data ownership, acceptable use, availability, changes,
+  contact). Linked from footer Legal column.
+- **Web** — `/changelog` page: versioned release history (v0.1–v0.3) styled with
+  accent-2 version badge chips and dash-separated change lists.
+- **Web** — Pro tier enforcement (frontend soft gates): `KeyboardHeatmap`
+  accepts `isPro?: boolean`; free/unauthenticated users see a "PNG export Pro →"
+  upgrade chip linking to `/pricing` instead of the three preset export buttons.
+  `MeResult` gains an optional `plan?: 'free'|'pro'|'team'` field;
+  `UserProfile.badges` typed as `Badge[]` (was `never[]`).
+- **Web** — Badge display on profile: `BadgeRow` component renders all four
+  Phase 4 badge types (vim-athlete, mouse-free, backspace-heavy,
+  arrow-navigator) below the stat grid. Earned badges render in accent-2
+  (cream); unearned badges are shown at 25% opacity as aspirational targets.
+- **Web** — Session history gate on Profile: free-plan users viewing their own
+  profile see a "Free plan · last 7 days" callout with an upgrade link at the
+  bottom of the session feed.
+- **Web** — OG meta fallbacks in `index.html`: `og:type`, `og:site_name`,
+  `og:title`, `og:description`, `twitter:card`, `twitter:title`,
+  `twitter:description` set as static defaults; dynamic pages (Profile,
+  SessionDetail) continue to override them per-route.
 - **Shared + Web** — Dvorak and Colemak keyboard layouts: `DVORAK_LAYOUT`,
   `COLEMAK_LAYOUT`, `KEYBOARD_LAYOUTS` record, and `LayoutName` type exported
   from `@commma/shared`. The session-detail keyboard heatmap gains a QWERTY /
@@ -42,6 +63,24 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
+- **Web** — Landing page CTA: non-functional email-capture form replaced with a
+  two-button row — "Get early access" (accent, links to `/pricing`) and "Install
+  free" (outline, links to VSCode Marketplace). All `href='#'` placeholders
+  removed site-wide; former stub CTAs now route to `/signin`, `/contact`, or
+  `/leaderboard`.
+- **Web** — Nav wordmark now uses `useNavigate` and always calls
+  `e.preventDefault()`: from any sub-page it routes cleanly to `/`; from `/` it
+  smooth-scrolls to top without adding a `#` fragment.
+- **Web** — Footer column layout switched from `grid-cols-2 sm:grid-cols-3` to
+  `flex flex-wrap justify-center` so the three columns remain evenly centred on
+  mobile instead of orphaning the Legal column bottom-left. Footer wordmark
+  (`commma.`) centred with `text-center`.
+- **Web** — Footer columns updated: Changelog added to Product; Terms added to
+  Legal; 404 retained in Legal.
+- **Web** — Tab titles aligned: landing page sets
+  `commma — every commit is a step` (was falling back to the HTML default
+  "commma — pace your code"); Pricing sets `Pricing · commma`; AuthCallback sets
+  `Signing in · commma`. `index.html` title updated to match.
 - **Web** — Text sizes bumped across all pages for readability: 10 px→11, 10.5
   px→12, 11 px→12, 12 px→13, 12.5 px→14, 13 px→14 px. Covers App, chrome, Feed,
   Leaderboard, Pricing, Profile, SessionDetail, SignIn, and all new footer
