@@ -2,6 +2,10 @@
 
 Welcome. commma is an open-source project and we take contributions seriously.
 
+> **Security issues:** do not open a public issue or PR for a vulnerability —
+> including any regression of the no-keylogging privacy invariant. Report it
+> privately following [SECURITY.md](./SECURITY.md).
+
 ---
 
 ## Before You Start
@@ -16,10 +20,13 @@ Welcome. commma is an open-source project and we take contributions seriously.
 
 ### Find Something to Work On
 
-- Browse issues labelled **`good-first-issue`** — scoped, well-defined, safe to pick up without deep context
+- Browse issues labelled **`good-first-issue`** — scoped, well-defined, safe to
+  pick up without deep context
 - Browse **`feature`** or **`help-wanted`** for larger work
-- If you have an idea not covered by an existing issue, open one first and discuss before writing code
-- Assign yourself to an issue before starting so two people don't duplicate effort
+- If you have an idea not covered by an existing issue, open one first and
+  discuss before writing code
+- Assign yourself to an issue before starting so two people don't duplicate
+  effort
 
 ---
 
@@ -102,7 +109,8 @@ pnpm test        # all tests
 
 - Target branch: `main`
 - PR title must follow Conventional Commits format
-- Fill in the PR template fully — description, testing steps, screenshots if UI changes
+- Fill in the PR template fully — description, testing steps, screenshots if UI
+  changes
 - Link the issue it closes (`Closes #123` in the PR body)
 - One concern per PR — do not bundle unrelated changes
 
@@ -120,7 +128,8 @@ pnpm test        # all tests
 
 - A maintainer will review within 48 hours on weekdays
 - Address all review comments before requesting re-review
-- Do not force-push after a review has started — use new commits, squash at merge
+- Do not force-push after a review has started — use new commits, squash at
+  merge
 
 ### Merge
 
@@ -133,7 +142,8 @@ pnpm test        # all tests
 
 ### @commma/shared
 
-- Consumed by both the extension and the API — schema changes are breaking if they remove or rename fields
+- Consumed by both the extension and the API — schema changes are breaking if
+  they remove or rename fields
 - Keyboard layout configs live in `packages/shared/src/layouts/`
 
 ### @commma/api
@@ -141,23 +151,28 @@ pnpm test        # all tests
 - All new endpoints must have Zod validation on request body/params
 - Tests run on Vitest from the repo root (`pnpm test`); specs live in each
   package's `test/` tree (e.g. `apps/api/test/**`). Cover pure logic with unit
-  tests today; a route/integration harness (throwaway Postgres) is still pending,
-  so route behaviour is currently proven by live verification — see ROADMAP
-- Background jobs are in-process intervals gated by `RUN_AGGREGATION`: schedulers
-  live in `src/aggregate/` (aggregation, streak reset) and `src/maintenance/`
-  (token cleanup), started in `src/index.ts`
+  tests today; a route/integration harness (throwaway Postgres) is still
+  pending, so route behaviour is currently proven by live verification — see
+  ROADMAP
+- Background jobs are in-process intervals gated by `RUN_AGGREGATION`:
+  schedulers live in `src/aggregate/` (aggregation, streak reset) and
+  `src/maintenance/` (token cleanup), started in `src/index.ts`
 
 ### @commma/extension
 
 - **Hard rule:** never capture, log, or transmit key content — only key labels
-- New settings must be added to `package.json` `contributes.configuration` and documented in README
-- Test activation performance: the extension must not cause >50ms activation delay
+- New settings must be added to `package.json` `contributes.configuration` and
+  documented in README
+- Test activation performance: the extension must not cause >50ms activation
+  delay
 
 ### @commma/web
 
 - Components go in `src/components/`
-- The keyboard heatmap Canvas renderer lives in `src/components/KeyboardHeatmap/`
-- Design tokens are defined in `src/index.css` under `@theme` — do not hardcode colors
+- The keyboard heatmap Canvas renderer lives in
+  `src/components/KeyboardHeatmap/`
+- Design tokens are defined in `src/index.css` under `@theme` — do not hardcode
+  colors
 
 ### @commma/db
 
@@ -169,18 +184,18 @@ pnpm test        # all tests
 
 ## Issue Labels
 
-| Label | Meaning |
-| ------- | --------- |
-| `good-first-issue` | Scoped, safe for first-time contributors |
-| `help-wanted` | Maintainers want external help |
-| `feature` | New functionality |
-| `bug` | Something is broken |
-| `docs` | Documentation only |
-| `test` | Test coverage gap |
-| `chore` | Dependency updates, tooling |
-| `performance` | Latency or bundle size concern |
-| `security` | See SECURITY.md before commenting publicly |
-| `needs-discussion` | Design not settled; comment before coding |
+| Label              | Meaning                                    |
+| ------------------ | ------------------------------------------ |
+| `good-first-issue` | Scoped, safe for first-time contributors   |
+| `help-wanted`      | Maintainers want external help             |
+| `feature`          | New functionality                          |
+| `bug`              | Something is broken                        |
+| `docs`             | Documentation only                         |
+| `test`             | Test coverage gap                          |
+| `chore`            | Dependency updates, tooling                |
+| `performance`      | Latency or bundle size concern             |
+| `security`         | See SECURITY.md before commenting publicly |
+| `needs-discussion` | Design not settled; comment before coding  |
 
 ---
 
@@ -197,13 +212,16 @@ pnpm test        # all tests
 
 ## Recognition
 
-Every merged PR is credited in `CHANGELOG.md`. Contributors with 3+ merged PRs are listed on the commma.dev contributors page.
+Every merged PR is credited in `CHANGELOG.md`. Contributors with 3+ merged PRs
+are listed on the commma.dev contributors page.
 
 ---
 
 ## Code of Conduct
 
-This project follows the [Contributor Covenant](https://www.contributor-covenant.org/). Be direct, constructive, and kind.
+This project follows the
+[Contributor Covenant](https://www.contributor-covenant.org/). Be direct,
+constructive, and kind.
 
 ---
 

@@ -8,15 +8,18 @@ Version 1.0 · May 2026
 
 commma is a developer activity tracking platform with three parts:
 
-| Part | What it does |
-| ------ | ------------- |
+| Part                 | What it does                                                                                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **VSCode Extension** | Runs silently in your editor. Captures keystroke counts, active file, language, and key-frequency data. Ships heartbeat batches to the API every 60 seconds. |
-| **API** | Hono/Node server. Receives heartbeat batches, aggregates them into sessions, serves REST endpoints for the web app. |
-| **Web App** | React app. Shows session detail, keyboard heatmaps, streaks, leaderboards, and public profiles. |
+| **API**              | Hono/Node server. Receives heartbeat batches, aggregates them into sessions, serves REST endpoints for the web app.                                          |
+| **Web App**          | React app. Shows session detail, keyboard heatmaps, streaks, leaderboards, and public profiles.                                                              |
 
-The unique feature is the **keyboard heatmap** — a per-session visualization of which physical keys you pressed most, exported as a transparent PNG for sharing.
+The unique feature is the **keyboard heatmap** — a per-session visualization of
+which physical keys you pressed most, exported as a transparent PNG for sharing.
 
-Stack: TypeScript everywhere, PostgreSQL, Redis, Hono, React 19, Tailwind v4, Drizzle ORM, BullMQ.
+Stack: TypeScript everywhere, PostgreSQL, Redis, Hono, React 19, Tailwind v4,
+Drizzle ORM. Session aggregation runs as an in-process interval (ADR-010), not a
+job queue.
 
 ---
 
@@ -27,11 +30,13 @@ commma/
 ├── apps/
 │   ├── api/              Hono REST API
 │   │   └── src/
-│   │       ├── index.ts          server entry point
+│   │       ├── index.ts          server entry point + interval scheduler start
 │   │       ├── routes/           one file per route group
-│   │       ├── workers/          BullMQ background jobs
-│   │       ├── middleware/       auth, rate limiting, logging
-│   │       └── lib/              db client, redis client, logger
+│   │       ├── aggregate/        in-process session aggregation + streak jobs
+│   │       ├── maintenance/      in-process refresh-token cleanup job
+│   │       ├── middleware/       auth, rate limiting
+│   │       ├── db.ts redis.ts logger.ts   shared clients + structured logger
+│   │       └── lib/              jwt, refresh, cookies, errors, github, heatmapCard
 │   │
 │   ├── extension/        VSCode extension
 │   │   └── src/
@@ -53,8 +58,9 @@ commma/
 ├── packages/
 │   ├── shared/           Zod schemas, types, keyboard layout configs
 │   │   └── src/
-│   │       ├── schemas/
-│   │       └── layouts/          QWERTY, Dvorak, Colemak
+│   │       ├── heartbeat.ts      ingest/heartbeat Zod contract
+│   │       ├── keyLabels.ts      key-label set + schema
+│   │       └── keyboardLayout.ts QWERTY layout config
 │   │
 │   └── db/               Drizzle ORM schema + migrations
 │       └── src/
@@ -98,11 +104,14 @@ DATABASE_URL=postgresql://commma:commma@localhost:5432/commma
 REDIS_URL=redis://localhost:6379
 GITHUB_CLIENT_ID=<from github.com/settings/developers>
 GITHUB_CLIENT_SECRET=<from github.com/settings/developers>
+GITHUB_CALLBACK_URL=http://localhost:3000/v1/auth/github/callback
 JWT_SECRET=any-random-32-char-string-for-local-dev
 REFRESH_TOKEN_SECRET=another-random-32-char-string
+WEB_ORIGIN=http://localhost:5173
 ```
 
-To create a GitHub OAuth App: go to `github.com/settings/developers` → New OAuth App → set callback URL to `http://localhost:3000/v1/auth/github/callback`.
+To create a GitHub OAuth App: go to `github.com/settings/developers` → New OAuth
+App → set callback URL to `http://localhost:3000/v1/auth/github/callback`.
 
 ### 4. Run migrations
 
@@ -123,7 +132,8 @@ pnpm dev
 
 - `http://localhost:5173` — landing page
 - `http://localhost:3000` — API health check
-- In VSCode: press `F5` in the `apps/extension` folder to launch Extension Development Host
+- In VSCode: press `F5` in the `apps/extension` folder to launch Extension
+  Development Host
 
 ---
 
@@ -148,9 +158,11 @@ The atomic unit of data the extension sends:
 
 ### Session
 
-A continuous stretch of coding activity. Gap of ≥15 minutes with no events = session end, new session begins.
+A continuous stretch of coding activity. Gap of ≥15 minutes with no events =
+session end, new session begins.
 
-Key fields: `started_at`, `ended_at`, `duration_s`, `lines_delta`, `pace_cpm`, `peak_cpm`, `keyboard_heatmap`
+Key fields: `started_at`, `ended_at`, `duration_s`, `lines_delta`, `pace_cpm`,
+`peak_cpm`, `keyboard_heatmap`
 
 ### Keyboard Heatmap
 
@@ -158,43 +170,45 @@ Stored as JSONB on the sessions table:
 
 ```typescript
 {
-  counts: Record<string, number>   // raw count per key label
-  freq:   Record<string, number>   // relative frequency 0.0–1.0
-  total:  number                   // total keystrokes in session
+  counts: Record<string, number>; // raw count per key label
+  freq: Record<string, number>; // relative frequency 0.0–1.0
+  total: number; // total keystrokes in session
 }
 ```
 
-Rendered in the browser via Canvas API. Each key is a rounded rect colored on a 5-stop cold→hot gradient. Background is transparent. Output is PNG.
+Rendered in the browser via Canvas API. Each key is a rounded rect colored on a
+5-stop cold→hot gradient. Background is transparent. Output is PNG.
 
 ### Ingest → Aggregation Flow
 
 ```text
 Extension (every 60s)
   → POST /v1/ingest { events: HeartbeatEvent[] }
-  → API validates, writes to events table, enqueues BullMQ job
-  → Worker: boundary detection → session upsert → streak update → Redis leaderboard ZADD
+  → API validates, writes to events table, returns 202 Accepted
+  → In-process interval (every 5 min): boundary detection → session insert →
+    streak update → Redis leaderboard ZINCRBY → delete finalized events
 ```
 
 ### Privacy Modes
 
-| Mode | What is sent |
-| ------ | ------------- |
-| `full` | All fields including file paths and `key_freq` |
+| Mode      | What is sent                                              |
+| --------- | --------------------------------------------------------- |
+| `full`    | All fields including file paths and `key_freq`            |
 | `summary` | Duration, keystrokes, lines only — no file, no `key_freq` |
-| `off` | Nothing — extension is silent |
+| `off`     | Nothing — extension is silent                             |
 
 ---
 
 ## Key Files to Read First
 
-| Area | Files |
-| ------ | ------- |
-| Extension tracking | `apps/extension/src/tracker.ts`, `keyCounter.ts` |
-| Ingest pipeline | `apps/api/src/routes/ingest.ts`, `apps/api/src/workers/sessionAggregation.ts` |
-| Session data | `packages/db/src/schema.ts` |
-| Heatmap rendering | `apps/web/src/components/KeyboardHeatmap/` |
-| Auth | `apps/api/src/middleware/auth.ts`, `apps/extension/src/auth.ts` |
-| Shared schemas | `packages/shared/src/schemas/` |
+| Area               | Files                                                            |
+| ------------------ | ---------------------------------------------------------------- |
+| Extension tracking | `apps/extension/src/tracker.ts`, `keyCounter.ts`                 |
+| Ingest pipeline    | `apps/api/src/routes/ingest.ts`, `apps/api/src/aggregate/run.ts` |
+| Session data       | `packages/db/src/schema.ts`                                      |
+| Heatmap rendering  | `apps/web/src/components/KeyboardHeatmap.tsx`                    |
+| Auth               | `apps/api/src/middleware/auth.ts`, `apps/extension/src/auth.ts`  |
+| Shared schemas     | `packages/shared/src/heartbeat.ts`                               |
 
 ---
 
@@ -206,7 +220,15 @@ pnpm test --filter @commma/api     # API only
 pnpm test --filter @commma/shared  # shared schema tests only
 ```
 
-Tests use Vitest. API integration tests spin up a test database using the same migrations as production.
+Tests use Vitest and run from the repo root. Pure-logic unit tests (aggregator,
+key counter, shared schema, extension offline queue) always run. The API
+route/integration suite under `apps/api/test/routes/` runs against a real
+Postgres + Redis only when `TEST_DATABASE_URL` is set (point it at a throwaway
+database, never production) and skips cleanly otherwise:
+
+```bash
+TEST_DATABASE_URL=postgresql://commma:commma@localhost:5432/commma pnpm test
+```
 
 ---
 
@@ -226,9 +248,10 @@ Run both before every push. CI will fail if either has errors.
 ### Add a new API endpoint
 
 1. Create or extend a file in `apps/api/src/routes/`
-2. Add Zod validation for request body/params
-3. Register the route in `apps/api/src/index.ts`
-4. Write an integration test in `apps/api/src/routes/__tests__/`
+2. Add Zod validation for request body/params (use the `apiError` helper for
+   error responses so the structured error shape stays consistent)
+3. Register the route in `apps/api/src/app.ts`
+4. Add a route test in `apps/api/test/routes/` (see `integration.test.ts`)
 5. Add the endpoint to `SYSTEM_DESIGN.md` route table
 
 ### Add a new shared schema
