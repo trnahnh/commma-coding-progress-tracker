@@ -17,40 +17,40 @@ function FeedCard({ entry }: { entry: FeedEntry }) {
       tabIndex={0}
       onClick={() => navigate(`/sessions/${id}`)}
       onKeyDown={(e) => e.key === 'Enter' && navigate(`/sessions/${id}`)}
-      className='group cursor-pointer border-b border-rule last:border-b-0 px-5 sm:px-8 py-4 sm:py-5 hover:bg-paper-2/40 transition-colors'
+      className='group cursor-pointer border-b border-rule last:border-b-0 px-5 sm:px-8 py-5 sm:py-6 hover:bg-paper-2/40 transition-colors'
     >
-      <div className='flex items-center gap-2.5 mb-3'>
+      <div className='flex items-center gap-3 mb-3.5'>
         {user.avatar_url ? (
           <img
             src={user.avatar_url}
             alt={user.handle}
-            width={24}
-            height={24}
-            className='w-6 h-6 rounded-full border border-rule object-cover shrink-0'
+            width={32}
+            height={32}
+            className='w-8 h-8 rounded-full border border-rule object-cover shrink-0'
           />
         ) : (
-          <span className='w-6 h-6 rounded-full border border-rule bg-paper-3 shrink-0' />
+          <span className='w-8 h-8 rounded-full border border-rule bg-paper-3 shrink-0' />
         )}
         <Link
           to={`/@${user.handle}`}
           onClick={(e) => e.stopPropagation()}
-          className='relative z-10 font-serif text-[14px] leading-none tracking-[-0.01em] text-ink hover:text-accent transition-colors'
+          className='relative z-10 font-serif text-[16px] leading-none tracking-[-0.01em] text-ink hover:text-accent transition-colors'
         >
           @{user.handle}
         </Link>
-        <span className='text-ink-faint text-[11px]'>·</span>
-        <span className='font-mono text-[11px] text-ink-mute tnum'>
+        <span className='text-ink-faint text-[12px]'>·</span>
+        <span className='font-mono text-[12px] text-ink-mute tnum'>
           {formatDate(started_at)}
           <span className='mx-1.5 text-ink-faint'>·</span>
           {formatClock(started_at)}
         </span>
       </div>
-      <div className='flex flex-wrap items-center gap-x-5 gap-y-1.5'>
-        <span className='font-mono text-[13px] font-medium text-ink tnum'>
+      <div className='flex flex-wrap items-center gap-x-5 gap-y-2'>
+        <span className='font-mono text-[15px] font-medium text-ink tnum'>
           {formatDuration(duration_s)}
         </span>
         {style && (
-          <span className='flex items-center gap-1.5 font-mono text-[12px] text-ink-soft'>
+          <span className='flex items-center gap-1.5 font-mono text-[13px] text-ink-soft'>
             <span
               className='w-2 h-2 rounded-sm'
               style={{ background: style.color }}
@@ -58,10 +58,10 @@ function FeedCard({ entry }: { entry: FeedEntry }) {
             {style.label}
           </span>
         )}
-        <span className='font-mono text-[12px] text-ink-mute tnum'>
+        <span className='font-mono text-[13px] text-ink-mute tnum'>
           {lines_delta.toLocaleString()}∆
         </span>
-        <span className='ml-auto font-mono text-[12px] text-ink-faint group-hover:text-ink-soft group-hover:translate-x-0.5 transition-all'>
+        <span className='ml-auto font-mono text-[13px] text-ink-faint group-hover:text-ink-soft group-hover:translate-x-0.5 transition-all'>
           →
         </span>
       </div>

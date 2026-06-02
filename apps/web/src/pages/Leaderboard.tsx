@@ -31,7 +31,7 @@ function PeriodTabs({
           key={value}
           type='button'
           onClick={() => onChange(value)}
-          className={`h-[30px] px-3 rounded-full font-mono text-[11px] uppercase tracking-wider border transition-colors ${
+          className={`h-[34px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider border transition-colors ${
             active === value
               ? 'bg-accent border-accent text-paper'
               : 'border-rule-strong text-ink-mute hover:text-ink hover:border-rule-strong'
@@ -53,7 +53,7 @@ function RankBadge({ rank }: { rank: number }) {
         : 'text-ink-faint'
   return (
     <span
-      className={`font-mono text-[13px] tnum w-6 text-right shrink-0 ${cls}`}
+      className={`font-mono text-[14px] tnum w-7 text-right shrink-0 ${cls}`}
     >
       {rank}
     </span>
@@ -64,28 +64,28 @@ function EntryRow({ entry }: { entry: LeaderboardEntry }) {
   const { rank, handle, avatar_url, duration_s, top_lang, streak_days } = entry
   const style = top_lang ? langStyle(top_lang) : null
   return (
-    <div className='flex items-center gap-3 sm:gap-4 px-5 sm:px-8 py-3 sm:py-3.5 border-b border-rule last:border-b-0 hover:bg-paper-2/40 transition-colors'>
+    <div className='flex items-center gap-3 sm:gap-4 px-5 sm:px-8 py-4 sm:py-5 border-b border-rule last:border-b-0 hover:bg-paper-2/40 transition-colors'>
       <RankBadge rank={rank} />
       {avatar_url ? (
         <img
           src={avatar_url}
           alt={handle}
-          width={28}
-          height={28}
-          className='w-7 h-7 rounded-full border border-rule object-cover shrink-0'
+          width={32}
+          height={32}
+          className='w-8 h-8 rounded-full border border-rule object-cover shrink-0'
         />
       ) : (
-        <span className='w-7 h-7 rounded-full border border-rule bg-paper-3 shrink-0' />
+        <span className='w-8 h-8 rounded-full border border-rule bg-paper-3 shrink-0' />
       )}
       <Link
         to={`/@${handle}`}
-        className='min-w-0 flex-1 font-serif text-[clamp(15px,2vw,18px)] leading-none tracking-[-0.01em] text-ink hover:text-accent transition-colors truncate'
+        className='min-w-0 flex-1 font-serif text-[clamp(16px,2vw,20px)] leading-none tracking-[-0.01em] text-ink hover:text-accent transition-colors truncate'
       >
         @{handle}
       </Link>
       <div className='hidden sm:flex items-center gap-5 shrink-0'>
         {style && (
-          <span className='flex items-center gap-1.5 font-mono text-[12px] text-ink-soft'>
+          <span className='flex items-center gap-1.5 font-mono text-[13px] text-ink-soft'>
             <span
               className='w-2 h-2 rounded-sm'
               style={{ background: style.color }}
@@ -94,13 +94,13 @@ function EntryRow({ entry }: { entry: LeaderboardEntry }) {
           </span>
         )}
         {streak_days > 0 && (
-          <span className='flex items-center gap-1.5 font-mono text-[12px] text-live'>
+          <span className='flex items-center gap-1.5 font-mono text-[13px] text-live'>
             <LiveDot color='live' />
             {streak_days}d
           </span>
         )}
       </div>
-      <span className='font-mono text-[13px] tnum text-ink-soft shrink-0'>
+      <span className='font-mono text-[14px] tnum text-ink-soft shrink-0'>
         {formatDuration(duration_s)}
       </span>
     </div>
@@ -135,21 +135,21 @@ function LeaderboardCard({
         </div>
       ) : (
         <>
-          <div className='hidden sm:flex items-center gap-3 sm:gap-4 px-5 sm:px-8 py-2.5 border-b border-rule bg-paper-3/60'>
-            <span className='w-6 shrink-0' />
+          <div className='hidden sm:flex items-center gap-3 sm:gap-4 px-5 sm:px-8 py-3 border-b border-rule bg-paper-3/60'>
             <span className='w-7 shrink-0' />
-            <span className='flex-1 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint'>
+            <span className='w-8 shrink-0' />
+            <span className='flex-1 font-mono text-[11px] uppercase tracking-[0.14em] text-ink-faint'>
               Player
             </span>
             <div className='flex items-center gap-5 shrink-0'>
-              <span className='font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint w-[90px] text-right'>
+              <span className='font-mono text-[11px] uppercase tracking-[0.14em] text-ink-faint w-[90px] text-right'>
                 Lang
               </span>
-              <span className='font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint w-[48px] text-right'>
+              <span className='font-mono text-[11px] uppercase tracking-[0.14em] text-ink-faint w-[48px] text-right'>
                 Streak
               </span>
             </div>
-            <span className='font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint shrink-0 w-[52px] text-right'>
+            <span className='font-mono text-[11px] uppercase tracking-[0.14em] text-ink-faint shrink-0 w-[52px] text-right'>
               Time
             </span>
           </div>
