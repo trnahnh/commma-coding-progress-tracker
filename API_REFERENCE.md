@@ -5,7 +5,8 @@ Version 1.0 · May 2026
 **Base URL (production):** `https://api.commma.dev`  
 **Base URL (local dev):** `http://localhost:3000`
 
-All request and response bodies are JSON. All timestamps are ISO 8601 strings unless noted.
+All request and response bodies are JSON. All timestamps are ISO 8601 strings
+unless noted.
 
 ---
 
@@ -25,10 +26,14 @@ Access tokens expire in 15 minutes. Use the refresh endpoint to rotate.
 
 ### `GET /v1/auth/github`
 
-Redirects the browser to GitHub OAuth. Use from a browser-based sign-in flow or from the extension's loopback flow (ADR-011).
+Redirects the browser to GitHub OAuth. Use from a browser-based sign-in flow or
+from the extension's loopback flow (ADR-011).
 
 **Auth:** None  
-**Query params:** `redirect_uri` *(optional)* — a loopback URL (`http://127.0.0.1:<port>/...` or `http://localhost:<port>/...`) to send the browser to after auth completes. Present only for the extension/CLI flow; rejected with `400 VALIDATION_ERROR` if not a loopback address.  
+**Query params:** `redirect_uri` _(optional)_ — a loopback URL
+(`http://127.0.0.1:<port>/...` or `http://localhost:<port>/...`) to send the
+browser to after auth completes. Present only for the extension/CLI flow;
+rejected with `400 VALIDATION_ERROR` if not a loopback address.  
 **Response:** `302` redirect to GitHub
 
 ---
@@ -41,8 +46,8 @@ Exchanges the GitHub code for a user identity. Behaviour depends on the flow:
   one-time code (60s TTL, Redis) and `302`-redirects to
   `${WEB_ORIGIN}/auth/callback?code=<code>`. The web app exchanges the code at
   `POST /v1/auth/cli/exchange` to receive tokens.
-- **Extension/CLI flow** (`redirect_uri` was sent): same one-time code mechanism,
-  but redirects to the loopback `redirect_uri?code=<code>`.
+- **Extension/CLI flow** (`redirect_uri` was sent): same one-time code
+  mechanism, but redirects to the loopback `redirect_uri?code=<code>`.
 
 **Auth:** None  
 **Query params:** `code` — GitHub authorization code; `state` — CSRF state
@@ -53,7 +58,8 @@ Exchanges the GitHub code for a user identity. Behaviour depends on the flow:
 
 ### `POST /v1/auth/cli/exchange`
 
-Exchanges a one-time code (from the extension/CLI loopback flow) for tokens. The code is single-use and expires after 60 seconds.
+Exchanges a one-time code (from the extension/CLI loopback flow) for tokens. The
+code is single-use and expires after 60 seconds.
 
 **Auth:** None  
 **Body:** `{ "code": "<one-time-code>" }`
@@ -81,12 +87,15 @@ Returns `401 UNAUTHORIZED` if the code is invalid or expired.
 
 Rotates the refresh token and issues a new access token.
 
-**Auth:** the refresh token, supplied **either** as the HTTP-only cookie (browser) **or** in the JSON body `{ "refresh_token": "<opaque>" }` (extension).
+**Auth:** the refresh token, supplied **either** as the HTTP-only cookie
+(browser) **or** in the JSON body `{ "refresh_token": "<opaque>" }` (extension).
 
 **Response:**
 
-- Cookie flow: `{ "access_token": "eyJ..." }` (rotated token set as the new cookie).
-- Body flow: `{ "access_token": "eyJ...", "refresh_token": "<opaque>" }` (rotated token returned for the caller to persist).
+- Cookie flow: `{ "access_token": "eyJ..." }` (rotated token set as the new
+  cookie).
+- Body flow: `{ "access_token": "eyJ...", "refresh_token": "<opaque>" }`
+  (rotated token returned for the caller to persist).
 
 ---
 
@@ -94,7 +103,8 @@ Rotates the refresh token and issues a new access token.
 
 Revokes the refresh token (the cookie's, and/or the one supplied in the body).
 
-**Auth:** JWT. Optionally include `{ "refresh_token": "<opaque>" }` in the body to revoke the extension's stored token.  
+**Auth:** JWT. Optionally include `{ "refresh_token": "<opaque>" }` in the body
+to revoke the extension's stored token.  
 **Response:** `204 No Content`
 
 ---
@@ -197,9 +207,10 @@ Unfollow a user.
 
 **Implementation status (Phase 2):** both follow and unfollow are live and
 idempotent (re-following or unfollowing when no edge exists still returns
-`204`). Following yourself is `400 VALIDATION_ERROR`; following a `privacy='off'`
-user (invisible to you) is `404`. `GET /v1/users/:handle/sessions` is also live
-with the same privacy gating and keyset cursor as `GET /v1/sessions`.
+`204`). Following yourself is `400 VALIDATION_ERROR`; following a
+`privacy='off'` user (invisible to you) is `404`.
+`GET /v1/users/:handle/sessions` is also live with the same privacy gating and
+keyset cursor as `GET /v1/sessions`.
 
 ---
 
@@ -237,11 +248,17 @@ Ingests a batch of heartbeat events from the extension.
 
 **Notes:**
 
-- `file` and `key_freq` are dropped server-side (never stored) when the user's privacy is `summary`; an `off` user's events are discarded entirely — enforcement does not rely on the client
+- `file` and `key_freq` are dropped server-side (never stored) when the user's
+  privacy is `summary`; an `off` user's events are discarded entirely —
+  enforcement does not rely on the client
 - `id` is used for idempotency — duplicate event IDs are silently dropped
-- Maximum 500 events per batch; the whole request body is capped at 1 MB (`413 PAYLOAD_TOO_LARGE` over that)
-- Field caps: `lang` ≤ 64, `file` ≤ 1024, `project` ≤ 256 chars; `keystrokes` 0–1,000,000; `lines` −1,000,000–1,000,000; `ts` ≤ `4102444800000` — anything over fails `400 VALIDATION_ERROR`
-- All `key_freq` keys must be normalized key labels (see [Key Label Reference](#key-label-reference))
+- Maximum 500 events per batch; the whole request body is capped at 1 MB
+  (`413 PAYLOAD_TOO_LARGE` over that)
+- Field caps: `lang` ≤ 64, `file` ≤ 1024, `project` ≤ 256 chars; `keystrokes`
+  0–1,000,000; `lines` −1,000,000–1,000,000; `ts` ≤ `4102444800000` — anything
+  over fails `400 VALIDATION_ERROR`
+- All `key_freq` keys must be normalized key labels (see
+  [Key Label Reference](#key-label-reference))
 
 **Response:** `202 Accepted`
 
@@ -288,9 +305,15 @@ Returns the authenticated user's sessions, paginated.
 
 ### `GET /v1/sessions/:id`
 
-Returns full session detail including language breakdown, top files, and keyboard heatmap.
+Returns full session detail including language breakdown, top files, and
+keyboard heatmap.
 
-**Auth:** Optional. Public, gated by the owner's `privacy`: sessions of `full`/`summary` users are viewable by anyone; sessions of `off` users are owner-only (a valid bearer matching the owner). Non-owners requesting an `off` user's session receive `404`. For `summary` owners, non-owners receive an empty `files` array and `keyboard_heatmap: null` (the owner still sees them); this covers data captured before the user switched to `summary`.
+**Auth:** Optional. Public, gated by the owner's `privacy`: sessions of
+`full`/`summary` users are viewable by anyone; sessions of `off` users are
+owner-only (a valid bearer matching the owner). Non-owners requesting an `off`
+user's session receive `404`. For `summary` owners, non-owners receive an empty
+`files` array and `keyboard_heatmap: null` (the owner still sees them); this
+covers data captured before the user switched to `summary`.
 
 **Response:**
 
@@ -306,15 +329,13 @@ Returns full session detail including language breakdown, top files, and keyboar
   "peak_at": "2026-05-26T09:51:00Z",
   "langs": [
     { "lang": "TypeScript", "duration_s": 4320, "pct": 52.2 },
-    { "lang": "Python",     "duration_s": 1860, "pct": 22.5 }
+    { "lang": "Python", "duration_s": 1860, "pct": 22.5 }
   ],
-  "files": [
-    { "path": "apps/api/src/routes/sessions.ts", "changes": 423 }
-  ],
+  "files": [{ "path": "apps/api/src/routes/sessions.ts", "changes": 423 }],
   "keyboard_heatmap": {
     "counts": { "j": 1420, "k": 980, "Backspace": 610 },
-    "freq":   { "j": 0.21, "k": 0.14, "Backspace": 0.09 },
-    "total":  6844
+    "freq": { "j": 0.21, "k": 0.14, "Backspace": 0.09 },
+    "total": 6844
   }
 }
 ```
@@ -331,29 +352,40 @@ Generates a server-side PNG of the keyboard heatmap card for OG image use.
 
 ```json
 {
-  "layout":       "qwerty",
-  "aspect":       "16:9",
-  "show_handle":  true,
-  "show_stats":   true
+  "layout": "qwerty",
+  "aspect": "16:9",
+  "show_handle": true,
+  "show_stats": true
 }
 ```
 
-`layout`: `qwerty` | `dvorak` | `colemak` — only `qwerty` is implemented; others return `400 VALIDATION_ERROR` (dvorak/colemak are Phase 4)  
+`layout`: `qwerty` | `dvorak` | `colemak` — only `qwerty` is implemented; others
+return `400 VALIDATION_ERROR` (dvorak/colemak are Phase 4)  
 `aspect`: `9:16` (1080×1920) | `1:1` (1080×1080) | `16:9` (1920×1080, default)  
-`show_handle` / `show_stats`: default `true` — overlay `@handle` and `<pace> cpm · <top lang>`
+`show_handle` / `show_stats`: default `true` — overlay `@handle` and
+`<pace> cpm · <top lang>`
 
 All fields are optional; an empty `{}` body uses the defaults.
 
-**Privacy:** gated like `GET /v1/sessions/:id` — a session whose owner is not `full` is renderable only by the owner; otherwise `404`. A session with no heatmap returns `404`.
+**Privacy:** gated like `GET /v1/sessions/:id` — a session whose owner is not
+`full` is renderable only by the owner; otherwise `404`. A session with no
+heatmap returns `404`.
 
-**Caching:** `Cache-Control: private, max-age=300`. The PNG is re-rendered per request (no server-side cache yet — add one before the feed renders thumbnails at scale).
+**Caching:** `Cache-Control: private, max-age=300`. The PNG is re-rendered per
+request (no server-side cache yet — add one before the feed renders thumbnails
+at scale).
 
 **Response:** `image/png` (binary)
 
 > **Notes / limitations:**
+>
 > - Rate-limited on its own `card` bucket (120/hr/user), separate from reads.
-> - Server-side text uses the host's fonts; the deploy must provide a monospace font (e.g. DejaVu/Liberation). The `⌘` cap is drawn as `Cmd` so it never depends on a glyph missing from common Linux fonts.
-> - Because it is auth-required `POST`, it is **not** a literal `og:image` source (crawlers issue unauthenticated `GET`); it serves in-app (e.g. feed) thumbnails. A public `GET` variant would be needed for crawler OG.
+> - Server-side text uses the host's fonts; the deploy must provide a monospace
+>   font (e.g. DejaVu/Liberation). The `⌘` cap is drawn as `Cmd` so it never
+>   depends on a glyph missing from common Linux fonts.
+> - Because it is auth-required `POST`, it is **not** a literal `og:image`
+>   source (crawlers issue unauthenticated `GET`); it serves in-app (e.g. feed)
+>   thumbnails. A public `GET` variant would be needed for crawler OG.
 
 ---
 
@@ -389,7 +421,8 @@ Returns the top 100 users by coding time for the given period.
 }
 ```
 
-`delta` — rank change since the previous period snapshot (`+N` up, `-N` down, `0` unchanged).
+`delta` — rank change since the previous period snapshot (`+N` up, `-N` down,
+`0` unchanged).
 
 **Implementation status (Phase 2):** live, public. Reads the period's Redis
 sorted set (top 100) and hydrates handle/avatar/streak/top-lang from PostgreSQL;
@@ -448,26 +481,26 @@ All errors follow this shape:
 }
 ```
 
-| Code | HTTP Status | Description |
-| ------ | ------------- | ------------- |
-| `UNAUTHORIZED` | 401 | Missing or invalid JWT |
-| `FORBIDDEN` | 403 | Valid JWT but insufficient permissions |
-| `NOT_FOUND` | 404 | Resource does not exist |
-| `VALIDATION_ERROR` | 400 | Request body/params failed Zod validation |
-| `PAYLOAD_TOO_LARGE` | 413 | Request body exceeded the 1 MB `/v1/*` limit |
-| `RATE_LIMITED` | 429 | Per-user rate limit exceeded |
-| `INTERNAL_ERROR` | 500 | Unexpected server error |
+| Code                | HTTP Status | Description                                  |
+| ------------------- | ----------- | -------------------------------------------- |
+| `UNAUTHORIZED`      | 401         | Missing or invalid JWT                       |
+| `FORBIDDEN`         | 403         | Valid JWT but insufficient permissions       |
+| `NOT_FOUND`         | 404         | Resource does not exist                      |
+| `VALIDATION_ERROR`  | 400         | Request body/params failed Zod validation    |
+| `PAYLOAD_TOO_LARGE` | 413         | Request body exceeded the 1 MB `/v1/*` limit |
+| `RATE_LIMITED`      | 429         | Per-user rate limit exceeded                 |
+| `INTERNAL_ERROR`    | 500         | Unexpected server error                      |
 
 ---
 
 ## Rate Limits
 
-| Endpoint group | Limit | Window |
-| ---------------- | ------- | -------- |
-| `POST /v1/ingest` | 1,000 requests | 1 hour (per user) |
-| All read endpoints | 300 requests | 1 hour (per user) |
-| `POST /v1/sessions/:id/heatmap-card` | 120 requests | 1 hour (per user) |
-| Auth endpoints | 20 requests | 1 hour (per IP) |
+| Endpoint group                       | Limit          | Window            |
+| ------------------------------------ | -------------- | ----------------- |
+| `POST /v1/ingest`                    | 1,000 requests | 1 hour (per user) |
+| All read endpoints                   | 300 requests   | 1 hour (per user) |
+| `POST /v1/sessions/:id/heatmap-card` | 120 requests   | 1 hour (per user) |
+| Auth endpoints                       | 20 requests    | 1 hour (per IP)   |
 
 **Rate limit headers:**
 
@@ -489,12 +522,12 @@ it to the number of proxies in front (1 = ALB, 2 = CloudFront→ALB) so a forged
 
 `key_freq` keys must use normalized labels from this set:
 
-| Category | Labels |
-| ---------- | -------- |
-| Letters | `a`–`z` (lowercase) |
-| Digits | `0`–`9` |
-| Editing | `Backspace`, `Delete`, `Enter`, `Tab`, `Escape` |
-| Modifiers | `Shift`, `Control`, `Alt`, `Meta` |
+| Category   | Labels                                                                                 |
+| ---------- | -------------------------------------------------------------------------------------- |
+| Letters    | `a`–`z` (lowercase)                                                                    |
+| Digits     | `0`–`9`                                                                                |
+| Editing    | `Backspace`, `Delete`, `Enter`, `Tab`, `Escape`                                        |
+| Modifiers  | `Shift`, `Control`, `Alt`, `Meta`                                                      |
 | Navigation | `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight`, `Home`, `End`, `PageUp`, `PageDown` |
-| Function | `F1`–`F12` |
-| Other | Anything outside this set — omit or bucket as `Other` |
+| Function   | `F1`–`F12`                                                                             |
+| Other      | Anything outside this set — omit or bucket as `Other`                                  |

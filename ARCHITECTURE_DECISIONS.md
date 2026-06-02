@@ -2,7 +2,10 @@
 
 Version 1.0 · May 2026
 
-An ADR documents a significant technical decision: what was decided, why, and what was rejected. New ADRs are added as decisions are made. Existing ADRs are never deleted — if a decision is reversed, a new ADR supersedes it and references the old one.
+An ADR documents a significant technical decision: what was decided, why, and
+what was rejected. New ADRs are added as decisions are made. Existing ADRs are
+never deleted — if a decision is reversed, a new ADR supersedes it and
+references the old one.
 
 ---
 
@@ -12,7 +15,9 @@ An ADR documents a significant technical decision: what was decided, why, and wh
 
 ### Context
 
-Three distinct deployable artifacts (extension, API, web app) plus two shared packages. We need to share types and schemas without publishing to npm, run parallel dev servers from one command, and keep dependency management tractable.
+Three distinct deployable artifacts (extension, API, web app) plus two shared
+packages. We need to share types and schemas without publishing to npm, run
+parallel dev servers from one command, and keep dependency management tractable.
 
 ### Decision
 
@@ -22,13 +27,16 @@ pnpm workspace monorepo at the root with Turborepo for task orchestration.
 
 - Single `pnpm install` installs all packages
 - `pnpm dev` starts all services in parallel
-- `@commma/shared` and `@commma/db` are importable directly from source — no build step in dev
+- `@commma/shared` and `@commma/db` are importable directly from source — no
+  build step in dev
 - TypeScript project references handle cross-package type checking
 
 ### Rejected Alternatives
 
-- **Separate repos per package** — cross-package schema changes would require coordinated releases and version bumps
-- **Nx** — heavier than needed; pnpm + Turborepo covers the same ground with less config
+- **Separate repos per package** — cross-package schema changes would require
+  coordinated releases and version bumps
+- **Nx** — heavier than needed; pnpm + Turborepo covers the same ground with
+  less config
 
 ---
 
@@ -38,11 +46,14 @@ pnpm workspace monorepo at the root with Turborepo for task orchestration.
 
 ### Context
 
-We need a Node.js HTTP framework. Requirements: excellent TypeScript support, minimal overhead, compatible with edge runtimes for future flexibility.
+We need a Node.js HTTP framework. Requirements: excellent TypeScript support,
+minimal overhead, compatible with edge runtimes for future flexibility.
 
 ### Decision
 
-Hono with `@hono/node-server`. Route handlers stay close to the Hono API so migrating to an edge runtime (Cloudflare Workers, Deno Deploy) later would be low-friction.
+Hono with `@hono/node-server`. Route handlers stay close to the Hono API so
+migrating to an edge runtime (Cloudflare Workers, Deno Deploy) later would be
+low-friction.
 
 ### Consequences
 
@@ -54,8 +65,10 @@ Hono with `@hono/node-server`. Route handlers stay close to the Hono API so migr
 ### Rejected Alternatives
 
 - **Fastify** — more complex plugin system; heavier runtime
-- **Express** — no native TypeScript types; not edge-compatible; large legacy surface area
-- **tRPC** — extension client would need the tRPC client library, adding bundle weight and coupling
+- **Express** — no native TypeScript types; not edge-compatible; large legacy
+  surface area
+- **tRPC** — extension client would need the tRPC client library, adding bundle
+  weight and coupling
 
 ---
 
@@ -65,11 +78,14 @@ Hono with `@hono/node-server`. Route handlers stay close to the Hono API so migr
 
 ### Context
 
-We need type-safe database access for PostgreSQL. Requirements: no code generation at runtime, migrations-first workflow, low overhead, strong TypeScript inference.
+We need type-safe database access for PostgreSQL. Requirements: no code
+generation at runtime, migrations-first workflow, low overhead, strong
+TypeScript inference.
 
 ### Decision
 
-Drizzle ORM. Schema defined in `packages/db/src/schema.ts`. Migrations generated with `drizzle-kit generate` and applied with `drizzle-kit migrate`.
+Drizzle ORM. Schema defined in `packages/db/src/schema.ts`. Migrations generated
+with `drizzle-kit generate` and applied with `drizzle-kit migrate`.
 
 ### Consequences
 
@@ -80,8 +96,10 @@ Drizzle ORM. Schema defined in `packages/db/src/schema.ts`. Migrations generated
 
 ### Rejected Alternatives
 
-- **Prisma** — requires a separate client generation step; Prisma Client adds bundle overhead; the query engine is a separate binary
-- **Raw SQL with pg** — no type safety without significant boilerplate; hand-maintained type definitions for every query
+- **Prisma** — requires a separate client generation step; Prisma Client adds
+  bundle overhead; the query engine is a separate binary
+- **Raw SQL with pg** — no type safety without significant boilerplate;
+  hand-maintained type definitions for every query
 
 ---
 
@@ -91,23 +109,31 @@ Drizzle ORM. Schema defined in `packages/db/src/schema.ts`. Migrations generated
 
 ### Context
 
-The keyboard heatmap is a variable-length mapping of key labels to counts. The set of keys varies per session. We need to store this efficiently without performing heavy relational operations on it.
+The keyboard heatmap is a variable-length mapping of key labels to counts. The
+set of keys varies per session. We need to store this efficiently without
+performing heavy relational operations on it.
 
 ### Decision
 
-Store `key_freq` on the events table and `keyboard_heatmap` on the sessions table as PostgreSQL JSONB columns. The aggregation worker merges `key_freq` maps in application code and writes the result to `sessions.keyboard_heatmap`.
+Store `key_freq` on the events table and `keyboard_heatmap` on the sessions
+table as PostgreSQL JSONB columns. The aggregation worker merges `key_freq` maps
+in application code and writes the result to `sessions.keyboard_heatmap`.
 
 ### Consequences
 
 - No schema migration needed when the key label set changes
 - JSONB supports GIN indexing if we need to query specific key counts later
-- Merge logic is simple: `Object.entries(freq).forEach(([k, v]) => merged[k] = (merged[k] ?? 0) + v)`
-- Heatmap data is returned inline in the session detail response — no separate join needed
+- Merge logic is simple:
+  `Object.entries(freq).forEach(([k, v]) => merged[k] = (merged[k] ?? 0) + v)`
+- Heatmap data is returned inline in the session detail response — no separate
+  join needed
 
 ### Rejected Alternatives
 
-- **Separate `key_counts` table (session_id, key_label, count)** — 60+ rows per session; unnecessary relational overhead for data always read as a unit
-- **Application-level JSON (not JSONB)** — JSONB gives indexing capability and type validation at the DB level
+- **Separate `key_counts` table (session_id, key_label, count)** — 60+ rows per
+  session; unnecessary relational overhead for data always read as a unit
+- **Application-level JSON (not JSONB)** — JSONB gives indexing capability and
+  type validation at the DB level
 
 ---
 
@@ -117,47 +143,55 @@ Store `key_freq` on the events table and `keyboard_heatmap` on the sessions tabl
 
 ### Context
 
-We need to render the keyboard heatmap as a transparent PNG for export. This can be done client-side (browser Canvas) or server-side (Node + image library).
+We need to render the keyboard heatmap as a transparent PNG for export. This can
+be done client-side (browser Canvas) or server-side (Node + image library).
 
 ### Decision
 
-Use the browser Canvas API as the primary rendering path. A server-side path using `sharp` is added specifically for Open Graph images.
+Use the browser Canvas API as the primary rendering path. A server-side path
+using `sharp` is added specifically for Open Graph images.
 
 ### Consequences
 
 - Heatmap export is instant — no network round-trip
 - Works offline
-- `canvas.toBlob('image/png')` produces a transparent PNG ready for download or clipboard
-- Two implementations of the same rendering logic must be kept in sync (Canvas + sharp)
-- Keyboard layout config must be shared between both renderers — lives in `@commma/shared`
+- `canvas.toBlob('image/png')` produces a transparent PNG ready for download or
+  clipboard
+- Two implementations of the same rendering logic must be kept in sync (Canvas +
+  sharp)
+- Keyboard layout config must be shared between both renderers — lives in
+  `@commma/shared`
 
 ### Rejected Alternatives
 
-- **Server-side only (Puppeteer/headless Chrome)** — expensive, slow, heavy dependency
-- **SVG export** — inconsistent transparency handling across social platforms; PNG is universally supported for story/post sharing
+- **Server-side only (Puppeteer/headless Chrome)** — expensive, slow, heavy
+  dependency
+- **SVG export** — inconsistent transparency handling across social platforms;
+  PNG is universally supported for story/post sharing
 
 ### Amendment — 2026-05 (Phase 2 step 3, Canvas renderer shipped)
 
 The shared layout config now lives at `packages/shared/src/keyboardLayout.ts`
-(`QWERTY_LAYOUT`: unit-grid keycap coordinates, pure data so `sharp` can reuse it
-verbatim). The browser Canvas path is built (`apps/web/src/components/KeyboardHeatmap.tsx`)
-with a basic transparent-PNG download via `canvas.toBlob`. The server-side `sharp`
-renderer (OG images) and the multi-aspect-ratio export presets remain pending —
-they consume the same `QWERTY_LAYOUT`. The spacebar/punctuation caps now light up:
-`KEY_LABELS` gained `Space` + the punctuation physical keys and shifted symbols map
-to their physical key (ROADMAP item E, done).
+(`QWERTY_LAYOUT`: unit-grid keycap coordinates, pure data so `sharp` can reuse
+it verbatim). The browser Canvas path is built
+(`apps/web/src/components/KeyboardHeatmap.tsx`) with a basic transparent-PNG
+download via `canvas.toBlob`. The server-side `sharp` renderer (OG images) and
+the multi-aspect-ratio export presets remain pending — they consume the same
+`QWERTY_LAYOUT`. The spacebar/punctuation caps now light up: `KEY_LABELS` gained
+`Space` + the punctuation physical keys and shifted symbols map to their
+physical key (ROADMAP item E, done).
 
 ### Amendment — 2026-06 (Phase 3, server-side `sharp` path shipped)
 
 Both pending pieces are now built. The multi-aspect export presets shipped in
-Phase 2, and the server-side renderer landed in Phase 3 as `POST
-/v1/sessions/:id/heatmap-card`: `lib/heatmapCard.ts` builds an **SVG** from the
-same `QWERTY_LAYOUT` + cold→`accent` ramp and `sharp` rasterizes it to PNG (no
-headless browser / `node-canvas`). The "two implementations kept in sync"
-consequence is now live — the Canvas and SVG renderers must track each other.
-One deliberate divergence: the server draws the Meta cap as `Cmd` (not `⌘`) so the
-PNG never depends on a glyph missing from common Linux fonts; the host must still
-provide a monospace font for the remaining text.
+Phase 2, and the server-side renderer landed in Phase 3 as
+`POST /v1/sessions/:id/heatmap-card`: `lib/heatmapCard.ts` builds an **SVG**
+from the same `QWERTY_LAYOUT` + cold→`accent` ramp and `sharp` rasterizes it to
+PNG (no headless browser / `node-canvas`). The "two implementations kept in
+sync" consequence is now live — the Canvas and SVG renderers must track each
+other. One deliberate divergence: the server draws the Meta cap as `Cmd` (not
+`⌘`) so the PNG never depends on a glyph missing from common Linux fonts; the
+host must still provide a monospace font for the remaining text.
 
 ---
 
@@ -170,46 +204,55 @@ provide a monospace font for the remaining text.
 The keyboard heatmap requires knowing which keys were pressed. Two approaches:
 
 1. Intercept the `type` command to observe what characters were typed (content)
-2. Maintain a counter per keystroke that records only the key label (physical key identity)
+2. Maintain a counter per keystroke that records only the key label (physical
+   key identity)
 
 ### Decision
 
-Track only key labels — the physical key pressed — never key content. The distinction: we count that the `j` key was pressed 142 times, not that the user typed the letter j in any specific word or context.
+Track only key labels — the physical key pressed — never key content. The
+distinction: we count that the `j` key was pressed 142 times, not that the user
+typed the letter j in any specific word or context.
 
-`contentChanges` in `onDidChangeTextDocument` is never read, stored, or transmitted.
+`contentChanges` in `onDidChangeTextDocument` is never read, stored, or
+transmitted.
 
 ### Consequences
 
-- Users can verify the privacy guarantee by reading the open-source extension code
-- The heatmap is slightly less precise than a content-based approach — acceptable trade-off
-- **This decision is a permanent privacy guarantee.** It must never be weakened in future versions without a new ADR, a CHANGELOG entry, and a version bump.
+- Users can verify the privacy guarantee by reading the open-source extension
+  code
+- The heatmap is slightly less precise than a content-based approach —
+  acceptable trade-off
+- **This decision is a permanent privacy guarantee.** It must never be weakened
+  in future versions without a new ADR, a CHANGELOG entry, and a version bump.
 
 ### Rejected Alternatives
 
-- **Content-based tracking** — rejected unconditionally. Capturing what was typed would make commma a keylogger regardless of intent. No business justification exists.
+- **Content-based tracking** — rejected unconditionally. Capturing what was
+  typed would make commma a keylogger regardless of intent. No business
+  justification exists.
 
 ### Amendment — 2026-05 (extension implementation, step 5)
 
 VSCode exposes **no raw key-event API** to extensions. The only signal that
 reveals which character key was pressed is the inserted text in
-`onDidChangeTextDocument`. Building the per-key heatmap therefore requires reading
-that character. This amendment defines the narrow, permitted way to do so without
-weakening the guarantee:
+`onDidChangeTextDocument`. Building the per-key heatmap therefore requires
+reading that character. This amendment defines the narrow, permitted way to do
+so without weakening the guarantee:
 
 > Characters from `contentChanges.text` are read solely to increment a frequency
 > counter then immediately discarded. The string is never stored, logged, or
-> transmitted. Only the final `Record<string, number>` map is retained. Content is
-> unrecoverable from a frequency histogram — this is not key logging.
+> transmitted. Only the final `Record<string, number>` map is retained. Content
+> is unrecoverable from a frequency histogram — this is not key logging.
 
 Implementation (`apps/extension/src/keyCounter.ts`): each `contentChange` is
 mapped to a single `KeyLabel` (lowercased letters/digits, `\n`→`Enter`,
 `\t`→`Tab`, a deletion→`Backspace`, anything else→`Other`) and folded into a
 counter. Order, position, and surrounding context are destroyed at the point of
 capture. Multi-character inserts (paste/autocomplete/IME) are **not** attributed
-to any key. The bright line is unchanged: an **order-destroyed histogram** is key
-labels; a reconstructable sequence is content and remains forbidden. Recorded with
-a CHANGELOG entry and an extension version bump (`0.0.1 → 0.1.0`) as this ADR
-requires.
+to any key. The bright line is unchanged: an **order-destroyed histogram** is
+key labels; a reconstructable sequence is content and remains forbidden.
+Recorded with a CHANGELOG entry and an extension version bump (`0.0.1 → 0.1.0`)
+as this ADR requires.
 
 ---
 
@@ -219,25 +262,42 @@ requires.
 
 ### Context
 
-The leaderboard needs to return top 100 users by coding time for week/month/alltime scopes. This query runs on every leaderboard page load and must be fast.
+The leaderboard needs to return top 100 users by coding time for
+week/month/alltime scopes. This query runs on every leaderboard page load and
+must be fast.
 
 ### Decision
 
-Maintain Redis sorted sets (`ZADD`) updated on every session write. Keys: `leaderboard:week`, `leaderboard:month`, `leaderboard:alltime`. Score is total coding seconds. `ZREVRANGE ... WITHSCORES` returns the top N in O(log N + N) time.
+Maintain Redis sorted sets (`ZADD`) updated on every session write. Keys:
+`leaderboard:week`, `leaderboard:month`, `leaderboard:alltime`. Score is total
+coding seconds. `ZREVRANGE ... WITHSCORES` returns the top N in O(log N + N)
+time.
 
-Sorted sets are authoritative for ranking. User handles and metadata are hydrated from PostgreSQL after the Redis read.
+Sorted sets are authoritative for ranking. User handles and metadata are
+hydrated from PostgreSQL after the Redis read.
 
 ### Consequences
 
 - Leaderboard reads are O(log N + 100) regardless of total user count
 - Sorted sets are updated inline during session aggregation — no separate job
-- If Redis is wiped, the leaderboard is rebuilt from PostgreSQL on next read (cold start path)
-- **Rebuild source (important, per ADR-010):** step-4 aggregation **prunes events** after writing sessions, so the cold-start rebuild must sum `sessions.duration_s` grouped by user (and by period for week/month from `sessions.started_at`) — **never** from `events`, which no longer holds the history. Maintenance today is incremental `ZINCRBY` on session write; the rebuild itself is not implemented yet and must land with the `GET /v1/leaderboard` endpoint (Phase 2), or a Redis flush will silently and permanently under-count rankings.
+- If Redis is wiped, the leaderboard is rebuilt from PostgreSQL on next read
+  (cold start path)
+- **Rebuild source (important, per ADR-010):** step-4 aggregation **prunes
+  events** after writing sessions, so the cold-start rebuild must sum
+  `sessions.duration_s` grouped by user (and by period for week/month from
+  `sessions.started_at`) — **never** from `events`, which no longer holds the
+  history. Maintenance today is incremental `ZINCRBY` on session write; the
+  rebuild itself is not implemented yet and must land with the
+  `GET /v1/leaderboard` endpoint (Phase 2), or a Redis flush will silently and
+  permanently under-count rankings.
 
 ### Rejected Alternatives
 
-- **PostgreSQL aggregate query on every request** — a `SUM(duration_s) GROUP BY user_id` over millions of session rows would be too slow; Redis sorted sets are the right abstraction
-- **Materialized views in PostgreSQL** — require a refresh mechanism; don't give O(1) rank lookups
+- **PostgreSQL aggregate query on every request** — a
+  `SUM(duration_s) GROUP BY user_id` over millions of session rows would be too
+  slow; Redis sorted sets are the right abstraction
+- **Materialized views in PostgreSQL** — require a refresh mechanism; don't give
+  O(1) rank lookups
 
 ---
 
@@ -247,23 +307,32 @@ Sorted sets are authoritative for ranking. User handles and metadata are hydrate
 
 ### Context
 
-Session aggregation is async: ingest returns `202` immediately, then a worker processes events in the background. We need a reliable job queue with retry, dead-letter handling, and observability.
+Session aggregation is async: ingest returns `202` immediately, then a worker
+processes events in the background. We need a reliable job queue with retry,
+dead-letter handling, and observability.
 
 ### Decision
 
-BullMQ backed by Redis (same Redis instance as caching in MVP; separate instance at scale). Jobs are enqueued on ingest and deduplicated by `user_id` within a 5-minute window — one aggregation job per user per 5 minutes, not one per ingest call.
+BullMQ backed by Redis (same Redis instance as caching in MVP; separate instance
+at scale). Jobs are enqueued on ingest and deduplicated by `user_id` within a
+5-minute window — one aggregation job per user per 5 minutes, not one per ingest
+call.
 
 ### Consequences
 
 - Automatic retry with configurable backoff
 - Failed jobs go to a dead-letter queue for inspection
-- Redis now serves three purposes: cache, rate limiting, job queue — acceptable for MVP, should be separated at scale
+- Redis now serves three purposes: cache, rate limiting, job queue — acceptable
+  for MVP, should be separated at scale
 - Bull Board can be added for observability
 
 ### Rejected Alternatives
 
-- **pg-boss (PostgreSQL-backed queue)** — eliminates a dependency but adds table-polling overhead to PostgreSQL; we already have Redis for caching
-- **Cron-only approach** — fixed 5-minute cron would add up to 5-minute latency to session data appearing in the UI; the queue approach gives near-real-time aggregation
+- **pg-boss (PostgreSQL-backed queue)** — eliminates a dependency but adds
+  table-polling overhead to PostgreSQL; we already have Redis for caching
+- **Cron-only approach** — fixed 5-minute cron would add up to 5-minute latency
+  to session data appearing in the UI; the queue approach gives near-real-time
+  aggregation
 
 ---
 
@@ -273,19 +342,25 @@ BullMQ backed by Redis (same Redis instance as caching in MVP; separate instance
 
 **Decision:**
 
-| Layer | Provider | Cost |
-|-------|----------|------|
-| API | AWS EC2 t3.micro + PM2 | $0 free tier (12mo), then $8/mo |
-| Redis | Upstash free tier | $0 |
-| PostgreSQL | Railway Hobby | $5/mo |
-| Web | Vercel Hobby | $0 |
-| **Total** | | **~$5/mo** |
+| Layer      | Provider               | Cost                            |
+| ---------- | ---------------------- | ------------------------------- |
+| API        | AWS EC2 t3.micro + PM2 | $0 free tier (12mo), then $8/mo |
+| Redis      | Upstash free tier      | $0                              |
+| PostgreSQL | Railway Hobby          | $5/mo                           |
+| Web        | Vercel Hobby           | $0                              |
+| **Total**  |                        | **~$5/mo**                      |
 
-**Rationale:** Zero users at launch — no need for load balancers or containers. EC2 t3.micro free tier runs PM2 + Hono/Node with plenty of headroom. Upstash serverless Redis is free at MVP scale. Railway gives zero-config managed Postgres. Vercel handles the frontend with native Vite/React support, PR preview deploys, and a global CDN.
+**Rationale:** Zero users at launch — no need for load balancers or containers.
+EC2 t3.micro free tier runs PM2 + Hono/Node with plenty of headroom. Upstash
+serverless Redis is free at MVP scale. Railway gives zero-config managed
+Postgres. Vercel handles the frontend with native Vite/React support, PR preview
+deploys, and a global CDN.
 
-**Migration path:** At 10k DAU or when the free tier expires, migrate API to ECS Fargate + ALB. App code stays identical — only the deploy target changes.
+**Migration path:** At 10k DAU or when the free tier expires, migrate API to ECS
+Fargate + ALB. App code stays identical — only the deploy target changes.
 
-**Rejected:** ECS Fargate at launch — ALB costs $18/mo fixed regardless of traffic. ElastiCache at launch — Upstash free tier is sufficient.
+**Rejected:** ECS Fargate at launch — ALB costs $18/mo fixed regardless of
+traffic. ElastiCache at launch — Upstash free tier is sufficient.
 
 ---
 
@@ -295,34 +370,90 @@ BullMQ backed by Redis (same Redis instance as caching in MVP; separate instance
 
 ### Context
 
-ADR-008 chose BullMQ for session aggregation. In implementation a cost problem surfaced against the ADR-009 stack: a BullMQ worker **blocking-polls Redis continuously even when idle** (`BRPOPLPUSH`/`BZPOPMIN` loops, scheduler ticks). On the Upstash free tier — billed per command (~500K/month) — a single always-on idle worker would exhaust the budget on polling alone, before processing a single real job. At zero/low users that is pure waste.
+ADR-008 chose BullMQ for session aggregation. In implementation a cost problem
+surfaced against the ADR-009 stack: a BullMQ worker **blocking-polls Redis
+continuously even when idle** (`BRPOPLPUSH`/`BZPOPMIN` loops, scheduler ticks).
+On the Upstash free tier — billed per command (~500K/month) — a single always-on
+idle worker would exhaust the budget on polling alone, before processing a
+single real job. At zero/low users that is pure waste.
 
 ### Decision
 
-Replace the BullMQ queue with an **in-process interval scan**. A `setInterval` (5 min) inside the API Node process runs the aggregator: `SELECT DISTINCT user_id FROM events` → per user, fetch events ordered by `ts` → split on the 15-min idle gap → finalize only **closed** sessions (a trailing in-progress group is left for the next tick) → write `sessions` + `session_langs` + `session_files` + `keyboard_heatmap`, update `streaks`, `ZINCRBY` the leaderboard, and **delete** the finalized events, all in one transaction per user. An in-process guard prevents overlapping runs; `RUN_AGGREGATION` env gates the loop so only one instance runs it if ever scaled horizontally.
+Replace the BullMQ queue with an **in-process interval scan**. A `setInterval`
+(5 min) inside the API Node process runs the aggregator:
+`SELECT DISTINCT user_id FROM events` → per user, fetch events ordered by `ts` →
+split on the 15-min idle gap → finalize only **closed** sessions (a trailing
+in-progress group is left for the next tick) → write `sessions` +
+`session_langs` + `session_files` + `keyboard_heatmap`, update `streaks`,
+`ZINCRBY` the leaderboard, and **delete** the finalized events, all in one
+transaction per user. An in-process guard prevents overlapping runs;
+`RUN_AGGREGATION` env gates the loop so only one instance runs it if ever scaled
+horizontally.
 
 ### Consequences
 
-- **Zero idle Redis commands** — Redis is touched only on session write (a few `ZINCRBY`) and per request (one rate-limit command). Comfortably within the Upstash free tier.
-- Finalizing only closed sessions makes re-runs **idempotent** — a session is written exactly once and never rewritten, which also makes deleting its events safe (strong Railway storage discipline).
-- No external queue dependency, no separate worker process to deploy (pure backend code; PM2/EC2 setup is unchanged).
-- **Lost:** BullMQ's automatic retry, dead-letter queue, and Bull Board observability. Mitigated because failed users are logged and simply retried on the next tick (their events stay in the table until successfully finalized). Acceptable for a single-instance MVP.
-- Latency is up to one interval (~5 min) before closed sessions appear — and a session cannot be known to have ended until the 15-min idle gap exists anyway, so this is not a practical regression.
+- **Zero idle Redis commands** — Redis is touched only on session write (a few
+  `ZINCRBY`) and per request (one rate-limit command). Comfortably within the
+  Upstash free tier.
+- Finalizing only closed sessions makes re-runs **idempotent** — a session is
+  written exactly once and never rewritten, which also makes deleting its events
+  safe (strong Railway storage discipline).
+- No external queue dependency, no separate worker process to deploy (pure
+  backend code; PM2/EC2 setup is unchanged).
+- **Lost:** BullMQ's automatic retry, dead-letter queue, and Bull Board
+  observability. Mitigated because failed users are logged and simply retried on
+  the next tick (their events stay in the table until successfully finalized).
+  Acceptable for a single-instance MVP.
+- Latency is up to one interval (~5 min) before closed sessions appear — and a
+  session cannot be known to have ended until the 15-min idle gap exists anyway,
+  so this is not a practical regression.
 
 ### Rejected Alternatives
 
-- **BullMQ as in ADR-008** — rejected on Upstash command-budget grounds (idle polling), not on correctness.
-- **Tuning BullMQ poll intervals** — reduces but does not eliminate idle commands, and adds tuning complexity for no benefit at MVP scale.
+- **BullMQ as in ADR-008** — rejected on Upstash command-budget grounds (idle
+  polling), not on correctness.
+- **Tuning BullMQ poll intervals** — reduces but does not eliminate idle
+  commands, and adds tuning complexity for no benefit at MVP scale.
 
 ### Scale notes & migration path
 
-These are the tweaks this design will need as load grows. None are needed at MVP; they are recorded so they are not rediscovered later.
+These are the tweaks this design will need as load grows. None are needed at
+MVP; they are recorded so they are not rediscovered later.
 
-- **(A) Trigger → queue + dedicated worker.** The interval scan (one `setInterval` in the web process, sequential per user, `SELECT DISTINCT user_id` each tick) caps out as active users grow — the scan widens and per-user work serializes on the request event loop. At the horizontal-scale / ElastiCache tier (where Redis is no longer billed per command, so the ADR-010 cost objection disappears), move aggregation to a separate worker process behind a real queue. This also dissolves the multi-instance duplication risk (today only an in-process guard + `RUN_AGGREGATION` prevent two instances aggregating the same users). **Pre-seamed:** `run.ts` already exposes `aggregateUser(userId)` as a standalone unit and the logic lives in pure modules (`boundaries`/`build`/`streak`), so this swap replaces `scheduler.ts` and enqueues one job per user — `aggregateUser` becomes the job processor unchanged. No work now.
-- **(B) Rate-limit client IP behind a proxy. — RESOLVED (Phase 3).** `ipKey` no longer trusts the leftmost `x-forwarded-for` hop. `TRUST_PROXY_HOPS` (env, default `0`) configures how many proxies front the API, and the pure `selectClientIp` (`lib/clientIp.ts`) resolves the client IP by counting that many hops in from the trusted (right) end, so a forged header can't spoof or exhaust a victim's bucket. Set `1` behind an ALB, `2` behind CloudFront→ALB. Still requires the deploy to lock the security group so only the LB can reach the host (otherwise XFF is forgeable regardless).
-- **(C) Leaderboard rebuild source.** Because this step **prunes (deletes) events** after aggregating, the Redis-wipe rebuild promised in ADR-007 must sum from the `sessions` table, not `events`. Fine to mid-scale; at large session volume, rebuild from a periodic user-rollup table rather than scanning all sessions. See ADR-007.
+- **(A) Trigger → queue + dedicated worker.** The interval scan (one
+  `setInterval` in the web process, sequential per user,
+  `SELECT DISTINCT user_id` each tick) caps out as active users grow — the scan
+  widens and per-user work serializes on the request event loop. At the
+  horizontal-scale / ElastiCache tier (where Redis is no longer billed per
+  command, so the ADR-010 cost objection disappears), move aggregation to a
+  separate worker process behind a real queue. This also dissolves the
+  multi-instance duplication risk (today only an in-process guard +
+  `RUN_AGGREGATION` prevent two instances aggregating the same users).
+  **Pre-seamed:** `run.ts` already exposes `aggregateUser(userId)` as a
+  standalone unit and the logic lives in pure modules
+  (`boundaries`/`build`/`streak`), so this swap replaces `scheduler.ts` and
+  enqueues one job per user — `aggregateUser` becomes the job processor
+  unchanged. No work now.
+- **(B) Rate-limit client IP behind a proxy. — RESOLVED (Phase 3).** `ipKey` no
+  longer trusts the leftmost `x-forwarded-for` hop. `TRUST_PROXY_HOPS` (env,
+  default `0`) configures how many proxies front the API, and the pure
+  `selectClientIp` (`lib/clientIp.ts`) resolves the client IP by counting that
+  many hops in from the trusted (right) end, so a forged header can't spoof or
+  exhaust a victim's bucket. Set `1` behind an ALB, `2` behind CloudFront→ALB.
+  Still requires the deploy to lock the security group so only the LB can reach
+  the host (otherwise XFF is forgeable regardless).
+- **(C) Leaderboard rebuild source.** Because this step **prunes (deletes)
+  events** after aggregating, the Redis-wipe rebuild promised in ADR-007 must
+  sum from the `sessions` table, not `events`. Fine to mid-scale; at large
+  session volume, rebuild from a periodic user-rollup table rather than scanning
+  all sessions. See ADR-007.
 
-**Not scale issues (do not tweak for scale):** `duration_s` accuracy (addressed in step 5 — `buildSession` floors duration to `span + one heartbeat window`, since each heartbeat represents up to ~60s of activity; a single-event session is 60s not 0s, so it earns real leaderboard credit and non-zero lang splits), event pruning (already the scale win — keeps `events` tiny regardless of history), streak UTC day boundaries (correctness/UX, scale-invariant).
+**Not scale issues (do not tweak for scale):** `duration_s` accuracy (addressed
+in step 5 — `buildSession` floors duration to `span + one heartbeat window`,
+since each heartbeat represents up to ~60s of activity; a single-event session
+is 60s not 0s, so it earns real leaderboard credit and non-zero lang splits),
+event pruning (already the scale win — keeps `events` tiny regardless of
+history), streak UTC day boundaries (correctness/UX, scale-invariant).
 
 ---
 
@@ -332,11 +463,12 @@ These are the tweaks this design will need as load grows. None are needed at MVP
 
 ### Context
 
-The web auth flow (ADR per `routes/auth.ts`) returns the access token as JSON and
-the refresh token as an **HTTP-only, `SameSite=Strict`, `Path=/v1/auth` cookie**.
-A VSCode extension is not a browser: it cannot read or replay that cookie, and
-there is no web app yet to broker a "connect your editor" handshake. The extension
-must drive GitHub OAuth itself and obtain tokens it can persist in SecretStorage.
+The web auth flow (ADR per `routes/auth.ts`) returns the access token as JSON
+and the refresh token as an **HTTP-only, `SameSite=Strict`, `Path=/v1/auth`
+cookie**. A VSCode extension is not a browser: it cannot read or replay that
+cookie, and there is no web app yet to broker a "connect your editor" handshake.
+The extension must drive GitHub OAuth itself and obtain tokens it can persist in
+SecretStorage.
 
 ### Decision
 
@@ -344,36 +476,38 @@ must drive GitHub OAuth itself and obtain tokens it can persist in SecretStorage
 apps" loopback pattern, with a server-side single-use code instead of PKCE):
 
 1. The extension starts a throwaway HTTP server on an ephemeral `127.0.0.1` port
-   and opens the system browser to `GET /v1/auth/github?redirect_uri=<loopback>`.
+   and opens the system browser to
+   `GET /v1/auth/github?redirect_uri=<loopback>`.
 2. `GET /v1/auth/github` validates `redirect_uri` against a loopback allowlist
-   (`http://127.0.0.1:*` / `http://localhost:*`) and stores `state → redirect_uri`
-   in Redis (`oauth:cli:state:<state>`, TTL 600s). The existing CSRF state cookie
-   and GitHub redirect are unchanged.
+   (`http://127.0.0.1:*` / `http://localhost:*`) and stores
+   `state → redirect_uri` in Redis (`oauth:cli:state:<state>`, TTL 600s). The
+   existing CSRF state cookie and GitHub redirect are unchanged.
 3. After the normal GitHub exchange + user upsert, the callback detects the CLI
    flow (state key present in Redis), mints a **single-use one-time code**
    (`oauth:cli:code:<code> → userId`, TTL 60s) and redirects the browser to the
-   loopback `redirect_uri?code=<code>`. The long-lived refresh token never transits
-   a URL.
+   loopback `redirect_uri?code=<code>`. The long-lived refresh token never
+   transits a URL.
 4. The extension exchanges the code at **`POST /v1/auth/cli/exchange`** for
-   `{ access_token, refresh_token, user }` over HTTPS and stores the refresh token
-   in `context.secrets`.
+   `{ access_token, refresh_token, user }` over HTTPS and stores the refresh
+   token in `context.secrets`.
 5. `POST /v1/auth/refresh` and `POST /v1/auth/signout` additionally accept a
-   `{ refresh_token }` body (rotated value returned in the body) so the extension
-   can refresh/revoke without a cookie. The browser cookie paths are untouched.
+   `{ refresh_token }` body (rotated value returned in the body) so the
+   extension can refresh/revoke without a cookie. The browser cookie paths are
+   untouched.
 
 State (state→redirect_uri, one-time codes) lives only in Redis with short TTLs —
-**no DB migration**. Token minting reuses `signAccessToken` / `mintRefreshToken` /
-`rotateRefreshToken` / `revokeRefreshToken`.
+**no DB migration**. Token minting reuses `signAccessToken` / `mintRefreshToken`
+/ `rotateRefreshToken` / `revokeRefreshToken`.
 
 ### Consequences
 
 - The extension authenticates with no web app and no cookie support; the browser
   and extension flows share one set of endpoints with a clean branch.
-- The refresh token is delivered over HTTPS in the exchange body, never in a URL;
-  the only URL-borne secret is a 60-second single-use code.
-- The extension bundles with **esbuild** (`--format=cjs`, `vscode` external) so the
-  CJS VSCode host can consume `@commma/shared` (ESM, raw-TS source); `tsc --noEmit`
-  remains the typecheck.
+- The refresh token is delivered over HTTPS in the exchange body, never in a
+  URL; the only URL-borne secret is a 60-second single-use code.
+- The extension bundles with **esbuild** (`--format=cjs`, `vscode` external) so
+  the CJS VSCode host can consume `@commma/shared` (ESM, raw-TS source);
+  `tsc --noEmit` remains the typecheck.
 
 ### Rejected Alternatives
 
@@ -381,7 +515,7 @@ State (state→redirect_uri, one-time codes) lives only in Redis with short TTLs
   Codespaces, but adds moving parts; loopback is simpler to build and verify for
   the desktop MVP. Revisit if Remote/web VSCode support is needed.
 - **Manual token paste (PAT-style)** — clunky UX and needs a web/API page to
-  display a token (none exists yet); closer to the icebox "API access tokens" idea.
-- **Reusing the cookie refresh flow** — impossible: the browser, not the extension,
-  receives the callback's `Set-Cookie`.
-
+  display a token (none exists yet); closer to the icebox "API access tokens"
+  idea.
+- **Reusing the cookie refresh flow** — impossible: the browser, not the
+  extension, receives the callback's `Set-Cookie`.

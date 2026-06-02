@@ -14,9 +14,8 @@ commma is a three-tier distributed system:
 3. **Web App (React/Vite)** — presentation layer; session detail, leaderboards,
    profiles, heatmap export
 
-All three tiers communicate over HTTPS/JSON. A shared package
-(`@commma/shared`) holds Zod schemas enforcing the data contract across the
-extension→API boundary.
+All three tiers communicate over HTTPS/JSON. A shared package (`@commma/shared`)
+holds Zod schemas enforcing the data contract across the extension→API boundary.
 
 ---
 
@@ -241,35 +240,35 @@ CREATE INDEX follows_followee ON follows(followee_id);
 
 ## 6. API Route Map
 
-| Method | Path | Auth | Description |
-| -------- | ------ | ------ | ------------- |
-| GET | /v1/auth/github | None | Redirect to GitHub OAuth |
-| GET | /v1/auth/github/callback | None | Exchange code → JWT + refresh |
-| POST | /v1/auth/refresh | Refresh cookie | Rotate refresh token |
-| POST | /v1/auth/signout | JWT | Revoke refresh token |
-| GET | /v1/me | JWT | Authenticated user profile |
-| POST | /v1/ingest | JWT | Ingest HeartbeatBatch |
-| GET | /v1/sessions | JWT | Paginated session list (self) |
-| GET | /v1/sessions/:id | JWT | Session detail + heatmap |
-| POST | /v1/sessions/:id/heatmap-card | JWT | Server-side PNG for OG image |
-| GET | /v1/users/:handle | None | Public profile |
-| GET | /v1/users/:handle/sessions | None | Public session list |
-| POST | /v1/users/:handle/follow | JWT | Follow a user |
-| DELETE | /v1/users/:handle/follow | JWT | Unfollow a user |
-| GET | /v1/leaderboard | None | Leaderboard |
-| GET | /v1/feed | JWT | Activity feed |
+| Method | Path                          | Auth           | Description                   |
+| ------ | ----------------------------- | -------------- | ----------------------------- |
+| GET    | /v1/auth/github               | None           | Redirect to GitHub OAuth      |
+| GET    | /v1/auth/github/callback      | None           | Exchange code → JWT + refresh |
+| POST   | /v1/auth/refresh              | Refresh cookie | Rotate refresh token          |
+| POST   | /v1/auth/signout              | JWT            | Revoke refresh token          |
+| GET    | /v1/me                        | JWT            | Authenticated user profile    |
+| POST   | /v1/ingest                    | JWT            | Ingest HeartbeatBatch         |
+| GET    | /v1/sessions                  | JWT            | Paginated session list (self) |
+| GET    | /v1/sessions/:id              | JWT            | Session detail + heatmap      |
+| POST   | /v1/sessions/:id/heatmap-card | JWT            | Server-side PNG for OG image  |
+| GET    | /v1/users/:handle             | None           | Public profile                |
+| GET    | /v1/users/:handle/sessions    | None           | Public session list           |
+| POST   | /v1/users/:handle/follow      | JWT            | Follow a user                 |
+| DELETE | /v1/users/:handle/follow      | JWT            | Unfollow a user               |
+| GET    | /v1/leaderboard               | None           | Leaderboard                   |
+| GET    | /v1/feed                      | JWT            | Activity feed                 |
 
 ---
 
 ## 7. Caching Strategy
 
-| Data | Store | TTL | Invalidation |
-| ------ | ------- | ----- | -------------- |
-| Leaderboard (week) | Redis sorted set | 10 min | ZADD on write |
-| Leaderboard (month, alltime) | Redis sorted set | 1 hour | ZADD on write |
-| Session list (per user) | Redis string (JSON) | 60 sec | DEL on write |
-| Public profile stats | Redis string (JSON) | 5 min | DEL on write |
-| Rate limit counters | Redis sliding window | 1 hour | Natural expiry |
+| Data                         | Store                | TTL    | Invalidation   |
+| ---------------------------- | -------------------- | ------ | -------------- |
+| Leaderboard (week)           | Redis sorted set     | 10 min | ZADD on write  |
+| Leaderboard (month, alltime) | Redis sorted set     | 1 hour | ZADD on write  |
+| Session list (per user)      | Redis string (JSON)  | 60 sec | DEL on write   |
+| Public profile stats         | Redis string (JSON)  | 5 min  | DEL on write   |
+| Rate limit counters          | Redis sliding window | 1 hour | Natural expiry |
 
 ---
 
@@ -281,12 +280,12 @@ CREATE INDEX follows_followee ON follows(followee_id);
   in-process guard prevents overlapping runs, and `RUN_AGGREGATION` gates it so
   only one instance runs the loop if ever scaled out.
 - **Logic:** `SELECT DISTINCT user_id` → per user fetch events by `ts` →
-  boundary detection → finalize only *closed* sessions → build
+  boundary detection → finalize only _closed_ sessions → build
   sessions/langs/files/heatmap, update streaks, delete finalized events (one
   txn/user) → `ZINCRBY` leaderboard after commit.
-- **Failure:** a failed user is logged and retried on the next tick — its
-  events stay in the table until successfully finalized (no queue/DLQ). Re-runs
-  are idempotent because only closed sessions are written.
+- **Failure:** a failed user is logged and retried on the next tick — its events
+  stay in the table until successfully finalized (no queue/DLQ). Re-runs are
+  idempotent because only closed sessions are written.
 - **Cost:** zero idle Redis commands (no queue polling); Redis touched only on
   session write. This is the reason BullMQ was dropped — see ADR-010.
 
@@ -297,19 +296,19 @@ CREATE INDEX follows_followee ON follows(followee_id);
   in-process guard prevents overlapping runs. Hourly (not daily) so a broken
   streak is corrected within an hour of the UTC rollover rather than at a single
   fixed wall-clock minute that a restart could miss.
-- **Logic:** one bulk `UPDATE streaks SET current_days = 0 … RETURNING` for users
-  with `current_days > 0` and `last_active_date < yesterday` (UTC). `longest_days`
-  and `last_active_date` are left intact so the next session restarts the streak
-  at 1. Idempotent — already-zeroed rows are excluded by the `current_days > 0`
-  guard.
+- **Logic:** one bulk `UPDATE streaks SET current_days = 0 … RETURNING` for
+  users with `current_days > 0` and `last_active_date < yesterday` (UTC).
+  `longest_days` and `last_active_date` are left intact so the next session
+  restarts the streak at 1. Idempotent — already-zeroed rows are excluded by the
+  `current_days > 0` guard.
 - **Settled-user guard:** the update also requires `NOT EXISTS` any `events` row
   for the user. Aggregation lags reality (15-min idle gap + 5-min tick) and only
-  advances `last_active_date` on finalize, so a session ending near 00:00 UTC can
-  leave `last_active_date` stale just after midnight. Since events are pruned on
-  finalize, "no events" means `last_active_date` is authoritative; users with
-  pending events are skipped this tick and re-evaluated once their session
-  aggregates. This prevents a midnight-spanning session from being mis-scored
-  as a broken streak.
+  advances `last_active_date` on finalize, so a session ending near 00:00 UTC
+  can leave `last_active_date` stale just after midnight. Since events are
+  pruned on finalize, "no events" means `last_active_date` is authoritative;
+  users with pending events are skipped this tick and re-evaluated once their
+  session aggregates. This prevents a midnight-spanning session from being
+  mis-scored as a broken streak.
 
 ### Refresh Token Cleanup Job
 
@@ -323,7 +322,8 @@ CREATE INDEX follows_followee ON follows(followee_id);
 ### Weekly Recap Email Job
 
 - **Trigger:** cron every Sunday 09:00 UTC
-- **Logic:** compile stats for users with sessions in past 7 days → send via Resend/Postmark
+- **Logic:** compile stats for users with sessions in past 7 days → send via
+  Resend/Postmark
 
 ---
 
@@ -344,8 +344,8 @@ src/
 
 ## 10. Scalability Plan
 
-- **MVP:** EC2 t3.micro free tier · Upstash Redis free · Railway $5/mo ·
-  Vercel free = ~$5/mo
+- **MVP:** EC2 t3.micro free tier · Upstash Redis free · Railway $5/mo · Vercel
+  free = ~$5/mo
 - **1k DAU:** Same stack
 - **5k DAU:** Upgrade to t3.small, add Railway read replica
 - **10k DAU:** Migrate to ECS Fargate + ALB, move Redis to ElastiCache

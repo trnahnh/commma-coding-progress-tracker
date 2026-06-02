@@ -19,68 +19,69 @@ Each metric lists:
 
 ## Instrumentation status
 
-- **Today:** structured JSON logs (`apps/api/src/logger.ts`) and the Hono request
-  logger (per-request method/path/status/ms). No metrics aggregation, export, or
-  dashboards exist.
+- **Today:** structured JSON logs (`apps/api/src/logger.ts`) and the Hono
+  request logger (per-request method/path/status/ms). No metrics aggregation,
+  export, or dashboards exist.
 - **Planned (Phase 3 / infra):** choose a metrics sink (e.g. OpenTelemetry →
   hosted backend), derive the SLOs below from request logs, add alerting. Until
-  then, values are read ad-hoc from logs, the DB, and the Upstash/Railway consoles.
+  then, values are read ad-hoc from logs, the DB, and the Upstash/Railway
+  consoles.
 
 ---
 
 ## 1. System / SLO
 
-| Metric | now | target | source |
-| --- | --- | --- | --- |
-| Ingest p95 (`POST /v1/ingest`) | logs only | <50ms srv | Hono logger → sink |
-| Read p95 (see note) | not instrumented | <200ms; <150ms | logger + k6 |
-| Aggregation lag | not measured | ≤~20 min | `created_at − max(ts)` |
-| Ingest success (`202`/total) | not measured | ≥99.9% | request logger |
-| Server errors (`5xx`/total) | not measured | <0.1% | logger / unhandled |
-| Availability | not measured | 99.5% (MVP) | `/healthz` uptime |
+| Metric                         | now              | target         | source                 |
+| ------------------------------ | ---------------- | -------------- | ---------------------- |
+| Ingest p95 (`POST /v1/ingest`) | logs only        | <50ms srv      | Hono logger → sink     |
+| Read p95 (see note)            | not instrumented | <200ms; <150ms | logger + k6            |
+| Aggregation lag                | not measured     | ≤~20 min       | `created_at − max(ts)` |
+| Ingest success (`202`/total)   | not measured     | ≥99.9%         | request logger         |
+| Server errors (`5xx`/total)    | not measured     | <0.1%          | logger / unhandled     |
+| Availability                   | not measured     | 99.5% (MVP)    | `/healthz` uptime      |
 
-Read p95 routes: `/v1/me`, `/v1/sessions`, `/v1/sessions/:id`, `/v1/leaderboard`.
-Targets: <200 ms @ 100 concurrent (Phase 2 DoD); <150 ms @ 1k (Phase 3 DoD).
-`POST /v1/sessions/:id/heatmap-card` is **render-bound** (`sharp` rasterize) — it
-is excluded from the read-p95 target and carries its own `card` rate bucket; the
-load test must not hold it to `<150 ms`.
+Read p95 routes: `/v1/me`, `/v1/sessions`, `/v1/sessions/:id`,
+`/v1/leaderboard`. Targets: <200 ms @ 100 concurrent (Phase 2 DoD); <150 ms @ 1k
+(Phase 3 DoD). `POST /v1/sessions/:id/heatmap-card` is **render-bound** (`sharp`
+rasterize) — it is excluded from the read-p95 target and carries its own `card`
+rate bucket; the load test must not hold it to `<150 ms`.
 
 Aggregation lag: 5-min interval + 15-min idle gap (ADR-010); event `ts` →
 `sessions.created_at`.
 
 ## 2. Cost guardrails
 
-| Metric | now | target | source |
-| --- | --- | --- | --- |
-| Redis cmds/mo | ~0 idle (ADR-010) | <500k/mo | Upstash / commandstats |
-| `events` rows | pruned after finalize | bounded | `count(*)` |
-| `sessions` growth | historical (rebuild) | Railway plan | count + table size |
-| Postgres storage | not measured | ~$5 MVP plan | Railway console |
+| Metric            | now                   | target       | source                 |
+| ----------------- | --------------------- | ------------ | ---------------------- |
+| Redis cmds/mo     | ~0 idle (ADR-010)     | <500k/mo     | Upstash / commandstats |
+| `events` rows     | pruned after finalize | bounded      | `count(*)`             |
+| `sessions` growth | historical (rebuild)  | Railway plan | count + table size     |
+| Postgres storage  | not measured          | ~$5 MVP plan | Railway console        |
 
-Redis cost drivers: per-request rate limits + per-finalize `ZINCRBY` (no BullMQ).
-`events` holds only open/recent sessions after aggregation prunes finalized rows;
-bounded heartbeat field sizes + the 1 MB ingest body cap keep per-event/per-batch
-storage bounded. Heatmap-card renders per request (no Redis/disk PNG cache yet —
-deferred to stay under the command budget; add it before the feed serves
-thumbnails at scale).
+Redis cost drivers: per-request rate limits + per-finalize `ZINCRBY` (no
+BullMQ). `events` holds only open/recent sessions after aggregation prunes
+finalized rows; bounded heartbeat field sizes + the 1 MB ingest body cap keep
+per-event/per-batch storage bounded. Heatmap-card renders per request (no
+Redis/disk PNG cache yet — deferred to stay under the command budget; add it
+before the feed serves thumbnails at scale).
 
 ## 3. Privacy / trust (invariants — verifiable, brand-defining)
 
-| Metric | now | target | source |
-| --- | --- | --- | --- |
-| Key-content bytes | **0** (histogram only) | **0** forever | schema + audit |
-| `contentChanges.text` | never stored | never | `keyCounter.ts` |
-| PII (see note) | server-enforced modes | minimal modes | schema + ingest |
-| Leaderboard drift | not measured | 0 | DB sum vs `ZSCORE` |
+| Metric                | now                    | target        | source             |
+| --------------------- | ---------------------- | ------------- | ------------------ |
+| Key-content bytes     | **0** (histogram only) | **0** forever | schema + audit     |
+| `contentChanges.text` | never stored           | never         | `keyCounter.ts`    |
+| PII (see note)        | server-enforced modes  | minimal modes | schema + ingest    |
+| Leaderboard drift     | not measured           | 0             | DB sum vs `ZSCORE` |
 
-Key-content: no content column; only `key_freq` label histograms (ADR-006).
-PII: emails always; file paths when `privacy = full`. `summary` drops paths +
-`key_freq`; `off` stores nothing. Enforced **server-side at ingest** (not just by
-the extension) — `summary` strips `file`/`key_freq` before insert, `off` persists
-no events; `GET /v1/sessions/:id` also withholds files/heatmap from non-owners of
-`summary` owners. The `heatmap-card` endpoint applies the same gate (non-`full`
-owners' cards are owner-only). Auditable via the `events`/`sessions` rows,
-independent of client.
+Key-content: no content column; only `key_freq` label histograms (ADR-006). PII:
+emails always; file paths when `privacy = full`. `summary` drops paths +
+`key_freq`; `off` stores nothing. Enforced **server-side at ingest** (not just
+by the extension) — `summary` strips `file`/`key_freq` before insert, `off`
+persists no events; `GET /v1/sessions/:id` also withholds files/heatmap from
+non-owners of `summary` owners. The `heatmap-card` endpoint applies the same
+gate (non-`full` owners' cards are owner-only). Auditable via the
+`events`/`sessions` rows, independent of client.
 
 Leaderboard: `Σ sessions.duration_s` per period must match Redis ZSET score.
 Drift surfaces post-commit `ZINCRBY` failure (backlog B); Phase-2 rebuild fixes.
@@ -90,17 +91,18 @@ Drift surfaces post-commit `ZINCRBY` failure (backlog B); Phase-2 rebuild fixes.
 All currently **now: pre-launch, no users.** Defined here so instrumentation
 lands with the features rather than being retrofitted.
 
-| Metric | target | source |
-| --- | --- | --- |
-| Activation (install → HB @24h) | ≥60% | extension telemetry + events |
-| Retention W1 / W4 | W1≥40%; W4≥20% | cohort on events/sessions |
-| Sessions / active user / week | ≥5 | `sessions` |
-| Streak (`currentDays ≥ 3`) | grows MoM | `streaks` |
-| Launch GitHub stars | 200 / 72h | GitHub (ROADMAP Ph4) |
+| Metric                         | target         | source                       |
+| ------------------------------ | -------------- | ---------------------------- |
+| Activation (install → HB @24h) | ≥60%           | extension telemetry + events |
+| Retention W1 / W4              | W1≥40%; W4≥20% | cohort on events/sessions    |
+| Sessions / active user / week  | ≥5             | `sessions`                   |
+| Streak (`currentDays ≥ 3`)     | grows MoM      | `streaks`                    |
+| Launch GitHub stars            | 200 / 72h      | GitHub (ROADMAP Ph4)         |
 
 ---
 
 ## Review cadence
 
 Revisit at each phase boundary: confirm the prior phase's targets are met (or
-consciously deferred), and add metrics for the features the next phase introduces.
+consciously deferred), and add metrics for the features the next phase
+introduces.
