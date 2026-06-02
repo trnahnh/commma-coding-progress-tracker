@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Footer, LiveDot, Nav } from './components/chrome'
 import { getLeaderboard, type LeaderboardEntry } from './lib/api'
@@ -75,7 +75,7 @@ function Hero() {
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)] pt-[clamp(56px,9vw,120px)] pb-[clamp(48px,6vw,96px)]'>
         <div className='flex items-center gap-3.5 mb-10 sm:mb-12 opacity-0 animate-rise-700 delay-100'>
           <LiveDot />
-          <span className='font-mono text-[11px] tracking-[0.16em] uppercase text-ink-mute'>
+          <span className='font-mono text-[15px] tracking-[0.16em] uppercase text-ink-mute'>
             v0.1 · invite-only · 2,841 athletes
           </span>
         </div>
@@ -107,7 +107,7 @@ function Hero() {
             <div className='flex gap-3 items-center flex-wrap opacity-0 animate-rise-700 delay-640'>
               <a
                 href='#'
-                className='group inline-flex items-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[12px] uppercase tracking-wider font-medium
+                className='group inline-flex items-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium
                   bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors'
               >
                 Install the extension
@@ -117,7 +117,7 @@ function Hero() {
               </a>
               <a
                 href='#'
-                className='inline-flex items-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[12px] uppercase tracking-wider
+                className='inline-flex items-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[15px] uppercase tracking-wider
                   text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint transition-colors'
               >
                 See a sample profile
@@ -131,7 +131,7 @@ function Hero() {
                 <span className='block font-serif text-[clamp(34px,4vw,56px)] leading-none tracking-[-0.02em] tnum'>
                   {pulse.toLocaleString()}
                 </span>
-                <span className='block font-mono text-[11px] tracking-[0.14em] uppercase text-ink-mute mt-2.5'>
+                <span className='block font-mono text-[15px] tracking-[0.14em] uppercase text-ink-mute mt-2.5'>
                   active right now
                 </span>
               </div>
@@ -142,7 +142,7 @@ function Hero() {
                     d
                   </span>
                 </span>
-                <span className='block font-mono text-[11px] tracking-[0.14em] uppercase text-ink-mute mt-2.5'>
+                <span className='block font-mono text-[15px] tracking-[0.14em] uppercase text-ink-mute mt-2.5'>
                   longest streak
                 </span>
               </div>
@@ -150,7 +150,7 @@ function Hero() {
                 <span className='block font-serif text-[clamp(34px,4vw,56px)] leading-none tracking-[-0.02em] tnum'>
                   1.4M
                 </span>
-                <span className='block font-mono text-[11px] tracking-[0.14em] uppercase text-ink-mute mt-2.5'>
+                <span className='block font-mono text-[15px] tracking-[0.14em] uppercase text-ink-mute mt-2.5'>
                   hours logged
                 </span>
               </div>
@@ -161,7 +161,7 @@ function Hero() {
                     %
                   </span>
                 </span>
-                <span className='block font-mono text-[11px] tracking-[0.14em] uppercase text-ink-mute mt-2.5'>
+                <span className='block font-mono text-[15px] tracking-[0.14em] uppercase text-ink-mute mt-2.5'>
                   return next-day
                 </span>
               </div>
@@ -177,7 +177,7 @@ function Ticker() {
   const items = [...TICKER, ...TICKER, ...TICKER, ...TICKER]
   return (
     <div className='border-y border-rule bg-paper-2 overflow-hidden whitespace-nowrap'>
-      <div className='inline-flex gap-14 py-3.5 animate-marquee font-mono text-[12px] tracking-wide text-ink-mute'>
+      <div className='inline-flex gap-14 py-3.5 animate-marquee font-mono text-[15px] tracking-wide text-ink-mute'>
         {items.map((t, i) => (
           <span key={i} className='inline-flex items-center gap-2'>
             <span className='text-ink-faint'>◇</span>
@@ -202,14 +202,14 @@ function SectionHead({
 }) {
   return (
     <div className='grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-3 md:gap-8 items-baseline pb-[clamp(36px,5vw,72px)]'>
-      <span className='font-mono text-[11px] tracking-[0.18em] uppercase text-ink-mute'>
+      <span className='font-mono text-[15px] tracking-[0.18em] uppercase text-ink-mute'>
         § {no}
       </span>
       <h2 className='font-serif font-normal text-[clamp(30px,4.5vw,64px)] leading-none tracking-tight m-0'>
         {title}
       </h2>
       {aside && (
-        <span className='font-mono text-[11px] tracking-[0.14em] uppercase text-ink-mute md:text-right'>
+        <span className='font-mono text-[15px] tracking-[0.14em] uppercase text-ink-mute md:text-right'>
           {aside}
         </span>
       )}
@@ -226,7 +226,7 @@ function ActivityCard() {
     <div className='relative border border-rule-strong bg-linear-to-b from-paper-2 to-paper rounded overflow-hidden'>
       <div className='grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto] sm:gap-6 items-start px-5 sm:px-8 py-6 sm:py-7 border-b border-rule'>
         <div>
-          <div className='font-mono text-[11px] tracking-[0.16em] text-accent uppercase mb-2.5 flex items-center gap-2.5'>
+          <div className='font-mono text-[15px] tracking-[0.16em] text-accent uppercase mb-2.5 flex items-center gap-2.5'>
             <LiveDot color='accent' />
             session · 2026-05-26
           </div>
@@ -237,7 +237,7 @@ function ActivityCard() {
             </span>
           </h3>
         </div>
-        <div className='font-mono text-[12px] text-ink-mute flex flex-row sm:flex-col flex-wrap gap-x-4 gap-y-1.5 items-start sm:items-end whitespace-nowrap'>
+        <div className='font-mono text-[15px] text-ink-mute flex flex-row sm:flex-col flex-wrap gap-x-4 gap-y-1.5 items-start sm:items-end whitespace-nowrap'>
           <span>
             <strong className='text-ink font-medium'>{SESSION.date}</strong>
           </span>
@@ -274,18 +274,18 @@ function ActivityCard() {
             key={s.label}
             className={`px-5 sm:px-8 py-5 sm:py-6 ${i < 3 ? 'md:border-r' : ''} border-rule ${i < 2 ? 'border-b md:border-b-0' : ''} ${i === 1 ? 'border-r md:border-r' : ''}`}
           >
-            <span className='block font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-mute mb-3.5'>
+            <span className='block font-mono text-[15px] tracking-[0.16em] uppercase text-ink-mute mb-3.5'>
               {s.label}
             </span>
             <span className='flex items-baseline gap-1.5 font-serif text-[clamp(28px,3vw,44px)] leading-none tracking-[-0.02em] text-ink tnum'>
               {s.value}
               {s.unit && (
-                <span className='font-mono text-[12px] tracking-wide text-ink-mute lowercase'>
+                <span className='font-mono text-[15px] tracking-wide text-ink-mute lowercase'>
                   {s.unit}
                 </span>
               )}
               {s.delta && (
-                <span className='font-mono text-[11px] text-live tracking-wide ml-1.5'>
+                <span className='font-mono text-[15px] text-live tracking-wide ml-1.5'>
                   {s.delta}
                 </span>
               )}
@@ -295,7 +295,7 @@ function ActivityCard() {
       </div>
 
       <div className='px-5 sm:px-8 py-6 sm:py-8'>
-        <div className='flex justify-between items-baseline gap-3 mb-4 font-mono text-[11px] tracking-[0.14em] uppercase text-ink-mute'>
+        <div className='flex justify-between items-baseline gap-3 mb-4 font-mono text-[15px] tracking-[0.14em] uppercase text-ink-mute'>
           <span>Keystrokes / minute</span>
           <span className='text-right'>
             peak <span className='text-ink tnum'>241</span> at{' '}
@@ -330,7 +330,7 @@ function ActivityCard() {
           <path d={area} fill='url(#cfill)' />
           <path d={line} fill='none' stroke='#FF4D1A' strokeWidth='1.5' />
         </svg>
-        <div className='grid grid-cols-4 sm:grid-cols-8 mt-2.5 font-mono text-[10px] text-ink-faint tracking-wider'>
+        <div className='grid grid-cols-4 sm:grid-cols-8 mt-2.5 font-mono text-[15px] text-ink-faint tracking-wider'>
           {[
             '08:42',
             '09:00',
@@ -353,13 +353,13 @@ function ActivityCard() {
 
       <div className='grid grid-cols-1 md:grid-cols-2 border-t border-rule'>
         <div className='px-5 sm:px-8 py-6 border-b md:border-b-0 md:border-r border-rule'>
-          <div className='font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-mute mb-3.5'>
+          <div className='font-mono text-[15px] tracking-[0.16em] uppercase text-ink-mute mb-3.5'>
             Languages
           </div>
           {SESSION.langs.map((l) => (
             <div
               key={l.name}
-              className='grid grid-cols-[10px_1fr_auto] items-center gap-3 py-2 font-mono text-[12.5px] text-ink-soft border-b border-dashed border-rule last:border-b-0'
+              className='grid grid-cols-[10px_1fr_auto] items-center gap-3 py-2 font-mono text-[15px] text-ink-soft border-b border-dashed border-rule last:border-b-0'
             >
               <span
                 className='w-2.5 h-2.5 rounded-sm'
@@ -375,13 +375,13 @@ function ActivityCard() {
           ))}
         </div>
         <div className='px-5 sm:px-8 py-6'>
-          <div className='font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-mute mb-3.5'>
+          <div className='font-mono text-[15px] tracking-[0.16em] uppercase text-ink-mute mb-3.5'>
             Most-touched files
           </div>
           {SESSION.files.map((f) => (
             <div
               key={f.name}
-              className='grid grid-cols-[1fr_auto] items-baseline gap-3 py-2 font-mono text-[12.5px] text-ink-soft border-b border-dashed border-rule last:border-b-0'
+              className='grid grid-cols-[1fr_auto] items-baseline gap-3 py-2 font-mono text-[15px] text-ink-soft border-b border-dashed border-rule last:border-b-0'
             >
               <span className='truncate'>
                 <span className='text-ink-mute'>{f.path}</span>
@@ -468,17 +468,17 @@ function HowItWorks() {
               key={s.no}
               className={`px-5 sm:px-8 py-8 sm:py-10 ${i < 2 ? 'md:border-r' : ''} ${i < 2 ? 'border-b md:border-b-0' : ''} border-rule`}
             >
-              <div className='font-mono text-[11px] tracking-[0.16em] text-ink-mute flex items-center gap-3 mb-7'>
+              <div className='font-mono text-[15px] tracking-[0.16em] text-ink-mute flex items-center gap-3 mb-7'>
                 <span>{s.no}</span>
                 <span className='flex-1 h-px bg-rule' />
               </div>
-              <pre className='font-mono text-[12px] leading-snug text-accent bg-paper-2 border border-rule px-4 py-3.5 rounded-[2px] mb-6 whitespace-pre overflow-x-auto'>
+              <pre className='font-mono text-[15px] leading-snug text-accent bg-paper-2 border border-rule px-4 py-3.5 rounded-[2px] mb-6 whitespace-pre overflow-x-auto'>
                 {s.ascii}
               </pre>
               <h3 className='font-serif font-normal text-[28px] leading-tight tracking-[-0.015em] m-0 mb-3.5 text-ink'>
                 {s.title}
               </h3>
-              <p className='text-[14px] leading-relaxed text-ink-soft m-0 max-w-[36ch]'>
+              <p className='text-[15px] leading-relaxed text-ink-soft m-0 max-w-[36ch]'>
                 {s.body}
               </p>
             </div>
@@ -500,7 +500,7 @@ function LeaderRow({
   return (
     <Link
       to={`/@${entry.handle}`}
-      className={`group grid grid-cols-[40px_1fr_auto] md:grid-cols-[56px_1.4fr_1fr_1fr_32px] items-center px-4 sm:px-6 py-4 gap-3 border-b border-rule last:border-b-0 font-mono text-[13px] text-ink-soft relative transition-colors ${isSelf ? 'bg-accent-soft' : 'hover:bg-paper-2'}`}
+      className={`group grid grid-cols-[40px_1fr_auto] md:grid-cols-[56px_1.4fr_1fr_1fr_32px] items-center px-4 sm:px-6 py-4 gap-3 border-b border-rule last:border-b-0 font-mono text-[15px] text-ink-soft relative transition-colors ${isSelf ? 'bg-accent-soft' : 'hover:bg-paper-2'}`}
     >
       {isSelf && (
         <span className='absolute left-0 top-0 bottom-0 w-0.5 bg-accent' />
@@ -520,7 +520,7 @@ function LeaderRow({
             className='shrink-0 w-8 h-8 rounded-full border border-rule object-cover'
           />
         ) : (
-          <span className='shrink-0 w-8 h-8 rounded-full bg-paper-3 border border-rule-strong font-serif text-[14px] text-ink grid place-items-center'>
+          <span className='shrink-0 w-8 h-8 rounded-full bg-paper-3 border border-rule-strong font-serif text-[15px] text-ink grid place-items-center'>
             {entry.handle[0].toUpperCase()}
           </span>
         )}
@@ -528,7 +528,7 @@ function LeaderRow({
           <span className='block text-ink font-medium truncate'>
             @{entry.handle}
           </span>
-          <span className='block md:hidden text-[11px] text-ink-mute mt-0.5 tnum'>
+          <span className='block md:hidden text-[15px] text-ink-mute mt-0.5 tnum'>
             {style?.label}
             {entry.streak_days > 0 ? ` · ${entry.streak_days}d` : ''}
           </span>
@@ -539,7 +539,7 @@ function LeaderRow({
       </span>
       <span className='hidden md:flex items-center gap-4'>
         {style && (
-          <span className='flex items-center gap-2 text-[12px]'>
+          <span className='flex items-center gap-2 text-[15px]'>
             <span
               className='w-2 h-2 rounded-sm'
               style={{ background: style.color }}
@@ -554,7 +554,7 @@ function LeaderRow({
           </span>
         )}
       </span>
-      <span className='hidden md:block text-accent font-mono text-[14px] text-right opacity-0 -translate-x-1 transition group-hover:opacity-100 group-hover:translate-x-0'>
+      <span className='hidden md:block text-accent font-mono text-[15px] text-right opacity-0 -translate-x-1 transition group-hover:opacity-100 group-hover:translate-x-0'>
         →
       </span>
     </Link>
@@ -591,7 +591,7 @@ function Leaderboard() {
           aside={aside}
         />
         <div className='border-y border-rule-strong'>
-          <div className='grid grid-cols-[40px_1fr_auto] md:grid-cols-[56px_1.4fr_1fr_1fr_32px] items-center px-4 sm:px-6 py-3.5 gap-3 font-mono text-[10.5px] tracking-[0.14em] uppercase text-ink-mute bg-paper-2 border-b border-rule'>
+          <div className='grid grid-cols-[40px_1fr_auto] md:grid-cols-[56px_1.4fr_1fr_1fr_32px] items-center px-4 sm:px-6 py-3.5 gap-3 font-mono text-[15px] tracking-[0.14em] uppercase text-ink-mute bg-paper-2 border-b border-rule'>
             <span>Rank</span>
             <span>Athlete</span>
             <span className='text-right md:text-left'>Time</span>
@@ -599,7 +599,7 @@ function Leaderboard() {
             <span className='hidden md:block' />
           </div>
           {entries.length === 0 ? (
-            <div className='px-4 sm:px-6 py-10 font-mono text-[12px] text-ink-mute text-center'>
+            <div className='px-4 sm:px-6 py-10 font-mono text-[15px] text-ink-mute text-center'>
               No data yet — be the first to log a session.
             </div>
           ) : (
@@ -621,7 +621,7 @@ function Final() {
   return (
     <section className='py-[clamp(72px,12vw,200px)] text-center border-t border-rule relative'>
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
-        <p className='font-mono text-[12px] tracking-[0.18em] uppercase text-ink-mute m-0 mb-9'>
+        <p className='font-mono text-[15px] tracking-[0.18em] uppercase text-ink-mute m-0 mb-9'>
           <LiveDot /> &nbsp; 2,841 athletes logging right now
         </p>
         <h2 className='font-serif font-normal text-[clamp(44px,9vw,140px)] leading-[0.95] tracking-[-0.035em] m-0 mb-10 mx-auto max-w-[14ch] text-ink'>
@@ -634,11 +634,11 @@ function Final() {
           <input
             type='email'
             placeholder='you@dev.local'
-            className='flex-1 min-w-0 bg-transparent border-0 outline-none text-ink font-mono text-[13px] py-3'
+            className='flex-1 min-w-0 bg-transparent border-0 outline-none text-ink font-mono text-[15px] py-3'
           />
           <button
             type='submit'
-            className='group shrink-0 inline-flex items-center gap-2.5 h-[42px] px-4 sm:px-5 rounded-full font-mono text-[12px] uppercase tracking-wider font-medium bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors'
+            className='group shrink-0 inline-flex items-center gap-2.5 h-[42px] px-4 sm:px-5 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors'
           >
             <span className='hidden sm:inline'>Request access</span>
             <span className='sm:hidden'>Join</span>
@@ -647,7 +647,7 @@ function Final() {
             </span>
           </button>
         </form>
-        <p className='font-mono text-[11px] tracking-wider uppercase text-ink-mute mt-6'>
+        <p className='font-mono text-[15px] tracking-wider uppercase text-ink-mute mt-6'>
           free during early access · no card · leave anytime
         </p>
       </div>
@@ -655,11 +655,67 @@ function Final() {
   )
 }
 
+function ProgressBar() {
+  const barRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const update = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight
+      const pct = max > 0 ? Math.min(1, window.scrollY / max) : 0
+      if (barRef.current) barRef.current.style.transform = `scaleX(${pct})`
+    }
+    window.addEventListener('scroll', update, { passive: true })
+    return () => window.removeEventListener('scroll', update)
+  }, [])
+  return (
+    <div
+      ref={barRef}
+      className='fixed top-0 left-0 right-0 z-60 h-[2px] bg-accent origin-left pointer-events-none'
+      style={{ transform: 'scaleX(0)' }}
+    />
+  )
+}
+
+function BackToTop() {
+  const btnRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    const check = () => {
+      const el = btnRef.current
+      if (!el) return
+      const show = window.scrollY > 500
+      el.style.opacity = show ? '1' : '0'
+      el.style.transform = show ? 'translateY(0)' : 'translateY(10px)'
+      el.style.pointerEvents = show ? 'auto' : 'none'
+    }
+    window.addEventListener('scroll', check, { passive: true })
+    return () => window.removeEventListener('scroll', check)
+  }, [])
+  return (
+    <button
+      ref={btnRef}
+      type='button'
+      aria-label='Back to top'
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      style={{
+        opacity: '0',
+        transform: 'translateY(10px)',
+        pointerEvents: 'none',
+        transition: 'opacity 250ms, transform 250ms',
+      }}
+      className='fixed bottom-6 right-5 sm:right-6 z-50 w-9 h-9 sm:w-10 sm:h-10 rounded-full
+        bg-paper-3 border border-rule-strong text-ink-mute hover:text-ink hover:border-ink-faint
+        font-serif text-[18px] flex items-center justify-center'
+    >
+      ↑
+    </button>
+  )
+}
+
 export default function App() {
   return (
     <div className='min-h-screen flex flex-col'>
       <Nav />
-      <main className='flex-1'>
+      <ProgressBar />
+      <main className='flex-1 animate-page-in'>
         <Hero />
         <Ticker />
         <Activity />
@@ -668,6 +724,7 @@ export default function App() {
         <Final />
       </main>
       <Footer />
+      <BackToTop />
     </div>
   )
 }
