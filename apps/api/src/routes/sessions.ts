@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { and, desc, eq } from 'drizzle-orm'
+import { and, desc, eq, gte, isNotNull } from 'drizzle-orm'
 import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import sharp from 'sharp'
@@ -69,6 +69,63 @@ sessionRoutes.get(
     return c.json({
       sessions: page.map((s) => toSessionSummary(s, topLang.get(s.id) ?? null)),
       next_cursor: nextCursor,
+    })
+  },
+)
+
+sessionRoutes.get(
+  '/featured',
+  rateLimit({ scope: 'read', limit: 300, windowS: 3600, key: ipKey }),
+  async (c) => {
+    const rows = await db
+      .select()
+      .from(sessions)
+      .innerJoin(users, eq(users.id, sessions.userId))
+      .where(
+        and(
+          eq(users.privacy, 'full'),
+          isNotNull(sessions.keyboardHeatmap),
+          gte(sessions.durationS, 300),
+        ),
+      )
+      .orderBy(desc(sessions.startedAt))
+      .limit(1)
+
+    const row = rows[0]
+    if (!row) return apiError(c, 'NOT_FOUND', 'No featured session available')
+
+    const { sessions: session, users: owner } = row
+    const [langRows, fileRows] = await Promise.all([
+      db
+        .select()
+        .from(sessionLangs)
+        .where(eq(sessionLangs.sessionId, session.id))
+        .orderBy(desc(sessionLangs.pct)),
+      db
+        .select()
+        .from(sessionFiles)
+        .where(eq(sessionFiles.sessionId, session.id))
+        .orderBy(desc(sessionFiles.changes))
+        .limit(10),
+    ])
+
+    c.header('Cache-Control', 'public, max-age=300')
+    return c.json({
+      id: session.id,
+      started_at: session.startedAt,
+      ended_at: session.endedAt,
+      duration_s: session.durationS,
+      lines_delta: session.linesDelta,
+      pace_cpm: session.paceCpm,
+      peak_cpm: session.peakCpm,
+      user: { handle: owner.handle, avatar_url: owner.avatarUrl },
+      langs: langRows.map((l) => ({
+        lang: l.lang,
+        duration_s: l.durationS,
+        pct: Number(l.pct),
+      })),
+      files: fileRows.map((f) => ({ path: f.path, changes: f.changes })),
+      keyboard_heatmap: session.keyboardHeatmap ?? null,
     })
   },
 )
