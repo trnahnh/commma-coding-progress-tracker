@@ -226,6 +226,7 @@ export function Footer() {
     { label: 'Feed', to: '/feed' },
     { label: 'Leaderboard', to: '/leaderboard' },
     { label: 'Pricing', to: '/pricing' },
+    { label: 'Changelog', to: '/changelog' },
     { label: 'API', to: '/api' },
   ]
   const company = [
@@ -234,8 +235,8 @@ export function Footer() {
   ]
   const legal = [
     { label: 'Privacy', to: '/privacy' },
+    { label: 'Terms', to: '/terms' },
     { label: 'Status', to: '/status' },
-    { label: '404', to: '/404' },
   ]
 
   return (
@@ -246,7 +247,7 @@ export function Footer() {
         </div>
 
         <div className='pb-10 border-b border-rule'>
-          <div className='grid grid-cols-2 sm:grid-cols-3 gap-8 sm:gap-12 max-w-2xl mx-auto'>
+          <div className='flex flex-wrap justify-center gap-10 sm:gap-16'>
             <div>
               <p className='font-mono text-[11px] tracking-[0.18em] uppercase text-ink-mute mb-4 m-0'>
                 Product

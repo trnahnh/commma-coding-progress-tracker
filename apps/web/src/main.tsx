@@ -18,6 +18,8 @@ import Api from './pages/Api.tsx'
 import Careers from './pages/Careers.tsx'
 import Contact from './pages/Contact.tsx'
 import Status from './pages/Status.tsx'
+import Terms from './pages/Terms.tsx'
+import Changelog from './pages/Changelog.tsx'
 
 const router = createBrowserRouter([
   {
@@ -34,6 +36,8 @@ const router = createBrowserRouter([
       { path: '/careers', element: <Careers /> },
       { path: '/contact', element: <Contact /> },
       { path: '/privacy', element: <Privacy /> },
+      { path: '/terms', element: <Terms /> },
+      { path: '/changelog', element: <Changelog /> },
       { path: '/api', element: <Api /> },
       { path: '/status', element: <Status /> },
       { path: '/404', element: <NotFound /> },
