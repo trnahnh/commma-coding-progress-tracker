@@ -467,6 +467,101 @@ Followees who later set `privacy='off'` are excluded from the feed. Each
 
 ---
 
+### `GET /v1/sessions/featured`
+
+Returns the most recent public session with a keyboard heatmap for use on the
+landing page.
+
+**Auth:** None  
+**Rate limit:** 300/hr per IP  
+**Cache-Control:** `public, max-age=300`
+
+**Response:**
+
+```json
+{
+  "id": "...",
+  "started_at": "2026-06-01T08:42:00Z",
+  "ended_at": "2026-06-01T11:00:00Z",
+  "duration_s": 8280,
+  "lines_delta": 1247,
+  "pace_cpm": 184,
+  "peak_cpm": 210,
+  "user": { "handle": "northbound", "avatar_url": "..." },
+  "langs": [{ "lang": "TypeScript", "duration_s": 4320, "pct": 52.0 }],
+  "files": [{ "path": "apps/api/src/sessions.ts", "changes": 423 }],
+  "keyboard_heatmap": { "counts": {}, "freq": {}, "total": 0 }
+}
+```
+
+Selection: most recent `privacy='full'` session with a heatmap and
+`duration_s >= 300`. Returns `404` if no qualifying session exists.
+
+---
+
+### `GET /v1/stats/activity`
+
+Returns 60 days of aggregated daily coding activity across all public users, for
+the landing-page sparkline chart.
+
+**Auth:** None  
+**Rate limit:** 300/hr per IP  
+**Cache-Control:** `public, max-age=3600`
+
+**Response:**
+
+```json
+{
+  "days": [
+    { "date": "2026-04-04", "duration_s": 18600 },
+    { "date": "2026-04-05", "duration_s": 0 }
+  ]
+}
+```
+
+Always returns exactly 60 entries (oldest → newest, UTC calendar days). Missing
+days are filled with `duration_s: 0`. Excludes `privacy='off'` users.
+
+---
+
+### `GET /v1/activity/stream`
+
+Returns recent activity entries derived from finished sessions, for the
+landing-page ticker marquee.
+
+**Auth:** None  
+**Rate limit:** 300/hr per IP  
+**Cache-Control:** `public, max-age=60`
+
+**Response:**
+
+```json
+{
+  "entries": [
+    {
+      "who": "northbound",
+      "what": "finished a 2h 14m session in",
+      "em": "Go",
+      "session_id": "...",
+      "ts": "2026-06-01T11:00:00Z"
+    },
+    {
+      "who": "falsetto",
+      "what": "+1,204 lines in",
+      "em": "Rust",
+      "session_id": "...",
+      "ts": "2026-06-01T10:00:00Z"
+    }
+  ]
+}
+```
+
+Up to 30 entries from the last 30 days, newest first. Sessions shorter than 10
+minutes with fewer than 100 lines are omitted. Excludes `privacy='off'` users.
+Each entry maps to exactly one session.
+
+---
+
 ## Error Format
 
 All errors follow this shape:
