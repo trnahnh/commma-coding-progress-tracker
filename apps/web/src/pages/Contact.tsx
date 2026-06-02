@@ -41,12 +41,12 @@ export default function Contact() {
               GitHub
             </span>
             <a
-              href='https://github.com/NauriFive/commma-coding-progress-tracker'
+              href='https://github.com/trnahnh'
               target='_blank'
               rel='noopener noreferrer'
               className='font-mono text-[14px] text-ink-soft hover:text-ink transition-colors inline-flex items-center gap-1.5 break-all'
             >
-              NauriFive/commma-coding-progress-tracker
+              trnahnh
               <span className='text-ink-mute text-[12px] shrink-0'>↗</span>
             </a>
           </div>
