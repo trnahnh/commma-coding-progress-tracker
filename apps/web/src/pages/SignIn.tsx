@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Wordmark } from '../components/chrome'
 import { useAuth } from '../lib/auth'
 
@@ -43,6 +43,12 @@ export default function SignIn() {
 
   return (
     <div className='min-h-screen bg-paper flex flex-col items-center justify-center px-6 animate-page-in'>
+      <Link
+        to='/'
+        className='absolute top-5 left-5 sm:top-7 sm:left-7 inline-flex items-center gap-2 font-mono text-[13px] text-ink-faint hover:text-ink transition-colors py-2 px-1'
+      >
+        ← back
+      </Link>
       <a href='/' className='mb-16'>
         <Wordmark size='text-[36px]' />
       </a>
