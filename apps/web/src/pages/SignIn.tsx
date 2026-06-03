@@ -42,10 +42,10 @@ export default function SignIn() {
   }, [isLoading, token, navigate])
 
   return (
-    <div className='min-h-screen bg-paper flex flex-col items-center justify-center px-6 animate-page-in'>
+    <div className='relative min-h-screen bg-paper flex flex-col items-center justify-center px-6 animate-page-in'>
       <Link
         to='/'
-        className='absolute top-5 left-5 sm:top-7 sm:left-7 inline-flex items-center gap-2 font-mono text-[13px] text-ink-faint hover:text-ink transition-colors py-2 px-1'
+        className='absolute top-4 left-4 sm:top-6 sm:left-6 inline-flex items-center gap-2 font-mono text-[13px] text-ink-faint hover:text-ink transition-colors py-3 px-3'
       >
         ← back
       </Link>
