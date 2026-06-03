@@ -45,7 +45,7 @@ export default function SignIn() {
     <div className='relative min-h-screen bg-paper flex flex-col items-center justify-center px-6 animate-page-in'>
       <Link
         to='/'
-        className='absolute top-4 left-4 sm:top-6 sm:left-6 inline-flex items-center gap-2 font-mono text-[13px] text-accent-2 hover:text-ink transition-colors py-3 px-3'
+        className='absolute top-4 left-4 sm:top-6 sm:left-6 inline-flex items-center gap-2 font-mono text-[13px] text-accent-2 hover:text-ink border border-transparent hover:border-accent-2 rounded-full transition-colors py-3 px-3'
       >
         ← back
       </Link>
