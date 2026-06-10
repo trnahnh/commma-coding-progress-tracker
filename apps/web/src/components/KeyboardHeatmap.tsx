@@ -188,13 +188,19 @@ export default function KeyboardHeatmap({
           </button>
         ))}
       </div>
-      <div className='overflow-hidden rounded border border-rule bg-paper/40 p-3 sm:p-4'>
-        <canvas
-          ref={canvasRef}
-          className='mx-auto block'
-          style={{ width: '100%', height: 'auto', maxWidth: `${logicalW}px` }}
-        />
+      <div className='rounded border border-rule bg-paper/40'>
+        <div className='relative overflow-x-auto p-3 sm:p-4'>
+          <canvas
+            ref={canvasRef}
+            className='mx-auto block'
+            style={{ width: `${logicalW}px`, height: `${logicalH}px` }}
+          />
+          <div className='pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-paper/90 to-transparent sm:hidden' />
+        </div>
       </div>
+      <p className='mt-1.5 text-center font-mono text-[10px] uppercase tracking-widest text-ink-faint sm:hidden'>
+        swipe to explore
+      </p>
       {isPro ? (
         <div className='mt-4 flex items-center justify-end gap-2'>
           <span className='font-mono text-[10px] uppercase tracking-wider text-ink-faint'>
