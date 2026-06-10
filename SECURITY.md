@@ -85,8 +85,8 @@ recover suppressed data is also in scope.
 
 **Out of scope:**
 
-- Vulnerabilities in third-party infrastructure we deploy on (Railway, Upstash,
-  Vercel, AWS) — report those to the respective vendor.
+- Vulnerabilities in third-party infrastructure we deploy on (AWS, Railway,
+  Upstash) — report those to the respective vendor.
 - Denial of service from traffic volume alone (the API has documented rate
   limits; report a _bypass_ of them instead).
 - Social engineering, physical attacks, or compromised end-user machines.

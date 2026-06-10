@@ -336,31 +336,50 @@ call.
 
 ---
 
-## ADR-009: Deployment Infrastructure — EC2 + Railway + Vercel + Upstash
+## ADR-009: Deployment Infrastructure — AWS Compute (EC2 + S3/CloudFront)
 
-**Status:** Accepted — 2026-05
+**Status:** Accepted — 2026-05 (web target revised 2026-06: Vercel → S3 +
+CloudFront)
 
-**Decision:**
+**Decision:** Host both compute tiers on AWS. The API runs on EC2; the web app
+is a static Vite build served from **S3 + CloudFront**. PostgreSQL stays on
+Railway and Redis on Upstash (both third-party managed) — they are unaffected by
+the all-AWS hosting move and migrate to RDS/ElastiCache only at the scale points
+below.
 
 | Layer      | Provider               | Cost                            |
 | ---------- | ---------------------- | ------------------------------- |
 | API        | AWS EC2 t3.micro + PM2 | $0 free tier (12mo), then $8/mo |
+| Web        | AWS S3 + CloudFront    | ~$0 free tier, then <$1/mo MVP  |
 | Redis      | Upstash free tier      | $0                              |
 | PostgreSQL | Railway Hobby          | $5/mo                           |
-| Web        | Vercel Hobby           | $0                              |
 | **Total**  |                        | **~$5/mo**                      |
 
 **Rationale:** Zero users at launch — no need for load balancers or containers.
-EC2 t3.micro free tier runs PM2 + Hono/Node with plenty of headroom. Upstash
-serverless Redis is free at MVP scale. Railway gives zero-config managed
-Postgres. Vercel handles the frontend with native Vite/React support, PR preview
-deploys, and a global CDN.
+EC2 t3.micro free tier runs PM2 + Hono/Node with plenty of headroom. The web app
+has no SSR or serverless functions — `vite build` emits a static `dist/`, so an
+S3 origin behind CloudFront gives global CDN delivery at near-zero cost and
+keeps the whole stack under one AWS account/billing/IAM boundary alongside the
+API. SPA deep-link routing (`/sessions/:id`, `/@handle`) is handled by a
+CloudFront custom error response mapping 403/404 to `/index.html`;
+`VITE_API_BASE_URL` is injected at build time in CI before the `aws s3 sync`.
+Upstash serverless Redis is free at MVP scale; Railway gives zero-config managed
+Postgres.
+
+**Vercel — temporary interim only:** Vercel (with `vercel.json` SPA rewrites)
+may be used as a stopgap web host during early development for its zero-config
+git-push deploys, but it is **not** the target. The committed target is S3 +
+CloudFront so the platform is fully AWS. Do not document Vercel as the MVP host.
 
 **Migration path:** At 10k DAU or when the free tier expires, migrate API to ECS
-Fargate + ALB. App code stays identical — only the deploy target changes.
+Fargate + ALB and move the data tier to RDS + ElastiCache. App code and the web
+build stay identical — only the deploy target changes.
 
 **Rejected:** ECS Fargate at launch — ALB costs $18/mo fixed regardless of
-traffic. ElastiCache at launch — Upstash free tier is sufficient.
+traffic. ElastiCache / RDS at launch — Upstash and Railway free/hobby tiers are
+sufficient. AWS Amplify Hosting for the web — closer to Vercel's UX (PR
+previews, managed rewrites) but adds a managed-service cost and abstraction over
+the same S3 + CloudFront primitives we can wire directly.
 
 ---
 

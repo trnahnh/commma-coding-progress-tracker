@@ -344,12 +344,13 @@ src/
 
 ## 10. Scalability Plan
 
-- **MVP:** EC2 t3.micro free tier · Upstash Redis free · Railway $5/mo · Vercel
-  free = ~$5/mo
+- **MVP:** EC2 t3.micro free tier · S3 + CloudFront (web) · Upstash Redis free ·
+  Railway $5/mo = ~$5/mo (fully AWS-hosted compute; see ADR-009)
 - **1k DAU:** Same stack
 - **5k DAU:** Upgrade to t3.small, add Railway read replica
-- **10k DAU:** Migrate to ECS Fargate + ALB, move Redis to ElastiCache
-- **50k DAU:** ECS auto-scaling, CloudFront, separate ingest/read services
+- **10k DAU:** Migrate API to ECS Fargate + ALB, move data tier to RDS +
+  ElastiCache (web stays on S3 + CloudFront)
+- **50k DAU:** ECS auto-scaling, separate ingest/read services
 
 ### Deployment Secrets (GitHub Actions)
 
@@ -360,6 +361,20 @@ repository secrets under **Settings → Secrets and variables → Actions**:
 
 - `EC2_HOST` — public IP or domain of the EC2 instance
 - `EC2_SSH_KEY` — contents of the `.pem` private key file
+
+The web app deploys to S3 + CloudFront (ADR-009). Its CI job runs `vite build`
+with `VITE_API_BASE_URL` set, `aws s3 sync`s `dist/` to the bucket, then
+invalidates the distribution. That path needs:
+
+- `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` — deploy IAM user (scoped to the
+  bucket + `cloudfront:CreateInvalidation`)
+- `WEB_S3_BUCKET` — target bucket name
+- `CLOUDFRONT_DISTRIBUTION_ID` — for the post-sync cache invalidation
+- `VITE_API_BASE_URL` — `https://api.commma.dev`, inlined at build time
+
+SPA deep links are served by a CloudFront custom error response mapping 403/404
+to `/index.html` (the S3+CloudFront equivalent of the interim `vercel.json`
+rewrites).
 
 ---
 
