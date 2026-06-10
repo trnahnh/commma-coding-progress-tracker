@@ -55,3 +55,19 @@ jobs:
           aws cloudfront create-invalidation
           --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
           --paths "/*"
+
+      - name: Smoke check
+        env:
+          WEB_URL: ${{ vars.WEB_URL || 'https://commma.dev' }}
+        run: |
+          for i in $(seq 1 15); do
+            code=$(curl -fsS -o /dev/null -w "%{http_code}" "$WEB_URL" || true)
+            if [ "$code" = "200" ]; then
+              echo "web reachable ($code)"
+              exit 0
+            fi
+            echo "attempt $i: got '$code', retrying"
+            sleep 4
+          done
+          echo "smoke check failed: $WEB_URL did not return 200"
+          exit 1

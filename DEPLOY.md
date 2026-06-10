@@ -18,10 +18,10 @@ The work is split in two:
 Once the one-time setup is done, a release is two manual workflow runs in the
 GitHub **Actions** tab:
 
-| Workflow     | File                               | What it does                            |
-| ------------ | ---------------------------------- | --------------------------------------- |
-| `Deploy API` | `.github/workflows/deploy-api.yml` | SSH to EC2, pull, build, PM2 restart    |
-| `Deploy Web` | `.github/workflows/deploy-web.yml` | Build, `s3 sync`, CloudFront invalidate |
+| Workflow     | File                               | What it does                                             |
+| ------------ | ---------------------------------- | -------------------------------------------------------- |
+| `Deploy API` | `.github/workflows/deploy-api.yml` | SSH to EC2, pull, build, PM2 restart, `/health` check    |
+| `Deploy Web` | `.github/workflows/deploy-web.yml` | Build, `s3 sync`, CloudFront invalidate, URL smoke check |
 
 Both trigger on `workflow_dispatch` only, so deploying is intentional. Open the
 workflow, press **Run workflow**, pick `main`, confirm. CI (`ci.yml`) runs
@@ -145,6 +145,7 @@ Variables:
 | `WEB_S3_BUCKET`     | (none, required)         | `deploy-web` |
 | `AWS_REGION`        | `us-east-1`              | `deploy-web` |
 | `VITE_API_BASE_URL` | `https://api.commma.dev` | `deploy-web` |
+| `WEB_URL`           | `https://commma.dev`     | `deploy-web` |
 
 The `deploy-web` workflow authenticates to AWS with GitHub OIDC (no long-lived
 keys): create an IAM role trusting the repo's OIDC provider, granting only
