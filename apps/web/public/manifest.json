@@ -1,0 +1,53 @@
+{
+  "name": "commma",
+  "short_name": "commma",
+  "description": "Track your coding like an athlete. Pace, splits, streaks, leaderboards, and a shareable keyboard heatmap.",
+  "start_url": "/",
+  "scope": "/",
+  "id": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#0c0b08",
+  "background_color": "#0c0b08",
+  "lang": "en",
+  "categories": ["productivity", "developer-tools"],
+  "icons": [
+    {
+      "src": "/apple-touch-icon.svg",
+      "sizes": "180x180",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Leaderboard",
+      "short_name": "Leaderboard",
+      "url": "/leaderboard",
+      "description": "View the global coding leaderboard"
+    },
+    {
+      "name": "Feed",
+      "short_name": "Feed",
+      "url": "/feed",
+      "description": "Browse sessions from developers you follow"
+    }
+  ]
+}

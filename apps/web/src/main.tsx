@@ -53,3 +53,7 @@ createRoot(document.getElementById('root')!).render(
     </AuthProvider>
   </StrictMode>,
 )
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+}
