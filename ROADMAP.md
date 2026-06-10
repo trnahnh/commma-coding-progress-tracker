@@ -278,7 +278,7 @@ Goal: mobile, multi-editor, self-hosted.
 - [x] Full mobile layout audit and fixes
 - [x] PWA manifest
 - [ ] Push notifications for streak reminders
-- [ ] Heatmap export on mobile (touch-friendly)
+- [x] Heatmap export on mobile (touch-friendly)
 - [ ] JetBrains plugin scaffold (community-contributed)
 - [ ] Neovim Lua plugin scaffold (community-contributed)
 - [ ] Standalone CLI client (`commma login` / `commma watch`) as a headless data

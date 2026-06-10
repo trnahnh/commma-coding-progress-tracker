@@ -11,6 +11,25 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Web / API / DB** — User profile fields: `plan` (text, default `free`),
+  `display_name` (varchar 64), `bio` (varchar 160), `website` (varchar 256),
+  `location` (varchar 64), `school` (varchar 128), `field_of_study` (varchar 64)
+  added to `users` via migration `0002`. `PATCH /v1/me` endpoint accepts any
+  subset and returns the updated row. New `/profile` page (auth-gated) with
+  About / Education / Privacy sections; form pre-fills from `GET /v1/me` on
+  mount. Public `/@handle` profile hero now shows `display_name` as `h1` (with
+  `@handle` subtitle), `bio`, `location`, and `website`.
+- **Web** — Keyboard heatmap color themes: five built-in presets — Blaze
+  (orange-red `#ff4d1a`), Arctic (blue `#60a5fa`), Jade (green `#9cf76d`), Cream
+  (`#efead8`), Violet (`#c084fc`). Theme selector rendered as touch-friendly 7×7
+  dot buttons; selected theme highlighted with a double-ring `box-shadow`.
+  `drawHeatmap` parameterised on `hotFill`/`hotText` so all five export presets
+  use the active theme.
+- **Web** — Smart navbar: nav hides on scroll-down (after one nav-height of
+  travel) and reveals immediately on any upward scroll at any page depth.
+  Implemented with `fixed` positioning + `transition-transform duration-300`;
+  `h-16` spacer preserves layout. Resets to visible on route change. Mobile menu
+  open pins the nav visible.
 - **Web** — PWA support: `manifest.json` (`display: standalone`, two app
   shortcuts — Leaderboard and Feed), service worker with app-shell cache and
   offline SPA fallback (API calls bypass the cache), four brand-aligned SVG
@@ -27,6 +46,24 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
+- **API** — GitHub OAuth token exchange now correctly handles GitHub's
+  HTTP-200-on-error response (expired/used codes return `{"error":"..."}` not a
+  4xx). `exchangeCode` parses the error field and throws; the callback route
+  wraps the call in try/catch and returns `VALIDATION_ERROR` with a clear
+  message instead of falling through to `INTERNAL_ERROR`.
+- **API** — Unhandled error logger now includes `cause` (the underlying
+  PostgreSQL error message) so DB failures are diagnosable from logs without a
+  debugger.
+- **API** — CORS `allowMethods` now includes `PATCH` to support `PATCH /v1/me`.
+- **Web** — Heatmap mobile UX: canvas rendered at full logical width with an
+  `overflow-x-auto` scroll container; a right-edge fade gradient and "swipe to
+  explore" hint (`sm:hidden`) guide mobile users. Export buttons use `h-[44px]`
+  touch targets on mobile (`sm:h-[32px]` on desktop).
+- **Web** — Accessibility (Lighthouse pass): `aria-label` + `role="img"` on
+  heatmap canvas; `loading="lazy"` on list avatars (Leaderboard, Feed, Profile);
+  `aria-hidden="true"` on decorative language-colour swatches;
+  `<meta name="description">` injected dynamically on SessionDetail and Profile
+  pages alongside the existing OG tags.
 - **Web** — `/terms` page: Terms of Service with seven sections (acceptance,
   data collected, data ownership, acceptable use, availability, changes,
   contact). Linked from footer Legal column.
