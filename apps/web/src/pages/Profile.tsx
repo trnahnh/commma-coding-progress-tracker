@@ -45,30 +45,65 @@ function BadgeRow({ badges }: { badges: Badge[] }) {
 }
 
 function ProfileHero({ profile }: { profile: UserProfile }) {
-  const { handle, avatar_url, streak, stats } = profile
+  const { handle, avatar_url, display_name, bio, website, location, streak, stats } = profile
   const topStyle = stats.top_lang ? langStyle(stats.top_lang) : null
   return (
     <div className='border border-rule-strong rounded bg-linear-to-b from-paper-2 to-paper overflow-hidden'>
-      <div className='px-5 sm:px-8 py-6 sm:py-8 flex items-center gap-5 sm:gap-6 border-b border-rule'>
+      <div className='px-5 sm:px-8 py-6 sm:py-8 flex items-start gap-5 sm:gap-6 border-b border-rule'>
         <img
           src={avatar_url}
           alt={handle}
           width={80}
           height={80}
-          className='w-16 sm:w-20 h-16 sm:h-20 rounded-full border border-rule-strong object-cover shrink-0'
+          className='w-16 sm:w-20 h-16 sm:h-20 rounded-full border border-rule-strong object-cover shrink-0 mt-1'
         />
         <div className='min-w-0'>
           <div className='font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute mb-1.5'>
             profile
           </div>
-          <h1 className='font-serif text-[clamp(28px,4.5vw,52px)] leading-[1.04] tracking-[-0.02em] m-0 text-ink break-all'>
-            @{handle}
-          </h1>
-          {streak.current_days > 0 && (
-            <p className='mt-2 m-0 font-mono text-[13px] text-live flex items-center gap-2'>
-              <LiveDot color='live' />
-              {streak.current_days} day streak
+          {display_name ? (
+            <>
+              <h1 className='font-serif text-[clamp(28px,4.5vw,52px)] leading-[1.04] tracking-[-0.02em] m-0 text-ink'>
+                {display_name}
+              </h1>
+              <p className='mt-1 m-0 font-mono text-[13px] text-ink-mute'>
+                @{handle}
+              </p>
+            </>
+          ) : (
+            <h1 className='font-serif text-[clamp(28px,4.5vw,52px)] leading-[1.04] tracking-[-0.02em] m-0 text-ink break-all'>
+              @{handle}
+            </h1>
+          )}
+          {bio && (
+            <p className='mt-2 m-0 font-mono text-[13px] text-ink-soft leading-relaxed'>
+              {bio}
             </p>
+          )}
+          {(location || website || streak.current_days > 0) && (
+            <div className='mt-2 flex flex-wrap items-center gap-x-4 gap-y-1'>
+              {streak.current_days > 0 && (
+                <span className='font-mono text-[13px] text-live flex items-center gap-1.5'>
+                  <LiveDot color='live' />
+                  {streak.current_days}d streak
+                </span>
+              )}
+              {location && (
+                <span className='font-mono text-[13px] text-ink-mute'>
+                  {location}
+                </span>
+              )}
+              {website && (
+                <a
+                  href={website}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='font-mono text-[13px] text-ink-soft hover:text-ink transition-colors'
+                >
+                  {website.replace(/^https?:\/\//, '')}
+                </a>
+              )}
+            </div>
           )}
         </div>
       </div>

@@ -20,12 +20,14 @@ import Contact from './pages/Contact.tsx'
 import Status from './pages/Status.tsx'
 import Terms from './pages/Terms.tsx'
 import Changelog from './pages/Changelog.tsx'
+import EditProfile from './pages/EditProfile.tsx'
 
 const router = createBrowserRouter([
   {
     element: <RootLayout />,
     children: [
       { path: '/', element: <App /> },
+      { path: '/profile', element: <EditProfile /> },
       { path: '/pricing', element: <Pricing /> },
       { path: '/sessions/:id', element: <SessionDetail /> },
       { path: '/@:handle', element: <Profile /> },

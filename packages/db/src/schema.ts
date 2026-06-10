@@ -12,6 +12,7 @@ import {
   timestamp,
   uniqueIndex,
   uuid,
+  varchar,
 } from 'drizzle-orm/pg-core'
 
 export type KeyFreq = Record<string, number>
@@ -28,7 +29,14 @@ export const users = pgTable('users', {
   email: text('email').notNull().unique(),
   githubId: text('github_id').notNull().unique(),
   avatarUrl: text('avatar_url'),
+  plan: text('plan').notNull().default('free'),
   privacy: text('privacy').notNull().default('full'),
+  displayName: varchar('display_name', { length: 64 }),
+  bio: varchar('bio', { length: 160 }),
+  website: varchar('website', { length: 256 }),
+  location: varchar('location', { length: 64 }),
+  school: varchar('school', { length: 128 }),
+  fieldOfStudy: varchar('field_of_study', { length: 64 }),
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .defaultNow(),

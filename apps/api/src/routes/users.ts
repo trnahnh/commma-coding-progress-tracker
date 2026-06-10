@@ -75,6 +75,10 @@ userRoutes.get(
     return c.json({
       handle: user.handle,
       avatar_url: user.avatarUrl,
+      display_name: user.displayName,
+      bio: user.bio,
+      website: user.website,
+      location: user.location,
       created_at: user.createdAt,
       streak: {
         current_days: streak?.currentDays ?? 0,

@@ -111,6 +111,10 @@ export interface Badge {
 export interface UserProfile {
   handle: string
   avatar_url: string
+  display_name: string | null
+  bio: string | null
+  website: string | null
+  location: string | null
   created_at: string
   streak: UserStreak
   stats: UserStats
@@ -137,13 +141,29 @@ export interface RefreshResult {
 
 export interface MeResult extends AuthUser {
   privacy: string
-  created_at: string
   plan?: 'free' | 'pro' | 'team'
+  display_name: string | null
+  bio: string | null
+  website: string | null
+  location: string | null
+  school: string | null
+  field_of_study: string | null
+  created_at: string
   streak: {
     current_days: number
     longest_days: number
     last_active_date: string | null
   }
+}
+
+export interface ProfileUpdate {
+  display_name?: string | null
+  bio?: string | null
+  website?: string | null
+  location?: string | null
+  school?: string | null
+  field_of_study?: string | null
+  privacy?: 'full' | 'summary' | 'off'
 }
 
 export function exchangeCode(code: string): Promise<ExchangeResult> {
@@ -178,6 +198,20 @@ export function signOut(token: string, refreshToken: string): Promise<void> {
 export function getMe(token: string): Promise<MeResult> {
   return getJson<MeResult>('/v1/me', {
     headers: { Authorization: `Bearer ${token}` },
+  })
+}
+
+export function updateProfile(
+  token: string,
+  data: ProfileUpdate,
+): Promise<MeResult> {
+  return getJson<MeResult>('/v1/me', {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
   })
 }
 

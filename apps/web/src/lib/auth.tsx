@@ -11,6 +11,7 @@ import {
 import {
   type AuthUser,
   type MeResult,
+  getMe,
   refreshAccessToken,
   signOut as apiSignOut,
 } from './api'
@@ -65,6 +66,7 @@ interface AuthContextValue extends AuthState {
     refreshToken: string,
     user: AuthUser,
   ) => void
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -138,6 +140,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [],
   )
 
+  const refreshUser = useCallback(async () => {
+    const { token } = state
+    if (!token) return
+    try {
+      const user = await getMe(token)
+      setState((prev) => ({ ...prev, user }))
+    } catch {
+      void 0
+    }
+  }, [state])
+
   const signIn = useCallback(() => {
     const apiBase = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
     window.location.href = `${apiBase}/v1/auth/github`
@@ -159,7 +172,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [state])
 
   return (
-    <AuthContext.Provider value={{ ...state, signIn, signOut, setSession }}>
+    <AuthContext.Provider value={{ ...state, signIn, signOut, setSession, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )

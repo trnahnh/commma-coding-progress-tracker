@@ -43,6 +43,13 @@ function NavActions() {
             className='w-8 h-8 rounded-full border border-rule group-hover:border-accent transition-colors object-cover'
           />
         </Link>
+        <Link
+          to='/profile'
+          className='hidden sm:inline-flex items-center h-[34px] sm:h-[38px] px-3 sm:px-4 rounded-full font-mono text-[12px] sm:text-[13px] uppercase tracking-wider
+            text-ink-soft hover:text-ink border border-transparent hover:border-rule-strong transition-colors'
+        >
+          Edit profile
+        </Link>
         <button
           type='button'
           onClick={() => void signOut()}
@@ -81,6 +88,7 @@ function NavActions() {
 export function Nav() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
+  const { token } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [lastPathname, setLastPathname] = useState(pathname)
 
@@ -182,6 +190,15 @@ export function Nav() {
                 </Link>
               )
             })}
+            {token && (
+              <Link
+                to='/profile'
+                onClick={() => setMobileOpen(false)}
+                className={`font-mono text-[15px] tracking-wide py-4 border-t border-rule transition-colors ${pathname === '/profile' ? 'text-ink' : 'text-ink-soft hover:text-ink'}`}
+              >
+                Edit profile
+              </Link>
+            )}
           </div>
         </div>
       )}
