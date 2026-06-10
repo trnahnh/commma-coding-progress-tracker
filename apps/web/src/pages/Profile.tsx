@@ -344,18 +344,25 @@ type LoadState =
   | { phase: 'error'; error: ApiError }
 
 export default function Profile() {
-  const { handle = '' } = useParams<{ handle: string }>()
+  const { handle: rawHandle = '' } = useParams<{ handle: string }>()
+  const hasAt = rawHandle.startsWith('@')
+  const handle = hasAt ? rawHandle.slice(1) : rawHandle
   const { user } = useAuth()
-  const [state, setState] = useState<LoadState>({ phase: 'loading' })
-  const [trackedHandle, setTrackedHandle] = useState(handle)
+  const initialState = (): LoadState =>
+    hasAt
+      ? { phase: 'loading' }
+      : { phase: 'error', error: new ApiError(404, 'NOT_FOUND', 'Not found') }
+  const [state, setState] = useState<LoadState>(initialState)
+  const [trackedHandle, setTrackedHandle] = useState(rawHandle)
   const [loadingMore, setLoadingMore] = useState(false)
 
-  if (trackedHandle !== handle) {
-    setTrackedHandle(handle)
-    setState({ phase: 'loading' })
+  if (trackedHandle !== rawHandle) {
+    setTrackedHandle(rawHandle)
+    setState(initialState())
   }
 
   useEffect(() => {
+    if (!hasAt) return
     let cancelled = false
     Promise.all([getProfile(handle), getProfileSessions(handle)])
       .then(([profile, page]) => {
@@ -381,7 +388,7 @@ export default function Profile() {
     return () => {
       cancelled = true
     }
-  }, [handle])
+  }, [handle, hasAt])
 
   useEffect(() => {
     const label =
