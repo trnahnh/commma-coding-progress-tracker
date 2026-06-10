@@ -2,13 +2,13 @@ import { useEffect } from 'react'
 import { Shell, LiveDot } from '../components/chrome'
 
 const COMPONENTS = [
-  { name: 'VSCode Extension',     note: 'Invite only' },
-  { name: 'API — Ingest',         note: 'Invite only' },
-  { name: 'API — Sessions',       note: 'Invite only' },
-  { name: 'API — Leaderboard',    note: 'Invite only' },
-  { name: 'Web Dashboard',        note: 'Invite only' },
-  { name: 'Database',             note: 'Invite only' },
-  { name: 'Public Access',        note: 'Pending launch' },
+  { name: 'VSCode Extension', note: 'Invite only' },
+  { name: 'API — Ingest', note: 'Invite only' },
+  { name: 'API — Sessions', note: 'Invite only' },
+  { name: 'API — Leaderboard', note: 'Invite only' },
+  { name: 'Web Dashboard', note: 'Invite only' },
+  { name: 'Database', note: 'Invite only' },
+  { name: 'Public Access', note: 'Pending launch' },
 ]
 
 export default function Status() {

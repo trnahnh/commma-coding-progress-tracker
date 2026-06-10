@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Shell } from '../components/chrome'
-import { ApiError, updateProfile } from '../lib/api'
+import { ApiError, getMe, updateProfile } from '../lib/api'
 import { useAuth } from '../lib/auth'
 
 const PRIVACY_OPTIONS = [
   {
     value: 'full' as const,
     label: 'Full',
-    description: 'Show all session data including file paths and keyboard heatmap',
+    description:
+      'Show all session data including file paths and keyboard heatmap',
   },
   {
     value: 'summary' as const,
@@ -69,16 +70,18 @@ export default function EditProfile() {
   }, [isLoading, token, navigate])
 
   useEffect(() => {
-    if (initialized.current || !user) return
+    if (!token || initialized.current) return
     initialized.current = true
-    setDisplayName(user.display_name ?? '')
-    setBio(user.bio ?? '')
-    setWebsite(user.website ?? '')
-    setLocation(user.location ?? '')
-    setSchool(user.school ?? '')
-    setFieldOfStudy(user.field_of_study ?? '')
-    setPrivacy((user.privacy as 'full' | 'summary' | 'off') ?? 'full')
-  }, [user])
+    getMe(token).then((me) => {
+      setDisplayName(me.display_name ?? '')
+      setBio(me.bio ?? '')
+      setWebsite(me.website ?? '')
+      setLocation(me.location ?? '')
+      setSchool(me.school ?? '')
+      setFieldOfStudy(me.field_of_study ?? '')
+      setPrivacy((me.privacy as 'full' | 'summary' | 'off') ?? 'full')
+    }).catch(() => void 0)
+  }, [token])
 
   useEffect(() => {
     document.title = 'Edit profile · commma'
@@ -112,9 +115,7 @@ export default function EditProfile() {
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } catch (err) {
-      setError(
-        err instanceof ApiError ? err.message : 'Failed to save changes',
-      )
+      setError(err instanceof ApiError ? err.message : 'Failed to save changes')
     } finally {
       setSaving(false)
     }
@@ -150,7 +151,10 @@ export default function EditProfile() {
               <div className='font-mono text-[11px] uppercase tracking-[0.18em] text-ink-mute'>
                 About
               </div>
-              <Field label='Display name' hint='Shown on your public profile. Leave blank to use your handle.'>
+              <Field
+                label='Display name'
+                hint='Shown on your public profile. Leave blank to use your handle.'
+              >
                 <input
                   type='text'
                   value={displayName}

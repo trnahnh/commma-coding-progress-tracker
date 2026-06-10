@@ -45,7 +45,16 @@ function BadgeRow({ badges }: { badges: Badge[] }) {
 }
 
 function ProfileHero({ profile }: { profile: UserProfile }) {
-  const { handle, avatar_url, display_name, bio, website, location, streak, stats } = profile
+  const {
+    handle,
+    avatar_url,
+    display_name,
+    bio,
+    website,
+    location,
+    streak,
+    stats,
+  } = profile
   const topStyle = stats.top_lang ? langStyle(stats.top_lang) : null
   return (
     <div className='border border-rule-strong rounded bg-linear-to-b from-paper-2 to-paper overflow-hidden'>

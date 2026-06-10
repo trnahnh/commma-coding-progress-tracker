@@ -235,18 +235,16 @@ function HeatmapSlot({
           </span>
         )}
       </p>
-      <KeyboardHeatmapCanvas heatmap={heatmap} sessionLabel={sessionLabel} isPro={isPro} />
+      <KeyboardHeatmapCanvas
+        heatmap={heatmap}
+        sessionLabel={sessionLabel}
+        isPro={isPro}
+      />
     </div>
   )
 }
 
-function SessionCard({
-  session,
-  isPro,
-}: {
-  session: Session
-  isPro: boolean
-}) {
+function SessionCard({ session, isPro }: { session: Session; isPro: boolean }) {
   return (
     <div className='relative border border-rule-strong bg-linear-to-b from-paper-2 to-paper rounded overflow-hidden'>
       <div className='px-5 sm:px-8 py-6 sm:py-7 border-b border-rule'>
