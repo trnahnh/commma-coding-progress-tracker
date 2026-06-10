@@ -87,13 +87,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     let cancelled = false
     refreshAccessToken(rt)
-      .then((result) => {
+      .then(async (result) => {
         if (cancelled) return
         if (result.refresh_token) {
           refreshTokenRef.current = result.refresh_token
           saveRefreshToken(result.refresh_token)
         }
-        setState({ user: null, token: result.access_token, isLoading: false })
+        const user = await getMe(result.access_token).catch(() => null)
+        if (cancelled) return
+        setState({ user, token: result.access_token, isLoading: false })
       })
       .catch(() => {
         if (cancelled) return

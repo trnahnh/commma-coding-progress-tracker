@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 
@@ -90,12 +90,27 @@ export function Nav() {
   const navigate = useNavigate()
   const { token } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [visible, setVisible] = useState(true)
+  const lastY = useRef(0)
   const [lastPathname, setLastPathname] = useState(pathname)
 
   if (lastPathname !== pathname) {
     setLastPathname(pathname)
     setMobileOpen(false)
+    setVisible(true)
+    lastY.current = 0
   }
+
+  useEffect(() => {
+    const NAV_H = 64
+    const onScroll = () => {
+      const y = window.scrollY
+      setVisible(y < NAV_H || y < lastY.current)
+      lastY.current = y
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   const homeClick = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -107,7 +122,8 @@ export function Nav() {
   }
 
   return (
-    <nav className='sticky top-0 z-50 border-b border-rule backdrop-blur-xl backdrop-saturate-150 bg-paper/70'>
+    <>
+    <nav className={`fixed top-0 left-0 right-0 z-50 border-b border-rule backdrop-blur-xl backdrop-saturate-150 bg-paper/70 transition-transform duration-300 ${visible || mobileOpen ? 'translate-y-0' : '-translate-y-full'}`}>
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
         <div className='grid grid-cols-[1fr_auto] md:grid-cols-[1fr_auto_1fr] items-center h-16'>
           <Link to='/' className='justify-self-start' onClick={homeClick}>
@@ -203,6 +219,8 @@ export function Nav() {
         </div>
       )}
     </nav>
+    <div className='h-16' aria-hidden='true' />
+    </>
   )
 }
 

@@ -29,7 +29,7 @@ export function createApp() {
       origin: env.WEB_ORIGIN,
       credentials: true,
       allowHeaders: ['Authorization', 'Content-Type'],
-      allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+      allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     }),
   )
   app.use(

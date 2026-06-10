@@ -46,7 +46,7 @@ function Field({
 }
 
 const inputCls =
-  'w-full bg-paper-3 border border-rule rounded px-3 py-2.5 font-mono text-[13px] text-ink placeholder:text-ink-faint focus:outline-none focus:border-accent/60 transition-colors'
+  'w-full bg-paper-3 border border-rule-strong rounded px-3 py-2.5 font-mono text-[13px] text-ink placeholder:text-ink-faint focus:outline-none focus:border-accent/60 transition-colors'
 
 export default function EditProfile() {
   const { user, token, isLoading, refreshUser } = useAuth()
@@ -125,7 +125,7 @@ export default function EditProfile() {
 
   return (
     <Shell>
-      <div className='max-w-[640px]'>
+      <div className='max-w-[640px] mx-auto'>
         <Link
           to={user ? `/@${user.handle}` : '/'}
           className='group inline-flex items-center gap-2 font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute hover:text-ink transition-colors mb-8'
