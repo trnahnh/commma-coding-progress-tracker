@@ -19,6 +19,14 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   About / Education / Privacy sections; form pre-fills from `GET /v1/me` on
   mount. Public `/@handle` profile hero now shows `display_name` as `h1` (with
   `@handle` subtitle), `bio`, `location`, and `website`.
+- **Web / API / DB** — Extended profile fields: `company` (varchar 128),
+  `job_title` (varchar 64), `pronouns` (varchar 32), `linkedin` (varchar 160),
+  and `open_to_work` (boolean, default `false`) added to `users` via migration
+  `0003`. `PATCH /v1/me` and the public `GET /v1/users/:handle` both accept and
+  return them. The `/profile` editor gains a Work section (company, current
+  role, LinkedIn) plus a pronouns field and an "open to work" toggle. The public
+  `/@handle` hero now shows pronouns beside the handle, an "Open to work" badge
+  (accent-2 cream), a `role · company` line, and a LinkedIn link.
 - **Web** — Keyboard heatmap color themes: five built-in presets — Blaze
   (orange-red `#ff4d1a`), Arctic (blue `#60a5fa`), Jade (green `#9cf76d`), Cream
   (`#efead8`), Violet (`#c084fc`). Theme selector rendered as touch-friendly 7×7
@@ -55,6 +63,13 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   PostgreSQL error message) so DB failures are diagnosable from logs without a
   debugger.
 - **API** — CORS `allowMethods` now includes `PATCH` to support `PATCH /v1/me`.
+- **Web** — `AuthProvider` now loads the signed-in user (`GET /v1/me`) after the
+  startup token refresh, so the nav reflects the authenticated state (avatar +
+  Edit profile) on reload instead of falling back to the "Sign in" link.
+- **Web** — Profile route fixed for React Router v7: `/@:handle` (an unsupported
+  partial dynamic segment that never matched) became `/:handle`, with `Profile`
+  stripping the leading `@`. The `/@handle` links across the app now resolve
+  instead of rendering "Page not found".
 - **Web** — Heatmap mobile UX: canvas rendered at full logical width with an
   `overflow-x-auto` scroll container; a right-edge fade gradient and "swipe to
   explore" hint (`sm:hidden`) guide mobile users. Export buttons use `h-[44px]`
