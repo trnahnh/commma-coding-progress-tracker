@@ -1,6 +1,9 @@
 import { z } from 'zod'
 
-const tokenResponseSchema = z.object({ access_token: z.string() })
+const tokenResponseSchema = z.union([
+  z.object({ access_token: z.string() }),
+  z.object({ error: z.string() }),
+])
 
 const userResponseSchema = z.object({
   id: z.number(),
@@ -41,7 +44,9 @@ export async function exchangeCode(params: {
     }),
   })
   if (!res.ok) throw new Error('github_token_exchange_failed')
-  return tokenResponseSchema.parse(await res.json()).access_token
+  const body = tokenResponseSchema.parse(await res.json())
+  if ('error' in body) throw new Error(`github_token_exchange_failed: ${body.error}`)
+  return body.access_token
 }
 
 export async function fetchGithubUser(

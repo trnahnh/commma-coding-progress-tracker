@@ -55,8 +55,10 @@ export function createApp() {
 
   app.notFound((c) => apiError(c, 'NOT_FOUND', 'Resource not found'))
   app.onError((err, c) => {
+    const cause = err instanceof Error ? err.cause : undefined
     log.error('unhandled_error', {
       message: err instanceof Error ? err.message : String(err),
+      cause: cause instanceof Error ? cause.message : cause,
     })
     return apiError(c, 'INTERNAL_ERROR', 'Unexpected server error')
   })

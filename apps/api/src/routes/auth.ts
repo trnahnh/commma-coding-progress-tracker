@@ -92,12 +92,17 @@ authRoutes.get('/github/callback', async (c) => {
     return apiError(c, 'VALIDATION_ERROR', 'Invalid OAuth state')
   }
 
-  const ghToken = await exchangeCode({
-    clientId: env.GITHUB_CLIENT_ID,
-    clientSecret: env.GITHUB_CLIENT_SECRET,
-    code,
-    redirectUri: env.GITHUB_CALLBACK_URL,
-  })
+  let ghToken: string
+  try {
+    ghToken = await exchangeCode({
+      clientId: env.GITHUB_CLIENT_ID,
+      clientSecret: env.GITHUB_CLIENT_SECRET,
+      code,
+      redirectUri: env.GITHUB_CALLBACK_URL,
+    })
+  } catch {
+    return apiError(c, 'VALIDATION_ERROR', 'GitHub code exchange failed — try signing in again')
+  }
   const ghUser = await fetchGithubUser(ghToken)
   if (!ghUser.email) {
     return apiError(c, 'VALIDATION_ERROR', 'GitHub account has no usable email')
