@@ -19,17 +19,24 @@ const LAYOUT_LABELS: Record<LayoutName, string> = {
   colemak: 'Colemak',
 }
 
+const THEMES = [
+  { id: 'blaze', label: 'Blaze', hot: '#ff4d1a', hotText: '#fff4ec' },
+  { id: 'arctic', label: 'Arctic', hot: '#60a5fa', hotText: '#eff6ff' },
+  { id: 'jade', label: 'Jade', hot: '#9cf76d', hotText: '#0c0b08' },
+  { id: 'cream', label: 'Cream', hot: '#efead8', hotText: '#1a1814' },
+  { id: 'violet', label: 'Violet', hot: '#c084fc', hotText: '#faf5ff' },
+] as const
+
+type ThemeId = (typeof THEMES)[number]['id']
+
 const UNIT = 46
 const PAD = 16
 const GAP = 3
 const RADIUS = 6
 
 const COLD_FILL = '#1a1814'
-const HOT_FILL = '#ff4d1a'
 const COLD_BORDER = '#2d2922'
-const HOT_BORDER = '#ff4d1a'
 const COLD_TEXT = '#7a746a'
-const HOT_TEXT = '#fff4ec'
 
 function hexToRgb(hex: string): [number, number, number] {
   const v = hex.replace('#', '')
@@ -61,6 +68,8 @@ function drawHeatmap(
   canvas: HTMLCanvasElement,
   heatmap: Heatmap,
   layout: KeyboardLayout,
+  hotFill: string,
+  hotText: string,
 ) {
   const ctx = canvas.getContext('2d')
   if (!ctx) return
@@ -89,16 +98,15 @@ function drawHeatmap(
 
     ctx.beginPath()
     ctx.roundRect(px, py, pw, ph, RADIUS)
-    ctx.fillStyle = t > 0 ? lerpColor(COLD_FILL, HOT_FILL, t) : COLD_FILL
+    ctx.fillStyle = t > 0 ? lerpColor(COLD_FILL, hotFill, t) : COLD_FILL
     ctx.fill()
     ctx.lineWidth = 1
-    ctx.strokeStyle =
-      t > 0 ? lerpColor(COLD_BORDER, HOT_BORDER, t) : COLD_BORDER
+    ctx.strokeStyle = t > 0 ? lerpColor(COLD_BORDER, hotFill, t) : COLD_BORDER
     ctx.stroke()
 
     if (key.cap) {
       const fontSize = key.cap.length > 2 ? 11 : 15
-      ctx.fillStyle = t > 0 ? lerpColor(COLD_TEXT, HOT_TEXT, t) : COLD_TEXT
+      ctx.fillStyle = t > 0 ? lerpColor(COLD_TEXT, hotText, t) : COLD_TEXT
       ctx.font = `${fontSize}px "Geist Mono", ui-monospace, monospace`
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
@@ -120,15 +128,17 @@ export default function KeyboardHeatmap({
 }: KeyboardHeatmapProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [layoutName, setLayoutName] = useState<LayoutName>('qwerty')
+  const [themeId, setThemeId] = useState<ThemeId>('blaze')
   const layout = KEYBOARD_LAYOUTS[layoutName]
+  const theme = THEMES.find((t) => t.id === themeId) ?? THEMES[0]
   const logicalW = layout.cols * UNIT + PAD * 2
   const logicalH = layout.rows * UNIT + PAD * 2
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    drawHeatmap(canvas, heatmap, layout)
-  }, [heatmap, layout])
+    drawHeatmap(canvas, heatmap, layout, theme.hot, theme.hotText)
+  }, [heatmap, layout, theme])
 
   useLayoutEffect(() => {
     draw()
@@ -171,22 +181,52 @@ export default function KeyboardHeatmap({
 
   return (
     <div>
-      <div className='mb-3 flex items-center gap-1'>
-        {(Object.keys(LAYOUT_LABELS) as LayoutName[]).map((name) => (
-          <button
-            key={name}
-            type='button'
-            onClick={() => setLayoutName(name)}
-            className={[
-              'h-[26px] px-2.5 rounded font-mono text-[10px] uppercase tracking-wider transition-colors',
-              layoutName === name
-                ? 'bg-accent/15 text-accent border border-accent/40'
-                : 'text-ink-mute border border-transparent hover:text-ink-soft hover:border-rule',
-            ].join(' ')}
-          >
-            {LAYOUT_LABELS[name]}
-          </button>
-        ))}
+      <div className='mb-3 flex items-center justify-between gap-2'>
+        <div className='flex items-center gap-1'>
+          {(Object.keys(LAYOUT_LABELS) as LayoutName[]).map((name) => (
+            <button
+              key={name}
+              type='button'
+              onClick={() => setLayoutName(name)}
+              className={[
+                'h-[26px] px-2.5 rounded font-mono text-[10px] uppercase tracking-wider transition-colors',
+                layoutName === name
+                  ? 'bg-accent/15 text-accent border border-accent/40'
+                  : 'text-ink-mute border border-transparent hover:text-ink-soft hover:border-rule',
+              ].join(' ')}
+            >
+              {LAYOUT_LABELS[name]}
+            </button>
+          ))}
+        </div>
+        <div className='flex items-center gap-0.5'>
+          {THEMES.map((t) => (
+            <button
+              key={t.id}
+              type='button'
+              aria-label={t.label}
+              aria-pressed={themeId === t.id}
+              onClick={() => setThemeId(t.id)}
+              className='flex items-center justify-center w-7 h-7 rounded transition-all focus:outline-none'
+            >
+              <span
+                className={[
+                  'block w-3.5 h-3.5 rounded-full transition-all',
+                  themeId === t.id
+                    ? 'scale-125 opacity-100'
+                    : 'opacity-40 hover:opacity-70',
+                ].join(' ')}
+                style={{
+                  background: t.hot,
+                  boxShadow:
+                    themeId === t.id
+                      ? `0 0 0 2px var(--color-paper), 0 0 0 3.5px ${t.hot}`
+                      : 'none',
+                }}
+              />
+            </button>
+          ))}
+        </div>
       </div>
       <div className='rounded border border-rule bg-paper/40'>
         <div className='relative overflow-x-auto p-3 sm:p-4'>
@@ -194,7 +234,7 @@ export default function KeyboardHeatmap({
             ref={canvasRef}
             className='mx-auto block'
             style={{ width: `${logicalW}px`, height: `${logicalH}px` }}
-            aria-label={`Keyboard heatmap for ${sessionLabel ?? 'session'} — ${LAYOUT_LABELS[layoutName]} layout`}
+            aria-label={`Keyboard heatmap for ${sessionLabel ?? 'session'} — ${LAYOUT_LABELS[layoutName]} layout, ${theme.label} theme`}
             role='img'
           />
           <div className='pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-paper/90 to-transparent sm:hidden' />
@@ -207,7 +247,7 @@ export default function KeyboardHeatmap({
         swipe to explore
       </p>
       {isPro ? (
-        <div className='mt-4 flex items-center justify-end gap-2'>
+        <div className='mt-4 flex flex-wrap items-center justify-end gap-2'>
           <span className='font-mono text-[10px] uppercase tracking-wider text-ink-faint'>
             Export
           </span>
@@ -216,7 +256,7 @@ export default function KeyboardHeatmap({
               key={label}
               type='button'
               onClick={() => exportPreset(w, h, label)}
-              className='group inline-flex items-center gap-1.5 h-[32px] px-3 rounded-full font-mono text-[11px] uppercase tracking-wider text-ink-soft border border-rule-strong hover:text-paper hover:bg-accent hover:border-accent transition-colors'
+              className='group inline-flex items-center gap-1.5 h-[44px] sm:h-[32px] px-5 sm:px-3 rounded-full font-mono text-[13px] sm:text-[11px] uppercase tracking-wider text-ink-soft border border-rule-strong hover:text-paper hover:bg-accent hover:border-accent transition-colors'
             >
               {label}
               <span className='inline-block transition-transform group-hover:translate-y-0.5'>
