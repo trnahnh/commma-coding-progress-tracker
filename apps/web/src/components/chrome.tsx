@@ -92,14 +92,12 @@ export function Nav() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [visible, setVisible] = useState(true)
   const lastY = useRef(0)
-  const [lastPathname, setLastPathname] = useState(pathname)
 
-  if (lastPathname !== pathname) {
-    setLastPathname(pathname)
+  useEffect(() => {
     setMobileOpen(false)
     setVisible(true)
     lastY.current = 0
-  }
+  }, [pathname])
 
   useEffect(() => {
     const NAV_H = 64
