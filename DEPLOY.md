@@ -13,6 +13,27 @@ The work is split in two:
 - **Deploying** (anyone, every release) — click **Run workflow** on the two
   GitHub Actions below. No SSH, no AWS console.
 
+## Before you have a domain
+
+No domain is registered yet, so `commma.dev` / `api.commma.dev` throughout this
+doc are **placeholders**. Until a real domain is bought:
+
+- **Static preview only.** You can ship the web build and view it on the
+  CloudFront default domain (`https://<id>.cloudfront.net`) — no ACM cert or DNS
+  needed for that.
+- **Auth will not work end-to-end.** The API needs HTTPS on a real domain (Let's
+  Encrypt won't issue a cert for a bare EC2 IP), and the refresh cookie is
+  `Secure; SameSite=Strict` — so web and API must live on one registrable
+  domain. The CloudFront default domain plus any API stopgap are different
+  sites, which drops the cookie.
+
+Once the domain is registered, update these four config spots, point DNS, and
+set the GitHub OAuth App callback to match:
+
+- `VITE_API_BASE_URL` and `WEB_URL` GitHub variables.
+- `WEB_ORIGIN` and `GITHUB_CALLBACK_URL` in the server `.env`.
+- `server_name` in the nginx config.
+
 ## Deploying (the click)
 
 Once the one-time setup is done, a release is two manual workflow runs in the
