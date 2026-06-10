@@ -31,7 +31,7 @@ function PeriodTabs({
           key={value}
           type='button'
           onClick={() => onChange(value)}
-          className={`h-[42px] px-5 rounded-full font-mono text-[15px] uppercase tracking-wider border transition-colors ${
+          className={`h-[38px] sm:h-[42px] px-3.5 sm:px-5 rounded-full font-mono text-[13px] sm:text-[15px] uppercase tracking-wider whitespace-nowrap border transition-colors ${
             active === value
               ? 'bg-accent border-accent text-paper'
               : 'border-rule-strong text-ink-mute hover:text-ink hover:border-rule-strong'
