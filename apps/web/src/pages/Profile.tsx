@@ -49,13 +49,19 @@ function ProfileHero({ profile }: { profile: UserProfile }) {
     handle,
     avatar_url,
     display_name,
+    pronouns,
     bio,
     website,
     location,
+    company,
+    job_title,
+    linkedin,
+    open_to_work,
     streak,
     stats,
   } = profile
   const topStyle = stats.top_lang ? langStyle(stats.top_lang) : null
+  const work = [job_title, company].filter(Boolean).join(' · ')
   return (
     <div className='border border-rule-strong rounded bg-linear-to-b from-paper-2 to-paper overflow-hidden'>
       <div className='px-5 sm:px-8 py-6 sm:py-8 flex items-start gap-5 sm:gap-6 border-b border-rule'>
@@ -70,26 +76,42 @@ function ProfileHero({ profile }: { profile: UserProfile }) {
           <div className='font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute mb-1.5'>
             profile
           </div>
-          {display_name ? (
-            <>
+          <div className='flex flex-wrap items-center gap-x-3 gap-y-1.5'>
+            {display_name ? (
               <h1 className='font-serif text-[clamp(28px,4.5vw,52px)] leading-[1.04] tracking-[-0.02em] m-0 text-ink'>
                 {display_name}
               </h1>
-              <p className='mt-1 m-0 font-mono text-[13px] text-ink-mute'>
+            ) : (
+              <h1 className='font-serif text-[clamp(28px,4.5vw,52px)] leading-[1.04] tracking-[-0.02em] m-0 text-ink break-all'>
                 @{handle}
-              </p>
-            </>
-          ) : (
-            <h1 className='font-serif text-[clamp(28px,4.5vw,52px)] leading-[1.04] tracking-[-0.02em] m-0 text-ink break-all'>
-              @{handle}
-            </h1>
+              </h1>
+            )}
+            {open_to_work && (
+              <span className='inline-flex items-center h-[24px] px-2.5 rounded-full font-mono text-[11px] uppercase tracking-wider text-accent-2 border border-accent-2-line bg-accent-2-soft'>
+                Open to work
+              </span>
+            )}
+          </div>
+          {(display_name || pronouns) && (
+            <p className='mt-1 m-0 font-mono text-[13px] text-ink-mute'>
+              {display_name && <span>@{handle}</span>}
+              {display_name && pronouns && (
+                <span className='mx-2 text-ink-faint'>·</span>
+              )}
+              {pronouns && <span>{pronouns}</span>}
+            </p>
+          )}
+          {work && (
+            <p className='mt-2 m-0 font-mono text-[13px] text-ink-soft'>
+              {work}
+            </p>
           )}
           {bio && (
             <p className='mt-2 m-0 font-mono text-[13px] text-ink-soft leading-relaxed'>
               {bio}
             </p>
           )}
-          {(location || website || streak.current_days > 0) && (
+          {(location || website || linkedin || streak.current_days > 0) && (
             <div className='mt-2 flex flex-wrap items-center gap-x-4 gap-y-1'>
               {streak.current_days > 0 && (
                 <span className='font-mono text-[13px] text-live flex items-center gap-1.5'>
@@ -110,6 +132,16 @@ function ProfileHero({ profile }: { profile: UserProfile }) {
                   className='font-mono text-[13px] text-ink-soft hover:text-ink transition-colors'
                 >
                   {website.replace(/^https?:\/\//, '')}
+                </a>
+              )}
+              {linkedin && (
+                <a
+                  href={linkedin}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='font-mono text-[13px] text-ink-soft hover:text-ink transition-colors'
+                >
+                  LinkedIn
                 </a>
               )}
             </div>

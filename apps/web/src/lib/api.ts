@@ -112,9 +112,14 @@ export interface UserProfile {
   handle: string
   avatar_url: string
   display_name: string | null
+  pronouns: string | null
   bio: string | null
   website: string | null
   location: string | null
+  company: string | null
+  job_title: string | null
+  linkedin: string | null
+  open_to_work: boolean
   created_at: string
   streak: UserStreak
   stats: UserStats
@@ -148,6 +153,11 @@ export interface MeResult extends AuthUser {
   location: string | null
   school: string | null
   field_of_study: string | null
+  company: string | null
+  job_title: string | null
+  pronouns: string | null
+  linkedin: string | null
+  open_to_work: boolean
   created_at: string
   streak: {
     current_days: number
@@ -163,6 +173,11 @@ export interface ProfileUpdate {
   location?: string | null
   school?: string | null
   field_of_study?: string | null
+  company?: string | null
+  job_title?: string | null
+  pronouns?: string | null
+  linkedin?: string | null
+  open_to_work?: boolean
   privacy?: 'full' | 'summary' | 'off'
 }
 

@@ -37,6 +37,11 @@ export const users = pgTable('users', {
   location: varchar('location', { length: 64 }),
   school: varchar('school', { length: 128 }),
   fieldOfStudy: varchar('field_of_study', { length: 64 }),
+  company: varchar('company', { length: 128 }),
+  jobTitle: varchar('job_title', { length: 64 }),
+  pronouns: varchar('pronouns', { length: 32 }),
+  linkedin: varchar('linkedin', { length: 160 }),
+  openToWork: boolean('open_to_work').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
