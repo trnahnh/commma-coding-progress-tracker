@@ -120,6 +120,7 @@ function StatCell({
       <span className='flex items-center gap-2 font-serif text-[clamp(22px,2.5vw,36px)] leading-none tracking-[-0.02em] text-ink tnum'>
         {dot && (
           <span
+            aria-hidden='true'
             className='w-3 h-3 rounded-sm shrink-0'
             style={{ background: dot }}
           />
@@ -161,6 +162,7 @@ function SessionRow({ session }: { session: SessionSummary }) {
         {style ? (
           <span className='flex items-center gap-1.5 font-mono text-[13px] text-ink-soft'>
             <span
+              aria-hidden='true'
               className='w-2 h-2 rounded-sm'
               style={{ background: style.color }}
             />
@@ -326,6 +328,16 @@ export default function Profile() {
       el.setAttribute('content', content)
     }
 
+    const setNameMeta = (name: string, content: string) => {
+      let el = document.querySelector<HTMLMetaElement>(`meta[name="${name}"]`)
+      if (!el) {
+        el = document.createElement('meta')
+        el.setAttribute('name', name)
+        document.head.appendChild(el)
+      }
+      el.setAttribute('content', content)
+    }
+
     if (state.phase === 'ready') {
       const { profile } = state
       const desc = [
@@ -337,6 +349,7 @@ export default function Profile() {
       ]
         .filter(Boolean)
         .join(' · ')
+      setNameMeta('description', desc)
       setMeta('og:type', 'profile')
       setMeta('og:title', `${label} · commma`)
       setMeta('og:description', desc)

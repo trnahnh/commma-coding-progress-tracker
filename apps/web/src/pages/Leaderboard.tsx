@@ -72,6 +72,7 @@ function EntryRow({ entry }: { entry: LeaderboardEntry }) {
           alt={handle}
           width={32}
           height={32}
+          loading='lazy'
           className='w-8 h-8 rounded-full border border-rule object-cover shrink-0'
         />
       ) : (
@@ -87,6 +88,7 @@ function EntryRow({ entry }: { entry: LeaderboardEntry }) {
         {style && (
           <span className='flex items-center gap-1.5 font-mono text-[15px] text-ink-soft'>
             <span
+              aria-hidden='true'
               className='w-2 h-2 rounded-sm'
               style={{ background: style.color }}
             />

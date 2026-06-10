@@ -194,11 +194,16 @@ export default function KeyboardHeatmap({
             ref={canvasRef}
             className='mx-auto block'
             style={{ width: `${logicalW}px`, height: `${logicalH}px` }}
+            aria-label={`Keyboard heatmap for ${sessionLabel ?? 'session'} — ${LAYOUT_LABELS[layoutName]} layout`}
+            role='img'
           />
           <div className='pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-paper/90 to-transparent sm:hidden' />
         </div>
       </div>
-      <p className='mt-1.5 text-center font-mono text-[10px] uppercase tracking-widest text-ink-faint sm:hidden'>
+      <p
+        aria-hidden='true'
+        className='mt-1.5 text-center font-mono text-[10px] uppercase tracking-widest text-ink-faint sm:hidden'
+      >
         swipe to explore
       </p>
       {isPro ? (

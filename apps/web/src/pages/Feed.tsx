@@ -15,6 +15,7 @@ function FeedCard({ entry }: { entry: FeedEntry }) {
     <div
       role='link'
       tabIndex={0}
+      aria-label={`Session by @${user.handle} on ${formatDate(started_at)} — ${formatDuration(duration_s)}`}
       onClick={() => navigate(`/sessions/${id}`)}
       onKeyDown={(e) => e.key === 'Enter' && navigate(`/sessions/${id}`)}
       className='group cursor-pointer border-b border-rule last:border-b-0 px-5 sm:px-8 py-5 sm:py-6 hover:bg-paper-2/40 transition-colors'
@@ -26,6 +27,7 @@ function FeedCard({ entry }: { entry: FeedEntry }) {
             alt={user.handle}
             width={32}
             height={32}
+            loading='lazy'
             className='w-8 h-8 rounded-full border border-rule object-cover shrink-0'
           />
         ) : (
@@ -52,6 +54,7 @@ function FeedCard({ entry }: { entry: FeedEntry }) {
         {style && (
           <span className='flex items-center gap-1.5 font-mono text-[13px] text-ink-soft'>
             <span
+              aria-hidden='true'
               className='w-2 h-2 rounded-sm'
               style={{ background: style.color }}
             />

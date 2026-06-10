@@ -349,6 +349,16 @@ export default function SessionDetail() {
       el.setAttribute('content', content)
     }
 
+    const setNameMeta = (name: string, content: string) => {
+      let el = document.querySelector<HTMLMetaElement>(`meta[name="${name}"]`)
+      if (!el) {
+        el = document.createElement('meta')
+        el.setAttribute('name', name)
+        document.head.appendChild(el)
+      }
+      el.setAttribute('content', content)
+    }
+
     if (state.phase === 'ready') {
       const { session } = state
       const topLang = session.langs[0]?.lang ?? null
@@ -361,6 +371,7 @@ export default function SessionDetail() {
       ]
         .filter(Boolean)
         .join(' ')
+      setNameMeta('description', desc)
       setMeta('og:type', 'article')
       setMeta('og:title', `${label} · commma`)
       setMeta('og:description', desc)
