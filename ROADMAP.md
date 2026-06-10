@@ -275,8 +275,8 @@ Goal: mobile, multi-editor, self-hosted.
 
 ### Planned
 
-- [ ] Full mobile layout audit and fixes
-- [ ] PWA manifest
+- [x] Full mobile layout audit and fixes
+- [x] PWA manifest
 - [ ] Push notifications for streak reminders
 - [ ] Heatmap export on mobile (touch-friendly)
 - [ ] JetBrains plugin scaffold (community-contributed)

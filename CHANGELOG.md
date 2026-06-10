@@ -11,6 +11,22 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Web** — PWA support: `manifest.json` (`display: standalone`, two app
+  shortcuts — Leaderboard and Feed), service worker with app-shell cache and
+  offline SPA fallback (API calls bypass the cache), four brand-aligned SVG
+  icons (192, 512, maskable, apple-touch) using the `<,>` mark in `accent`
+  orange on `accent-2` cream background, and full `<head>` wiring
+  (`theme-color`, `apple-mobile-web-app-*` meta tags). App is now installable on
+  Android and iOS.
+- **Web** — Mobile layout audit (Phase 5): all pages verified at 375 px with no
+  horizontal overflow. Fixed leaderboard period tabs (`whitespace-nowrap` +
+  responsive sizing) so "Week / Month / All time" render on one row.
+- **Web** — Favicon redesigned from off-brand purple Vite bolt to the `<,>`
+  brand mark (angle brackets + comma) in `#ff4d1a` on `#efead8` cream
+  background, consistent with the new PWA icons.
+
+### Changed
+
 - **Web** — `/terms` page: Terms of Service with seven sections (acceptance,
   data collected, data ownership, acceptable use, availability, changes,
   contact). Linked from footer Legal column.
@@ -60,9 +76,6 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   collection, privacy modes, data retention), `/api` (endpoint reference with
   rate limits; all routes marked pending), `/status` (invite-only early-access
   status board). All content centred via `mx-auto`.
-
-### Changed
-
 - **Web** — Landing page CTA: non-functional email-capture form replaced with a
   two-button row — "Get early access" (accent, links to `/pricing`) and "Install
   free" (outline, links to VSCode Marketplace). All `href='#'` placeholders
