@@ -1,0 +1,179 @@
+# Deploying commma
+
+This is the operational runbook for shipping commma to AWS. It follows the
+all-AWS compute target in ADR-009: the **API** runs on an EC2 t3.micro under
+PM2, and the **web** app is a static Vite build served from **S3 + CloudFront**.
+PostgreSQL stays on Railway and Redis on Upstash.
+
+The work is split in two:
+
+- **One-time setup** (the owner, once per environment) — provision the box, wire
+  DNS/TLS, create the AWS web hosting, and register GitHub secrets. All of it is
+  config-first: the scripts and configs live in `infra/`.
+- **Deploying** (anyone, every release) — click **Run workflow** on the two
+  GitHub Actions below. No SSH, no AWS console.
+
+## Deploying (the click)
+
+Once the one-time setup is done, a release is two manual workflow runs in the
+GitHub **Actions** tab:
+
+| Workflow     | File                               | What it does                            |
+| ------------ | ---------------------------------- | --------------------------------------- |
+| `Deploy API` | `.github/workflows/deploy-api.yml` | SSH to EC2, pull, build, PM2 restart    |
+| `Deploy Web` | `.github/workflows/deploy-web.yml` | Build, `s3 sync`, CloudFront invalidate |
+
+Both trigger on `workflow_dispatch` only, so deploying is intentional. Open the
+workflow, press **Run workflow**, pick `main`, confirm. CI (`ci.yml`) runs
+typecheck, lint, tests, and markdown lint on every push and PR independently.
+
+## One-time setup
+
+### 1. Managed data tier
+
+- **PostgreSQL** — create a Railway Postgres instance, apply migrations with
+  `drizzle-kit migrate` against its connection string, and keep that string for
+  `DATABASE_URL`.
+- **Redis** — create an Upstash database and keep its TLS URL for `REDIS_URL`.
+
+### 2. Provision the EC2 box
+
+Launch an EC2 t3.micro on **Amazon Linux 2023 or Ubuntu 20.04+** — never Amazon
+Linux 2. The `sharp` dependency (heatmap PNG) needs glibc >= 2.28; AL2 ships
+glibc 2.26 and the server will not boot. A monospace font is also required for
+the card text; `provision-ec2.sh` installs DejaVu Mono.
+
+**Security group (do not skip):** expose only `80` and `443` to the internet,
+plus `22` from your own IP for SSH. Port `3000` must **never** be reachable from
+outside the box. The API binds `0.0.0.0:3000`, so if the security group leaves
+`3000` open, clients can hit the API directly and forge `X-Forwarded-For`,
+defeating the `TRUST_PROXY_HOPS=1` rate limiting. nginx (on the same box) is the
+only thing that talks to `:3000`.
+
+SSH in and run the bootstrap script:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/NauriFive/commma-coding-progress-tracker/main/infra/provision-ec2.sh | bash
+```
+
+It installs Node 20, pnpm, and PM2, clones the repo to `/home/ec2-user/commma`,
+builds the API, and (on first run) copies `apps/api/.env.example` to
+`apps/api/.env` then stops so you can fill it in.
+
+### 3. Fill in the server env
+
+Edit `/home/ec2-user/commma/apps/api/.env` with real values. Key fields beyond
+`.env.example`:
+
+- `DATABASE_URL`, `REDIS_URL` — from step 1.
+- `GITHUB_CALLBACK_URL=https://api.commma.dev/v1/auth/github/callback`. This
+  must exactly match the **Authorization callback URL** set on the GitHub OAuth
+  App (GitHub -> Settings -> Developer settings -> OAuth Apps).
+- `WEB_ORIGIN=https://commma.dev` — the single allowed CORS origin. Pick one
+  canonical web host; `www.commma.dev` would be rejected unless you redirect it
+  to the apex at the CDN/DNS layer.
+- `RUN_AGGREGATION=true` — exactly one process runs the in-process timers; keep
+  it `true` on a single-instance box.
+- `TRUST_PROXY_HOPS=1` — one nginx hop in front (only valid with the security
+  group from step 2).
+
+Apply database migrations against Railway, then re-run the bootstrap script to
+start PM2 (on its second pass, with `.env` present, it runs
+`pm2 start ecosystem.config.cjs --env production` and `pm2 save` for you):
+
+```bash
+cd /home/ec2-user/commma
+pnpm --filter @commma/db migrate
+bash infra/provision-ec2.sh
+```
+
+`drizzle-kit migrate` reads `DATABASE_URL` from `apps/api/.env` (see
+`packages/db/drizzle.config.ts`). After the script prints the `pm2 startup`
+command, run it once so PM2 resurrects on reboot.
+
+### 4. nginx reverse proxy + TLS
+
+The provision script installs and starts nginx. Point a DNS `A` record for
+`api.commma.dev` at the instance's public IP, install certbot, then wire up the
+proxy and TLS:
+
+```bash
+sudo dnf install -y certbot python3-certbot-nginx
+sudo cp /home/ec2-user/commma/infra/nginx/api.commma.dev.conf \
+  /etc/nginx/conf.d/api.commma.dev.conf
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot --nginx -d api.commma.dev
+```
+
+On Ubuntu, install certbot with
+`sudo apt-get install -y certbot python3-certbot-nginx` instead.
+
+`certbot --nginx` injects the 443 server block and HTTP->HTTPS redirect into the
+committed HTTP config and sets up auto-renewal. The proxy forwards to
+`127.0.0.1:3000` and appends the client IP to `X-Forwarded-For`, which is what
+`TRUST_PROXY_HOPS=1` expects.
+
+### 5. Web hosting (S3 + CloudFront)
+
+- Create a private S3 bucket for the static build.
+- Create a CloudFront distribution with that bucket as origin (via Origin Access
+  Control) and `commma.dev` as an alternate domain. The ACM cert for CloudFront
+  **must be issued in `us-east-1`**, regardless of the bucket's region.
+- Set the distribution's **default root object** to `index.html`.
+- Add a CloudFront **custom error response** mapping both `403` and `404` to
+  `/index.html` with response code `200` — this serves SPA deep links like
+  `/@handle` and `/sessions/:id`.
+- Point DNS for `commma.dev` at the distribution.
+
+### 6. GitHub secrets and variables
+
+Set these in **Settings -> Secrets and variables -> Actions**.
+
+Secrets:
+
+| Name                         | Used by      | Value                                 |
+| ---------------------------- | ------------ | ------------------------------------- |
+| `EC2_HOST`                   | `deploy-api` | Public IP or domain of the EC2 box    |
+| `EC2_SSH_KEY`                | `deploy-api` | Contents of the `.pem` private key    |
+| `AWS_ROLE_ARN`               | `deploy-web` | IAM role assumed via GitHub OIDC      |
+| `CLOUDFRONT_DISTRIBUTION_ID` | `deploy-web` | Distribution to invalidate after sync |
+
+Variables:
+
+| Name                | Default                  | Used by      |
+| ------------------- | ------------------------ | ------------ |
+| `WEB_S3_BUCKET`     | (none, required)         | `deploy-web` |
+| `AWS_REGION`        | `us-east-1`              | `deploy-web` |
+| `VITE_API_BASE_URL` | `https://api.commma.dev` | `deploy-web` |
+
+The `deploy-web` workflow authenticates to AWS with GitHub OIDC (no long-lived
+keys): create an IAM role trusting the repo's OIDC provider, granting only
+`s3:PutObject`/`s3:DeleteObject`/`s3:ListBucket` on the web bucket and
+`cloudfront:CreateInvalidation` on the distribution.
+
+## Redeploy and rollback
+
+- **Redeploy** — re-run the relevant workflow. `Deploy API` pulls `main` and
+  PM2-restarts; `Deploy Web` rebuilds and re-syncs.
+- **Rollback** — check out the previous good commit and re-run the workflow, or
+  on the box `git checkout <sha>`, `pnpm --filter @commma/api build`,
+  `pm2 restart commma-api`.
+- **Logs** — `pm2 logs commma-api` on the box. The API emits structured JSON.
+
+## Constraints that must not be broken
+
+- **Web and API share one registrable domain.** The refresh cookie is
+  `Secure; HttpOnly; SameSite=Strict`, host-only on `api.commma.dev`. It is sent
+  on requests from `commma.dev` only because both are the same site
+  (`commma.dev`). If the web app is ever served from a different domain (e.g. a
+  Vercel preview host), the cookie is dropped and silent-refresh auth breaks.
+- **Only one canonical web origin.** `WEB_ORIGIN` is a single value enforced by
+  CORS; redirect any alternate host (e.g. `www`) to it at the CDN/DNS layer.
+- **The security group must keep port 3000 closed** (see step 2) for the rate
+  limiter's `X-Forwarded-For` handling to be trustworthy.
+
+## Docker note
+
+`apps/api/Dockerfile` exists for a **future ECS Fargate migration** (ADR-009)
+and is not used by this EC2 deploy. `docker-compose.yml` is for local dev infra
+(Postgres + Redis) only. Neither is part of the production path today.
