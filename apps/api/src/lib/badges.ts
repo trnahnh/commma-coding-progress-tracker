@@ -19,6 +19,12 @@ const JUMP_KEYS = ['Home', 'End', 'PageUp', 'PageDown'] as const
 
 export const MIN_KEYSTROKES = 2000
 
+const VIM_ESCAPE_MIN_SHARE = 0.02
+const VIM_ARROW_MAX_SHARE = 0.01
+const MOUSE_FREE_NAV_MIN_SHARE = 0.1
+const BACKSPACE_HEAVY_MIN_SHARE = 0.12
+const ARROW_NAVIGATOR_MIN_SHARE = 0.06
+
 function sumKeys(counts: KeyCounts, keys: readonly string[]): number {
   return keys.reduce((sum, key) => sum + (counts[key] ?? 0), 0)
 }
@@ -49,25 +55,26 @@ const RULES: readonly BadgeRule[] = [
     name: 'Vim athlete',
     description: 'Leans on Escape and almost never reaches for the arrow keys.',
     earned: (s) =>
-      share(s.escape, s.total) >= 0.02 && share(s.arrows, s.total) <= 0.01,
+      share(s.escape, s.total) >= VIM_ESCAPE_MIN_SHARE &&
+      share(s.arrows, s.total) <= VIM_ARROW_MAX_SHARE,
   },
   {
     id: 'mouse-free',
     name: 'Mouse-free',
     description: 'Moves through the file by keyboard instead of the mouse.',
-    earned: (s) => share(s.navigation, s.total) >= 0.1,
+    earned: (s) => share(s.navigation, s.total) >= MOUSE_FREE_NAV_MIN_SHARE,
   },
   {
     id: 'backspace-heavy',
     name: 'Backspace heavy',
     description: 'Edits in place with a high share of Backspace and Delete.',
-    earned: (s) => share(s.backspaceDelete, s.total) >= 0.12,
+    earned: (s) => share(s.backspaceDelete, s.total) >= BACKSPACE_HEAVY_MIN_SHARE,
   },
   {
     id: 'arrow-navigator',
     name: 'Arrow navigator',
     description: 'Gets around the file with the arrow keys.',
-    earned: (s) => share(s.arrows, s.total) >= 0.06,
+    earned: (s) => share(s.arrows, s.total) >= ARROW_NAVIGATOR_MIN_SHARE,
   },
 ]
 

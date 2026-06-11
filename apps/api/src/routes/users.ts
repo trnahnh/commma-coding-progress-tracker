@@ -10,10 +10,12 @@ import {
   parseLimit,
   sessionKeyset,
 } from '../lib/cursor.js'
-import { computeBadges } from '../lib/badges.js'
+import { computeBadges, type Badge } from '../lib/badges.js'
 import { toSessionSummary, topLangBySession } from '../lib/sessionSummary.js'
 import { requireAuth } from '../middleware/auth.js'
 import { ipKey, rateLimit, userKey } from '../middleware/rateLimit.js'
+import { redis } from '../redis.js'
+import { log } from '../logger.js'
 import type { AppEnv } from '../types.js'
 
 export const userRoutes = new Hono<AppEnv>()
@@ -26,6 +28,12 @@ async function requesterFrom(authorization: string | undefined) {
 }
 
 const HANDLE_RE = /^[a-zA-Z0-9-]{1,39}$/
+
+const BADGE_CACHE_TTL_S = 600
+
+function badgeCacheKey(userId: string) {
+  return `badges:v1:${userId}`
+}
 
 async function aggregateKeyCounts(userId: string) {
   const rows = await db.execute(sql`
@@ -41,6 +49,39 @@ async function aggregateKeyCounts(userId: string) {
     counts[String(row.label)] = Number(row.count)
   }
   return counts
+}
+
+async function readBadgeCache(
+  userId: string,
+  privacy: string,
+): Promise<Badge[] | null> {
+  if (privacy !== 'full') return []
+  try {
+    const cached = await redis.get(badgeCacheKey(userId))
+    return cached ? (JSON.parse(cached) as Badge[]) : null
+  } catch (err) {
+    log.error('badge_cache_read_error', {
+      message: err instanceof Error ? err.message : String(err),
+    })
+    return null
+  }
+}
+
+async function computeAndCacheBadges(userId: string): Promise<Badge[]> {
+  const badges = computeBadges(await aggregateKeyCounts(userId))
+  try {
+    await redis.set(
+      badgeCacheKey(userId),
+      JSON.stringify(badges),
+      'EX',
+      BADGE_CACHE_TTL_S,
+    )
+  } catch (err) {
+    log.error('badge_cache_write_error', {
+      message: err instanceof Error ? err.message : String(err),
+    })
+  }
+  return badges
 }
 
 async function findUser(handle: string) {
@@ -65,7 +106,7 @@ userRoutes.get(
       return apiError(c, 'NOT_FOUND', 'User not found')
     }
 
-    const [streakRow, statRows, langRows, keyCounts] = await Promise.all([
+    const [streakRow, statRows, langRows, cachedBadges] = await Promise.all([
       db.select().from(streaks).where(eq(streaks.userId, user.id)).limit(1),
       db
         .select({
@@ -85,9 +126,10 @@ userRoutes.get(
         .groupBy(sessionLangs.lang)
         .orderBy(desc(sql`sum(${sessionLangs.durationS})`))
         .limit(1),
-      aggregateKeyCounts(user.id),
+      readBadgeCache(user.id, user.privacy),
     ])
 
+    const badges = cachedBadges ?? (await computeAndCacheBadges(user.id))
     const streak = streakRow[0]
     const stat = statRows[0]
     return c.json({
@@ -112,7 +154,7 @@ userRoutes.get(
         total_duration_s: stat?.totalDurationS ?? 0,
         top_lang: langRows[0]?.lang ?? null,
       },
-      badges: computeBadges(keyCounts),
+      badges,
     })
   },
 )
