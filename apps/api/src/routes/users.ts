@@ -10,6 +10,7 @@ import {
   parseLimit,
   sessionKeyset,
 } from '../lib/cursor.js'
+import { computeBadges } from '../lib/badges.js'
 import { toSessionSummary, topLangBySession } from '../lib/sessionSummary.js'
 import { requireAuth } from '../middleware/auth.js'
 import { ipKey, rateLimit, userKey } from '../middleware/rateLimit.js'
@@ -25,6 +26,22 @@ async function requesterFrom(authorization: string | undefined) {
 }
 
 const HANDLE_RE = /^[a-zA-Z0-9-]{1,39}$/
+
+async function aggregateKeyCounts(userId: string) {
+  const rows = await db.execute(sql`
+    select key as label, sum(value::numeric)::int as count
+    from ${sessions}
+    cross join lateral jsonb_each_text(${sessions.keyboardHeatmap} -> 'counts')
+    where ${sessions.userId} = ${userId}
+      and ${sessions.keyboardHeatmap} is not null
+    group by key
+  `)
+  const counts: Record<string, number> = {}
+  for (const row of rows) {
+    counts[String(row.label)] = Number(row.count)
+  }
+  return counts
+}
 
 async function findUser(handle: string) {
   if (!HANDLE_RE.test(handle)) return null
@@ -48,7 +65,7 @@ userRoutes.get(
       return apiError(c, 'NOT_FOUND', 'User not found')
     }
 
-    const [streakRow, statRows, langRows] = await Promise.all([
+    const [streakRow, statRows, langRows, keyCounts] = await Promise.all([
       db.select().from(streaks).where(eq(streaks.userId, user.id)).limit(1),
       db
         .select({
@@ -68,6 +85,7 @@ userRoutes.get(
         .groupBy(sessionLangs.lang)
         .orderBy(desc(sql`sum(${sessionLangs.durationS})`))
         .limit(1),
+      aggregateKeyCounts(user.id),
     ])
 
     const streak = streakRow[0]
@@ -94,7 +112,7 @@ userRoutes.get(
         total_duration_s: stat?.totalDurationS ?? 0,
         top_lang: langRows[0]?.lang ?? null,
       },
-      badges: [],
+      badges: computeBadges(keyCounts),
     })
   },
 )
