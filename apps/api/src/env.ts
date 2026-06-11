@@ -1,6 +1,11 @@
 import 'dotenv/config'
 import { z } from 'zod'
 
+const optionalSecret = z.preprocess(
+  (v) => (v === '' ? undefined : v),
+  z.string().min(1).optional(),
+)
+
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   REDIS_URL: z.string().url(),
@@ -16,6 +21,12 @@ const envSchema = z.object({
     .default('true')
     .transform((v) => v === 'true'),
   TRUST_PROXY_HOPS: z.coerce.number().int().nonnegative().default(0),
+  STRIPE_SECRET_KEY: optionalSecret,
+  STRIPE_WEBHOOK_SECRET: optionalSecret,
+  STRIPE_PRICE_PRO_MONTHLY: optionalSecret,
+  STRIPE_PRICE_PRO_YEARLY: optionalSecret,
+  STRIPE_PRICE_TEAM_MONTHLY: optionalSecret,
+  STRIPE_PRICE_TEAM_YEARLY: optionalSecret,
 })
 
 export const env = envSchema.parse(process.env)

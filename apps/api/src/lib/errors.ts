@@ -8,6 +8,7 @@ export type ErrorCode =
   | 'VALIDATION_ERROR'
   | 'PAYLOAD_TOO_LARGE'
   | 'RATE_LIMITED'
+  | 'SERVICE_UNAVAILABLE'
   | 'INTERNAL_ERROR'
 
 const statusByCode: Record<ErrorCode, ContentfulStatusCode> = {
@@ -17,6 +18,7 @@ const statusByCode: Record<ErrorCode, ContentfulStatusCode> = {
   VALIDATION_ERROR: 400,
   PAYLOAD_TOO_LARGE: 413,
   RATE_LIMITED: 429,
+  SERVICE_UNAVAILABLE: 503,
   INTERNAL_ERROR: 500,
 }
 
