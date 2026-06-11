@@ -29,6 +29,20 @@
       "when": 1781066772783,
       "tag": "0003_shallow_starhawk",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1781150789057,
+      "tag": "0004_complete_justin_hammer",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1781152710799,
+      "tag": "0005_magical_the_fallen",
+      "breakpoints": true
     }
   ]
 }

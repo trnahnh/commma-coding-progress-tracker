@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "stripe_event_ts" timestamp with time zone;
