@@ -250,6 +250,9 @@ Goal: growth mechanics live. First external contributors merged.
 - [x] Style badges: Vim athlete, Mouse-free, Backspace heavy, Arrow navigator —
       defined in `BadgeRow` (Profile.tsx); earned=accent-2, unearned=dim
 - [x] Badge display on profile page
+- [x] Server-side badge computation — `GET /v1/users/:handle` derives earned
+      badges from the all-time `keyboard_heatmap` key counts (`lib/badges.ts`,
+      pure + unit-tested); 2000-keystroke floor before any award
 - [ ] Team model: create team, invite members, team role
 - [ ] Private team leaderboard
 - [ ] Team aggregate heatmap visualization

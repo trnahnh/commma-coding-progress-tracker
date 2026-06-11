@@ -156,15 +156,41 @@ Returns a public profile.
     "total_duration_s": 1843200,
     "top_lang": "TypeScript"
   },
-  "badges": ["vim-athlete", "mouse-free"]
+  "badges": [
+    {
+      "id": "vim-athlete",
+      "name": "Vim athlete",
+      "description": "Leans on Escape and almost never reaches for the arrow keys."
+    },
+    {
+      "id": "mouse-free",
+      "name": "Mouse-free",
+      "description": "Moves through the file by keyboard instead of the mouse."
+    }
+  ]
 }
 ```
 
-**Implementation status (Phase 2):** live. `stats` are aggregated from
+**Implementation status (Phase 4):** live. `stats` are aggregated from
 `sessions`/`session_langs` (`total_sessions`, `total_duration_s`, and the
 all-time `top_lang`). Gated by `privacy`: an `off` user is `404` to everyone but
-the owner (send a bearer). `badges` is always `[]` for now (the badge system is
-Phase 4).
+the owner (send a bearer).
+
+`badges` are computed server-side on each read from the user's all-time
+`keyboard_heatmap` key counts (summed across sessions in Postgres). A profile
+must have at least 2000 tracked keystrokes before any badge is awarded;
+otherwise `badges` is `[]`. The catalog and the share thresholds (over total
+keystrokes) are:
+
+| Badge             | Earned when                                               |
+| ----------------- | --------------------------------------------------------- |
+| `vim-athlete`     | Escape ≥ 2% **and** arrow keys ≤ 1%                       |
+| `mouse-free`      | navigation keys (arrows + Home/End/PageUp/PageDown) ≥ 10% |
+| `backspace-heavy` | Backspace + Delete ≥ 12%                                  |
+| `arrow-navigator` | arrow keys ≥ 6%                                           |
+
+`vim-athlete` and `arrow-navigator` are mutually exclusive by construction.
+`summary`/`off` users carry no `key_freq`, so they earn no badges.
 
 ---
 

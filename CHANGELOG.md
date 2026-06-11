@@ -11,6 +11,15 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **API** — Style badges on public profiles, computed server-side.
+  `GET /v1/users/:handle` now returns `badges` as `{ id, name, description }[]`
+  (was always `[]`), derived on read from the user's all-time `keyboard_heatmap`
+  key counts summed across sessions in Postgres. Catalog: `vim-athlete` (Escape
+  ≥ 2% and arrow keys ≤ 1%), `mouse-free` (arrows + Home/End/PageUp/PageDown ≥
+  10%), `backspace-heavy` (Backspace + Delete ≥ 12%), `arrow-navigator` (arrow
+  keys ≥ 6%), as a share of total keystrokes. A profile needs ≥ 2000 tracked
+  keystrokes before any badge is awarded; `summary`/`off` users carry no
+  `key_freq` and so earn none. No schema change — badges are read-time only.
 - **API / DB** — Stripe subscription billing for the Pro and Team tiers.
   `POST /v1/billing/checkout` (auth, 30/hr) opens a Stripe Checkout session for
   a `plan` (`pro`/`team`) × `interval` (`monthly`/`yearly`);
