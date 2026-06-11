@@ -18,8 +18,11 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   ≥ 2% and arrow keys ≤ 1%), `mouse-free` (arrows + Home/End/PageUp/PageDown ≥
   10%), `backspace-heavy` (Backspace + Delete ≥ 12%), `arrow-navigator` (arrow
   keys ≥ 6%), as a share of total keystrokes. A profile needs ≥ 2000 tracked
-  keystrokes before any badge is awarded; `summary`/`off` users carry no
-  `key_freq` and so earn none. No schema change — badges are read-time only.
+  keystrokes before any badge is awarded. Badges are computed only for
+  `full`-privacy profiles (checked at request time, so a privacy downgrade hides
+  them immediately) and cached per user in Redis for ~10 minutes so a hot
+  profile does not re-scan its sessions each read; the cache fails open if Redis
+  is unavailable. No schema change — badges are read-time only.
 - **API / DB** — Stripe subscription billing for the Pro and Team tiers.
   `POST /v1/billing/checkout` (auth, 30/hr) opens a Stripe Checkout session for
   a `plan` (`pro`/`team`) × `interval` (`monthly`/`yearly`);

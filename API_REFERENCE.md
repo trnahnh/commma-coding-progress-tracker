@@ -176,8 +176,9 @@ Returns a public profile.
 all-time `top_lang`). Gated by `privacy`: an `off` user is `404` to everyone but
 the owner (send a bearer).
 
-`badges` are computed server-side on each read from the user's all-time
-`keyboard_heatmap` key counts (summed across sessions in Postgres). A profile
+`badges` are computed server-side from the user's all-time `keyboard_heatmap`
+key counts (summed across sessions in Postgres) and cached in Redis for ~10
+minutes per user, so a hot profile does not re-scan every request. A profile
 must have at least 2000 tracked keystrokes before any badge is awarded;
 otherwise `badges` is `[]`. The catalog and the share thresholds (over total
 keystrokes) are:
@@ -189,8 +190,11 @@ keystrokes) are:
 | `backspace-heavy` | Backspace + Delete ≥ 12%                                  |
 | `arrow-navigator` | arrow keys ≥ 6%                                           |
 
-`vim-athlete` and `arrow-navigator` are mutually exclusive by construction.
-`summary`/`off` users carry no `key_freq`, so they earn no badges.
+The thresholds are heuristics (centralized in `lib/badges.ts`) and may be
+re-tuned once real usage data exists. `vim-athlete` and `arrow-navigator` are
+mutually exclusive by construction. Badges are only computed for `full`-privacy
+profiles — `summary` and `off` users earn none, applied at request time so a
+privacy downgrade hides badges immediately regardless of cache.
 
 ---
 
