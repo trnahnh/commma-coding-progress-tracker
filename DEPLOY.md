@@ -173,6 +173,37 @@ keys): create an IAM role trusting the repo's OIDC provider, granting only
 `s3:PutObject`/`s3:DeleteObject`/`s3:ListBucket` on the web bucket and
 `cloudfront:CreateInvalidation` on the distribution.
 
+### 7. Billing (Stripe, optional)
+
+Billing is optional: with no Stripe env set, `/v1/billing/*` returns
+`503 SERVICE_UNAVAILABLE` and every account stays on `plan='free'`. To enable
+Pro/Team subscriptions, configure Stripe **in a sandbox first**, then repeat
+against the live account at launch.
+
+In the Stripe Dashboard, choose **Recurring payments**, business type **Digital
+goods (SaaS)**, and (recommended) the **Stripe does it / Managed Payments**
+option so Stripe is the merchant of record for global VAT/sales tax. Then:
+
+1. Create four recurring **prices** — Pro and Team, each monthly and yearly ($5
+   / $50 / $20 / $200, matching the ROADMAP pricing table). Copy each
+   `price_...` id into `STRIPE_PRICE_PRO_MONTHLY`, `STRIPE_PRICE_PRO_YEARLY`,
+   `STRIPE_PRICE_TEAM_MONTHLY`, `STRIPE_PRICE_TEAM_YEARLY`. Sandbox and live
+   prices are distinct — recreate them when you go live.
+2. Copy the **secret key** (`sk_test_...` in sandbox, `sk_live_...` in
+   production) into `STRIPE_SECRET_KEY`.
+3. Register a webhook endpoint at `https://api.commma.dev/v1/billing/webhook`
+   subscribed to `checkout.session.completed`, `customer.subscription.created`,
+   `customer.subscription.updated`, and `customer.subscription.deleted`; copy
+   its signing secret (`whsec_...`) into `STRIPE_WEBHOOK_SECRET`. For local
+   testing use `stripe listen --forward-to localhost:3000/v1/billing/webhook`,
+   which prints the `whsec_...` to use.
+
+Verify end to end with test card `4242 4242 4242 4242`:
+`POST /v1/billing/checkout` → pay → the webhook flips that user's `users.plan`,
+confirmable via `GET /v1/me`. The webhook is authenticated by the Stripe
+signature, not a JWT, so the nginx proxy must forward `POST /v1/billing/webhook`
+like any other `/v1` route (it already does — no special-casing needed).
+
 ## Redeploy and rollback
 
 - **Redeploy** — re-run the relevant workflow. `Deploy API` pulls `main` and

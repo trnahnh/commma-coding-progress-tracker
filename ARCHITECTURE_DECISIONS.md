@@ -538,3 +538,84 @@ State (state→redirect_uri, one-time codes) lives only in Redis with short TTLs
   idea.
 - **Reusing the cookie refresh flow** — impossible: the browser, not the
   extension, receives the callback's `Set-Cookie`.
+
+---
+
+## ADR-012: Stripe Billing & Webhook Idempotency
+
+**Status:** Accepted — 2026-06
+
+### Context
+
+The Pro and Team tiers (see `ROADMAP.md` pricing) need recurring subscription
+billing: a way to start a subscription, a way for users to manage or cancel it,
+and a reliable way to keep `users.plan` in sync with the customer's real
+subscription state. As a solo, early-stage product selling digital goods (SaaS)
+internationally, global sales-tax/VAT compliance is a disproportionate burden to
+carry directly. Billing must also not become a hard dependency for local dev,
+tests, or self-hosting, none of which need Stripe to run the core product.
+
+### Decision
+
+Use **Stripe** for subscriptions via Stripe-hosted **Checkout** (redirect flow,
+no client-side Stripe.js) and the **Billing Portal** for self-serve
+management/cancellation. Adopt Stripe **Managed Payments** (merchant of record)
+so Stripe is liable for global VAT/sales tax, fraud, and disputes in exchange
+for a per-transaction add-on fee.
+
+`customer.subscription.*` webhook events are the **single source of truth** for
+`users.plan`, derived from the subscription's price (mapped via configured price
+IDs) and status (`active`/`trialing`/`past_due` are entitled; everything else
+falls back to `free`). `checkout.session.completed` only persists the Stripe
+customer/subscription IDs — it never sets the plan, avoiding two writers for one
+field.
+
+Webhook delivery is **at-least-once and unordered**, so the plan update is an
+**atomic conditional UPDATE guarded by a monotonic `users.stripe_event_ts`
+watermark**: an event applies only when `event.created` is newer than the last
+recorded timestamp for that customer. Pure duplicates are already idempotent
+(the same write); the watermark additionally defeats **out-of-order** delivery —
+e.g. a retried `active` arriving after `deleted` is a no-op and cannot resurrect
+a cancelled plan. The webhook is authenticated by the Stripe **signature**
+(`STRIPE_WEBHOOK_SECRET`), not a JWT. `customers.create` uses an idempotency key
+to prevent duplicate customers under concurrent checkout.
+
+All Stripe configuration is **optional env**: unset (or present-but-blank) keys
+are coerced to absent, every `/v1/billing/*` endpoint returns
+`503 SERVICE_UNAVAILABLE`, and all accounts stay on `free`.
+
+### Consequences
+
+- VAT/sales-tax liability and dispute handling sit with Stripe; the trade-off is
+  the Managed Payments add-on fee, revisited if fee drag outweighs the
+  compliance convenience (the choice is reversible in Stripe).
+- Plan state converges to the truth regardless of webhook ordering or
+  redelivery, without an event-id ledger or an extra Stripe API round-trip per
+  event.
+- A brief window can exist between a completed payment and the
+  `customer.subscription.created` event landing, during which the plan is still
+  `free`; in practice the event arrives near-instantly.
+- The watermark is per-customer, so a single customer holding multiple
+  concurrent subscriptions is not modelled (one active subscription per customer
+  is assumed for now).
+- Local dev, tests, and self-hosting run with no Stripe keys; billing simply
+  reports `503`. Two new `users` columns ship via migrations `0004`
+  (`stripe_customer_id` unique, `stripe_subscription_id`) and `0005`
+  (`stripe_event_ts`).
+
+### Rejected Alternatives
+
+- **Self-managed tax (standard Stripe, not merchant of record)** — lower fees
+  but puts global VAT registration/remittance and disputes on the owner;
+  premature at this scale. Revisit at higher volume.
+- **Re-fetching the subscription from Stripe on every webhook** — also handles
+  ordering (always reads current truth), but couples each event to a live API
+  call, adds latency and a new failure mode, and is harder to test
+  deterministically. The watermark achieves the same safety with a pure DB
+  write.
+- **A processed-event-id ledger table** — solves duplicates but not ordering,
+  and is unnecessary once writes are idempotent and watermark-guarded.
+- **Trusting `checkout.session.completed` metadata for the plan** — works for
+  the initial purchase but not for later upgrades/downgrades/cancellations, and
+  would mean two writers for `users.plan`; the subscription price/status is the
+  durable source of truth.

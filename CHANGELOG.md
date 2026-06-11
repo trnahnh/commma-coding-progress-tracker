@@ -11,6 +11,25 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **API / DB** — Stripe subscription billing for the Pro and Team tiers.
+  `POST /v1/billing/checkout` (auth, 30/hr) opens a Stripe Checkout session for
+  a `plan` (`pro`/`team`) × `interval` (`monthly`/`yearly`);
+  `POST /v1/billing/portal` (auth, 30/hr) opens the Stripe Billing Portal for
+  managing or cancelling. `POST /v1/billing/webhook` is signature-verified
+  against `STRIPE_WEBHOOK_SECRET` (no JWT). `customer.subscription.*` is the
+  single source of truth for `users.plan` (derived from the price + status, with
+  `past_due` kept active); `checkout.session.completed` only persists the
+  customer/subscription IDs. Webhook delivery is at-least-once and unordered, so
+  the subscription handler is an **atomic conditional UPDATE guarded by a
+  monotonic `users.stripe_event_ts` watermark** — a redelivered or out-of-order
+  stale event (e.g. a retried `active` arriving after `deleted`) is a no-op and
+  cannot resurrect a cancelled plan. `customers.create` uses an idempotency key
+  to avoid duplicate customers on concurrent checkout. `users` gained
+  `stripe_customer_id` (unique) and `stripe_subscription_id` (migration `0004`)
+  and `stripe_event_ts` (migration `0005`). All Stripe env vars are optional —
+  unset (or present-but-blank, e.g. the `.env.example` placeholders) is coerced
+  to absent, the endpoints return `503 SERVICE_UNAVAILABLE` (new error code),
+  and every account stays on `free`.
 - **Web / API / DB** — User profile fields: `plan` (text, default `free`),
   `display_name` (varchar 64), `bio` (varchar 160), `website` (varchar 256),
   `location` (varchar 64), `school` (varchar 128), `field_of_study` (varchar 64)
@@ -226,6 +245,17 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Docs
 
+- Added a "Billing (Stripe, optional)" step to `DEPLOY.md` — sandbox-first
+  setup, the four recurring price IDs, secret/webhook-secret env wiring, and the
+  `4242` test-card end-to-end check, including the note that the webhook is
+  signature-authenticated (no JWT) so nginx forwards it like any other `/v1`
+  route.
+- Added **ADR-012: Stripe Billing & Webhook Idempotency** — records the choice
+  of Stripe + Managed Payments (merchant of record for VAT), subscription events
+  as the single plan source, the `stripe_event_ts` watermark for ordering-safe
+  idempotency, and optional-env graceful degradation, with rejected
+  alternatives. Added the three `/v1/billing/*` routes to the `SYSTEM_DESIGN.md`
+  route map and a Billing row to the `README.md` tech-stack table.
 - Added `SECURITY.md` — private vulnerability reporting, supported versions,
   scope, safe harbor, and the no-keylogging privacy invariant (ADR-006) as a
   security boundary. Linked from `README.md` and `CONTRIBUTING.md`.

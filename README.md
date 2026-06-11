@@ -40,6 +40,7 @@ original to this project.
 | Heatmap (client)    | Canvas API → transparent PNG                                                                            |
 | Heatmap (server OG) | sharp                                                                                                   |
 | Auth                | GitHub OAuth, JWT + HTTP-only refresh token                                                             |
+| Billing             | Stripe (Pro/Team subscriptions, signature-verified webhooks)                                            |
 | Monorepo            | pnpm workspaces                                                                                         |
 | Deployment (MVP)    | AWS-hosted compute — EC2 t3.micro + PM2 (API), S3 + CloudFront (web); Railway PostgreSQL, Upstash Redis |
 

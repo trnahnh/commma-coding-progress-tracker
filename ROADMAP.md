@@ -236,8 +236,13 @@ Goal: growth mechanics live. First external contributors merged.
 - [x] Pro tier enforcement — 7-day session-history window for free accounts,
       heatmap PNG export gate (`isPro` prop on `KeyboardHeatmap`), session
       history gate on own free-plan profile; `MeResult.plan` field added
-- [ ] Stripe integration — subscription billing for Pro; webhook handler to flip
-      `users.plan` on checkout and cancellation
+- [x] Stripe integration — subscription billing for Pro/Team
+      (`POST /v1/billing/checkout` + `/portal`); signature-verified webhook
+      (`POST /v1/billing/webhook`) flips `users.plan` on
+      `checkout.session.completed` and `customer.subscription.*`. All-optional
+      Stripe env: with no keys the endpoints return `503` and plans stay free.
+      `users` gained `stripe_customer_id`/`stripe_subscription_id` (migration
+      `0004`).
 - [x] Waitlist-to-paid conversion — landing-page email-capture CTA replaced with
       two-button row: Get early access (→ /pricing) + Install free (→
       marketplace); all `href='#'` removed site-wide

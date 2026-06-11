@@ -562,6 +562,76 @@ Each entry maps to exactly one session.
 
 ---
 
+## Billing Endpoints
+
+Stripe-backed subscription billing for the Pro and Team tiers. Billing is
+optional: if the server has no Stripe keys configured, every billing endpoint
+returns `503 SERVICE_UNAVAILABLE` and all accounts stay on `plan: "free"`. The
+plan a user is on is read from `GET /v1/me` (`plan` field).
+
+### `POST /v1/billing/checkout`
+
+Creates a Stripe Checkout session for a subscription and returns its hosted URL.
+A Stripe customer is created for the user on first use and remembered.
+
+**Auth:** Required  
+**Rate limit:** 30/hr per user
+
+**Request:**
+
+```json
+{
+  "plan": "pro",
+  "interval": "monthly"
+}
+```
+
+`plan` is `pro` or `team`; `interval` is `monthly` or `yearly`. A plan whose
+price is not configured returns `503 SERVICE_UNAVAILABLE`.
+
+**Response:**
+
+```json
+{
+  "url": "https://checkout.stripe.com/c/pay/cs_test_..."
+}
+```
+
+Redirect the browser to `url`. On success Stripe redirects to
+`${WEB_ORIGIN}/billing/success`; on cancel to `${WEB_ORIGIN}/pricing`.
+
+### `POST /v1/billing/portal`
+
+Creates a Stripe Billing Portal session so the user can manage or cancel their
+subscription. Returns `404 NOT_FOUND` if the user has no billing account yet.
+
+**Auth:** Required  
+**Rate limit:** 30/hr per user
+
+**Response:**
+
+```json
+{
+  "url": "https://billing.stripe.com/p/session/..."
+}
+```
+
+### `POST /v1/billing/webhook`
+
+Stripe → API webhook. Not called by clients; authenticated by the Stripe
+signature in the `stripe-signature` header (verified against
+`STRIPE_WEBHOOK_SECRET`) rather than a JWT. A missing or invalid signature
+returns `401`/`400`. `customer.subscription.created|updated|deleted` owns
+`users.plan` (`free`/`pro`/`team`, derived from the subscription's price and
+status); `checkout.session.completed` only records the customer/subscription
+IDs. Because Stripe delivers at-least-once and unordered, the plan update is
+idempotent and ordering-safe: it applies only when the event is newer than the
+last one recorded for that customer (a `stripe_event_ts` watermark), so a
+redelivered or out-of-order stale event is ignored. Responds
+`{ "received": true }`.
+
+---
+
 ## Error Format
 
 All errors follow this shape:
@@ -576,26 +646,28 @@ All errors follow this shape:
 }
 ```
 
-| Code                | HTTP Status | Description                                  |
-| ------------------- | ----------- | -------------------------------------------- |
-| `UNAUTHORIZED`      | 401         | Missing or invalid JWT                       |
-| `FORBIDDEN`         | 403         | Valid JWT but insufficient permissions       |
-| `NOT_FOUND`         | 404         | Resource does not exist                      |
-| `VALIDATION_ERROR`  | 400         | Request body/params failed Zod validation    |
-| `PAYLOAD_TOO_LARGE` | 413         | Request body exceeded the 1 MB `/v1/*` limit |
-| `RATE_LIMITED`      | 429         | Per-user rate limit exceeded                 |
-| `INTERNAL_ERROR`    | 500         | Unexpected server error                      |
+| Code                  | HTTP Status | Description                                  |
+| --------------------- | ----------- | -------------------------------------------- |
+| `UNAUTHORIZED`        | 401         | Missing or invalid JWT                       |
+| `FORBIDDEN`           | 403         | Valid JWT but insufficient permissions       |
+| `NOT_FOUND`           | 404         | Resource does not exist                      |
+| `VALIDATION_ERROR`    | 400         | Request body/params failed Zod validation    |
+| `PAYLOAD_TOO_LARGE`   | 413         | Request body exceeded the 1 MB `/v1/*` limit |
+| `RATE_LIMITED`        | 429         | Per-user rate limit exceeded                 |
+| `SERVICE_UNAVAILABLE` | 503         | Dependency not configured (e.g. billing off) |
+| `INTERNAL_ERROR`      | 500         | Unexpected server error                      |
 
 ---
 
 ## Rate Limits
 
-| Endpoint group                       | Limit          | Window            |
-| ------------------------------------ | -------------- | ----------------- |
-| `POST /v1/ingest`                    | 1,000 requests | 1 hour (per user) |
-| All read endpoints                   | 300 requests   | 1 hour (per user) |
-| `POST /v1/sessions/:id/heatmap-card` | 120 requests   | 1 hour (per user) |
-| Auth endpoints                       | 20 requests    | 1 hour (per IP)   |
+| Endpoint group                         | Limit          | Window            |
+| -------------------------------------- | -------------- | ----------------- |
+| `POST /v1/ingest`                      | 1,000 requests | 1 hour (per user) |
+| All read endpoints                     | 300 requests   | 1 hour (per user) |
+| `POST /v1/sessions/:id/heatmap-card`   | 120 requests   | 1 hour (per user) |
+| `POST /v1/billing/checkout`, `/portal` | 30 requests    | 1 hour (per user) |
+| Auth endpoints                         | 20 requests    | 1 hour (per IP)   |
 
 **Rate limit headers:**
 

@@ -257,6 +257,9 @@ CREATE INDEX follows_followee ON follows(followee_id);
 | DELETE | /v1/users/:handle/follow      | JWT            | Unfollow a user               |
 | GET    | /v1/leaderboard               | None           | Leaderboard                   |
 | GET    | /v1/feed                      | JWT            | Activity feed                 |
+| POST   | /v1/billing/checkout          | JWT            | Stripe Checkout session       |
+| POST   | /v1/billing/portal            | JWT            | Stripe Billing Portal session |
+| POST   | /v1/billing/webhook           | Stripe sig     | Subscription state → plan     |
 
 ---
 
