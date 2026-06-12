@@ -24,6 +24,7 @@ const Changelog = lazy(() => import('./pages/Changelog.tsx'))
 const EditProfile = lazy(() => import('./pages/EditProfile.tsx'))
 const Teams = lazy(() => import('./pages/Teams.tsx'))
 const TeamDashboard = lazy(() => import('./pages/TeamDashboard.tsx'))
+const BillingSuccess = lazy(() => import('./pages/BillingSuccess.tsx'))
 
 const router = createBrowserRouter([
   {
@@ -32,6 +33,7 @@ const router = createBrowserRouter([
       { path: '/', element: <App /> },
       { path: '/profile', element: <EditProfile /> },
       { path: '/pricing', element: <Pricing /> },
+      { path: '/billing/success', element: <BillingSuccess /> },
       { path: '/sessions/:id', element: <SessionDetail /> },
       { path: '/teams', element: <Teams /> },
       { path: '/teams/:slug', element: <TeamDashboard /> },

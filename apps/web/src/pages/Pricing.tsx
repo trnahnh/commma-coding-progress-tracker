@@ -1,6 +1,19 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Shell } from '../components/chrome'
+import {
+  ApiError,
+  createCheckout,
+  openBillingPortal,
+  type BillingInterval,
+  type PaidPlan,
+} from '../lib/api'
+import { useAuth } from '../lib/auth'
+import { setPostAuthRedirect } from '../lib/redirect'
+
+function isPaidPlan(value: string | null): value is PaidPlan {
+  return value === 'pro' || value === 'team'
+}
 
 const FEATURES_FREE = [
   'Last 7 days of sessions',
@@ -49,10 +62,61 @@ function FeatureList({ features }: { features: string[] }) {
 
 export default function Pricing() {
   const [annual, setAnnual] = useState(false)
+  const [pending, setPending] = useState<PaidPlan | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const { token, isLoading } = useAuth()
+  const navigate = useNavigate()
+  const [params, setParams] = useSearchParams()
+  const resumed = useRef(false)
 
   useEffect(() => {
     document.title = 'Pricing · commma'
   }, [])
+
+  const startCheckout = useCallback(
+    async (plan: PaidPlan, interval: BillingInterval) => {
+      if (pending) return
+      if (!token) {
+        setPostAuthRedirect(`/pricing?plan=${plan}&interval=${interval}`)
+        navigate('/signin')
+        return
+      }
+      setPending(plan)
+      setError(null)
+      try {
+        const { url } = await createCheckout(token, plan, interval)
+        window.location.href = url
+      } catch (err) {
+        if (err instanceof ApiError && err.code === 'CONFLICT') {
+          try {
+            const { url } = await openBillingPortal(token)
+            window.location.href = url
+            return
+          } catch {
+            void 0
+          }
+        }
+        setError(
+          err instanceof ApiError
+            ? err.message
+            : 'Could not start checkout. Try again.',
+        )
+        setPending(null)
+      }
+    },
+    [pending, token, navigate],
+  )
+
+  useEffect(() => {
+    if (resumed.current || isLoading || !token) return
+    const plan = params.get('plan')
+    if (!isPaidPlan(plan)) return
+    resumed.current = true
+    const interval: BillingInterval =
+      params.get('interval') === 'yearly' ? 'yearly' : 'monthly'
+    setParams({}, { replace: true })
+    void Promise.resolve().then(() => startCheckout(plan, interval))
+  }, [isLoading, token, params, setParams, startCheckout])
 
   return (
     <Shell>
@@ -164,15 +228,21 @@ export default function Pricing() {
               </div>
             </div>
             <FeatureList features={FEATURES_PRO} />
-            <Link
-              to='/signin'
-              className='group inline-flex items-center justify-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors bg-accent text-paper border border-accent hover:bg-ink hover:border-ink'
+            <button
+              type='button'
+              onClick={() =>
+                void startCheckout('pro', annual ? 'yearly' : 'monthly')
+              }
+              disabled={pending !== null}
+              className='group inline-flex items-center justify-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors bg-accent text-paper border border-accent hover:bg-ink hover:border-ink disabled:opacity-50 disabled:cursor-not-allowed'
             >
-              Get early access
-              <span className='inline-block transition-transform group-hover:translate-x-1'>
-                →
-              </span>
-            </Link>
+              {pending === 'pro' ? 'Redirecting…' : 'Upgrade to Pro'}
+              {pending !== 'pro' && (
+                <span className='inline-block transition-transform group-hover:translate-x-1'>
+                  →
+                </span>
+              )}
+            </button>
           </div>
 
           <div className='relative flex flex-col px-6 sm:px-8 pt-8 sm:pt-10 pb-8 sm:pb-10 bg-paper'>
@@ -200,17 +270,29 @@ export default function Pricing() {
               </div>
             </div>
             <FeatureList features={FEATURES_TEAM} />
-            <Link
-              to='/contact'
-              className='group inline-flex items-center justify-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint'
+            <button
+              type='button'
+              onClick={() =>
+                void startCheckout('team', annual ? 'yearly' : 'monthly')
+              }
+              disabled={pending !== null}
+              className='group inline-flex items-center justify-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint disabled:opacity-50 disabled:cursor-not-allowed'
             >
-              Join waitlist
-              <span className='inline-block transition-transform group-hover:translate-x-1'>
-                →
-              </span>
-            </Link>
+              {pending === 'team' ? 'Redirecting…' : 'Upgrade to Team'}
+              {pending !== 'team' && (
+                <span className='inline-block transition-transform group-hover:translate-x-1'>
+                  →
+                </span>
+              )}
+            </button>
           </div>
         </div>
+
+        {error && (
+          <p className='mt-5 font-mono text-[14px] text-accent text-center m-0'>
+            {error}
+          </p>
+        )}
 
         <div className='mt-10 pt-8 border-t border-rule font-mono text-[14px] text-ink-mute leading-relaxed'>
           <p className='m-0'>

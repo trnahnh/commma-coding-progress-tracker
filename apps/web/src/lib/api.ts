@@ -234,6 +234,31 @@ export function getSession(id: string): Promise<SessionDetail> {
   return getJson<SessionDetail>(`/v1/sessions/${encodeURIComponent(id)}`)
 }
 
+export type PaidPlan = 'pro' | 'team'
+export type BillingInterval = 'monthly' | 'yearly'
+
+export function createCheckout(
+  token: string,
+  plan: PaidPlan,
+  interval: BillingInterval,
+): Promise<{ url: string }> {
+  return getJson<{ url: string }>('/v1/billing/checkout', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ plan, interval }),
+  })
+}
+
+export function openBillingPortal(token: string): Promise<{ url: string }> {
+  return getJson<{ url: string }>('/v1/billing/portal', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+}
+
 export type LeaderboardPeriod = 'week' | 'month' | 'alltime'
 
 export interface LeaderboardEntry {
