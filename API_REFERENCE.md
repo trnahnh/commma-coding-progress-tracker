@@ -403,10 +403,12 @@ heatmap returns `404`.
 
 **Caching:** `Cache-Control: private, max-age=300`. The rendered PNG is cached
 in Redis for 10 minutes keyed by session + render options
-(`card:v1:<id>:<aspect>:<layout>:<h|H>:<s|S>`), so repeated requests skip the
-`sharp` rasterization. The cache is fail-open (a Redis outage just re-renders)
-and stores only the image bytes — privacy is re-checked against Postgres on
-every request before any cached image is served.
+(`card:v1:<id>:<aspect>:<layout>:h-<handle>|H:<s|S>`), so repeated requests skip
+the `sharp` rasterization. The drawn `@handle` is part of the key, so a handle
+rename serves a fresh card immediately rather than a stale one. The cache is
+fail-open (a Redis outage just re-renders) and stores only the image bytes —
+privacy is re-checked against Postgres on every request before any cached image
+is served.
 
 **Response:** `image/png` (binary)
 

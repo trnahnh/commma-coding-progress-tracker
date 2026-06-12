@@ -17,10 +17,12 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   sessions (`404` otherwise, no existence leak), is rate-limited 120/hr per IP,
   and sends `Cache-Control: public, max-age=600`. Both endpoints now cache the
   rendered PNG in Redis for 10 minutes, keyed by session and render options
-  (`card:v1:<id>:<aspect>:<layout>:<h|H>:<s|S>`), so repeated hits skip the
-  `sharp` rasterization. The cache stores only image bytes and is fail-open;
-  privacy is re-checked against Postgres on every request before any cached
-  image is served, so a privacy downgrade takes effect immediately.
+  including the drawn handle
+  (`card:v1:<id>:<aspect>:<layout>:h-<handle>|H:<s|S>`), so repeated hits skip
+  the `sharp` rasterization and a handle rename never serves a stale card. The
+  cache stores only image bytes and is fail-open; privacy is re-checked against
+  Postgres on every request before any cached image is served, so a privacy
+  downgrade takes effect immediately.
 - **Web** — Team pages. `/teams` lists the user's teams and any pending invites
   with one-click accept/decline; a create-team form (gated to `plan: "team"`)
   auto-derives the slug from the name. `/teams/:slug` is the team dashboard:
