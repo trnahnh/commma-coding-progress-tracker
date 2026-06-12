@@ -174,6 +174,50 @@ describe.skipIf(!hasDb)('route integration', () => {
     const res = await req(`/v1/sessions/${session.id}`)
     expect(res.status).toBe(404)
   })
+
+  it('serves a public heatmap card PNG for a full-privacy session', async () => {
+    const owner = await seedUser({ privacy: 'full' })
+    const session = await seedSession(owner.id, { withHeatmap: true })
+
+    const res = await req(`/v1/sessions/${session.id}/heatmap-card?aspect=1:1`)
+    expect(res.status).toBe(200)
+    expect(res.headers.get('content-type')).toBe('image/png')
+    expect(res.headers.get('cache-control')).toContain('public')
+    const png = Buffer.from(await res.arrayBuffer())
+    expect(png.subarray(1, 4).toString()).toBe('PNG')
+  })
+
+  it('hides the public heatmap card for a non-full owner', async () => {
+    const summaryOwner = await seedUser({ privacy: 'summary' })
+    const summarySession = await seedSession(summaryOwner.id, {
+      withHeatmap: true,
+    })
+    const summaryRes = await req(
+      `/v1/sessions/${summarySession.id}/heatmap-card`,
+    )
+    expect(summaryRes.status).toBe(404)
+
+    const offOwner = await seedUser({ privacy: 'off' })
+    const offSession = await seedSession(offOwner.id, { withHeatmap: true })
+    const offRes = await req(`/v1/sessions/${offSession.id}/heatmap-card`)
+    expect(offRes.status).toBe(404)
+  })
+
+  it('returns 404 for a public heatmap card with no heatmap data', async () => {
+    const owner = await seedUser({ privacy: 'full' })
+    const session = await seedSession(owner.id)
+    const res = await req(`/v1/sessions/${session.id}/heatmap-card`)
+    expect(res.status).toBe(404)
+  })
+
+  it('rejects an unsupported public heatmap card aspect', async () => {
+    const owner = await seedUser({ privacy: 'full' })
+    const session = await seedSession(owner.id, { withHeatmap: true })
+    const res = await req(`/v1/sessions/${session.id}/heatmap-card?aspect=4:3`)
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as { error: { code: string } }
+    expect(body.error.code).toBe('VALIDATION_ERROR')
+  })
 })
 
 async function loadDb() {
