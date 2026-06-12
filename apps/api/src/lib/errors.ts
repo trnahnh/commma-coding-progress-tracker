@@ -5,6 +5,7 @@ export type ErrorCode =
   | 'UNAUTHORIZED'
   | 'FORBIDDEN'
   | 'NOT_FOUND'
+  | 'CONFLICT'
   | 'VALIDATION_ERROR'
   | 'PAYLOAD_TOO_LARGE'
   | 'RATE_LIMITED'
@@ -15,6 +16,7 @@ const statusByCode: Record<ErrorCode, ContentfulStatusCode> = {
   UNAUTHORIZED: 401,
   FORBIDDEN: 403,
   NOT_FOUND: 404,
+  CONFLICT: 409,
   VALIDATION_ERROR: 400,
   PAYLOAD_TOO_LARGE: 413,
   RATE_LIMITED: 429,
