@@ -315,11 +315,12 @@ sessionRoutes.post(
       return apiError(c, 'NOT_FOUND', 'Session has no heatmap')
     }
 
+    const handle = opts.show_handle ? owner.handle : null
     const cacheKey = heatmapCardCacheKey({
       sessionId: id,
       aspect: opts.aspect,
       layout: opts.layout,
-      handle: opts.show_handle,
+      handle,
       stats: opts.show_stats,
     })
     const png = await cachedCardPng(cacheKey, () =>
@@ -327,7 +328,7 @@ sessionRoutes.post(
         id,
         heatmap,
         session.paceCpm,
-        opts.show_handle ? owner.handle : null,
+        handle,
         opts.aspect,
         opts.show_stats,
       ),
@@ -393,11 +394,18 @@ sessionRoutes.get(
       sessionId: id,
       aspect: opts.aspect,
       layout: opts.layout,
-      handle: true,
+      handle: owner.handle,
       stats: true,
     })
     const png = await cachedCardPng(cacheKey, () =>
-      renderCardPng(id, heatmap, session.paceCpm, owner.handle, opts.aspect, true),
+      renderCardPng(
+        id,
+        heatmap,
+        session.paceCpm,
+        owner.handle,
+        opts.aspect,
+        true,
+      ),
     )
 
     return new Response(new Uint8Array(png), {

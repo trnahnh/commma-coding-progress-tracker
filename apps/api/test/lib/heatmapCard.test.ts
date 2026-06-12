@@ -74,22 +74,39 @@ describe('heatmapCardCacheKey', () => {
         sessionId: 'abc',
         aspect: '16:9',
         layout: 'qwerty',
-        handle: true,
+        handle: 'octocat',
         stats: true,
       }),
-    ).toBe('card:v1:abc:16:9:qwerty:h:s')
+    ).toBe('card:v1:abc:16:9:qwerty:h-octocat:s')
   })
 
-  it('distinguishes toggled handle and stats overlays', () => {
+  it('distinguishes a hidden handle from a drawn one', () => {
     const base = {
       sessionId: 'abc',
       aspect: '1:1',
       layout: 'qwerty',
     } as const
-    const all = heatmapCardCacheKey({ ...base, handle: true, stats: true })
-    const noHandle = heatmapCardCacheKey({ ...base, handle: false, stats: true })
-    const noStats = heatmapCardCacheKey({ ...base, handle: true, stats: false })
-    expect(new Set([all, noHandle, noStats]).size).toBe(3)
+    const shown = heatmapCardCacheKey({ ...base, handle: 'octocat', stats: true })
+    const hidden = heatmapCardCacheKey({ ...base, handle: null, stats: true })
+    const noStats = heatmapCardCacheKey({
+      ...base,
+      handle: 'octocat',
+      stats: false,
+    })
+    expect(new Set([shown, hidden, noStats]).size).toBe(3)
+    expect(hidden).toContain(':H:')
+  })
+
+  it('busts the key when the handle changes so a rename never serves stale', () => {
+    const base = {
+      sessionId: 'abc',
+      aspect: '16:9',
+      layout: 'qwerty',
+      stats: true,
+    } as const
+    expect(heatmapCardCacheKey({ ...base, handle: 'before' })).not.toBe(
+      heatmapCardCacheKey({ ...base, handle: 'after' }),
+    )
   })
 
   it('separates aspects and sessions', () => {
@@ -97,14 +114,14 @@ describe('heatmapCardCacheKey', () => {
       sessionId: 'one',
       aspect: '9:16',
       layout: 'qwerty',
-      handle: true,
+      handle: 'octocat',
       stats: true,
     })
     const b = heatmapCardCacheKey({
       sessionId: 'two',
       aspect: '9:16',
       layout: 'qwerty',
-      handle: true,
+      handle: 'octocat',
       stats: true,
     })
     expect(a).not.toBe(b)

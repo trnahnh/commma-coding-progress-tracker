@@ -42,12 +42,12 @@ export interface CardCacheKeyInput {
   sessionId: string
   aspect: CardAspect
   layout: string
-  handle: boolean
+  handle: string | null
   stats: boolean
 }
 
 export function heatmapCardCacheKey(input: CardCacheKeyInput): string {
-  const h = input.handle ? 'h' : 'H'
+  const h = input.handle ? `h-${input.handle}` : 'H'
   const s = input.stats ? 's' : 'S'
   return `card:v1:${input.sessionId}:${input.aspect}:${input.layout}:${h}:${s}`
 }
