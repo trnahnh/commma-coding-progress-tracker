@@ -25,3 +25,29 @@ self.addEventListener('fetch', e => {
   }
   e.respondWith(caches.match(request).then(cached => cached ?? fetch(request)))
 })
+
+self.addEventListener('push', e => {
+  const data = e.data ? e.data.json() : {}
+  e.waitUntil(
+    self.registration.showNotification(data.title ?? 'commma', {
+      body: data.body ?? '',
+      icon: '/icon-192.svg',
+      badge: '/icon-192.svg',
+      tag: 'streak-reminder',
+      renotify: true,
+      data: { url: data.url ?? '/' },
+    })
+  )
+})
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close()
+  const url = e.notification.data ? e.notification.data.url : '/'
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => {
+      const open = cs.find(c => 'focus' in c)
+      if (open) return open.focus()
+      return clients.openWindow(url)
+    })
+  )
+})

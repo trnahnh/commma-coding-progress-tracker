@@ -3,6 +3,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Shell } from '../components/chrome'
 import { ApiError, getMe, updateProfile } from '../lib/api'
 import { useAuth } from '../lib/auth'
+import {
+  getPushState,
+  isPushSupported,
+  subscribePush,
+  unsubscribePush,
+  type PushState,
+} from '../lib/push'
 
 const PRIVACY_OPTIONS = [
   {
@@ -47,6 +54,68 @@ function Field({
 
 const inputCls =
   'w-full bg-paper-3 border border-rule-strong rounded px-3 py-2.5 font-mono text-[13px] text-ink placeholder:text-ink-faint focus:outline-none focus:border-accent/60 transition-colors'
+
+function NotificationsSection({ token }: { token: string }) {
+  const [state, setState] = useState<PushState | 'loading'>('loading')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+
+  useEffect(() => {
+    getPushState().then(setState).catch(() => setState('unsupported'))
+  }, [])
+
+  const toggle = async () => {
+    setBusy(true)
+    setErr(null)
+    try {
+      if (state === 'subscribed') {
+        setState(await unsubscribePush(token))
+      } else {
+        setState(await subscribePush(token))
+      }
+    } catch {
+      setErr('Something went wrong. Try again.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const unsupported = state === 'unsupported' || !isPushSupported()
+
+  return (
+    <div className='px-5 sm:px-8 py-6 sm:py-7 flex flex-col gap-4'>
+      <div className='font-mono text-[11px] uppercase tracking-[0.18em] text-ink-mute'>
+        Notifications
+      </div>
+      <div className='flex items-start justify-between gap-4'>
+        <div>
+          <p className='font-mono text-[13px] text-ink m-0'>Streak reminders</p>
+          <p className='font-mono text-[11px] text-ink-mute m-0 mt-0.5'>
+            {unsupported
+              ? 'Not supported in this browser.'
+              : state === 'denied'
+                ? 'Notifications are blocked. Allow them in browser settings.'
+                : 'Get a daily reminder when you haven\'t coded yet and your streak is at risk.'}
+          </p>
+          {err && <p className='font-mono text-[11px] text-accent m-0 mt-1'>{err}</p>}
+        </div>
+        <button
+          type='button'
+          disabled={busy || unsupported || state === 'denied' || state === 'loading'}
+          onClick={() => void toggle()}
+          className={[
+            'shrink-0 inline-flex items-center h-[34px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider border transition-colors disabled:opacity-40',
+            state === 'subscribed'
+              ? 'text-ink-soft border-rule-strong hover:text-ink hover:border-ink-faint'
+              : 'text-accent border-accent/50 hover:bg-accent hover:text-paper hover:border-accent',
+          ].join(' ')}
+        >
+          {busy ? '…' : state === 'subscribed' ? 'Disable' : 'Enable'}
+        </button>
+      </div>
+    </div>
+  )
+}
 
 export default function EditProfile() {
   const { user, token, isLoading, refreshUser } = useAuth()
@@ -343,6 +412,7 @@ export default function EditProfile() {
                 </label>
               ))}
             </div>
+            <NotificationsSection token={token} />
           </div>
 
           <div className='mt-5 flex items-center justify-between gap-4'>
