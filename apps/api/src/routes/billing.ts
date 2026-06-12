@@ -68,6 +68,13 @@ billingRoutes.post(
       .limit(1)
     if (!user) return apiError(c, 'NOT_FOUND', 'User not found')
 
+    if (user.plan !== 'free' || user.stripeSubscriptionId)
+      return apiError(
+        c,
+        'CONFLICT',
+        'You already have an active subscription. Manage it from the billing portal.',
+      )
+
     let stripeCustomerId = user.stripeCustomerId
     if (!stripeCustomerId) {
       const customer = await stripe.customers.create(
@@ -84,16 +91,19 @@ billingRoutes.post(
         .where(eq(users.id, userId))
     }
 
-    const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
-      customer: stripeCustomerId,
-      line_items: [{ price: priceId, quantity: 1 }],
-      client_reference_id: user.id,
-      metadata: { userId: user.id, plan },
-      subscription_data: { metadata: { userId: user.id, plan } },
-      success_url: `${env.WEB_ORIGIN}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${env.WEB_ORIGIN}/pricing`,
-    })
+    const session = await stripe.checkout.sessions.create(
+      {
+        mode: 'subscription',
+        customer: stripeCustomerId,
+        line_items: [{ price: priceId, quantity: 1 }],
+        client_reference_id: user.id,
+        metadata: { userId: user.id, plan },
+        subscription_data: { metadata: { userId: user.id, plan } },
+        success_url: `${env.WEB_ORIGIN}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${env.WEB_ORIGIN}/pricing`,
+      },
+      { idempotencyKey: `checkout-${user.id}-${plan}-${interval}` },
+    )
 
     return c.json({ url: session.url })
   },
@@ -119,7 +129,7 @@ billingRoutes.post(
 
     const session = await stripe.billingPortal.sessions.create({
       customer: user.stripeCustomerId,
-      return_url: `${env.WEB_ORIGIN}/settings`,
+      return_url: `${env.WEB_ORIGIN}/profile`,
     })
 
     return c.json({ url: session.url })
