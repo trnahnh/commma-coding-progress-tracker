@@ -4,6 +4,7 @@ import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import sharp from 'sharp'
 import { sessionFiles, sessionLangs, sessions, users } from '@commma/db'
+import type { KeyboardHeatmap } from '@commma/db'
 import { db } from '../db.js'
 import { apiError } from '../lib/errors.js'
 import { verifyAccessToken } from '../lib/jwt.js'
@@ -13,10 +14,16 @@ import {
   parseLimit,
   sessionKeyset,
 } from '../lib/cursor.js'
-import { renderHeatmapCardSvg } from '../lib/heatmapCard.js'
+import {
+  heatmapCardCacheKey,
+  renderHeatmapCardSvg,
+  type CardAspect,
+} from '../lib/heatmapCard.js'
 import { toSessionSummary, topLangBySession } from '../lib/sessionSummary.js'
 import { requireAuth } from '../middleware/auth.js'
 import { ipKey, rateLimit, userKey } from '../middleware/rateLimit.js'
+import { redis } from '../redis.js'
+import { log } from '../logger.js'
 import type { AppEnv } from '../types.js'
 
 const heatmapCardSchema = z.object({
@@ -26,10 +33,73 @@ const heatmapCardSchema = z.object({
   show_stats: z.boolean().default(true),
 })
 
+const heatmapCardQuerySchema = z.object({
+  layout: z.enum(['qwerty', 'dvorak', 'colemak']).default('qwerty'),
+  aspect: z.enum(['9:16', '1:1', '16:9']).default('16:9'),
+})
+
+const CARD_CACHE_TTL_S = 600
+
 export const sessionRoutes = new Hono<AppEnv>()
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+async function renderCardPng(
+  sessionId: string,
+  heatmap: KeyboardHeatmap,
+  paceCpm: number | null,
+  handle: string | null,
+  aspect: CardAspect,
+  showStats: boolean,
+): Promise<Buffer> {
+  let stats: string | undefined
+  if (showStats) {
+    const [topLang] = await db
+      .select({ lang: sessionLangs.lang })
+      .from(sessionLangs)
+      .where(eq(sessionLangs.sessionId, sessionId))
+      .orderBy(desc(sessionLangs.pct))
+      .limit(1)
+    const parts = [`${paceCpm ?? 0} cpm`]
+    if (topLang) parts.push(topLang.lang)
+    stats = parts.join('  ·  ')
+  }
+
+  const svg = renderHeatmapCardSvg({
+    heatmap,
+    aspect,
+    handle: handle ? `@${handle}` : undefined,
+    stats,
+  })
+  return sharp(Buffer.from(svg)).png().toBuffer()
+}
+
+async function cachedCardPng(
+  cacheKey: string,
+  render: () => Promise<Buffer>,
+): Promise<Buffer> {
+  try {
+    const cached = await redis.getBuffer(cacheKey)
+    if (cached) return cached
+  } catch (err) {
+    log.error('card_cache_read_error', {
+      message: err instanceof Error ? err.message : String(err),
+    })
+  }
+
+  const png = await render()
+
+  try {
+    await redis.set(cacheKey, png, 'EX', CARD_CACHE_TTL_S)
+  } catch (err) {
+    log.error('card_cache_write_error', {
+      message: err instanceof Error ? err.message : String(err),
+    })
+  }
+
+  return png
+}
 
 sessionRoutes.get(
   '/',
@@ -245,32 +315,96 @@ sessionRoutes.post(
       return apiError(c, 'NOT_FOUND', 'Session has no heatmap')
     }
 
-    let stats: string | undefined
-    if (opts.show_stats) {
-      const [topLang] = await db
-        .select({ lang: sessionLangs.lang })
-        .from(sessionLangs)
-        .where(eq(sessionLangs.sessionId, id))
-        .orderBy(desc(sessionLangs.pct))
-        .limit(1)
-      const parts = [`${session.paceCpm ?? 0} cpm`]
-      if (topLang) parts.push(topLang.lang)
-      stats = parts.join('  ·  ')
-    }
-
-    const svg = renderHeatmapCardSvg({
-      heatmap,
+    const cacheKey = heatmapCardCacheKey({
+      sessionId: id,
       aspect: opts.aspect,
-      handle: opts.show_handle ? `@${owner.handle}` : undefined,
-      stats,
+      layout: opts.layout,
+      handle: opts.show_handle,
+      stats: opts.show_stats,
     })
-    const png = await sharp(Buffer.from(svg)).png().toBuffer()
+    const png = await cachedCardPng(cacheKey, () =>
+      renderCardPng(
+        id,
+        heatmap,
+        session.paceCpm,
+        opts.show_handle ? owner.handle : null,
+        opts.aspect,
+        opts.show_stats,
+      ),
+    )
 
     return new Response(new Uint8Array(png), {
       status: 200,
       headers: {
         'Content-Type': 'image/png',
         'Cache-Control': 'private, max-age=300',
+      },
+    })
+  },
+)
+
+sessionRoutes.get(
+  '/:id/heatmap-card',
+  rateLimit({ scope: 'card', limit: 120, windowS: 3600, key: ipKey }),
+  zValidator('query', heatmapCardQuerySchema, (result, c) => {
+    if (!result.success) {
+      return apiError(
+        c,
+        'VALIDATION_ERROR',
+        'Invalid heatmap card request',
+        result.error.issues,
+      )
+    }
+  }),
+  async (c) => {
+    const id = c.req.param('id')
+    if (!UUID_RE.test(id)) return apiError(c, 'NOT_FOUND', 'Session not found')
+
+    const opts = c.req.valid('query')
+    if (opts.layout !== 'qwerty') {
+      return apiError(
+        c,
+        'VALIDATION_ERROR',
+        'Only the qwerty layout is supported',
+      )
+    }
+
+    const rows = await db
+      .select()
+      .from(sessions)
+      .innerJoin(users, eq(users.id, sessions.userId))
+      .where(eq(sessions.id, id))
+      .limit(1)
+
+    const row = rows[0]
+    if (!row) return apiError(c, 'NOT_FOUND', 'Session not found')
+
+    const { sessions: session, users: owner } = row
+    if (owner.privacy !== 'full') {
+      return apiError(c, 'NOT_FOUND', 'Session not found')
+    }
+
+    const heatmap = session.keyboardHeatmap
+    if (!heatmap || heatmap.total === 0) {
+      return apiError(c, 'NOT_FOUND', 'Session has no heatmap')
+    }
+
+    const cacheKey = heatmapCardCacheKey({
+      sessionId: id,
+      aspect: opts.aspect,
+      layout: opts.layout,
+      handle: true,
+      stats: true,
+    })
+    const png = await cachedCardPng(cacheKey, () =>
+      renderCardPng(id, heatmap, session.paceCpm, owner.handle, opts.aspect, true),
+    )
+
+    return new Response(new Uint8Array(png), {
+      status: 200,
+      headers: {
+        'Content-Type': 'image/png',
+        'Cache-Control': 'public, max-age=600',
       },
     })
   },

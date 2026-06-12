@@ -38,6 +38,20 @@ export function aspectDimensions(aspect: CardAspect) {
   return DIMENSIONS[aspect]
 }
 
+export interface CardCacheKeyInput {
+  sessionId: string
+  aspect: CardAspect
+  layout: string
+  handle: boolean
+  stats: boolean
+}
+
+export function heatmapCardCacheKey(input: CardCacheKeyInput): string {
+  const h = input.handle ? 'h' : 'H'
+  const s = input.stats ? 's' : 'S'
+  return `card:v1:${input.sessionId}:${input.aspect}:${input.layout}:${h}:${s}`
+}
+
 function hexToRgb(hex: string): [number, number, number] {
   const v = hex.replace('#', '')
   return [

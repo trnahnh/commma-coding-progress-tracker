@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { KeyboardHeatmap } from '@commma/db'
 import {
   aspectDimensions,
+  heatmapCardCacheKey,
   renderHeatmapCardSvg,
 } from '../../src/lib/heatmapCard.js'
 
@@ -63,5 +64,49 @@ describe('renderHeatmapCardSvg', () => {
       stats: 'a & b < c',
     })
     expect(svg).toContain('a &amp; b &lt; c')
+  })
+})
+
+describe('heatmapCardCacheKey', () => {
+  it('encodes every input that changes the rendered image', () => {
+    expect(
+      heatmapCardCacheKey({
+        sessionId: 'abc',
+        aspect: '16:9',
+        layout: 'qwerty',
+        handle: true,
+        stats: true,
+      }),
+    ).toBe('card:v1:abc:16:9:qwerty:h:s')
+  })
+
+  it('distinguishes toggled handle and stats overlays', () => {
+    const base = {
+      sessionId: 'abc',
+      aspect: '1:1',
+      layout: 'qwerty',
+    } as const
+    const all = heatmapCardCacheKey({ ...base, handle: true, stats: true })
+    const noHandle = heatmapCardCacheKey({ ...base, handle: false, stats: true })
+    const noStats = heatmapCardCacheKey({ ...base, handle: true, stats: false })
+    expect(new Set([all, noHandle, noStats]).size).toBe(3)
+  })
+
+  it('separates aspects and sessions', () => {
+    const a = heatmapCardCacheKey({
+      sessionId: 'one',
+      aspect: '9:16',
+      layout: 'qwerty',
+      handle: true,
+      stats: true,
+    })
+    const b = heatmapCardCacheKey({
+      sessionId: 'two',
+      aspect: '9:16',
+      layout: 'qwerty',
+      handle: true,
+      stats: true,
+    })
+    expect(a).not.toBe(b)
   })
 })
