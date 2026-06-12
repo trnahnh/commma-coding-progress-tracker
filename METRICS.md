@@ -39,12 +39,19 @@ Each metric lists:
 | Ingest success (`202`/total)   | not measured     | ≥99.9%         | request logger         |
 | Server errors (`5xx`/total)    | not measured     | <0.1%          | logger / unhandled     |
 | Availability                   | not measured     | 99.5% (MVP)    | `/health` uptime       |
+| Lighthouse mobile perf         | 91 (2026-06-12)  | ≥90            | `npx lighthouse`       |
+| Lighthouse mobile a11y         | 95 (2026-06-12)  | ≥90            | `npx lighthouse`       |
 
 Read p95 routes: `/v1/me`, `/v1/sessions`, `/v1/sessions/:id`,
-`/v1/leaderboard`. Targets: <200 ms @ 100 concurrent (Phase 2 DoD); <150 ms @ 1k
-(Phase 3 DoD). `POST /v1/sessions/:id/heatmap-card` is **render-bound** (`sharp`
-rasterize) — it is excluded from the read-p95 target and carries its own `card`
-rate bucket; the load test must not hold it to `<150 ms`.
+`/v1/leaderboard`, `/v1/users/:handle`, `/v1/feed`, `/v1/stats`, `/v1/activity`,
+and the members-only team reads (`/v1/teams/:slug`,
+`/v1/teams/:slug/leaderboard`, `/v1/teams/:slug/heatmap`). Targets: <200 ms @
+100 concurrent (Phase 2 DoD); <150 ms @ 1k (Phase 3 DoD). Both heatmap-card
+variants are **render-bound** (`sharp` rasterize) and excluded from the read-p95
+target: the authed `POST /v1/sessions/:id/heatmap-card` and the public
+`GET /v1/sessions/:id/heatmap-card` (crawler `og:image`,
+`Cache-Control: public, max-age=600` + CDN) share the `card` rate bucket and the
+Redis PNG cache; the load test must not hold either to `<150 ms`.
 
 Aggregation lag: 5-min interval + 15-min idle gap (ADR-010); event `ts` →
 `sessions.created_at`.
@@ -59,11 +66,16 @@ Aggregation lag: 5-min interval + 15-min idle gap (ADR-010); event `ts` →
 | Postgres storage  | not measured          | ~$5 MVP plan | Railway console        |
 
 Redis cost drivers: per-request rate limits + per-finalize `ZINCRBY` (no
-BullMQ). `events` holds only open/recent sessions after aggregation prunes
-finalized rows; bounded heartbeat field sizes + the 1 MB ingest body cap keep
-per-event/per-batch storage bounded. Heatmap-card renders per request (no
-Redis/disk PNG cache yet — deferred to stay under the command budget; add it
-before the feed serves thumbnails at scale).
+BullMQ), plus a handful of cache-aside entries — the heatmap-card PNG
+(`card:v1:…`, 10-min TTL), per-user badges (`badges:v1:<id>`, ~10 min), and the
+team aggregate heatmap (`team:heatmap:v1:<teamId>`, ~10 min). Each is one `GET`
+plus an occasional `SET` on miss (not a hot per-request loop) and is fail-open,
+so the command budget story holds. `events` holds only open/recent sessions
+after aggregation prunes finalized rows; bounded heartbeat field sizes + the 1
+MB ingest body cap keep per-event/per-batch storage bounded. The heatmap-card
+PNG is now cached in Redis (image bytes only, privacy re-checked per request)
+and fronted by CloudFront on the public `GET`, so render cost is amortized for
+feed thumbnails and crawler `og:image` hits.
 
 ## 3. Privacy / trust (invariants — verifiable, brand-defining)
 
@@ -79,8 +91,12 @@ emails always; file paths when `privacy = full`. `summary` drops paths +
 `key_freq`; `off` stores nothing. Enforced **server-side at ingest** (not just
 by the extension) — `summary` strips `file`/`key_freq` before insert, `off`
 persists no events; `GET /v1/sessions/:id` also withholds files/heatmap from
-non-owners of `summary` owners. The `heatmap-card` endpoint applies the same
-gate (non-`full` owners' cards are owner-only). Auditable via the
+non-owners of `summary` owners. The same gate extends to every derived read: the
+authed `heatmap-card` (non-`full` owners' cards are owner-only) and the public
+`GET` heatmap-card + server-side `badges` are served for `privacy = 'full'` only
+(`404` otherwise, no existence leak), with the privacy check evaluated before
+any cache or DB read so a downgrade takes effect immediately. Team reads are
+members-only (`404` to non-members, no existence leak). Auditable via the
 `events`/`sessions` rows, independent of client.
 
 Leaderboard: `Σ sessions.duration_s` per period must match Redis ZSET score.
@@ -97,6 +113,8 @@ lands with the features rather than being retrofitted.
 | Retention W1 / W4              | W1≥40%; W4≥20% | cohort on events/sessions    |
 | Sessions / active user / week  | ≥5             | `sessions`                   |
 | Streak (`currentDays ≥ 3`)     | grows MoM      | `streaks`                    |
+| Free → paid conversion         | ≥3%            | `users.plan` + Stripe        |
+| Team adoption (`plan='team'`)  | grows MoM      | `users.plan` + `teams`       |
 | Launch GitHub stars            | 200 / 72h      | GitHub (ROADMAP Ph4)         |
 
 ---
