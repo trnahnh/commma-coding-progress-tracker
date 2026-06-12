@@ -260,7 +260,7 @@ function Ticker() {
       <div className='inline-flex gap-14 py-3.5 animate-marquee font-mono text-[15px] tracking-wide text-ink-mute'>
         {items.map((t, i) => (
           <span key={i} className='inline-flex items-center gap-2'>
-            <span className='text-ink-faint'>◇</span>
+            <span className='text-ink-soft'>◇</span>
             <strong className='text-ink font-medium'>@{t.who}</strong>
             <span>{t.what}</span>
             <em className='not-italic text-accent'>{t.em}</em>
@@ -692,7 +692,7 @@ function Leaderboard() {
           aside={aside}
         />
         <div className='border-y border-rule-strong'>
-          <div className='grid grid-cols-[40px_1fr_auto] md:grid-cols-[56px_1.4fr_1fr_1fr_32px] items-center px-4 sm:px-6 py-3.5 gap-3 font-mono text-[15px] tracking-[0.14em] uppercase text-ink-mute bg-paper-2 border-b border-rule'>
+          <div className='grid grid-cols-[40px_1fr_auto] md:grid-cols-[56px_1.4fr_1fr_1fr_32px] items-center px-4 sm:px-6 py-3.5 gap-3 font-mono text-[15px] tracking-[0.14em] uppercase text-ink-soft bg-paper-2 border-b border-rule'>
             <span>Rank</span>
             <span>Athlete</span>
             <span className='text-right md:text-left'>Time</span>
