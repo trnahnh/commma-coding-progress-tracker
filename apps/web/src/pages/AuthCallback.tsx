@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Shell, StatusPanel } from '../components/chrome'
 import { exchangeCode } from '../lib/api'
 import { useAuth } from '../lib/auth'
+import { takePostAuthRedirect } from '../lib/redirect'
 
 export default function AuthCallback() {
   const [params] = useSearchParams()
@@ -27,7 +28,7 @@ export default function AuthCallback() {
     exchangeCode(code)
       .then(({ access_token, refresh_token, user }) => {
         setSession(access_token, refresh_token, user)
-        navigate('/', { replace: true })
+        navigate(takePostAuthRedirect() ?? '/', { replace: true })
       })
       .catch(() => {
         navigate('/', { replace: true })

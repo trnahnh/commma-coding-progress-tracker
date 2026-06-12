@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Wordmark } from '../components/chrome'
 import { useAuth } from '../lib/auth'
+import { takePostAuthRedirect } from '../lib/redirect'
 
 function GithubMark() {
   return (
@@ -38,7 +39,8 @@ export default function SignIn() {
   }, [])
 
   useEffect(() => {
-    if (!isLoading && token) navigate('/', { replace: true })
+    if (!isLoading && token)
+      navigate(takePostAuthRedirect() ?? '/', { replace: true })
   }, [isLoading, token, navigate])
 
   return (
