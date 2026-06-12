@@ -401,9 +401,12 @@ All fields are optional; an empty `{}` body uses the defaults.
 `full` is renderable only by the owner; otherwise `404`. A session with no
 heatmap returns `404`.
 
-**Caching:** `Cache-Control: private, max-age=300`. The PNG is re-rendered per
-request (no server-side cache yet — add one before the feed renders thumbnails
-at scale).
+**Caching:** `Cache-Control: private, max-age=300`. The rendered PNG is cached
+in Redis for 10 minutes keyed by session + render options
+(`card:v1:<id>:<aspect>:<layout>:<h|H>:<s|S>`), so repeated requests skip the
+`sharp` rasterization. The cache is fail-open (a Redis outage just re-renders)
+and stores only the image bytes — privacy is re-checked against Postgres on
+every request before any cached image is served.
 
 **Response:** `image/png` (binary)
 
@@ -413,9 +416,41 @@ at scale).
 > - Server-side text uses the host's fonts; the deploy must provide a monospace
 >   font (e.g. DejaVu/Liberation). The `⌘` cap is drawn as `Cmd` so it never
 >   depends on a glyph missing from common Linux fonts.
-> - Because it is auth-required `POST`, it is **not** a literal `og:image`
->   source (crawlers issue unauthenticated `GET`); it serves in-app (e.g. feed)
->   thumbnails. A public `GET` variant would be needed for crawler OG.
+> - Auth-required `POST` serves in-app (e.g. feed) thumbnails. Crawlers issue
+>   unauthenticated `GET`, so use the public `GET` variant below for `og:image`.
+
+---
+
+### `GET /v1/sessions/:id/heatmap-card`
+
+Public crawler-facing variant of the heatmap card, suitable as a literal
+`og:image` URL. No auth — only sessions whose owner is `privacy: "full"` are
+renderable; any other owner (`summary`/`off`) or a session with no heatmap
+returns `404` (no existence leak), exactly like the public
+`GET /v1/sessions/:id`.
+
+**Auth:** None
+
+**Query parameters:**
+
+| Param    | Values                                           | Default  |
+| -------- | ------------------------------------------------ | -------- |
+| `aspect` | `9:16` (1080×1920), `1:1` (1080×1080), `16:9`    | `16:9`   |
+| `layout` | `qwerty` (only `qwerty` implemented; else `400`) | `qwerty` |
+
+The `@handle` and `<pace> cpm · <top lang>` overlays are always drawn (there are
+no toggles on the public variant). Invalid `aspect`/`layout` →
+`400 VALIDATION_ERROR`.
+
+**Caching:** `Cache-Control: public, max-age=600`, plus the same Redis PNG cache
+as the `POST` (shared key space — a public `GET` and an owner `POST` with
+default options resolve to identical bytes and the same cache entry). Privacy is
+re-checked on every request before a cached image is served.
+
+**Anti-DoS:** rate-limited on the `card` bucket at 120/hr **per IP**; the Redis
+PNG cache absorbs repeated crawler hits for the same card.
+
+**Response:** `image/png` (binary)
 
 ---
 
@@ -941,6 +976,7 @@ All errors follow this shape:
 | `POST /v1/ingest`                      | 1,000 requests | 1 hour (per user) |
 | All read endpoints                     | 300 requests   | 1 hour (per user) |
 | `POST /v1/sessions/:id/heatmap-card`   | 120 requests   | 1 hour (per user) |
+| `GET /v1/sessions/:id/heatmap-card`    | 120 requests   | 1 hour (per IP)   |
 | `POST /v1/billing/checkout`, `/portal` | 30 requests    | 1 hour (per user) |
 | All team reads and writes              | 300 requests   | 1 hour (per user) |
 | Auth endpoints                         | 20 requests    | 1 hour (per IP)   |

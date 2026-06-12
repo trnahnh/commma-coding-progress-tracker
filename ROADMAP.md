@@ -156,12 +156,12 @@ Goal: production-safe. No known P0/P1 bugs. Published extension.
       by `sharp`; auth-required, privacy-gated (non-`full` owners are
       owner-only); `aspect` 9:16/1:1/16:9; `layout` only `qwerty`
       (dvorak/colemak are Phase 4); own `card` rate bucket (120/hr).
-  - [ ] **Follow-up:** heatmap-card PNG cache (Redis/disk, privacy re-checked
-        per request) — land before the feed renders thumbnails at scale;
-        re-rendering per request is fine until then.
-  - [ ] **Follow-up:** public `GET` heatmap-card variant for crawler `og:image`
-        (needs its own privacy + anti-DoS caching) — the auth-required `POST`
-        serves in-app thumbnails, not crawlers.
+  - [x] **Follow-up:** heatmap-card PNG cache (Redis, privacy re-checked per
+        request) — rendered PNG cached 10 min keyed by session + render options
+        (`card:v1:…`), fail-open; shared by the `POST` and the public `GET`.
+  - [x] **Follow-up:** public `GET` heatmap-card variant for crawler `og:image`
+        — unauthenticated, `privacy='full'` only (404 otherwise), 120/hr per IP,
+        `Cache-Control: public, max-age=600` plus the shared Redis PNG cache.
   - [ ] **Deploy note:** the API host must provide a monospace font (e.g.
         DejaVu/Liberation) for server-side text; `⌘` already renders as `Cmd` to
         avoid a glyph gap.
@@ -259,8 +259,8 @@ Goal: growth mechanics live. First external contributors merged.
 - [x] Private team leaderboard — `GET /v1/teams/:slug/leaderboard`, members
       only, ranked by coding time over week/month/alltime
 - [x] Team aggregate heatmap endpoint — `GET /v1/teams/:slug/heatmap`, members'
-      `keyboard_heatmap` counts merged and Redis-cached (frontend visualization
-      still pending)
+      `keyboard_heatmap` counts merged and Redis-cached; team dashboard shows
+      the heatmap via the existing Canvas `KeyboardHeatmap` component
 - [x] Dvorak keyboard layout config
 - [x] Colemak keyboard layout config
 - [x] Wire the landing page `SESSION`/`CHART`/`TICKER` sections to live data

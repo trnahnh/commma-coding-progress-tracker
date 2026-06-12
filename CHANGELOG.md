@@ -11,6 +11,24 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **API** — Public crawler heatmap card + a Redis PNG cache. New unauthenticated
+  `GET /v1/sessions/:id/heatmap-card` renders the same card as the existing
+  `POST` for use as a literal `og:image`; it serves only `privacy: "full"`
+  sessions (`404` otherwise, no existence leak), is rate-limited 120/hr per IP,
+  and sends `Cache-Control: public, max-age=600`. Both endpoints now cache the
+  rendered PNG in Redis for 10 minutes, keyed by session and render options
+  (`card:v1:<id>:<aspect>:<layout>:<h|H>:<s|S>`), so repeated hits skip the
+  `sharp` rasterization. The cache stores only image bytes and is fail-open;
+  privacy is re-checked against Postgres on every request before any cached
+  image is served, so a privacy downgrade takes effect immediately.
+- **Web** — Team pages. `/teams` lists the user's teams and any pending invites
+  with one-click accept/decline; a create-team form (gated to `plan: "team"`)
+  auto-derives the slug from the name. `/teams/:slug` is the team dashboard:
+  member roster with leave/remove actions, period-tabbed private leaderboard
+  (week/month/alltime), and a lazy-loaded aggregate keyboard heatmap powered by
+  the existing `KeyboardHeatmap` canvas component. Owner-only panel: invite by
+  handle, rename, and delete with confirmation. Frozen teams hide invite/rename
+  but keep delete. "Teams" nav link appears only for authenticated users.
 - **API / DB** — Team model for the Team tier. New `teams`, `team_members`, and
   `team_invites` tables (migration `0006`). `POST /v1/teams` creates a team
   (gated to `plan: "team"`, caller becomes `owner`); a team holds up to five
