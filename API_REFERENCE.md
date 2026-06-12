@@ -654,7 +654,12 @@ A Stripe customer is created for the user on first use and remembered.
 ```
 
 `plan` is `pro` or `team`; `interval` is `monthly` or `yearly`. A plan whose
-price is not configured returns `503 SERVICE_UNAVAILABLE`.
+price is not configured returns `503 SERVICE_UNAVAILABLE`. A user who is already
+on a paid plan (or already has a subscription on file) gets `409 CONFLICT` —
+plan changes go through the billing portal, not a second checkout, so the client
+should fall back to `POST /v1/billing/portal`. The session create is idempotent
+per `(user, plan, interval)`, so a rapid double-submit returns the same hosted
+URL rather than opening two subscriptions.
 
 **Response:**
 

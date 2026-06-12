@@ -11,6 +11,15 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Web** — Billing is wired to Stripe end-to-end. The Pricing page Pro and Team
+  CTAs now open Stripe Checkout (auth-gated: a signed-out click stashes the
+  chosen plan/interval and resumes checkout automatically after GitHub sign-in),
+  and a new `/billing/success` page handles the post-payment return. The account
+  page (`/profile`) gains a Billing section showing the current plan with a
+  "Manage billing" button (Stripe Billing Portal) for paid users and an
+  "Upgrade" link for free users. New `createCheckout`/`openBillingPortal` API
+  client calls back the existing `/v1/billing/*` endpoints; a `409 CONFLICT`
+  from checkout transparently redirects to the portal.
 - **API** — Public crawler heatmap card + a Redis PNG cache. New unauthenticated
   `GET /v1/sessions/:id/heatmap-card` renders the same card as the existing
   `POST` for use as a literal `og:image`; it serves only `privacy: "full"`
@@ -139,6 +148,12 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
+- **API** — Billing checkout is hardened against accidental double-subscribing.
+  `POST /v1/billing/checkout` returns `409 CONFLICT` when the caller is already
+  on a paid plan or has a subscription on file (plan changes belong in the
+  portal), the Stripe session create carries an idempotency key keyed by
+  `(user, plan, interval)`, and the portal `return_url` points at `/profile`
+  (the real account page) instead of a nonexistent `/settings`.
 - **API** — GitHub OAuth token exchange now correctly handles GitHub's
   HTTP-200-on-error response (expired/used codes return `{"error":"..."}` not a
   4xx). `exchangeCode` parses the error field and throws; the callback route
