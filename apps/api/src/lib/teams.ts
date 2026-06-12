@@ -14,6 +14,10 @@ export function canManageTeam(role: string): boolean {
   return role === 'owner'
 }
 
+export function isTeamFrozen(ownerPlan: string): boolean {
+  return ownerPlan !== 'team'
+}
+
 export function mergeHeatmaps(maps: KeyboardHeatmap[]): KeyboardHeatmap {
   const counts: Record<string, number> = {}
   for (const map of maps) {

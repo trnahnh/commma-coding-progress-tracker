@@ -22,6 +22,7 @@ import {
 } from '../aggregate/leaderboard.js'
 import {
   canManageTeam,
+  isTeamFrozen,
   isValidSlug,
   mergeHeatmaps,
   TEAM_MAX_MEMBERS,
@@ -69,6 +70,15 @@ async function membershipRole(
     .where(and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId)))
     .limit(1)
   return rows[0]?.role ?? null
+}
+
+async function teamFrozen(ownerId: string): Promise<boolean> {
+  const rows = await db
+    .select({ plan: users.plan })
+    .from(users)
+    .where(eq(users.id, ownerId))
+    .limit(1)
+  return isTeamFrozen(rows[0]?.plan ?? 'free')
 }
 
 async function loadMembers(teamId: string) {
@@ -151,12 +161,22 @@ teamRoutes.get('/', read, async (c) => {
       name: teams.name,
       role: teamMembers.role,
       created_at: teams.createdAt,
+      ownerPlan: users.plan,
     })
     .from(teamMembers)
     .innerJoin(teams, eq(teams.id, teamMembers.teamId))
+    .innerJoin(users, eq(users.id, teams.ownerId))
     .where(eq(teamMembers.userId, userId))
     .orderBy(desc(teamMembers.joinedAt))
-  return c.json({ teams: rows })
+  return c.json({
+    teams: rows.map((r) => ({
+      slug: r.slug,
+      name: r.name,
+      role: r.role,
+      created_at: r.created_at,
+      frozen: isTeamFrozen(r.ownerPlan),
+    })),
+  })
 })
 
 teamRoutes.get('/invites', read, async (c) => {
@@ -199,28 +219,38 @@ teamRoutes.post('/invites/:id/accept', write, async (c) => {
   const invite = await loadOwnInvite(c.req.param('id'), userId)
   if (!invite) return apiError(c, 'NOT_FOUND', 'Invite not found')
 
-  const members = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(teamMembers)
-    .where(eq(teamMembers.teamId, invite.teamId))
-  if ((members[0]?.count ?? 0) >= TEAM_MAX_MEMBERS) {
-    return apiError(c, 'CONFLICT', 'Team is full')
+  const teamRows = await db
+    .select({ ownerId: teams.ownerId, slug: teams.slug, name: teams.name })
+    .from(teams)
+    .where(eq(teams.id, invite.teamId))
+    .limit(1)
+  const team = teamRows[0]
+  if (!team) return apiError(c, 'NOT_FOUND', 'Team not found')
+  if (await teamFrozen(team.ownerId)) {
+    return apiError(c, 'FORBIDDEN', "This team's plan is inactive")
   }
 
-  await db.transaction(async (tx) => {
+  const outcome = await db.transaction(async (tx) => {
+    await tx
+      .select({ id: teams.id })
+      .from(teams)
+      .where(eq(teams.id, invite.teamId))
+      .for('update')
+    const members = await tx
+      .select({ count: sql<number>`count(*)::int` })
+      .from(teamMembers)
+      .where(eq(teamMembers.teamId, invite.teamId))
+    if ((members[0]?.count ?? 0) >= TEAM_MAX_MEMBERS) return 'full'
     await tx
       .insert(teamMembers)
       .values({ teamId: invite.teamId, userId, role: 'member' })
       .onConflictDoNothing()
     await tx.delete(teamInvites).where(eq(teamInvites.id, invite.id))
+    return 'joined'
   })
 
-  const team = await db
-    .select({ slug: teams.slug, name: teams.name })
-    .from(teams)
-    .where(eq(teams.id, invite.teamId))
-    .limit(1)
-  return c.json({ team: team[0] ?? null })
+  if (outcome === 'full') return apiError(c, 'CONFLICT', 'Team is full')
+  return c.json({ team: { slug: team.slug, name: team.name } })
 })
 
 teamRoutes.post('/invites/:id/decline', write, async (c) => {
@@ -239,11 +269,15 @@ teamRoutes.get('/:slug', read, async (c) => {
     return apiError(c, 'NOT_FOUND', 'Team not found')
   }
 
-  const members = await loadMembers(team.id)
+  const [members, frozen] = await Promise.all([
+    loadMembers(team.id),
+    teamFrozen(team.ownerId),
+  ])
   return c.json({
     slug: team.slug,
     name: team.name,
     created_at: team.createdAt,
+    frozen,
     member_count: members.length,
     max_members: TEAM_MAX_MEMBERS,
     members: members.map((m) => ({
@@ -262,6 +296,9 @@ teamRoutes.patch('/:slug', write, zValidator('json', patchSchema, invalid), asyn
   const role = await membershipRole(team.id, userId)
   if (!role) return apiError(c, 'NOT_FOUND', 'Team not found')
   if (!canManageTeam(role)) return apiError(c, 'FORBIDDEN', 'Owner only')
+  if (await teamFrozen(team.ownerId)) {
+    return apiError(c, 'FORBIDDEN', "This team's plan is inactive")
+  }
 
   const { name } = c.req.valid('json')
   const updated = await db
@@ -296,6 +333,9 @@ teamRoutes.post('/:slug/invites', write, zValidator('json', inviteSchema, invali
   const role = await membershipRole(team.id, userId)
   if (!role) return apiError(c, 'NOT_FOUND', 'Team not found')
   if (!canManageTeam(role)) return apiError(c, 'FORBIDDEN', 'Owner only')
+  if (await teamFrozen(team.ownerId)) {
+    return apiError(c, 'FORBIDDEN', "This team's plan is inactive")
+  }
 
   const { handle } = c.req.valid('json')
   const target = await db

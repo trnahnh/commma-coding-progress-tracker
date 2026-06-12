@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   canManageTeam,
+  isTeamFrozen,
   isValidSlug,
   mergeHeatmaps,
   TEAM_MAX_MEMBERS,
@@ -27,6 +28,14 @@ describe('canManageTeam', () => {
     expect(canManageTeam('owner')).toBe(true)
     expect(canManageTeam('member')).toBe(false)
     expect(canManageTeam('')).toBe(false)
+  })
+})
+
+describe('isTeamFrozen', () => {
+  it('freezes a team whose owner is no longer on the team plan', () => {
+    expect(isTeamFrozen('team')).toBe(false)
+    expect(isTeamFrozen('free')).toBe(true)
+    expect(isTeamFrozen('pro')).toBe(true)
   })
 })
 
