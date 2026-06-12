@@ -50,6 +50,13 @@
       "when": 1781235332027,
       "tag": "0006_cooing_gorgon",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1781395200000,
+      "tag": "0007_push_subscriptions",
+      "breakpoints": true
     }
   ]
 }
