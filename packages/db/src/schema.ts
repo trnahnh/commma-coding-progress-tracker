@@ -167,3 +167,58 @@ export const follows = pgTable(
     index('follows_followee').on(t.followeeId),
   ],
 )
+
+export const teams = pgTable('teams', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  slug: text('slug').notNull().unique(),
+  name: varchar('name', { length: 64 }).notNull(),
+  ownerId: uuid('owner_id')
+    .notNull()
+    .references(() => users.id),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+})
+
+export const teamMembers = pgTable(
+  'team_members',
+  {
+    teamId: uuid('team_id')
+      .notNull()
+      .references(() => teams.id),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id),
+    role: text('role').notNull().default('member'),
+    joinedAt: timestamp('joined_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.teamId, t.userId] }),
+    index('team_members_user').on(t.userId),
+  ],
+)
+
+export const teamInvites = pgTable(
+  'team_invites',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    teamId: uuid('team_id')
+      .notNull()
+      .references(() => teams.id),
+    inviteeId: uuid('invitee_id')
+      .notNull()
+      .references(() => users.id),
+    invitedBy: uuid('invited_by')
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('team_invites_unique').on(t.teamId, t.inviteeId),
+    index('team_invites_invitee').on(t.inviteeId),
+  ],
+)

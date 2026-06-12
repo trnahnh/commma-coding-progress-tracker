@@ -43,6 +43,13 @@
       "when": 1781152710799,
       "tag": "0005_magical_the_fallen",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1781235332027,
+      "tag": "0006_cooing_gorgon",
+      "breakpoints": true
     }
   ]
 }
