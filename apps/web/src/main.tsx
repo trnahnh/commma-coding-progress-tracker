@@ -1,28 +1,29 @@
-import { StrictMode } from 'react'
+import { lazy, StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import './index.css'
 import { AuthProvider } from './lib/auth.tsx'
 import RootLayout from './RootLayout.tsx'
 import App from './App.tsx'
-import SessionDetail from './pages/SessionDetail.tsx'
-import Profile from './pages/Profile.tsx'
-import Leaderboard from './pages/Leaderboard.tsx'
-import Feed from './pages/Feed.tsx'
-import AuthCallback from './pages/AuthCallback.tsx'
-import SignIn from './pages/SignIn.tsx'
-import NotFound from './pages/NotFound.tsx'
-import Pricing from './pages/Pricing.tsx'
-import Privacy from './pages/Privacy.tsx'
-import Api from './pages/Api.tsx'
-import Careers from './pages/Careers.tsx'
-import Contact from './pages/Contact.tsx'
-import Status from './pages/Status.tsx'
-import Terms from './pages/Terms.tsx'
-import Changelog from './pages/Changelog.tsx'
-import EditProfile from './pages/EditProfile.tsx'
-import Teams from './pages/Teams.tsx'
-import TeamDashboard from './pages/TeamDashboard.tsx'
+
+const SessionDetail = lazy(() => import('./pages/SessionDetail.tsx'))
+const Profile = lazy(() => import('./pages/Profile.tsx'))
+const Leaderboard = lazy(() => import('./pages/Leaderboard.tsx'))
+const Feed = lazy(() => import('./pages/Feed.tsx'))
+const AuthCallback = lazy(() => import('./pages/AuthCallback.tsx'))
+const SignIn = lazy(() => import('./pages/SignIn.tsx'))
+const NotFound = lazy(() => import('./pages/NotFound.tsx'))
+const Pricing = lazy(() => import('./pages/Pricing.tsx'))
+const Privacy = lazy(() => import('./pages/Privacy.tsx'))
+const Api = lazy(() => import('./pages/Api.tsx'))
+const Careers = lazy(() => import('./pages/Careers.tsx'))
+const Contact = lazy(() => import('./pages/Contact.tsx'))
+const Status = lazy(() => import('./pages/Status.tsx'))
+const Terms = lazy(() => import('./pages/Terms.tsx'))
+const Changelog = lazy(() => import('./pages/Changelog.tsx'))
+const EditProfile = lazy(() => import('./pages/EditProfile.tsx'))
+const Teams = lazy(() => import('./pages/Teams.tsx'))
+const TeamDashboard = lazy(() => import('./pages/TeamDashboard.tsx'))
 
 const router = createBrowserRouter([
   {
@@ -55,7 +56,9 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>
-      <RouterProvider router={router} />
+      <Suspense>
+        <RouterProvider router={router} />
+      </Suspense>
     </AuthProvider>
   </StrictMode>,
 )
