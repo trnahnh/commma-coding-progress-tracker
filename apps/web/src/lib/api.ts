@@ -326,3 +326,205 @@ export function getProfileSessions(
     `/v1/users/${encodeURIComponent(handle)}/sessions${qs}`,
   )
 }
+
+async function requestVoid(path: string, init?: RequestInit): Promise<void> {
+  let res: Response
+  try {
+    res = await fetch(`${API_BASE_URL}${path}`, init)
+  } catch {
+    throw new ApiError(0, 'NETWORK_ERROR', 'Could not reach the server')
+  }
+  if (!res.ok) {
+    let code = 'INTERNAL_ERROR'
+    let message = res.statusText
+    try {
+      const body = (await res.json()) as ApiErrorBody
+      if (body.error?.code) code = body.error.code
+      if (body.error?.message) message = body.error.message
+    } catch {
+      void 0
+    }
+    throw new ApiError(res.status, code, message)
+  }
+}
+
+export interface TeamSummary {
+  slug: string
+  name: string
+  role: string
+  created_at: string
+  frozen: boolean
+}
+
+export interface TeamMember {
+  handle: string
+  avatar_url: string | null
+  role: string
+  joined_at: string
+}
+
+export interface TeamDetail {
+  slug: string
+  name: string
+  created_at: string
+  frozen: boolean
+  member_count: number
+  max_members: number
+  members: TeamMember[]
+}
+
+export interface TeamInvite {
+  id: string
+  team: { slug: string; name: string }
+  invited_by: string
+  created_at: string
+}
+
+export interface TeamLeaderboardEntry {
+  rank: number
+  handle: string
+  avatar_url: string | null
+  role: string
+  duration_s: number
+  streak_days: number
+}
+
+export interface TeamLeaderboardData {
+  slug: string
+  period: LeaderboardPeriod
+  updated_at: string
+  entries: TeamLeaderboardEntry[]
+}
+
+export function getMyTeams(token: string): Promise<{ teams: TeamSummary[] }> {
+  return getJson<{ teams: TeamSummary[] }>('/v1/teams', {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+}
+
+export function createTeam(
+  token: string,
+  data: { name: string; slug: string },
+): Promise<{ slug: string; name: string; created_at: string }> {
+  return getJson('/v1/teams', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  })
+}
+
+export function getTeamInvites(
+  token: string,
+): Promise<{ invites: TeamInvite[] }> {
+  return getJson<{ invites: TeamInvite[] }>('/v1/teams/invites', {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+}
+
+export function acceptInvite(
+  token: string,
+  id: string,
+): Promise<{ team: { slug: string; name: string } }> {
+  return getJson(
+    `/v1/teams/invites/${encodeURIComponent(id)}/accept`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  )
+}
+
+export function declineInvite(token: string, id: string): Promise<void> {
+  return requestVoid(
+    `/v1/teams/invites/${encodeURIComponent(id)}/decline`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  )
+}
+
+export function getTeam(token: string, slug: string): Promise<TeamDetail> {
+  return getJson<TeamDetail>(`/v1/teams/${encodeURIComponent(slug)}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+}
+
+export function updateTeam(
+  token: string,
+  slug: string,
+  data: { name: string },
+): Promise<{ slug: string; name: string; created_at: string }> {
+  return getJson(`/v1/teams/${encodeURIComponent(slug)}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  })
+}
+
+export function deleteTeam(token: string, slug: string): Promise<void> {
+  return requestVoid(`/v1/teams/${encodeURIComponent(slug)}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+}
+
+export function inviteMember(
+  token: string,
+  slug: string,
+  handle: string,
+): Promise<{ id: string }> {
+  return getJson(`/v1/teams/${encodeURIComponent(slug)}/invites`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ handle }),
+  })
+}
+
+export function removeMember(
+  token: string,
+  slug: string,
+  handle: string,
+): Promise<void> {
+  return requestVoid(
+    `/v1/teams/${encodeURIComponent(slug)}/members/${encodeURIComponent(handle)}`,
+    {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  )
+}
+
+export function getTeamLeaderboard(
+  token: string,
+  slug: string,
+  period: LeaderboardPeriod,
+): Promise<TeamLeaderboardData> {
+  return getJson<TeamLeaderboardData>(
+    `/v1/teams/${encodeURIComponent(slug)}/leaderboard?period=${period}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  )
+}
+
+export function getTeamHeatmap(
+  token: string,
+  slug: string,
+): Promise<KeyboardHeatmap> {
+  return getJson<KeyboardHeatmap>(
+    `/v1/teams/${encodeURIComponent(slug)}/heatmap`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  )
+}

@@ -21,6 +21,8 @@ import Status from './pages/Status.tsx'
 import Terms from './pages/Terms.tsx'
 import Changelog from './pages/Changelog.tsx'
 import EditProfile from './pages/EditProfile.tsx'
+import Teams from './pages/Teams.tsx'
+import TeamDashboard from './pages/TeamDashboard.tsx'
 
 const router = createBrowserRouter([
   {
@@ -30,6 +32,8 @@ const router = createBrowserRouter([
       { path: '/profile', element: <EditProfile /> },
       { path: '/pricing', element: <Pricing /> },
       { path: '/sessions/:id', element: <SessionDetail /> },
+      { path: '/teams', element: <Teams /> },
+      { path: '/teams/:slug', element: <TeamDashboard /> },
       { path: '/:handle', element: <Profile /> },
       { path: '/leaderboard', element: <Leaderboard /> },
       { path: '/feed', element: <Feed /> },

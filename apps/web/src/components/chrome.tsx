@@ -134,7 +134,7 @@ export function Nav() {
           </Link>
 
           <div className='hidden md:flex gap-7 font-mono text-[13px] tracking-wider text-ink-soft'>
-            {NAV_LINKS.map(({ label, to }) => {
+            {[...NAV_LINKS, ...(token ? [{ label: 'Teams', to: '/teams' }] : [])].map(({ label, to }) => {
               const active =
                 to === '/' ? pathname === '/' : pathname.startsWith(to)
               return (
@@ -192,7 +192,7 @@ export function Nav() {
       {mobileOpen && (
         <div className='md:hidden border-t border-rule bg-paper/95 backdrop-blur-xl'>
           <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)] flex flex-col py-2'>
-            {NAV_LINKS.map(({ label, to }) => {
+            {[...NAV_LINKS, ...(token ? [{ label: 'Teams', to: '/teams' }] : [])].map(({ label, to }) => {
               const active =
                 to === '/' ? pathname === '/' : pathname.startsWith(to)
               return (
