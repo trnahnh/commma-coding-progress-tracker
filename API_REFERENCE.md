@@ -662,6 +662,241 @@ redelivered or out-of-order stale event is ignored. Responds
 
 ---
 
+## Team Endpoints
+
+Teams are private workspaces for the Team tier. Every team endpoint requires
+authentication, and team detail, leaderboard, and heatmap are visible only to
+members — a non-member receives `404` so a team's existence is never leaked. A
+team has one `owner` and up to four `member`s (five total, `TEAM_MAX_MEMBERS`).
+Only the owner can rename, invite, remove members, or delete the team. Invites
+target an existing user by `handle`; the invitee accepts or declines from their
+own invite inbox.
+
+### `POST /v1/teams`
+
+Creates a team. The caller must be on `plan: "team"` (else `403 FORBIDDEN`) and
+becomes its `owner`. `slug` must match `^[a-z0-9-]{1,39}$` and be unique
+(`409 CONFLICT` if taken).
+
+**Auth:** Required  
+**Rate limit:** 300/hr per user
+
+**Request:**
+
+```json
+{
+  "name": "Platform Team",
+  "slug": "platform"
+}
+```
+
+**Response (`201`):**
+
+```json
+{
+  "slug": "platform",
+  "name": "Platform Team",
+  "created_at": "2026-06-11T20:00:00.000Z"
+}
+```
+
+### `GET /v1/teams`
+
+Lists the teams the caller belongs to.
+
+**Auth:** Required  
+**Rate limit:** 300/hr per user
+
+**Response:**
+
+```json
+{
+  "teams": [
+    {
+      "slug": "platform",
+      "name": "Platform Team",
+      "role": "owner",
+      "created_at": "2026-06-11T20:00:00.000Z"
+    }
+  ]
+}
+```
+
+### `GET /v1/teams/invites`
+
+Lists the caller's pending invites.
+
+**Auth:** Required  
+**Rate limit:** 300/hr per user
+
+**Response:**
+
+```json
+{
+  "invites": [
+    {
+      "id": "0547fc57-33ac-401c-bd83-b31d8fb0d698",
+      "team": { "slug": "platform", "name": "Platform Team" },
+      "invited_by": "octocat",
+      "created_at": "2026-06-11T20:05:00.000Z"
+    }
+  ]
+}
+```
+
+### `POST /v1/teams/invites/:id/accept`
+
+Accepts an invite addressed to the caller and joins the team. Returns
+`404 NOT_FOUND` if the invite is not theirs and `409 CONFLICT` if the team is
+already full.
+
+**Auth:** Required  
+**Rate limit:** 300/hr per user
+
+**Response:**
+
+```json
+{
+  "team": { "slug": "platform", "name": "Platform Team" }
+}
+```
+
+### `POST /v1/teams/invites/:id/decline`
+
+Declines (deletes) an invite addressed to the caller. Responds `204`.
+
+**Auth:** Required  
+**Rate limit:** 300/hr per user
+
+### `GET /v1/teams/:slug`
+
+Returns team detail and the member roster. Members only.
+
+**Auth:** Required  
+**Rate limit:** 300/hr per user
+
+**Response:**
+
+```json
+{
+  "slug": "platform",
+  "name": "Platform Team",
+  "created_at": "2026-06-11T20:00:00.000Z",
+  "member_count": 3,
+  "max_members": 5,
+  "members": [
+    {
+      "handle": "octocat",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1",
+      "role": "owner",
+      "joined_at": "2026-06-11T20:00:00.000Z"
+    }
+  ]
+}
+```
+
+### `PATCH /v1/teams/:slug`
+
+Renames the team. Owner only.
+
+**Auth:** Required  
+**Rate limit:** 300/hr per user
+
+**Request:**
+
+```json
+{ "name": "Platform Guild" }
+```
+
+### `DELETE /v1/teams/:slug`
+
+Deletes the team and all its memberships and invites. Owner only. Responds
+`204`.
+
+**Auth:** Required  
+**Rate limit:** 300/hr per user
+
+### `POST /v1/teams/:slug/invites`
+
+Invites an existing user by `handle`. Owner only. Returns `404 NOT_FOUND` if no
+such user, and `409 CONFLICT` if the user is already a member, already invited,
+or the team (members plus pending invites) is full.
+
+**Auth:** Required  
+**Rate limit:** 300/hr per user
+
+**Request:**
+
+```json
+{ "handle": "monalisa" }
+```
+
+**Response (`201`):**
+
+```json
+{ "id": "0547fc57-33ac-401c-bd83-b31d8fb0d698" }
+```
+
+### `DELETE /v1/teams/:slug/members/:handle`
+
+Removes a member. The owner may remove any member; a member may remove only
+themselves (leave). The owner cannot leave — delete the team instead
+(`400 VALIDATION_ERROR`). Responds `204`.
+
+**Auth:** Required  
+**Rate limit:** 300/hr per user
+
+### `GET /v1/teams/:slug/leaderboard`
+
+Private leaderboard ranking each member by total coding time over a period.
+Members only. `?period=week|month|alltime` (default `week`). Unlike the public
+leaderboard, every member is included regardless of their public `privacy`
+setting, since the team is private and members joined deliberately.
+
+**Auth:** Required  
+**Rate limit:** 300/hr per user
+
+**Response:**
+
+```json
+{
+  "slug": "platform",
+  "period": "week",
+  "updated_at": "2026-06-11T20:10:00.000Z",
+  "entries": [
+    {
+      "rank": 1,
+      "handle": "octocat",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1",
+      "role": "owner",
+      "duration_s": 7200,
+      "streak_days": 4
+    }
+  ]
+}
+```
+
+### `GET /v1/teams/:slug/heatmap`
+
+Aggregate keyboard heatmap merged across all members' sessions. Members only.
+Cached in Redis for ~10 minutes per team. Same `{ counts, freq, total }` shape
+as a session heatmap.
+
+**Auth:** Required  
+**Rate limit:** 300/hr per user
+
+**Response:**
+
+```json
+{
+  "counts": { "a": 1820, "e": 1640, "Backspace": 540 },
+  "freq": { "a": 0.18, "e": 0.16, "Backspace": 0.054 },
+  "total": 10000
+}
+```
+
+---
+
 ## Error Format
 
 All errors follow this shape:
@@ -681,6 +916,7 @@ All errors follow this shape:
 | `UNAUTHORIZED`        | 401         | Missing or invalid JWT                       |
 | `FORBIDDEN`           | 403         | Valid JWT but insufficient permissions       |
 | `NOT_FOUND`           | 404         | Resource does not exist                      |
+| `CONFLICT`            | 409         | State conflict (e.g. taken slug, team full)  |
 | `VALIDATION_ERROR`    | 400         | Request body/params failed Zod validation    |
 | `PAYLOAD_TOO_LARGE`   | 413         | Request body exceeded the 1 MB `/v1/*` limit |
 | `RATE_LIMITED`        | 429         | Per-user rate limit exceeded                 |
@@ -697,6 +933,7 @@ All errors follow this shape:
 | All read endpoints                     | 300 requests   | 1 hour (per user) |
 | `POST /v1/sessions/:id/heatmap-card`   | 120 requests   | 1 hour (per user) |
 | `POST /v1/billing/checkout`, `/portal` | 30 requests    | 1 hour (per user) |
+| All team reads and writes              | 300 requests   | 1 hour (per user) |
 | Auth endpoints                         | 20 requests    | 1 hour (per IP)   |
 
 **Rate limit headers:**

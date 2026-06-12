@@ -11,6 +11,22 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **API / DB** — Team model for the Team tier. New `teams`, `team_members`, and
+  `team_invites` tables (migration `0006`). `POST /v1/teams` creates a team
+  (gated to `plan: "team"`, caller becomes `owner`); a team holds up to five
+  members. Invites target an existing user by `handle`: the owner posts to
+  `POST /v1/teams/:slug/invites`, the invitee sees it at `GET /v1/teams/invites`
+  and accepts/declines (`/invites/:id/accept|decline`). The five-member cap is
+  enforced at both invite time (members + pending) and accept time. Members-only
+  reads — `GET /v1/teams/:slug` (roster), `GET /v1/teams/:slug/leaderboard`
+  (members ranked by coding time over week/month/alltime), and
+  `GET /v1/teams/:slug/heatmap` (members' `keyboard_heatmap` counts merged,
+  Redis-cached ~10 min) — return `404` to non-members so a team's existence is
+  never leaked. Owner-only management: rename (`PATCH`), delete (`DELETE`, which
+  cascades members and invites), invite, and remove members; a member may leave
+  via `DELETE /v1/teams/:slug/members/:handle` but the owner cannot. New
+  `CONFLICT` (409) error code for taken slugs and full teams. All team endpoints
+  are 300/hr per user.
 - **API** — Style badges on public profiles, computed server-side.
   `GET /v1/users/:handle` now returns `badges` as `{ id, name, description }[]`
   (was always `[]`), derived on read from the user's all-time `keyboard_heatmap`

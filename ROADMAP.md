@@ -253,9 +253,14 @@ Goal: growth mechanics live. First external contributors merged.
 - [x] Server-side badge computation — `GET /v1/users/:handle` derives earned
       badges from the all-time `keyboard_heatmap` key counts (`lib/badges.ts`,
       pure + unit-tested); 2000-keystroke floor before any award
-- [ ] Team model: create team, invite members, team role
-- [ ] Private team leaderboard
-- [ ] Team aggregate heatmap visualization
+- [x] Team model: create team, invite members, team role (`POST /v1/teams`,
+      gated to `plan: "team"`; handle-based invites with an accept/decline
+      inbox; owner/member roles; five-member cap)
+- [x] Private team leaderboard — `GET /v1/teams/:slug/leaderboard`, members
+      only, ranked by coding time over week/month/alltime
+- [x] Team aggregate heatmap endpoint — `GET /v1/teams/:slug/heatmap`, members'
+      `keyboard_heatmap` counts merged and Redis-cached (frontend visualization
+      still pending)
 - [x] Dvorak keyboard layout config
 - [x] Colemak keyboard layout config
 - [x] Wire the landing page `SESSION`/`CHART`/`TICKER` sections to live data
