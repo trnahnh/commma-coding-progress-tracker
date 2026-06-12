@@ -27,6 +27,9 @@ const envSchema = z.object({
   STRIPE_PRICE_PRO_YEARLY: optionalSecret,
   STRIPE_PRICE_TEAM_MONTHLY: optionalSecret,
   STRIPE_PRICE_TEAM_YEARLY: optionalSecret,
+  VAPID_PUBLIC_KEY: optionalSecret,
+  VAPID_PRIVATE_KEY: optionalSecret,
+  VAPID_SUBJECT: optionalSecret,
 })
 
 export const env = envSchema.parse(process.env)
