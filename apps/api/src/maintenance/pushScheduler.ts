@@ -66,7 +66,6 @@ async function tick(): Promise<void> {
 export function startPushScheduler(): void {
   if (timer) return
   log.info('push_scheduler_started', { intervalMs: INTERVAL_MS })
-  void tick()
   timer = setInterval(() => void tick(), INTERVAL_MS)
   timer.unref()
 }
