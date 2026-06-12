@@ -26,7 +26,12 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   cascades members and invites), invite, and remove members; a member may leave
   via `DELETE /v1/teams/:slug/members/:handle` but the owner cannot. New
   `CONFLICT` (409) error code for taken slugs and full teams. All team endpoints
-  are 300/hr per user.
+  are 300/hr per user. The five-member cap is race-safe: accept counts members
+  under a `SELECT … FOR UPDATE` row lock on the team, so concurrent accepts
+  cannot overshoot. If the owner's plan lapses from `team`, the team is
+  **frozen** — invite, accept, and rename return `403`, while reads, leave, and
+  delete stay available; `GET /v1/teams` and `GET /v1/teams/:slug` expose a
+  `frozen` flag.
 - **API** — Style badges on public profiles, computed server-side.
   `GET /v1/users/:handle` now returns `badges` as `{ id, name, description }[]`
   (was always `[]`), derived on read from the user's all-time `keyboard_heatmap`

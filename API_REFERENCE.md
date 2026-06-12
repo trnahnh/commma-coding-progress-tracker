@@ -672,6 +672,12 @@ Only the owner can rename, invite, remove members, or delete the team. Invites
 target an existing user by `handle`; the invitee accepts or declines from their
 own invite inbox.
 
+If the owner is no longer on `plan: "team"` (e.g. their subscription lapsed),
+the team is **frozen**: growth writes — invite, accept, and rename — return
+`403 FORBIDDEN`, while all reads stay available and a member can still leave and
+the owner can still delete. `GET /v1/teams` and `GET /v1/teams/:slug` expose a
+`frozen` boolean.
+
 ### `POST /v1/teams`
 
 Creates a team. The caller must be on `plan: "team"` (else `403 FORBIDDEN`) and
@@ -716,7 +722,8 @@ Lists the teams the caller belongs to.
       "slug": "platform",
       "name": "Platform Team",
       "role": "owner",
-      "created_at": "2026-06-11T20:00:00.000Z"
+      "created_at": "2026-06-11T20:00:00.000Z",
+      "frozen": false
     }
   ]
 }
@@ -747,8 +754,9 @@ Lists the caller's pending invites.
 ### `POST /v1/teams/invites/:id/accept`
 
 Accepts an invite addressed to the caller and joins the team. Returns
-`404 NOT_FOUND` if the invite is not theirs and `409 CONFLICT` if the team is
-already full.
+`404 NOT_FOUND` if the invite is not theirs, `403 FORBIDDEN` if the team is
+frozen, and `409 CONFLICT` if the team is already full. The capacity check runs
+under a row lock on the team, so concurrent accepts cannot exceed the cap.
 
 **Auth:** Required  
 **Rate limit:** 300/hr per user
@@ -782,6 +790,7 @@ Returns team detail and the member roster. Members only.
   "slug": "platform",
   "name": "Platform Team",
   "created_at": "2026-06-11T20:00:00.000Z",
+  "frozen": false,
   "member_count": 3,
   "max_members": 5,
   "members": [
