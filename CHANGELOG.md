@@ -123,6 +123,19 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 - **Web** — Favicon redesigned from off-brand purple Vite bolt to the `<,>`
   brand mark (angle brackets + comma) in `#ff4d1a` on `#efead8` cream
   background, consistent with the new PWA icons.
+- **Web / API / DB** — Push notifications for streak reminders. New
+  `push_subscriptions` table (migration `0007`, FK to `users` with
+  `CASCADE DELETE`, unique on `endpoint`). Three new API routes:
+  `GET /v1/push/vapid-public-key` (public, returns the VAPID public key or `503`
+  if unset), `POST /v1/push/subscribe` (auth, 20/hr, upserts on `endpoint`), and
+  `DELETE /v1/push/subscribe` (auth, 20/hr). A daily in-process scheduler
+  queries users whose `streak.currentDays > 0` and `lastActiveDate < today`,
+  sends a "Streak reminder — commma" Web Push notification to each registered
+  browser, and auto-deletes expired subscriptions (410/404). VAPID vars are
+  fully optional — all push endpoints return `503` when unset, so the feature is
+  inert in environments without keys. Service worker (`public/sw.js`) gained
+  `push` and `notificationclick` handlers; `EditProfile` gained a Notifications
+  section with an Enable/Disable toggle.
 
 ### Changed
 

@@ -290,7 +290,7 @@ Goal: mobile, multi-editor, self-hosted.
 
 - [x] Full mobile layout audit and fixes
 - [x] PWA manifest
-- [ ] Push notifications for streak reminders
+- [x] Push notifications for streak reminders
 - [x] Heatmap export on mobile (touch-friendly)
 - [ ] JetBrains plugin scaffold (community-contributed)
 - [ ] Neovim Lua plugin scaffold (community-contributed)

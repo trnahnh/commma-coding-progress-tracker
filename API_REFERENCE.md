@@ -943,6 +943,69 @@ as a session heatmap.
 
 ---
 
+## Push Notifications
+
+Browser Web Push subscriptions for daily streak reminders. All routes return
+`503 SERVICE_UNAVAILABLE` when VAPID environment variables are not configured.
+
+---
+
+### `GET /v1/push/vapid-public-key`
+
+Returns the VAPID public key so a browser can create a `PushSubscription`.
+
+**Auth:** None **Rate limit:** 300/hr per IP
+
+**Response:**
+
+```json
+{ "key": "<base64url VAPID public key>" }
+```
+
+---
+
+### `POST /v1/push/subscribe`
+
+Registers or refreshes a browser push subscription. `endpoint` is the unique key
+— submitting the same endpoint twice is a no-op (upsert).
+
+**Auth:** Required **Rate limit:** 20/hr per user
+
+**Request body:**
+
+```json
+{
+  "endpoint": "https://fcm.googleapis.com/fcm/send/...",
+  "p256dh": "<base64url>",
+  "auth": "<base64url>"
+}
+```
+
+**Response:** `201 Created`
+
+```json
+{ "ok": true }
+```
+
+---
+
+### `DELETE /v1/push/subscribe`
+
+Removes a push subscription. Safe to call even if the subscription no longer
+exists.
+
+**Auth:** Required **Rate limit:** 20/hr per user
+
+**Request body:**
+
+```json
+{ "endpoint": "https://fcm.googleapis.com/fcm/send/..." }
+```
+
+**Response:** `204 No Content`
+
+---
+
 ## Error Format
 
 All errors follow this shape:
@@ -981,6 +1044,7 @@ All errors follow this shape:
 | `GET /v1/sessions/:id/heatmap-card`    | 120 requests   | 1 hour (per IP)   |
 | `POST /v1/billing/checkout`, `/portal` | 30 requests    | 1 hour (per user) |
 | All team reads and writes              | 300 requests   | 1 hour (per user) |
+| `POST`/`DELETE /v1/push/subscribe`     | 20 requests    | 1 hour (per user) |
 | Auth endpoints                         | 20 requests    | 1 hour (per IP)   |
 
 **Rate limit headers:**
