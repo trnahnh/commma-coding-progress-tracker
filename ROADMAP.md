@@ -302,7 +302,7 @@ Goal: mobile, multi-editor, self-hosted.
 - [ ] Third-party client event schema documentation (including `key_freq` spec)
 - [ ] `docker-compose.yml` for full self-hosted stack
 - [ ] Helm chart scaffold for Kubernetes
-- [ ] Lighthouse mobile score ≥90
+- [x] Lighthouse mobile score ≥90
 
 ---
 
