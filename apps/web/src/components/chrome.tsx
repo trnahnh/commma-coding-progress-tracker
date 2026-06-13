@@ -283,7 +283,6 @@ export function Footer() {
     { label: 'Privacy', to: '/privacy' },
     { label: 'Terms', to: '/terms' },
     { label: 'Status', to: '/status' },
-    { label: '404', to: '/404' },
   ]
 
   return (

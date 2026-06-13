@@ -3,23 +3,38 @@ import { Shell } from '../components/chrome'
 
 const ENTRIES = [
   {
-    version: '0.3.0',
+    version: '0.4.0',
     date: 'Jun 2026',
+    tag: 'Phase 4 cont.',
+    changes: [
+      'Weekly recap page for Pro and Team users — live in-app version of the Monday summary email',
+      'Current plan highlighted on Pricing; paid users get a "Manage billing" portal link',
+      'Team workspaces: invite members, private leaderboard, aggregate keyboard heatmap',
+      'Push notifications for streak reminders (browser Web Push, opt-in)',
+      'PWA: installable on Android and iOS, offline fallback via service worker',
+      'Server-side keyboard heatmap PNG for sharing and OG cards',
+      'Smart navbar: hides on scroll-down, reveals on any upward scroll',
+    ],
+  },
+  {
+    version: '0.3.0',
+    date: 'May 2026',
     tag: 'Phase 4',
     changes: [
-      'Dvorak and Colemak keyboard layout support in heatmap',
-      'PNG export gated behind Pro plan',
-      'Badge display on profile (Vim athlete, Mouse-free, Backspace heavy, Arrow navigator)',
-      'Landing page wired to live session, chart, and activity data',
-      'Free / Pro ($5/mo) / Team ($20/mo, up to 5) pricing page',
+      'Style badges on profiles: Vim athlete, Mouse-free, Backspace heavy, Arrow navigator',
+      'Dvorak and Colemak keyboard layout toggle on the heatmap',
+      'Five heatmap color themes: Blaze, Arctic, Jade, Cream, Violet',
+      'Stripe billing: Pro ($5/mo) and Team ($20/mo, up to 5 seats)',
+      'PNG export gated to Pro plan; free users see an upgrade prompt',
+      'Pricing page with Free / Pro / Team tiers',
     ],
   },
   {
     version: '0.2.0',
-    date: 'May 2026',
+    date: 'Apr 2026',
     tag: 'Phase 2 – 3',
     changes: [
-      'Profile pages at /@handle with live session feed',
+      'Profile pages at /@handle with live session feed and stat grid',
       'Leaderboard — week / month / all-time periods',
       'Community feed with follow / unfollow',
       'Keyboard heatmap PNG export (1:1, 9:16, 16:9 presets)',
@@ -30,10 +45,10 @@ const ENTRIES = [
   },
   {
     version: '0.1.0',
-    date: 'Apr 2026',
+    date: 'Mar 2026',
     tag: 'Phase 1',
     changes: [
-      'VSCode extension: keystroke tracking, 60-second heartbeat flush',
+      'VSCode extension: keystroke tracking, 60-second heartbeat flush to API',
       'Session aggregation with 15-minute idle gap detection',
       'Keyboard heatmap built from key-label frequency data',
       'Streak tracking and leaderboard sorted sets',
