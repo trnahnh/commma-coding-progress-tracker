@@ -2,14 +2,24 @@ import { useEffect } from 'react'
 import { Shell, LiveDot } from '../components/chrome'
 
 const COMPONENTS = [
-  { name: 'VSCode Extension', note: 'Invite only' },
-  { name: 'API — Ingest', note: 'Invite only' },
-  { name: 'API — Sessions', note: 'Invite only' },
-  { name: 'API — Leaderboard', note: 'Invite only' },
-  { name: 'Web Dashboard', note: 'Invite only' },
-  { name: 'Database', note: 'Invite only' },
-  { name: 'Public Access', note: 'Pending launch' },
+  { name: 'VSCode Extension', note: 'Early access' },
+  { name: 'API — Auth', note: 'Operational' },
+  { name: 'API — Ingest & Aggregation', note: 'Operational' },
+  { name: 'API — Sessions & Feed', note: 'Operational' },
+  { name: 'API — Leaderboard', note: 'Operational' },
+  { name: 'API — Teams & Billing', note: 'Operational' },
+  { name: 'API — Recap & Push', note: 'Operational' },
+  { name: 'Web App', note: 'Early access' },
+  { name: 'Database (Railway PostgreSQL)', note: 'Operational' },
+  { name: 'Cache (Upstash Redis)', note: 'Operational' },
+  { name: 'Public Launch', note: 'Pending' },
 ]
+
+const NOTE_COLOR: Record<string, string> = {
+  Operational: 'text-live',
+  'Early access': 'text-accent-2',
+  Pending: 'text-ink-mute',
+}
 
 export default function Status() {
   useEffect(() => {
@@ -24,18 +34,18 @@ export default function Status() {
         </p>
         <h1 className='font-serif font-normal text-[clamp(36px,6vw,80px)] leading-[0.95] tracking-[-0.03em] m-0 mb-4 text-ink'>
           All systems{' '}
-          <em className='italic text-accent'>pending operations.</em>
+          <em className='italic text-live'>operational.</em>
         </h1>
         <p className='font-sans text-[16px] leading-relaxed text-ink-soft m-0 mb-12 max-w-[48ch]'>
-          commma infrastructure is online and running in invite-only early
-          access. Full public operations are pending launch.
+          commma infrastructure is live and running in early access. Full
+          public launch is coming soon.
         </p>
 
         <div className='border border-rule-strong rounded overflow-hidden mb-8'>
           <div className='flex items-center gap-3 px-5 sm:px-7 py-4 bg-paper-2 border-b border-rule'>
-            <LiveDot color='accent' />
+            <LiveDot color='live' />
             <span className='font-mono text-[13px] text-ink-soft tracking-wide'>
-              Invite-only early access
+              Early access — all systems go
             </span>
           </div>
           {COMPONENTS.map((c, i) => (
@@ -44,7 +54,9 @@ export default function Status() {
               className={`flex items-center justify-between px-5 sm:px-7 py-4 gap-4 ${i < COMPONENTS.length - 1 ? 'border-b border-rule' : ''}`}
             >
               <span className='font-mono text-[14px] text-ink'>{c.name}</span>
-              <span className='font-mono text-[12px] tracking-[0.14em] uppercase text-ink-mute shrink-0'>
+              <span
+                className={`font-mono text-[12px] tracking-[0.14em] uppercase shrink-0 ${NOTE_COLOR[c.note] ?? 'text-ink-mute'}`}
+              >
                 {c.note}
               </span>
             </div>
