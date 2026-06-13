@@ -15,7 +15,13 @@ const CONCURRENCY = 5
 interface Recipient {
   id: string
   handle: string
+  displayName: string | null
   email: string
+}
+
+function recipientName(recipient: Recipient): string {
+  const display = recipient.displayName?.trim()
+  return display ? display : `@${recipient.handle}`
 }
 
 async function eligibleRecipients(window: RecapWindow): Promise<Recipient[]> {
@@ -23,6 +29,7 @@ async function eligibleRecipients(window: RecapWindow): Promise<Recipient[]> {
     .selectDistinct({
       id: users.id,
       handle: users.handle,
+      displayName: users.displayName,
       email: users.email,
     })
     .from(users)
@@ -58,11 +65,12 @@ async function resolveProse(
   recipient: Recipient,
   stats: Parameters<typeof composeRecapEmail>[0],
 ): Promise<RecapProse> {
-  if (!isRecapAIEnabled()) return defaultProse(stats, recipient.handle)
+  const name = recipientName(recipient)
+  if (!isRecapAIEnabled()) return defaultProse(stats, name)
   try {
-    return await aiProse(stats, recipient.handle)
+    return await aiProse(stats, name)
   } catch {
-    return defaultProse(stats, recipient.handle)
+    return defaultProse(stats, name)
   }
 }
 

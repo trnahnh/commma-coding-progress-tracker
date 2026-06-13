@@ -10,7 +10,7 @@ export const recapProseSchema = z.object({
 
 export type RecapProse = z.infer<typeof recapProseSchema>
 
-export function defaultProse(stats: RecapStats, handle: string): RecapProse {
+export function defaultProse(stats: RecapStats, name: string): RecapProse {
   const total = formatDuration(stats.totalDurationS)
   const delta = weekOverWeekPct(stats.totalDurationS, stats.priorWeekDurationS)
 
@@ -37,7 +37,7 @@ export function defaultProse(stats: RecapStats, handle: string): RecapProse {
 
   return {
     headline,
-    note: `Nice work, @${handle}. ${trend}${lang}${streak}`,
+    note: `Nice work, ${name}. ${trend}${lang}${streak}`,
   }
 }
 
@@ -55,7 +55,7 @@ function statsForModel(stats: RecapStats): Record<string, string | number> {
 
 export async function aiProse(
   stats: RecapStats,
-  handle: string,
+  name: string,
 ): Promise<RecapProse> {
   if (!openai) throw new Error('OpenAI not configured')
 
@@ -68,11 +68,11 @@ export async function aiProse(
       {
         role: 'system',
         content:
-          'You are a sports commentator for commma, a coding-activity tracker that treats coding like a sport. Write a punchy weekly recap for a developer. Respond ONLY with JSON {"headline": string, "note": string}. headline is at most 70 characters. note is one or two upbeat sentences, at most 320 characters, addressed to the developer by their @handle. Use ONLY the figures provided. Never invent or alter numbers, and never mention any number not given.',
+          'You are a sports commentator for commma, a coding-activity tracker that treats coding like a sport. Write a punchy weekly recap for a developer. Respond ONLY with JSON {"headline": string, "note": string}. headline is at most 70 characters. note is one or two upbeat sentences, at most 320 characters, addressed to the developer by the name provided. Use ONLY the figures provided. Never invent or alter numbers, and never mention any number not given.',
       },
       {
         role: 'user',
-        content: JSON.stringify({ handle, ...statsForModel(stats) }),
+        content: JSON.stringify({ name, ...statsForModel(stats) }),
       },
     ],
   })

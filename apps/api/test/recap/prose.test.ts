@@ -23,13 +23,17 @@ const base: RecapStats = {
 }
 
 describe('defaultProse', () => {
-  it('summarizes the week with a headline and note', () => {
-    const prose = defaultProse(base, 'ada')
+  it('addresses the developer by the name passed in', () => {
+    const prose = defaultProse(base, 'Ada Lovelace')
     expect(prose.headline).toBe('4 sessions, 2h this week')
-    expect(prose.note).toContain('@ada')
+    expect(prose.note).toContain('Nice work, Ada Lovelace.')
     expect(prose.note).toContain('Up 100% on last week')
     expect(prose.note).toContain('TypeScript')
     expect(prose.note).toContain('5-day streak')
+  })
+
+  it('uses an @handle fallback name verbatim', () => {
+    expect(defaultProse(base, '@grace').note).toContain('Nice work, @grace.')
   })
 
   it('handles a single session and no prior week', () => {
@@ -42,7 +46,7 @@ describe('defaultProse', () => {
         currentStreakDays: 1,
         topLang: null,
       },
-      'grace',
+      'Grace Hopper',
     )
     expect(prose.headline).toBe('One session, 30m on the board')
     expect(prose.note).toContain('Fresh week')
@@ -50,7 +54,9 @@ describe('defaultProse', () => {
   })
 
   it('always satisfies the prose schema', () => {
-    expect(() => recapProseSchema.parse(defaultProse(base, 'ada'))).not.toThrow()
+    expect(() =>
+      recapProseSchema.parse(defaultProse(base, 'Ada Lovelace')),
+    ).not.toThrow()
   })
 })
 
