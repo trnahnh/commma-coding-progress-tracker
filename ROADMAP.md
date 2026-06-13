@@ -246,7 +246,15 @@ Goal: growth mechanics live. First external contributors merged.
 - [x] Waitlist-to-paid conversion — landing-page email-capture CTA replaced with
       two-button row: Get early access (→ /pricing) + Install free (→
       marketplace); all `href='#'` removed site-wide
-- [ ] Weekly recap email: session count, best session, streak, top lang
+- [x] Weekly recap email: session count, best session, streak, top lang —
+      Pro/Team-only, in-process hourly interval (Monday at/after
+      `RECAP_SEND_HOUR_UTC`, gated by `RUN_AGGREGATION`) over the prior Mon–Sun
+      week from `sessions`; sent via Resend, idempotent per
+      `recap_emails (user_id, week_start)` with up-to-3 retry. Optional AI prose
+      (OpenAI `gpt-4.1-nano`) writes only the headline/note for `privacy='full'`
+      users when `OPENAI_API_KEY` is set; numbers are always deterministic and
+      it falls back to a template otherwise. All clients are optional env
+      (no keys → job no-ops), mirroring Stripe/VAPID.
 - [x] Style badges: Vim athlete, Mouse-free, Backspace heavy, Arrow navigator —
       defined in `BadgeRow` (Profile.tsx); earned=accent-2, unearned=dim
 - [x] Badge display on profile page
