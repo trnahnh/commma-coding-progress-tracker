@@ -16,7 +16,6 @@ interface Recipient {
   id: string
   handle: string
   email: string
-  privacy: string
 }
 
 async function eligibleRecipients(window: RecapWindow): Promise<Recipient[]> {
@@ -25,7 +24,6 @@ async function eligibleRecipients(window: RecapWindow): Promise<Recipient[]> {
       id: users.id,
       handle: users.handle,
       email: users.email,
-      privacy: users.privacy,
     })
     .from(users)
     .innerJoin(sessions, eq(sessions.userId, users.id))
@@ -60,14 +58,12 @@ async function resolveProse(
   recipient: Recipient,
   stats: Parameters<typeof composeRecapEmail>[0],
 ): Promise<RecapProse> {
-  if (recipient.privacy === 'full' && isRecapAIEnabled()) {
-    try {
-      return await aiProse(stats, recipient.handle)
-    } catch {
-      return defaultProse(stats, recipient.handle)
-    }
+  if (!isRecapAIEnabled()) return defaultProse(stats, recipient.handle)
+  try {
+    return await aiProse(stats, recipient.handle)
+  } catch {
+    return defaultProse(stats, recipient.handle)
   }
-  return defaultProse(stats, recipient.handle)
 }
 
 async function recordOutcome(
