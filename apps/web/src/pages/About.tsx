@@ -423,8 +423,9 @@ export default function About() {
                     style={{
                       animationDelay: `${groupDelay + ci * 40 + 120}ms`,
                     }}
-                    onClick={(e) => {
+                    onPointerDown={(e) => {
                       if (document.activeElement === e.currentTarget) {
+                        e.preventDefault()
                         e.currentTarget.blur()
                       }
                     }}
