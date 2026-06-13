@@ -18,7 +18,7 @@ const ENDPOINTS = [
       {
         method: 'POST',
         path: '/v1/auth/refresh',
-        desc: 'Rotate refresh token, issue new access token.',
+        desc: 'Rotate refresh token, issue new 15-minute access token.',
       },
       {
         method: 'POST',
@@ -33,22 +33,27 @@ const ENDPOINTS = [
       {
         method: 'GET',
         path: '/v1/me',
-        desc: 'Authenticated user profile, streak, and privacy setting.',
+        desc: 'Authenticated user profile, plan, streak, and privacy setting.',
+      },
+      {
+        method: 'PATCH',
+        path: '/v1/me',
+        desc: 'Update profile fields: display_name, bio, location, website, privacy, and more.',
       },
       {
         method: 'GET',
         path: '/v1/users/:handle',
-        desc: 'Public profile with stats and badges. 404 for privacy=off.',
+        desc: 'Public profile with stats and badges. Returns 404 for privacy=off users.',
       },
       {
         method: 'GET',
         path: '/v1/users/:handle/sessions',
-        desc: 'Paginated public session list. Respects privacy mode.',
+        desc: 'Keyset-paginated public session list. Respects privacy mode.',
       },
       {
         method: 'POST',
         path: '/v1/users/:handle/follow',
-        desc: 'Follow a user.',
+        desc: 'Follow a user. Idempotent 204.',
       },
       {
         method: 'DELETE',
@@ -63,7 +68,7 @@ const ENDPOINTS = [
       {
         method: 'POST',
         path: '/v1/ingest',
-        desc: 'Ingest a batch of heartbeat events (1–500). Idempotent on event id.',
+        desc: 'Ingest a batch of 1–500 heartbeat events. Idempotent on event id.',
       },
       {
         method: 'GET',
@@ -73,17 +78,142 @@ const ENDPOINTS = [
       {
         method: 'GET',
         path: '/v1/sessions/:id',
-        desc: 'Single session detail. Gated by privacy mode and ownership.',
-      },
-      {
-        method: 'GET',
-        path: '/v1/feed',
-        desc: 'Paginated activity feed from followed users.',
+        desc: 'Single session with language breakdown, file list, and keyboard heatmap.',
       },
       {
         method: 'GET',
         path: '/v1/leaderboard',
-        desc: 'Top coders by coding time. Periods: week · month · alltime.',
+        desc: 'Top coders by coding time. period: week (default) · month · alltime.',
+      },
+      {
+        method: 'GET',
+        path: '/v1/feed',
+        desc: 'Paginated sessions from followed users. Auth required.',
+      },
+      {
+        method: 'GET',
+        path: '/v1/recap',
+        desc: 'Current-week recap for the authenticated user. Pro and Team only.',
+      },
+    ],
+  },
+  {
+    group: 'Heatmap',
+    routes: [
+      {
+        method: 'POST',
+        path: '/v1/sessions/:id/heatmap-card',
+        desc: 'Render a keyboard heatmap PNG. aspect: 9:16 · 1:1 · 16:9. Auth + privacy-gated.',
+      },
+      {
+        method: 'GET',
+        path: '/v1/sessions/:id/heatmap-card',
+        desc: 'Public unauthenticated heatmap PNG for OG images. full-privacy sessions only.',
+      },
+    ],
+  },
+  {
+    group: 'Teams',
+    routes: [
+      {
+        method: 'GET',
+        path: '/v1/teams',
+        desc: "List the authenticated user's teams and pending invites.",
+      },
+      {
+        method: 'POST',
+        path: '/v1/teams',
+        desc: 'Create a team. Team plan required. Caller becomes owner.',
+      },
+      {
+        method: 'GET',
+        path: '/v1/teams/:slug',
+        desc: 'Team details and member roster. Members only.',
+      },
+      {
+        method: 'PATCH',
+        path: '/v1/teams/:slug',
+        desc: 'Rename the team. Owner only.',
+      },
+      {
+        method: 'DELETE',
+        path: '/v1/teams/:slug',
+        desc: 'Delete team and cascade members/invites. Owner only.',
+      },
+      {
+        method: 'GET',
+        path: '/v1/teams/invites',
+        desc: 'Pending invites addressed to the authenticated user.',
+      },
+      {
+        method: 'POST',
+        path: '/v1/teams/:slug/invites',
+        desc: 'Invite a user by handle. Owner only. Max 5 members enforced.',
+      },
+      {
+        method: 'POST',
+        path: '/v1/teams/invites/:id/accept',
+        desc: 'Accept a team invite.',
+      },
+      {
+        method: 'POST',
+        path: '/v1/teams/invites/:id/decline',
+        desc: 'Decline a team invite.',
+      },
+      {
+        method: 'DELETE',
+        path: '/v1/teams/:slug/members/:handle',
+        desc: 'Remove a member (owner) or leave the team (member).',
+      },
+      {
+        method: 'GET',
+        path: '/v1/teams/:slug/leaderboard',
+        desc: 'Members ranked by coding time. period: week · month · alltime. Members only.',
+      },
+      {
+        method: 'GET',
+        path: '/v1/teams/:slug/heatmap',
+        desc: "Merged keyboard heatmap across all team members' sessions. Redis-cached.",
+      },
+    ],
+  },
+  {
+    group: 'Billing',
+    routes: [
+      {
+        method: 'POST',
+        path: '/v1/billing/checkout',
+        desc: 'Open a Stripe Checkout session for Pro or Team. plan × interval.',
+      },
+      {
+        method: 'POST',
+        path: '/v1/billing/portal',
+        desc: 'Open the Stripe Billing Portal to manage or cancel a subscription.',
+      },
+      {
+        method: 'POST',
+        path: '/v1/billing/webhook',
+        desc: 'Stripe webhook receiver. Signature-verified; no JWT required.',
+      },
+    ],
+  },
+  {
+    group: 'Push',
+    routes: [
+      {
+        method: 'GET',
+        path: '/v1/push/vapid-public-key',
+        desc: 'VAPID public key for Web Push subscription. Public endpoint.',
+      },
+      {
+        method: 'POST',
+        path: '/v1/push/subscribe',
+        desc: 'Register a push subscription endpoint. Upserts on endpoint.',
+      },
+      {
+        method: 'DELETE',
+        path: '/v1/push/subscribe',
+        desc: 'Remove a push subscription.',
       },
     ],
   },
@@ -91,13 +221,18 @@ const ENDPOINTS = [
 
 const RATE_LIMITS = [
   { scope: 'POST /v1/ingest', limit: '1,000 / hr / user' },
-  { scope: 'GET reads (/me, /sessions)', limit: '300 / hr / user' },
-  { scope: 'Auth endpoints', limit: '20 / hr / IP' },
+  { scope: 'GET reads (/me, /sessions, /recap, …)', limit: '300 / hr / user' },
+  { scope: 'Auth endpoints', limit: '100 / hr / IP (dev) · 20 / hr / IP (prod)' },
+  { scope: 'POST /v1/billing/checkout · /portal', limit: '30 / hr / user' },
+  { scope: 'GET /v1/sessions/:id/heatmap-card', limit: '120 / hr / IP' },
+  { scope: 'Team endpoints', limit: '300 / hr / user' },
+  { scope: 'Push endpoints', limit: '20 / hr / user' },
 ]
 
 const METHOD_COLOR: Record<string, string> = {
   GET: 'text-live',
   POST: 'text-accent',
+  PATCH: 'text-accent-2',
   DELETE: 'text-ink-mute',
 }
 
@@ -117,9 +252,10 @@ export default function Api() {
         </h1>
 
         <div className='flex items-center gap-2.5 mb-12'>
-          <LiveDot color='accent' />
-          <span className='font-mono text-[13px] text-ink-mute leading-relaxed'>
-            Early access · v1 · all endpoints pending operations
+          <LiveDot color='live' />
+          <span className='font-mono text-[13px] text-ink-mute'>
+            v1 · base URL:{' '}
+            <span className='text-ink-soft'>api.commma.dev</span>
           </span>
         </div>
 
@@ -129,8 +265,8 @@ export default function Api() {
               Authentication
             </p>
             <p className='font-sans text-[15px] leading-relaxed text-ink-soft m-0 mb-3'>
-              All protected endpoints require a JWT bearer token issued by the
-              OAuth flow. Tokens expire in 15 minutes — use{' '}
+              Protected endpoints require a JWT bearer token. Tokens expire in
+              15 minutes — use{' '}
               <span className='font-mono text-[14px] text-accent'>
                 POST /v1/auth/refresh
               </span>{' '}
@@ -151,7 +287,7 @@ export default function Api() {
               <div className='border border-rule-strong rounded overflow-hidden'>
                 {group.routes.map((r, i) => (
                   <div
-                    key={r.path}
+                    key={r.path + r.method}
                     className={`px-5 sm:px-6 py-4 ${i < group.routes.length - 1 ? 'border-b border-rule' : ''} hover:bg-paper-2/30 transition-colors`}
                   >
                     <div className='flex flex-wrap items-baseline gap-x-3 gap-y-0.5 mb-1.5'>
@@ -162,9 +298,6 @@ export default function Api() {
                       </span>
                       <span className='font-mono text-[13px] text-ink break-all'>
                         {r.path}
-                      </span>
-                      <span className='ml-auto pl-2 font-mono text-[11px] tracking-wider uppercase shrink-0 text-ink-mute'>
-                        pending
                       </span>
                     </div>
                     <p className='font-sans text-[14px] text-ink-soft m-0'>
@@ -190,7 +323,7 @@ export default function Api() {
                 <span className='font-mono text-[13px] text-ink-soft'>
                   {r.scope}
                 </span>
-                <span className='font-mono text-[13px] text-ink tnum'>
+                <span className='font-mono text-[13px] text-ink tnum whitespace-nowrap'>
                   {r.limit}
                 </span>
               </div>
