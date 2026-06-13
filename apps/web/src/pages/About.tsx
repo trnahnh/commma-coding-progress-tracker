@@ -423,6 +423,11 @@ export default function About() {
                     style={{
                       animationDelay: `${groupDelay + ci * 40 + 120}ms`,
                     }}
+                    onClick={(e) => {
+                      if (document.activeElement === e.currentTarget) {
+                        e.currentTarget.blur()
+                      }
+                    }}
                   >
                     <div
                       className='font-mono text-[12px] text-ink-mute mb-2'
