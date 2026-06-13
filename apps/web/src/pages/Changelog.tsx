@@ -18,7 +18,7 @@ const ENTRIES = [
   },
   {
     version: '0.3.0',
-    date: 'May 2026',
+    date: 'Jun 2026',
     tag: 'Phase 4',
     changes: [
       'Style badges on profiles: Vim athlete, Mouse-free, Backspace heavy, Arrow navigator',
@@ -31,7 +31,7 @@ const ENTRIES = [
   },
   {
     version: '0.2.0',
-    date: 'Apr 2026',
+    date: 'May 2026',
     tag: 'Phase 2 – 3',
     changes: [
       'Profile pages at /@handle with live session feed and stat grid',
@@ -45,7 +45,7 @@ const ENTRIES = [
   },
   {
     version: '0.1.0',
-    date: 'Mar 2026',
+    date: 'May 2026',
     tag: 'Phase 1',
     changes: [
       'VSCode extension: keystroke tracking, 60-second heartbeat flush to API',
