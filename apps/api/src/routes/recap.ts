@@ -30,21 +30,21 @@ recapRoutes.get('/', async (c) => {
     .limit(1)
 
   if (!user) return apiError(c, 'NOT_FOUND', 'User not found')
-  if (user.plan === 'free' || !user.plan) {
+  if (user.plan !== 'pro' && user.plan !== 'team') {
     return apiError(c, 'FORBIDDEN', 'Weekly recap requires Pro or Team plan')
   }
 
   const now = new Date()
-  const window = currentWeek(now)
-  const prior = priorWeekOf(window)
-  const stats = await buildRecapStats(userId, window, prior)
+  const week = currentWeek(now)
+  const prior = priorWeekOf(week)
+  const stats = await buildRecapStats(userId, week, prior)
   const name = user.displayName ?? user.handle
   const prose = defaultProse(stats, name)
   const wowPct = weekOverWeekPct(stats.totalDurationS, stats.priorWeekDurationS)
 
   return c.json({
-    week_start: window.weekStart,
-    week_end: window.end.toISOString().slice(0, 10),
+    week_start: week.weekStart,
+    week_end: week.end.toISOString().slice(0, 10),
     session_count: stats.sessionCount,
     total_duration_s: stats.totalDurationS,
     best_duration_s: stats.bestDurationS,

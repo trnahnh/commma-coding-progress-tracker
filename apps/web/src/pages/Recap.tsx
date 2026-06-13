@@ -106,10 +106,12 @@ export default function Recap() {
   useEffect(() => {
     if (isLoading) return
     if (!token || !user) {
+      setFetching(false)
       navigate('/signin')
       return
     }
     if (user.plan === 'free' || !user.plan) {
+      setFetching(false)
       navigate('/pricing')
       return
     }
@@ -147,7 +149,7 @@ export default function Recap() {
   if (!recap) return null
 
   const progress = weekProgress(recap.week_start, recap.week_end)
-  const dayNum = Math.min(7, Math.ceil(progress * 7))
+  const dayNum = Math.min(7, Math.max(1, Math.ceil(progress * 7)))
   const weekLabel = formatWeekRange(recap.week_start, recap.week_end)
   const stats: { label: string; value: string }[] = [
     { label: 'Sessions', value: String(recap.session_count) },
