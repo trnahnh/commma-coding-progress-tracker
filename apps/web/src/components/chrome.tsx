@@ -276,6 +276,7 @@ export function Footer() {
     { label: 'API', to: '/api' },
   ]
   const company = [
+    { label: 'About', to: '/about' },
     { label: 'Careers', to: '/careers' },
     { label: 'Contact', to: '/contact' },
   ]

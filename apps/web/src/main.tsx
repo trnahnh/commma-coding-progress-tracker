@@ -26,6 +26,7 @@ const Teams = lazy(() => import('./pages/Teams.tsx'))
 const TeamDashboard = lazy(() => import('./pages/TeamDashboard.tsx'))
 const BillingSuccess = lazy(() => import('./pages/BillingSuccess.tsx'))
 const Recap = lazy(() => import('./pages/Recap.tsx'))
+const About = lazy(() => import('./pages/About.tsx'))
 
 const router = createBrowserRouter([
   {
@@ -51,6 +52,7 @@ const router = createBrowserRouter([
       { path: '/changelog', element: <Changelog /> },
       { path: '/api', element: <Api /> },
       { path: '/status', element: <Status /> },
+      { path: '/about', element: <About /> },
       { path: '/404', element: <NotFound /> },
       { path: '*', element: <NotFound /> },
     ],
