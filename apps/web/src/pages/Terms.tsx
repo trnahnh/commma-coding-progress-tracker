@@ -35,7 +35,7 @@ export default function Terms() {
           Terms of <em className='italic text-accent'>service.</em>
         </h1>
         <p className='font-mono text-[13px] text-ink-mute m-0 mb-12'>
-          Effective: January 1, 2026
+          Effective: May 2026
         </p>
 
         <Section title='Acceptance'>
