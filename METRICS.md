@@ -64,6 +64,7 @@ Aggregation lag: 5-min interval + 15-min idle gap (ADR-010); event `ts` →
 | `events` rows     | pruned after finalize | bounded      | `count(*)`             |
 | `sessions` growth | historical (rebuild)  | Railway plan | count + table size     |
 | Postgres storage  | not measured          | ~$5 MVP plan | Railway console        |
+| Recap LLM spend   | ~$0.0002/recap        | <$1/wk MVP   | OpenAI usage console   |
 
 Redis cost drivers: per-request rate limits + per-finalize `ZINCRBY` (no
 BullMQ), plus a handful of cache-aside entries — the heatmap-card PNG
@@ -75,7 +76,11 @@ after aggregation prunes finalized rows; bounded heartbeat field sizes + the 1
 MB ingest body cap keep per-event/per-batch storage bounded. The heatmap-card
 PNG is now cached in Redis (image bytes only, privacy re-checked per request)
 and fronted by CloudFront on the public `GET`, so render cost is amortized for
-feed thumbnails and crawler `og:image` hits.
+feed thumbnails and crawler `og:image` hits. The weekly recap's optional AI
+prose layer (OpenAI `gpt-4.1-nano`) runs at most once per Pro/Team user per
+week — short structured-copy generation at ~$0.0002/recap — and is fully
+skippable (no `OPENAI_API_KEY` → deterministic template), so it cannot become a
+runaway cost.
 
 ## 3. Privacy / trust (invariants — verifiable, brand-defining)
 

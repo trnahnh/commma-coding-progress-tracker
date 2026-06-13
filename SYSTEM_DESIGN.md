@@ -324,9 +324,33 @@ CREATE INDEX follows_followee ON follows(followee_id);
 
 ### Weekly Recap Email Job
 
-- **Trigger:** cron every Sunday 09:00 UTC
-- **Logic:** compile stats for users with sessions in past 7 days → send via
-  Resend/Postmark
+- **Trigger:** in-process `setInterval` (hourly) in the API process, gated by
+  `RUN_AGGREGATION` like the other loops; an in-process guard prevents
+  overlapping runs. Each tick returns early unless it is Monday and the hour is
+  at/after `RECAP_SEND_HOUR_UTC` (default 13), so the job effectively fires once
+  a week without an external cron.
+- **Eligibility:** `plan in ('pro','team')` users (recap is a Pro-tier perk,
+  see ROADMAP pricing) with **≥1 session** in the prior completed Mon–Sun week.
+  Users already recorded `sent` for that `week_start`, or past `attempts >= 3`,
+  are skipped — the `recap_emails (user_id, week_start)` primary key is the
+  idempotency + retry guard.
+- **Logic:** per user, aggregate the week from `sessions` (never `events`, which
+  are pruned per ADR-010) — session count, total/best duration, top language,
+  current streak, and prior-week total for a week-over-week delta. Render the
+  email (subject + stat block + prose), send via Resend, then upsert the
+  `recap_emails` outcome row. Users are processed in bounded concurrent chunks.
+- **Prose layer (optional AI):** all figures are computed deterministically and
+  injected exactly; an LLM (OpenAI `gpt-4.1-nano`) writes only the headline and
+  a short note. It runs only for `privacy='full'` users and only when
+  `OPENAI_API_KEY` is set; any failure (or `summary`/`off` privacy) falls back
+  to a deterministic template. No file paths, `key_freq`, or keystroke content
+  are ever sent to the LLM — only aggregate stats (ADR-006 unaffected).
+- **Gating:** the whole job no-ops when `RESEND_API_KEY`/`RECAP_FROM_EMAIL` are
+  unset, mirroring the optional Stripe/VAPID pattern.
+- **Failure:** a failed send records `status='failed'` and increments
+  `attempts`; the next hourly tick retries until success or three attempts, so a
+  transient outage self-heals within the send window without re-emailing
+  delivered recipients.
 
 ---
 

@@ -156,7 +156,8 @@ pnpm test        # all tests
   ROADMAP
 - Background jobs are in-process intervals gated by `RUN_AGGREGATION`:
   schedulers live in `src/aggregate/` (aggregation, streak reset) and
-  `src/maintenance/` (token cleanup), started in `src/index.ts`
+  `src/maintenance/` (token cleanup, push reminders, weekly recap email),
+  started in `src/index.ts`
 
 ### @commma/extension
 
