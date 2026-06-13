@@ -30,6 +30,10 @@ const envSchema = z.object({
   VAPID_PUBLIC_KEY: optionalSecret,
   VAPID_PRIVATE_KEY: optionalSecret,
   VAPID_SUBJECT: optionalSecret,
+  RESEND_API_KEY: optionalSecret,
+  RECAP_FROM_EMAIL: optionalSecret,
+  OPENAI_API_KEY: optionalSecret,
+  RECAP_SEND_HOUR_UTC: z.coerce.number().int().min(0).max(23).default(13),
 })
 
 export const env = envSchema.parse(process.env)
