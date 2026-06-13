@@ -11,6 +11,13 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Web** — `/about` page in the Company footer section. Covers the origin
+  story (GitHub × Strava inspiration), a scroll-animated "insight"
+  visualization showing how commma merges commit history with athletic-style
+  session data, a manifesto section, and a full stack catalogue — 23 entries
+  across 7 groups (Language & Tooling, API, Data, Frontend, Extension,
+  Infrastructure, Services). Stack cards reveal the rationale for each choice
+  on hover (desktop) or always on mobile.
 - **Web, API** — Weekly recap page (`/recap`) for Pro and Team users. A new
   `GET /v1/recap` endpoint returns current-week stats (session count, total and
   best session time, top language, streak, week-over-week delta, and a prose

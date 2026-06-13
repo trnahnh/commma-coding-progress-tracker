@@ -282,6 +282,10 @@ Goal: growth mechanics live. First external contributors merged.
       (derived from `sessions`, not `events`, which are pruned per ADR-010), and
       a recent public-activity feed for `TICKER`. Land before public launch so
       the landing page is fully real.
+- [x] `/about` page — origin story (GitHub × Strava inspiration), animated
+      "insight" comparison visualization, manifesto, and a 23-entry stack
+      catalogue grouped by layer (Language & Tooling / API / Data / Frontend /
+      Extension / Infrastructure / Services); footer Company link wired.
 - [ ] Contributor onboarding: Dockerfile for dev environment
 - [ ] First 3 external PR merges
 - [ ] Public launch: Product Hunt, social posts
