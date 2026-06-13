@@ -255,6 +255,11 @@ Goal: growth mechanics live. First external contributors merged.
       recipient when `OPENAI_API_KEY` is set; numbers are always deterministic
       and it falls back to a template otherwise. All clients are optional env
       (no keys → job no-ops), mirroring Stripe/VAPID.
+- [x] Weekly recap page (`/recap`) — Pro/Team-only web page backed by
+      `GET /v1/recap`; shows current-week progress bar, stat grid (sessions,
+      time, best session, top lang, streak), week-over-week delta arrow, and a
+      link to the best session. "Recap" nav link visible to Pro/Team users. Free
+      users redirected to `/pricing`.
 - [x] Style badges: Vim athlete, Mouse-free, Backspace heavy, Arrow navigator —
       defined in `BadgeRow` (Profile.tsx); earned=accent-2, unearned=dim
 - [x] Badge display on profile page

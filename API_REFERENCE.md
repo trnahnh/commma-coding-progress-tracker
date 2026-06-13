@@ -1011,6 +1011,60 @@ exists.
 
 ---
 
+## Recap Endpoint
+
+Returns current-week coding stats for the authenticated user. Pro and Team plans
+only; free accounts receive `403 FORBIDDEN`.
+
+The `week_end` field is the **exclusive** upper bound (next Monday 00:00 UTC) —
+i.e. `session.started_at >= week_start AND < week_end`. `formatWeekRange` on the
+client subtracts one day to show the inclusive Sunday label.
+
+---
+
+### `GET /v1/recap`
+
+**Auth:** Bearer token **Rate limit:** 300/hr per user (shared `read` bucket)
+**Plans:** Pro, Team
+
+**Response:**
+
+```json
+{
+  "week_start": "2026-06-09",
+  "week_end": "2026-06-16",
+  "session_count": 5,
+  "total_duration_s": 18600,
+  "best_duration_s": 5400,
+  "best_session_id": "sess_abc123",
+  "top_lang": "TypeScript",
+  "current_streak_days": 12,
+  "prior_week_duration_s": 14880,
+  "week_over_week_pct": 25,
+  "headline": "5 sessions, 5h 10m this week",
+  "note": "Nice work, Anh. Up 25% on last week — momentum is yours. Top language: TypeScript. 12-day streak still alive."
+}
+```
+
+| Field                   | Type             | Notes                                             |
+| ----------------------- | ---------------- | ------------------------------------------------- |
+| `week_start`            | `string` (date)  | Monday of the current week, UTC                   |
+| `week_end`              | `string` (date)  | Next Monday — exclusive upper bound               |
+| `session_count`         | `number`         | Sessions started this week                        |
+| `total_duration_s`      | `number`         | Total coding seconds this week                    |
+| `best_duration_s`       | `number`         | Longest single session this week                  |
+| `best_session_id`       | `string \| null` | ID of the longest session                         |
+| `top_lang`              | `string \| null` | Language with most seconds this week              |
+| `current_streak_days`   | `number`         | Current streak at time of request                 |
+| `prior_week_duration_s` | `number`         | Total seconds from the prior week                 |
+| `week_over_week_pct`    | `number \| null` | Change vs prior week (%); `null` if no prior data |
+| `headline`              | `string`         | Short prose headline (template or AI)             |
+| `note`                  | `string`         | One-to-two sentence coaching note                 |
+
+**Errors:** `401` missing/invalid token · `403` free plan · `404` user not found
+
+---
+
 ## Error Format
 
 All errors follow this shape:

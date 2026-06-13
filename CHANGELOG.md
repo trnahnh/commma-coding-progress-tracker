@@ -11,6 +11,13 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Web, API** — Weekly recap page (`/recap`) for Pro and Team users. A new
+  `GET /v1/recap` endpoint returns current-week stats (session count, total and
+  best session time, top language, streak, week-over-week delta, and a prose
+  headline/note) using the same logic as the Monday recap email. The web page
+  shows a live week-progress bar, a stat grid, the WoW delta, and a link to the
+  best session. A "Recap" nav link appears for Pro/Team users (desktop and
+  mobile). Free users who navigate to `/recap` are redirected to `/pricing`.
 - **Web** — The Pricing page now marks the signed-in user's current plan. The
   matching tier shows a "✓ Your plan" badge and a highlighted border, and its
   call-to-action becomes "Manage billing" (opening the Stripe Billing Portal)
