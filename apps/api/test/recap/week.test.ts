@@ -54,7 +54,8 @@ describe('isRecapSendTime', () => {
     expect(isRecapSendTime(new Date('2026-06-15T12:59:00.000Z'), 13)).toBe(false)
   })
 
-  it('is false on any other weekday', () => {
-    expect(isRecapSendTime(new Date('2026-06-16T13:00:00.000Z'), 13)).toBe(false)
+  it('stays true later in the week so a missed Monday send catches up', () => {
+    expect(isRecapSendTime(new Date('2026-06-16T08:00:00.000Z'), 13)).toBe(true)
+    expect(isRecapSendTime(new Date('2026-06-21T23:00:00.000Z'), 13)).toBe(true)
   })
 })
