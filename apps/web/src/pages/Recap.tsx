@@ -26,7 +26,7 @@ function formatWeekRange(start: string, end: string): string {
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
     <div className='flex flex-col gap-3 p-5 sm:p-6 rounded-xl border border-rule bg-paper-2/40'>
-      <span className='font-mono text-[12px] uppercase tracking-[0.12em] text-ink-faint'>
+      <span className='font-mono text-[12px] uppercase tracking-[0.12em] text-ink-mute'>
         {label}
       </span>
       <span className='font-mono text-[clamp(22px,3.5vw,34px)] leading-none tnum text-accent-2'>
@@ -125,9 +125,9 @@ export default function Recap() {
           <span className='font-mono text-[13px] uppercase tracking-[0.12em] text-accent'>
             Weekly recap
           </span>
-          <span className='font-mono text-[13px] text-rule-strong'>·</span>
-          <span className='font-mono text-[13px] text-ink-faint'>{weekLabel}</span>
-          <span className='ml-auto font-mono text-[11px] uppercase tracking-[0.1em] text-ink-faint border border-rule rounded-full px-3 py-1'>
+          <span className='font-mono text-[13px] text-ink-mute'>·</span>
+          <span className='font-mono text-[13px] text-ink-soft'>{weekLabel}</span>
+          <span className='ml-auto font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute border border-rule-strong rounded-full px-3 py-1'>
             {user?.plan === 'team' ? 'Team' : 'Pro'}
           </span>
         </div>
@@ -142,10 +142,10 @@ export default function Recap() {
 
       <div className='mb-10 sm:mb-14'>
         <div className='flex items-center justify-between mb-3'>
-          <span className='font-mono text-[12px] uppercase tracking-[0.12em] text-ink-faint'>
+          <span className='font-mono text-[12px] uppercase tracking-[0.12em] text-ink-mute'>
             Week progress
           </span>
-          <span className='font-mono text-[13px] text-ink-mute tnum'>
+          <span className='font-mono text-[13px] text-ink-soft tnum'>
             Day {dayNum} / 7
           </span>
         </div>
@@ -165,11 +165,11 @@ export default function Recap() {
 
       <div className='border border-rule-strong rounded-xl bg-paper-2/40 p-6 sm:p-8 lg:p-10 flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-10 justify-between'>
         <div className='min-w-0'>
-          <span className='font-mono text-[12px] uppercase tracking-[0.12em] text-ink-faint block mb-3'>
+          <span className='font-mono text-[12px] uppercase tracking-[0.12em] text-ink-mute block mb-3'>
             Vs last week
           </span>
           {pct === null ? (
-            <span className='font-mono text-[15px] text-ink-faint'>
+            <span className='font-mono text-[15px] text-ink-soft'>
               No data from last week
             </span>
           ) : (
@@ -183,7 +183,7 @@ export default function Recap() {
               >
                 {flat ? '—' : up ? `↑ ${pct}%` : `↓ ${Math.abs(pct)}%`}
               </span>
-              <span className='font-mono text-[15px] text-ink-mute'>
+              <span className='font-mono text-[15px] text-ink-soft'>
                 coding time vs last week
               </span>
             </div>
@@ -202,11 +202,11 @@ export default function Recap() {
               </span>
             </Link>
           ) : (
-            <span className='font-mono text-[13px] text-ink-faint'>
+            <span className='font-mono text-[13px] text-ink-soft'>
               No sessions logged this week yet.
             </span>
           )}
-          <div className='flex items-center gap-2 font-mono text-[12px] text-ink-faint'>
+          <div className='flex items-center gap-2 font-mono text-[12px] text-ink-mute'>
             <LiveDot color='live' />
             <span>Updated live</span>
           </div>
