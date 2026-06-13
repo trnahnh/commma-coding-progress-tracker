@@ -101,17 +101,14 @@ export default function Recap() {
   const navigate = useNavigate()
   const [recap, setRecap] = useState<RecapData | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [fetching, setFetching] = useState(true)
 
   useEffect(() => {
     if (isLoading) return
     if (!token || !user) {
-      setFetching(false)
       navigate('/signin')
       return
     }
-    if (user.plan === 'free' || !user.plan) {
-      setFetching(false)
+    if (user.plan !== 'pro' && user.plan !== 'team') {
       navigate('/pricing')
       return
     }
@@ -124,10 +121,9 @@ export default function Recap() {
           setError('Could not load your recap. Try again shortly.')
         }
       })
-      .finally(() => setFetching(false))
   }, [token, user, isLoading, navigate])
 
-  if (isLoading || fetching) {
+  if (isLoading || (!recap && !error)) {
     return (
       <Shell>
         <RecapSkeleton />
