@@ -390,9 +390,7 @@ export default function About() {
           className={`font-sans text-[15px] text-ink-soft m-0 mb-10 ${stackVisible ? 'animate-fade-up' : 'opacity-0'}`}
           style={{ animationDelay: '50ms' }}
         >
-          Every tool chosen deliberately.{' '}
-          <span className='hidden sm:inline'>Hover a card to see why.</span>
-          <span className='sm:hidden'>Tap a card to expand.</span>
+          Every tool chosen deliberately. Hover or tap any card to see why.
         </p>
 
         {STACK_GROUPS.map((group, gi) => {
@@ -420,7 +418,8 @@ export default function About() {
                 {group.items.map(({ no, name, role, why }, ci) => (
                   <div
                     key={no}
-                    className={`group border border-rule rounded-lg p-4 bg-paper-2 hover:border-accent-line hover:bg-accent-soft transition-colors cursor-default overflow-hidden ${stackVisible ? 'animate-fade-up' : 'opacity-0'}`}
+                    className={`group border border-rule rounded-lg p-4 bg-paper-2 hover:border-accent-line hover:bg-accent-soft focus-within:border-accent-line focus-within:bg-accent-soft transition-colors cursor-default overflow-hidden focus-visible:outline-none ${stackVisible ? 'animate-fade-up' : 'opacity-0'}`}
+                    tabIndex={0}
                     style={{
                       animationDelay: `${groupDelay + ci * 40 + 120}ms`,
                     }}
@@ -437,7 +436,7 @@ export default function About() {
                     <div className='font-mono text-[12px] text-ink-mute'>
                       {role}
                     </div>
-                    <p className='font-mono text-[13px] text-ink-soft leading-snug m-0 mt-2 overflow-hidden max-h-none md:max-h-0 md:mt-0 md:group-hover:max-h-32 md:group-hover:mt-2 transition-all duration-300 ease-out'>
+                    <p className='font-mono text-[13px] text-ink-soft leading-snug m-0 mt-0 max-h-0 overflow-hidden group-hover:max-h-32 group-hover:mt-2 group-focus-within:max-h-32 group-focus-within:mt-2 transition-all duration-300 ease-out'>
                       {why}
                     </p>
                   </div>
