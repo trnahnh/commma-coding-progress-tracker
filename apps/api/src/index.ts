@@ -6,6 +6,7 @@ import { startAggregation } from './aggregate/scheduler.js'
 import { startStreakReset } from './aggregate/streakScheduler.js'
 import { startRefreshTokenCleanup } from './maintenance/refreshTokenScheduler.js'
 import { startPushScheduler } from './maintenance/pushScheduler.js'
+import { startRecapScheduler } from './maintenance/recapScheduler.js'
 
 const app = createApp()
 
@@ -16,5 +17,6 @@ serve({ fetch: app.fetch, port: env.PORT }, (info) => {
     startStreakReset()
     startRefreshTokenCleanup()
     startPushScheduler()
+    startRecapScheduler()
   }
 })
