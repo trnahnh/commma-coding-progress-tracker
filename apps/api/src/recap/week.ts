@@ -32,5 +32,6 @@ export function priorWeekOf(window: RecapWindow): RecapWindow {
 }
 
 export function isRecapSendTime(now: Date, sendHourUTC: number): boolean {
-  return now.getUTCDay() === 1 && now.getUTCHours() >= sendHourUTC
+  if (now.getUTCDay() === 1) return now.getUTCHours() >= sendHourUTC
+  return true
 }
