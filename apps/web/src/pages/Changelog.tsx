@@ -7,13 +7,16 @@ const ENTRIES = [
     date: 'Jun 2026',
     tag: 'Phase 4 cont.',
     changes: [
+      'About page — origin story, animated GitHub × Strava insight, manifesto, and 23-entry stack catalogue grouped by layer',
       'Weekly recap page for Pro and Team users — live in-app version of the Monday summary email',
+      'Weekly recap email — Monday morning session summary with AI-assisted prose for Pro and Team users',
       'Current plan highlighted on Pricing; paid users get a "Manage billing" portal link',
       'Team workspaces: invite members, private leaderboard, aggregate keyboard heatmap',
       'Push notifications for streak reminders (browser Web Push, opt-in)',
       'PWA: installable on Android and iOS, offline fallback via service worker',
       'Server-side keyboard heatmap PNG for sharing and OG cards',
       'Smart navbar: hides on scroll-down, reveals on any upward scroll',
+      'Extension first-run sign-in nudge — one-time prompt after install',
     ],
   },
   {
@@ -23,7 +26,6 @@ const ENTRIES = [
     changes: [
       'Style badges on profiles: Vim athlete, Mouse-free, Backspace heavy, Arrow navigator',
       'Dvorak and Colemak keyboard layout toggle on the heatmap',
-      'Five heatmap color themes: Blaze, Arctic, Jade, Cream, Violet',
       'Stripe billing: Pro ($5/mo) and Team ($20/mo, up to 5 seats)',
       'PNG export gated to Pro plan; free users see an upgrade prompt',
       'Pricing page with Free / Pro / Team tiers',
