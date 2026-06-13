@@ -341,10 +341,11 @@ CREATE INDEX follows_followee ON follows(followee_id);
   `recap_emails` outcome row. Users are processed in bounded concurrent chunks.
 - **Prose layer (optional AI):** all figures are computed deterministically and
   injected exactly; an LLM (OpenAI `gpt-4.1-nano`) writes only the headline and
-  a short note. It runs only for `privacy='full'` users and only when
-  `OPENAI_API_KEY` is set; any failure (or `summary`/`off` privacy) falls back
-  to a deterministic template. No file paths, `key_freq`, or keystroke content
-  are ever sent to the LLM — only aggregate stats (ADR-006 unaffected).
+  a short note. It runs for every Pro/Team recipient when `OPENAI_API_KEY` is
+  set (the recap is private to the recipient, so the public `privacy` mode does
+  not gate it); any failure falls back to a deterministic template. No file
+  paths, `key_freq`, or keystroke content are ever sent to the LLM — only
+  aggregate stats (ADR-006 unaffected).
 - **Gating:** the whole job no-ops when `RESEND_API_KEY`/`RECAP_FROM_EMAIL` are
   unset, mirroring the optional Stripe/VAPID pattern.
 - **Failure:** a failed send records `status='failed'` and increments
