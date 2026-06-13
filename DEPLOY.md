@@ -204,6 +204,47 @@ confirmable via `GET /v1/me`. The webhook is authenticated by the Stripe
 signature, not a JWT, so the nginx proxy must forward `POST /v1/billing/webhook`
 like any other `/v1` route (it already does — no special-casing needed).
 
+### 8. Weekly recap email (Resend, optional)
+
+The weekly recap email (a Pro/Team perk) is **off until you configure it**, and
+it needs two things to actually deliver: the **API process running** with the
+recap timer enabled, and a **Resend-verified sender domain**. Until both are
+true, no recap leaves the system.
+
+Prerequisites:
+
+- **Backend up with the timer.** The recap is an in-process interval started in
+  `src/index.ts`, gated by `RUN_AGGREGATION=true`. It only runs inside a live
+  API process — there is no separate worker or cron — so the box (PM2) must be
+  up during the send window. It fires Monday at/after `RECAP_SEND_HOUR_UTC` and
+  catches up later that week if the process was down on Monday.
+- **A registered domain + verified Resend sender.** Because no domain is bought
+  yet (see "Before you have a domain"), this step is blocked until then: Resend
+  will only send from a domain you have verified via its DNS records (SPF + DKIM
+  CNAMEs, optionally DMARC). `RECAP_FROM_EMAIL` must use that verified domain,
+  e.g. `Commma <recap@commma.dev>`. The throwaway `onboarding@resend.dev` sender
+  works for a smoke test but **only delivers to your own Resend account email**,
+  so it is not usable for real recipients.
+
+Setup, once a domain exists:
+
+1. Create a Resend account and an API key (Sending access); put it in
+   `RESEND_API_KEY`.
+2. Add the domain in Resend → **Domains**, publish the shown DNS records, and
+   wait for **Verified**.
+3. Set the server `.env`:
+   - `RESEND_API_KEY=re_...`
+   - `RECAP_FROM_EMAIL=Commma <recap@commma.dev>` (verified domain)
+   - `RECAP_SEND_HOUR_UTC=13` (optional; default 13)
+   - `OPENAI_API_KEY=sk-...` (optional — enables GPT-4.1-nano headline/note for
+     all Pro/Team recipients; without it, recaps use the deterministic template.
+     Only aggregate stats are sent to OpenAI; no file paths or keystroke data.)
+4. Restart PM2 so the new env loads.
+
+With `RESEND_API_KEY`/`RECAP_FROM_EMAIL` unset the job no-ops cleanly (same
+optional-by-default pattern as Stripe/VAPID), so leaving it blank pre-domain is
+safe.
+
 ## Redeploy and rollback
 
 - **Redeploy** — re-run the relevant workflow. `Deploy API` pulls `main` and
