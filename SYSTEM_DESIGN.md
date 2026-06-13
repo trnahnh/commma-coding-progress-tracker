@@ -326,14 +326,19 @@ CREATE INDEX follows_followee ON follows(followee_id);
 
 - **Trigger:** in-process `setInterval` (hourly) in the API process, gated by
   `RUN_AGGREGATION` like the other loops; an in-process guard prevents
-  overlapping runs. Each tick returns early unless it is Monday and the hour is
-  at/after `RECAP_SEND_HOUR_UTC` (default 13), so the job effectively fires once
-  a week without an external cron.
+  overlapping runs. A tick acts once it is Monday at/after `RECAP_SEND_HOUR_UTC`
+  (default 13) and stays active for the rest of that week, so if the process is
+  down during the Monday window the recap **catches up** on a later day instead
+  of being skipped — the `recap_emails` dedup still guarantees exactly one send
+  per user per week. No external cron.
 - **Eligibility:** `plan in ('pro','team')` users (recap is a Pro-tier perk,
   see ROADMAP pricing) with **≥1 session** in the prior completed Mon–Sun week.
   Users already recorded `sent` for that `week_start`, or past `attempts >= 3`,
   are skipped — the `recap_emails (user_id, week_start)` primary key is the
-  idempotency + retry guard.
+  idempotency + retry guard. **Scope note:** eligibility keys off the user's own
+  `users.plan`, so a Team subscription covers only the owner's row; invited team
+  members on `plan='free'` do not receive a recap yet (a future change can join
+  through `team_members`).
 - **Logic:** per user, aggregate the week from `sessions` (never `events`, which
   are pruned per ADR-010) — session count, total/best duration, top language,
   current streak, and prior-week total for a week-over-week delta. Render the
