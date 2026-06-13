@@ -22,8 +22,8 @@ export class StatusBar {
   set(state: ConnectionState): void {
     switch (state) {
       case 'signedOut':
-        this.item.text = '$(circle-slash) commma'
-        this.item.tooltip = 'commma: click to sign in'
+        this.item.text = '$(sign-in) commma: sign in'
+        this.item.tooltip = 'commma: sign in with GitHub to start tracking'
         this.item.command = 'commma.signIn'
         break
       case 'tracking':

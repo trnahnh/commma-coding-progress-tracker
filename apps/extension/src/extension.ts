@@ -7,6 +7,7 @@ import { StatusBar } from './statusBar.js'
 import { getPrivacyMode } from './privacy.js'
 
 const QUEUE_KEY = 'commma.queue'
+const SIGN_IN_PROMPTED_KEY = 'commma.signInPrompted'
 
 export async function activate(context: vscode.ExtensionContext) {
   const auth = new Auth(context)
@@ -77,6 +78,21 @@ export async function activate(context: vscode.ExtensionContext) {
     },
   )
 
+  const maybePromptSignIn = async () => {
+    if (getPrivacyMode() === 'off') return
+    if (await auth.isSignedIn()) return
+    if (context.globalState.get<boolean>(SIGN_IN_PROMPTED_KEY)) return
+    await context.globalState.update(SIGN_IN_PROMPTED_KEY, true)
+    const choice = await vscode.window.showInformationMessage(
+      'commma tracks your coding sessions as a sport. Sign in with GitHub to start.',
+      'Sign in',
+      'Not now',
+    )
+    if (choice === 'Sign in') {
+      await vscode.commands.executeCommand('commma.signIn')
+    }
+  }
+
   const configSub = vscode.workspace.onDidChangeConfiguration((e) => {
     if (e.affectsConfiguration('commma')) void refreshState()
   })
@@ -93,6 +109,7 @@ export async function activate(context: vscode.ExtensionContext) {
   )
 
   await refreshState()
+  void maybePromptSignIn()
 }
 
 export function deactivate() {}
