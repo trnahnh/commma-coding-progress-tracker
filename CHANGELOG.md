@@ -11,6 +11,11 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Web** — The Pricing page now marks the signed-in user's current plan. The
+  matching tier shows a "✓ Your plan" badge and a highlighted border, and its
+  call-to-action becomes "Manage billing" (opening the Stripe Billing Portal)
+  instead of an upgrade button. Driven by `MeResult.plan`; signed-out visitors
+  see the standard upgrade CTAs.
 - **Web** — Billing is wired to Stripe end-to-end. The Pricing page Pro and Team
   CTAs now open Stripe Checkout (auth-gated: a signed-out click stashes the
   chosen plan/interval and resumes checkout automatically after GitHub sign-in),
