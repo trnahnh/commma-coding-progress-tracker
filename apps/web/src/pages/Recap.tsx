@@ -23,75 +23,35 @@ function formatWeekRange(start: string, end: string): string {
   return `${fmt(s)} – ${fmt(lastDay)}`
 }
 
-function StatBlock({
-  label,
-  value,
-}: {
-  label: string
-  value: string
-}) {
+function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className='flex flex-col gap-2 p-5 sm:p-6 rounded-xl border border-rule bg-paper-2/40'>
+    <div className='flex flex-col gap-3 p-5 sm:p-6 rounded-xl border border-rule bg-paper-2/40'>
       <span className='font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint'>
         {label}
       </span>
-      <span className='font-mono text-[clamp(22px,3.5vw,30px)] leading-none tnum text-accent-2'>
+      <span className='font-mono text-[clamp(22px,3.5vw,34px)] leading-none tnum text-accent-2'>
         {value}
       </span>
     </div>
   )
 }
 
-function DeltaBadge({ pct }: { pct: number | null }) {
-  if (pct === null) {
-    return (
-      <div className='flex items-center gap-3'>
-        <span className='font-mono text-[13px] text-ink-faint'>
-          No data from last week
-        </span>
-      </div>
-    )
-  }
-  const up = pct > 0
-  const flat = pct === 0
-  return (
-    <div className='flex items-center gap-3'>
-      <span
-        className={[
-          'font-mono text-[clamp(36px,7vw,56px)] leading-none tnum font-semibold',
-          up ? 'text-live' : flat ? 'text-ink-mute' : 'text-accent',
-        ].join(' ')}
-      >
-        {flat ? '—' : up ? `↑ ${pct}%` : `↓ ${Math.abs(pct)}%`}
-      </span>
-      <span className='font-mono text-[13px] text-ink-mute'>vs last week</span>
-    </div>
-  )
-}
-
 function RecapSkeleton() {
   return (
-    <div className='max-w-[680px] mx-auto'>
-      <div className='border border-rule-strong rounded-2xl overflow-hidden'>
-        <div className='px-6 sm:px-10 py-8 sm:py-10 border-b border-rule'>
-          <div className='h-3.5 w-32 bg-paper-3 rounded animate-pulse mb-6' />
-          <div className='h-9 w-full bg-paper-3 rounded animate-pulse mb-3' />
-          <div className='h-5 w-3/4 bg-paper-3 rounded animate-pulse' />
-        </div>
-        <div className='px-6 sm:px-10 py-6 border-b border-rule'>
-          <div className='h-2 w-full bg-paper-3 rounded animate-pulse' />
-        </div>
-        <div className='px-6 sm:px-10 py-8'>
-          <div className='grid grid-cols-2 sm:grid-cols-3 gap-3'>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div
-                key={i}
-                className='h-[88px] bg-paper-3 rounded-xl animate-pulse'
-              />
-            ))}
-          </div>
-        </div>
+    <div className='space-y-10 sm:space-y-12'>
+      <div>
+        <div className='h-3 w-48 bg-paper-3 rounded animate-pulse mb-6' />
+        <div className='h-12 w-3/4 bg-paper-3 rounded animate-pulse mb-4' />
+        <div className='h-5 w-1/2 bg-paper-3 rounded animate-pulse mb-2' />
+        <div className='h-5 w-2/5 bg-paper-3 rounded animate-pulse' />
       </div>
+      <div className='h-[3px] w-full bg-paper-3 rounded animate-pulse' />
+      <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4'>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className='h-[100px] bg-paper-3 rounded-xl animate-pulse' />
+        ))}
+      </div>
+      <div className='h-[130px] bg-paper-3 rounded-xl animate-pulse' />
     </div>
   )
 }
@@ -134,10 +94,7 @@ export default function Recap() {
   if (error) {
     return (
       <Shell>
-        <StatusPanel
-          title='Something went wrong'
-          body={error}
-        />
+        <StatusPanel title='Something went wrong' body={error} />
       </Shell>
     )
   }
@@ -147,6 +104,10 @@ export default function Recap() {
   const progress = weekProgress(recap.week_start, recap.week_end)
   const dayNum = Math.min(7, Math.max(1, Math.ceil(progress * 7)))
   const weekLabel = formatWeekRange(recap.week_start, recap.week_end)
+  const pct = recap.week_over_week_pct
+  const up = pct !== null && pct > 0
+  const flat = pct === 0
+
   const stats: { label: string; value: string }[] = [
     { label: 'Sessions', value: String(recap.session_count) },
     { label: 'Coding time', value: formatDuration(recap.total_duration_s) },
@@ -159,82 +120,95 @@ export default function Recap() {
 
   return (
     <Shell>
-      <div className='max-w-[680px] mx-auto'>
-        <div className='border border-rule-strong rounded-2xl overflow-hidden bg-linear-to-b from-paper-2 to-paper'>
-          <div className='px-6 sm:px-10 py-8 sm:py-10 border-b border-rule'>
-            <div className='flex flex-wrap items-center gap-x-3 gap-y-1 mb-6'>
-              <span className='font-mono text-[11px] uppercase tracking-[0.14em] text-accent'>
-                Weekly recap
-              </span>
-              <span className='text-rule-strong font-mono text-[11px]'>·</span>
-              <span className='font-mono text-[11px] text-ink-faint'>
-                {weekLabel}
-              </span>
-            </div>
+      <div className='mb-10 sm:mb-14'>
+        <div className='flex flex-wrap items-center gap-x-3 gap-y-1.5 mb-6'>
+          <span className='font-mono text-[11px] uppercase tracking-[0.14em] text-accent'>
+            Weekly recap
+          </span>
+          <span className='font-mono text-[11px] text-rule-strong'>·</span>
+          <span className='font-mono text-[11px] text-ink-faint'>{weekLabel}</span>
+          <span className='ml-auto font-mono text-[10px] uppercase tracking-[0.12em] text-ink-faint border border-rule rounded-full px-3 py-1'>
+            {user?.plan === 'team' ? 'Team' : 'Pro'}
+          </span>
+        </div>
 
-            <h1 className='font-serif text-[clamp(26px,5vw,40px)] leading-[1.15] tracking-[-0.02em] text-ink m-0 mb-4'>
-              {recap.headline}
-            </h1>
-            <p className='font-sans text-[15px] text-ink-soft leading-[1.6] m-0'>
-              {recap.note}
-            </p>
-          </div>
+        <h1 className='font-serif text-[clamp(30px,6vw,64px)] leading-[1.1] tracking-[-0.025em] text-ink m-0 mb-5 max-w-[900px]'>
+          {recap.headline}
+        </h1>
+        <p className='font-sans text-[15px] sm:text-[17px] text-ink-soft leading-[1.65] m-0 max-w-[600px]'>
+          {recap.note}
+        </p>
+      </div>
 
-          <div className='px-6 sm:px-10 py-5 border-b border-rule'>
-            <div className='flex items-center justify-between mb-2.5'>
-              <span className='font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint'>
-                Week progress
-              </span>
-              <span className='font-mono text-[11px] text-ink-mute tnum'>
-                Day {dayNum} / 7
-              </span>
-            </div>
-            <div className='h-[3px] rounded-full bg-paper-3 overflow-hidden'>
-              <div
-                className='h-full rounded-full bg-accent transition-all duration-700'
-                style={{ width: `${Math.round(progress * 100)}%` }}
-              />
-            </div>
-          </div>
+      <div className='mb-10 sm:mb-14'>
+        <div className='flex items-center justify-between mb-3'>
+          <span className='font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint'>
+            Week progress
+          </span>
+          <span className='font-mono text-[11px] text-ink-mute tnum'>
+            Day {dayNum} / 7
+          </span>
+        </div>
+        <div className='h-[3px] rounded-full bg-paper-3 overflow-hidden'>
+          <div
+            className='h-full rounded-full bg-accent transition-all duration-700'
+            style={{ width: `${Math.round(progress * 100)}%` }}
+          />
+        </div>
+      </div>
 
-          <div className='px-6 sm:px-10 py-8 border-b border-rule'>
-            <div className='grid grid-cols-2 sm:grid-cols-3 gap-3'>
-              {stats.map(({ label, value }) => (
-                <StatBlock key={label} label={label} value={value} />
-              ))}
-            </div>
-          </div>
+      <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-10 sm:mb-14'>
+        {stats.map(({ label, value }) => (
+          <StatCard key={label} label={label} value={value} />
+        ))}
+      </div>
 
-          <div className='px-6 sm:px-10 py-7 border-b border-rule flex items-center gap-3'>
-            <span className='font-mono text-[11px] uppercase tracking-[0.14em] text-ink-faint w-[90px] shrink-0'>
-              Vs last week
+      <div className='border border-rule-strong rounded-xl bg-paper-2/40 p-6 sm:p-8 lg:p-10 flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-10 justify-between'>
+        <div className='min-w-0'>
+          <span className='font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint block mb-3'>
+            Vs last week
+          </span>
+          {pct === null ? (
+            <span className='font-mono text-[15px] text-ink-faint'>
+              No data from last week
             </span>
-            <DeltaBadge pct={recap.week_over_week_pct} />
-          </div>
-
-          <div className='px-6 sm:px-10 py-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
-            {recap.best_session_id ? (
-              <Link
-                to={`/sessions/${recap.best_session_id}`}
-                className='group inline-flex items-center gap-2.5 h-[44px] px-6 rounded-full font-mono text-[13px] uppercase tracking-wider font-medium bg-accent text-paper hover:bg-ink transition-colors whitespace-nowrap'
+          ) : (
+            <div className='flex items-baseline gap-3 flex-wrap'>
+              <span
+                className={[
+                  'font-mono leading-none tnum font-semibold',
+                  'text-[clamp(44px,8vw,80px)]',
+                  up ? 'text-live' : flat ? 'text-ink-mute' : 'text-accent',
+                ].join(' ')}
               >
-                View best session
-                <span className='inline-block transition-transform group-hover:translate-x-1'>
-                  →
-                </span>
-              </Link>
-            ) : (
-              <span className='font-mono text-[13px] text-ink-faint'>
-                No sessions logged this week yet.
+                {flat ? '—' : up ? `↑ ${pct}%` : `↓ ${Math.abs(pct)}%`}
               </span>
-            )}
-
-            <div className='flex items-center gap-2 font-mono text-[11px] text-ink-faint'>
-              <LiveDot color='live' />
-              <span>
-                {user?.plan === 'team' ? 'Team' : 'Pro'} · updated live
+              <span className='font-mono text-[13px] text-ink-mute'>
+                coding time vs last week
               </span>
             </div>
+          )}
+        </div>
+
+        <div className='flex flex-col items-start sm:items-end gap-3 shrink-0'>
+          {recap.best_session_id ? (
+            <Link
+              to={`/sessions/${recap.best_session_id}`}
+              className='group inline-flex items-center gap-2.5 h-[44px] px-6 rounded-full font-mono text-[13px] uppercase tracking-wider font-medium bg-accent text-paper hover:bg-ink transition-colors whitespace-nowrap'
+            >
+              View best session
+              <span className='inline-block transition-transform group-hover:translate-x-1'>
+                →
+              </span>
+            </Link>
+          ) : (
+            <span className='font-mono text-[13px] text-ink-faint'>
+              No sessions logged this week yet.
+            </span>
+          )}
+          <div className='flex items-center gap-2 font-mono text-[11px] text-ink-faint'>
+            <LiveDot color='live' />
+            <span>Updated live</span>
           </div>
         </div>
       </div>
