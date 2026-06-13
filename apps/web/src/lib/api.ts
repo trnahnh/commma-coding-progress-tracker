@@ -553,3 +553,24 @@ export function getTeamHeatmap(
     },
   )
 }
+
+export interface RecapData {
+  week_start: string
+  week_end: string
+  session_count: number
+  total_duration_s: number
+  best_duration_s: number
+  best_session_id: string | null
+  top_lang: string | null
+  current_streak_days: number
+  prior_week_duration_s: number
+  week_over_week_pct: number | null
+  headline: string
+  note: string
+}
+
+export function getRecap(token: string): Promise<RecapData> {
+  return getJson<RecapData>('/v1/recap', {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+}

@@ -17,6 +17,7 @@ import { activityRoutes } from './routes/activity.js'
 import { billingRoutes } from './routes/billing.js'
 import { teamRoutes } from './routes/teams.js'
 import { pushRoutes } from './routes/push.js'
+import { recapRoutes } from './routes/recap.js'
 import type { AppEnv } from './types.js'
 
 export function createApp() {
@@ -58,6 +59,7 @@ export function createApp() {
   app.route('/v1/billing', billingRoutes)
   app.route('/v1/teams', teamRoutes)
   app.route('/v1/push', pushRoutes)
+  app.route('/v1/recap', recapRoutes)
 
   app.notFound((c) => apiError(c, 'NOT_FOUND', 'Resource not found'))
   app.onError((err, c) => {

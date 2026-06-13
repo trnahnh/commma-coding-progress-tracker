@@ -31,6 +31,14 @@ export function priorWeekOf(window: RecapWindow): RecapWindow {
   }
 }
 
+export function currentWeek(now: Date): RecapWindow {
+  const today = startOfUTCDay(now)
+  const offsetToMonday = (today.getUTCDay() + 6) % 7
+  const start = addDays(today, -offsetToMonday)
+  const end = addDays(start, 7)
+  return { start, end, weekStart: start.toISOString().slice(0, 10) }
+}
+
 export function isRecapSendTime(now: Date, sendHourUTC: number): boolean {
   if (now.getUTCDay() === 1) return now.getUTCHours() >= sendHourUTC
   return true
