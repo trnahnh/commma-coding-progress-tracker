@@ -217,6 +217,23 @@ export const pushSubscriptions = pgTable(
   (t) => [index('push_subscriptions_user').on(t.userId)],
 )
 
+export const recapEmails = pgTable(
+  'recap_emails',
+  {
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id),
+    weekStart: date('week_start').notNull(),
+    status: text('status').notNull(),
+    attempts: integer('attempts').notNull().default(0),
+    lastError: text('last_error'),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.weekStart] })],
+)
+
 export const teamInvites = pgTable(
   'team_invites',
   {
