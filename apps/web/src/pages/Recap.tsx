@@ -127,7 +127,7 @@ export default function Recap() {
           </span>
           <span className='font-mono text-[13px] text-ink-mute'>·</span>
           <span className='font-mono text-[13px] text-ink-soft'>{weekLabel}</span>
-          <span className='ml-auto font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute border border-rule-strong rounded-full px-3 py-1'>
+          <span className='ml-auto font-mono text-[11px] uppercase tracking-[0.1em] text-ink-soft border border-ink-mute rounded-full px-3 py-1'>
             {user?.plan === 'team' ? 'Team' : 'Pro'}
           </span>
         </div>
