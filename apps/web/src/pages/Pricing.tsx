@@ -40,6 +40,14 @@ const FEATURES_TEAM = [
   'Admin controls',
 ]
 
+function CurrentPlanBadge() {
+  return (
+    <span className='shrink-0 font-mono text-[14px] tracking-[0.16em] uppercase text-accent-2 border border-accent-2-line bg-accent-2-soft px-2.5 py-1 rounded-full mt-0.5'>
+      ✓ Your plan
+    </span>
+  )
+}
+
 function FeatureList({ features }: { features: string[] }) {
   return (
     <div className='flex-1 mb-8'>
@@ -63,8 +71,10 @@ function FeatureList({ features }: { features: string[] }) {
 export default function Pricing() {
   const [annual, setAnnual] = useState(false)
   const [pending, setPending] = useState<PaidPlan | null>(null)
+  const [portalPending, setPortalPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const { token, isLoading } = useAuth()
+  const { token, isLoading, user } = useAuth()
+  const currentPlan = token && user ? (user.plan ?? 'free') : null
   const navigate = useNavigate()
   const [params, setParams] = useSearchParams()
   const resumed = useRef(false)
@@ -106,6 +116,23 @@ export default function Pricing() {
     },
     [pending, token, navigate],
   )
+
+  const openPortal = useCallback(async () => {
+    if (!token || portalPending) return
+    setPortalPending(true)
+    setError(null)
+    try {
+      const { url } = await openBillingPortal(token)
+      window.location.href = url
+    } catch (err) {
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : 'Could not open billing. Try again.',
+      )
+      setPortalPending(false)
+    }
+  }, [token, portalPending])
 
   useEffect(() => {
     if (resumed.current || isLoading || !token) return
@@ -163,11 +190,18 @@ export default function Pricing() {
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-3 border border-rule-strong rounded overflow-hidden'>
-          <div className='relative flex flex-col px-6 sm:px-8 pt-8 sm:pt-10 pb-8 sm:pb-10 border-b md:border-b-0 md:border-r border-rule bg-paper'>
+          <div
+            className={`relative flex flex-col px-6 sm:px-8 pt-8 sm:pt-10 pb-8 sm:pb-10 border-b md:border-b-0 md:border-r border-rule bg-paper ${
+              currentPlan === 'free' ? 'ring-1 ring-inset ring-accent-2-line' : ''
+            }`}
+          >
             <div className='flex flex-col md:min-h-[220px]'>
-              <span className='font-serif text-[clamp(26px,2.8vw,36px)] leading-none tracking-[-0.02em] text-ink mb-6'>
-                Free
-              </span>
+              <div className='flex items-start justify-between gap-3 mb-6'>
+                <span className='font-serif text-[clamp(26px,2.8vw,36px)] leading-none tracking-[-0.02em] text-ink'>
+                  Free
+                </span>
+                {currentPlan === 'free' && <CurrentPlanBadge />}
+              </div>
               <div className='mb-7'>
                 <div className='flex items-baseline gap-1.5'>
                   <span className='font-serif text-[clamp(44px,5vw,64px)] leading-none tracking-[-0.04em] text-ink tnum'>
@@ -197,16 +231,24 @@ export default function Pricing() {
             </a>
           </div>
 
-          <div className='relative flex flex-col px-6 sm:px-8 pt-8 sm:pt-10 pb-8 sm:pb-10 border-b md:border-b-0 md:border-r border-rule bg-paper-2'>
+          <div
+            className={`relative flex flex-col px-6 sm:px-8 pt-8 sm:pt-10 pb-8 sm:pb-10 border-b md:border-b-0 md:border-r border-rule bg-paper-2 ${
+              currentPlan === 'pro' ? 'ring-1 ring-inset ring-accent-2-line' : ''
+            }`}
+          >
             <span className='absolute inset-x-0 top-0 h-0.5 bg-accent' />
             <div className='flex flex-col md:min-h-[220px]'>
               <div className='flex items-start justify-between gap-3 mb-6'>
                 <span className='font-serif text-[clamp(26px,2.8vw,36px)] leading-none tracking-[-0.02em] text-accent'>
                   Pro
                 </span>
-                <span className='shrink-0 font-mono text-[14px] tracking-[0.16em] uppercase text-accent-2 border border-accent-2-line bg-accent-2-soft px-2.5 py-1 rounded-full mt-0.5'>
-                  Most popular
-                </span>
+                {currentPlan === 'pro' ? (
+                  <CurrentPlanBadge />
+                ) : (
+                  <span className='shrink-0 font-mono text-[14px] tracking-[0.16em] uppercase text-accent-2 border border-accent-2-line bg-accent-2-soft px-2.5 py-1 rounded-full mt-0.5'>
+                    Most popular
+                  </span>
+                )}
               </div>
               <div className='mb-7'>
                 <div className='flex items-baseline gap-1.5'>
@@ -228,28 +270,46 @@ export default function Pricing() {
               </div>
             </div>
             <FeatureList features={FEATURES_PRO} />
-            <button
-              type='button'
-              onClick={() =>
-                void startCheckout('pro', annual ? 'yearly' : 'monthly')
-              }
-              disabled={pending !== null}
-              className='group inline-flex items-center justify-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors bg-accent text-paper border border-accent hover:bg-ink hover:border-ink disabled:opacity-50 disabled:cursor-not-allowed'
-            >
-              {pending === 'pro' ? 'Redirecting…' : 'Upgrade to Pro'}
-              {pending !== 'pro' && (
-                <span className='inline-block transition-transform group-hover:translate-x-1'>
-                  →
-                </span>
-              )}
-            </button>
+            {currentPlan === 'pro' ? (
+              <button
+                type='button'
+                onClick={() => void openPortal()}
+                disabled={portalPending}
+                className='inline-flex items-center justify-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint disabled:opacity-50 disabled:cursor-not-allowed'
+              >
+                {portalPending ? 'Redirecting…' : 'Manage billing'}
+              </button>
+            ) : (
+              <button
+                type='button'
+                onClick={() =>
+                  void startCheckout('pro', annual ? 'yearly' : 'monthly')
+                }
+                disabled={pending !== null}
+                className='group inline-flex items-center justify-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors bg-accent text-paper border border-accent hover:bg-ink hover:border-ink disabled:opacity-50 disabled:cursor-not-allowed'
+              >
+                {pending === 'pro' ? 'Redirecting…' : 'Upgrade to Pro'}
+                {pending !== 'pro' && (
+                  <span className='inline-block transition-transform group-hover:translate-x-1'>
+                    →
+                  </span>
+                )}
+              </button>
+            )}
           </div>
 
-          <div className='relative flex flex-col px-6 sm:px-8 pt-8 sm:pt-10 pb-8 sm:pb-10 bg-paper'>
+          <div
+            className={`relative flex flex-col px-6 sm:px-8 pt-8 sm:pt-10 pb-8 sm:pb-10 bg-paper ${
+              currentPlan === 'team' ? 'ring-1 ring-inset ring-accent-2-line' : ''
+            }`}
+          >
             <div className='flex flex-col md:min-h-[220px]'>
-              <span className='font-serif text-[clamp(26px,2.8vw,36px)] leading-none tracking-[-0.02em] text-ink mb-6'>
-                Team
-              </span>
+              <div className='flex items-start justify-between gap-3 mb-6'>
+                <span className='font-serif text-[clamp(26px,2.8vw,36px)] leading-none tracking-[-0.02em] text-ink'>
+                  Team
+                </span>
+                {currentPlan === 'team' && <CurrentPlanBadge />}
+              </div>
               <div className='mb-7'>
                 <div className='flex items-baseline gap-1.5'>
                   <span className='font-serif text-[clamp(44px,5vw,64px)] leading-none tracking-[-0.04em] text-ink tnum'>
@@ -270,21 +330,32 @@ export default function Pricing() {
               </div>
             </div>
             <FeatureList features={FEATURES_TEAM} />
-            <button
-              type='button'
-              onClick={() =>
-                void startCheckout('team', annual ? 'yearly' : 'monthly')
-              }
-              disabled={pending !== null}
-              className='group inline-flex items-center justify-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint disabled:opacity-50 disabled:cursor-not-allowed'
-            >
-              {pending === 'team' ? 'Redirecting…' : 'Upgrade to Team'}
-              {pending !== 'team' && (
-                <span className='inline-block transition-transform group-hover:translate-x-1'>
-                  →
-                </span>
-              )}
-            </button>
+            {currentPlan === 'team' ? (
+              <button
+                type='button'
+                onClick={() => void openPortal()}
+                disabled={portalPending}
+                className='inline-flex items-center justify-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint disabled:opacity-50 disabled:cursor-not-allowed'
+              >
+                {portalPending ? 'Redirecting…' : 'Manage billing'}
+              </button>
+            ) : (
+              <button
+                type='button'
+                onClick={() =>
+                  void startCheckout('team', annual ? 'yearly' : 'monthly')
+                }
+                disabled={pending !== null}
+                className='group inline-flex items-center justify-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint disabled:opacity-50 disabled:cursor-not-allowed'
+              >
+                {pending === 'team' ? 'Redirecting…' : 'Upgrade to Team'}
+                {pending !== 'team' && (
+                  <span className='inline-block transition-transform group-hover:translate-x-1'>
+                    →
+                  </span>
+                )}
+              </button>
+            )}
           </div>
         </div>
 
