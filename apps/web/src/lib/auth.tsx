@@ -123,7 +123,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           refreshTokenRef.current = result.refresh_token
           saveRefreshToken(result.refresh_token)
         }
-        setState((prev) => ({ ...prev, token: result.access_token }))
+        const freshUser = await getMe(result.access_token).catch(() => null)
+        setState((prev) => ({
+          ...prev,
+          token: result.access_token,
+          ...(freshUser ? { user: freshUser } : {}),
+        }))
       } catch {
         refreshTokenRef.current = null
         clearRefreshToken()
@@ -137,7 +142,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (accessToken: string, refreshToken: string, user: AuthUser) => {
       refreshTokenRef.current = refreshToken
       saveRefreshToken(refreshToken)
-      setState({ user: user as MeResult, token: accessToken, isLoading: false })
+      setState({ user: user as MeResult, token: accessToken, isLoading: true })
+      void getMe(accessToken)
+        .then((fullUser) => {
+          setState({ user: fullUser, token: accessToken, isLoading: false })
+        })
+        .catch(() => {
+          setState({ user: user as MeResult, token: accessToken, isLoading: false })
+        })
     },
     [],
   )
