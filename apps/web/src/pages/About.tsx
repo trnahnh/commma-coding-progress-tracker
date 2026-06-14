@@ -205,6 +205,50 @@ const STACK_GROUPS = [
   },
 ]
 
+function StackCard({
+  no,
+  name,
+  role,
+  why,
+  visible,
+  delay,
+}: {
+  no: string
+  name: string
+  role: string
+  why: string
+  visible: boolean
+  delay: number
+}) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div
+      className={`border rounded-lg p-4 bg-paper-2 transition-colors cursor-pointer overflow-hidden focus-visible:outline-none ${open ? 'border-accent-line bg-accent-soft' : 'border-rule'} ${visible ? 'animate-fade-up' : 'opacity-0'}`}
+      tabIndex={0}
+      style={{ animationDelay: `${delay}ms` }}
+      onFocus={() => setOpen(true)}
+      onBlur={() => setOpen(false)}
+      onPointerDown={(e) => {
+        if (open) {
+          e.preventDefault()
+          e.currentTarget.blur()
+        }
+      }}
+    >
+      <div className='font-mono text-[12px] text-ink-mute mb-2' aria-hidden='true'>
+        {no}
+      </div>
+      <div className='font-mono text-[14px] sm:text-[15px] text-ink mb-1'>{name}</div>
+      <div className='font-mono text-[12px] text-ink-mute'>{role}</div>
+      <p
+        className={`font-mono text-[13px] text-ink-soft leading-snug m-0 overflow-hidden transition-all duration-300 ease-out ${open ? 'max-h-32 mt-2' : 'max-h-0 mt-0'}`}
+      >
+        {why}
+      </p>
+    </div>
+  )
+}
+
 const BELIEFS = [
   'Code is output. Sessions are training.',
   'Every keystroke tells a story.',
@@ -416,36 +460,15 @@ export default function About() {
 
               <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3'>
                 {group.items.map(({ no, name, role, why }, ci) => (
-                  <div
+                  <StackCard
                     key={no}
-                    className={`group border border-rule rounded-lg p-4 bg-paper-2 focus-within:border-accent-line focus-within:bg-accent-soft transition-colors cursor-pointer overflow-hidden focus-visible:outline-none ${stackVisible ? 'animate-fade-up' : 'opacity-0'}`}
-                    tabIndex={0}
-                    style={{
-                      animationDelay: `${groupDelay + ci * 40 + 120}ms`,
-                    }}
-                    onPointerDown={(e) => {
-                      if (document.activeElement === e.currentTarget) {
-                        e.preventDefault()
-                        e.currentTarget.blur()
-                      }
-                    }}
-                  >
-                    <div
-                      className='font-mono text-[12px] text-ink-mute mb-2'
-                      aria-hidden='true'
-                    >
-                      {no}
-                    </div>
-                    <div className='font-mono text-[14px] sm:text-[15px] text-ink mb-1 group-hover:text-accent transition-colors'>
-                      {name}
-                    </div>
-                    <div className='font-mono text-[12px] text-ink-mute'>
-                      {role}
-                    </div>
-                    <p className='font-mono text-[13px] text-ink-soft leading-snug m-0 mt-0 max-h-0 overflow-hidden group-focus-within:max-h-32 group-focus-within:mt-2 transition-all duration-300 ease-out'>
-                      {why}
-                    </p>
-                  </div>
+                    no={no}
+                    name={name}
+                    role={role}
+                    why={why}
+                    visible={stackVisible}
+                    delay={groupDelay + ci * 40 + 120}
+                  />
                 ))}
               </div>
             </div>
