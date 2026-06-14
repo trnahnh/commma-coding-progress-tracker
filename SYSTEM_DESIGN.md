@@ -280,8 +280,10 @@ CREATE INDEX follows_followee ON follows(followee_id);
 ### Session Aggregation (in-process interval — ADR-010, supersedes ADR-008/BullMQ)
 
 - **Trigger:** an in-process `setInterval` (5 min) in the API process; an
-  in-process guard prevents overlapping runs, and `RUN_AGGREGATION` gates it so
-  only one instance runs the loop if ever scaled out.
+  in-process guard prevents overlapping runs, `RUN_AGGREGATION` gates it, and
+  each tick first takes a Redis leader lock (`SET leader:aggregation … NX PX`,
+  TTL = the interval) so that even with the flag on every instance, exactly one
+  runs per interval (see Scheduler safety below).
 - **Logic:** `SELECT DISTINCT user_id` → per user fetch events by `ts` →
   boundary detection → finalize only _closed_ sessions → build
   sessions/langs/files/heatmap, update streaks, delete finalized events (one
@@ -357,6 +359,27 @@ CREATE INDEX follows_followee ON follows(followee_id);
   `attempts`; the next hourly tick retries until success or three attempts, so a
   transient outage self-heals within the send window without re-emailing
   delivered recipients.
+
+### Scheduler safety (leader lock + graceful shutdown)
+
+- **One run per interval across the fleet.** Every loop (aggregation, streak,
+  token cleanup, push, recap) takes a per-loop Redis leader lock at the top of
+  each tick: `SET leader:<name> <pid> NX PX <interval>`. Only the holder runs;
+  the TTL equals the interval, so the lock self-expires before the next tick. A
+  process-local re-entrancy flag still prevents a slow tick from overlapping the
+  next on the same instance. Net effect: `RUN_AGGREGATION` may safely stay `true`
+  on every replica — the lock, not the flag, is what guarantees a single run.
+  If Redis is unreachable when acquiring the lock, the tick is skipped and
+  retried next interval (the jobs are idempotent, so a skipped tick is harmless).
+- **Cold leaderboard rebuild is also locked.** `topLeaderboard` rebuilds a
+  flushed sorted set from `sessions` on read; a `lock:rebuild:<key>` guard
+  (`SET … NX`) lets a single request rebuild while concurrent callers briefly
+  wait for the set to appear, avoiding a thundering-herd of identical scans.
+- **Graceful shutdown.** `SIGTERM`/`SIGINT` stop every scheduler, close the HTTP
+  server (draining in-flight requests), wait up to 30 s for any running
+  aggregation transaction to finish (`whenAggregationIdle`), then close the
+  Postgres pool and Redis before exit. A rolling deploy therefore cannot kill a
+  half-written session or drop an open request mid-flight.
 
 ---
 

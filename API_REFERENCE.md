@@ -702,6 +702,10 @@ last one recorded for that customer (a `stripe_event_ts` watermark), so a
 redelivered or out-of-order stale event is ignored. Responds
 `{ "received": true }`.
 
+**Rate limit:** 600/hr per IP — Stripe is authenticated by signature, so the
+bucket only bounds abuse of the unauthenticated path; it fails open if Redis is
+down so genuine Stripe retries are never dropped.
+
 ---
 
 ## Team Endpoints
@@ -1087,8 +1091,8 @@ All errors follow this shape:
 | `CONFLICT`            | 409         | State conflict (e.g. taken slug, team full)  |
 | `VALIDATION_ERROR`    | 400         | Request body/params failed Zod validation    |
 | `PAYLOAD_TOO_LARGE`   | 413         | Request body exceeded the 1 MB `/v1/*` limit |
-| `RATE_LIMITED`        | 429         | Per-user rate limit exceeded                 |
-| `SERVICE_UNAVAILABLE` | 503         | Dependency not configured (e.g. billing off) |
+| `RATE_LIMITED`        | 429         | Rate limit exceeded for the bucket           |
+| `SERVICE_UNAVAILABLE` | 503         | Dependency off, or limiter fail-closed       |
 | `INTERNAL_ERROR`      | 500         | Unexpected server error                      |
 
 ---
@@ -1104,6 +1108,8 @@ All errors follow this shape:
 | `POST /v1/billing/checkout`, `/portal` | 30 requests    | 1 hour (per user) |
 | All team reads and writes              | 300 requests   | 1 hour (per user) |
 | `POST`/`DELETE /v1/push/subscribe`     | 20 requests    | 1 hour (per user) |
+| Public reads (leaderboard, profiles…)  | 300 requests   | 1 hour (per IP)   |
+| `POST /v1/billing/webhook`             | 600 requests   | 1 hour (per IP)   |
 | Auth endpoints                         | 20 requests    | 1 hour (per IP)   |
 
 **Rate limit headers:**
@@ -1119,6 +1125,12 @@ client IP via `TRUST_PROXY_HOPS` (see `apps/api/.env.example`): `0` trusts the
 socket address, `N` trusts the Nth hop from the right of `x-forwarded-for`. Set
 it to the number of proxies in front (1 = ALB, 2 = CloudFront→ALB) so a forged
 `x-forwarded-for` cannot spoof or exhaust another visitor's bucket.
+
+**Limiter availability:** when Redis backing the limiter is unreachable, the
+write paths that must stay protected — `POST /v1/ingest` and all auth
+endpoints — **fail closed** with `503 SERVICE_UNAVAILABLE`; read paths and the
+Stripe webhook **fail open** so a limiter blip does not take down browsing or
+drop a legitimate Stripe retry.
 
 ---
 

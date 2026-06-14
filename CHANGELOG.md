@@ -167,6 +167,23 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
+- **API, DB** — Pre-deploy reliability hardening from the backend/infra audit.
+  The server now shuts down gracefully on `SIGTERM`/`SIGINT` (stop schedulers,
+  drain in-flight requests, let a running aggregation transaction finish, then
+  close the Postgres pool and Redis), so a rolling deploy can no longer corrupt
+  a half-written session. All five background loops (aggregation, streak, token
+  cleanup, push, recap) now take a per-loop Redis leader lock so exactly one
+  instance runs each interval even when `RUN_AGGREGATION` is enabled on every
+  replica. The rate limiter fails **closed** (`503`) for `POST /v1/ingest` and
+  auth endpoints when Redis is unreachable, and stays open for read paths and
+  the Stripe webhook. The cold leaderboard rebuild is now guarded by a Redis
+  lock to prevent a thundering-herd of identical `sessions` scans. A new index
+  migration adds a global `sessions (started_at desc)` index for the public
+  homepage queries and replaces the unusable partial `events` index with a plain
+  `events (user_id, ts)` the aggregator can use. The Postgres pool size is now
+  explicit (`DB_POOL_MAX`, default 10). All write request bodies reject unknown
+  fields (`.strict()`), and `POST /v1/billing/webhook` and
+  `GET /v1/push/vapid-public-key` gained IP rate-limit buckets.
 - **API** — Billing checkout is hardened against accidental double-subscribing.
   `POST /v1/billing/checkout` returns `409 CONFLICT` when the caller is already
   on a paid plan or has a subscription on file (plan changes belong in the

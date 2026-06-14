@@ -222,11 +222,13 @@ const ENDPOINTS = [
 const RATE_LIMITS = [
   { scope: 'POST /v1/ingest', limit: '1,000 / hr / user' },
   { scope: 'GET reads (/me, /sessions, /recap, …)', limit: '300 / hr / user' },
+  { scope: 'Public reads (leaderboard, profiles, activity)', limit: '300 / hr / IP' },
   { scope: 'Auth endpoints', limit: '100 / hr / IP (dev) · 20 / hr / IP (prod)' },
   { scope: 'POST /v1/billing/checkout · /portal', limit: '30 / hr / user' },
+  { scope: 'POST /v1/billing/webhook', limit: '600 / hr / IP' },
   { scope: 'GET /v1/sessions/:id/heatmap-card', limit: '120 / hr / IP' },
   { scope: 'Team endpoints', limit: '300 / hr / user' },
-  { scope: 'Push endpoints', limit: '20 / hr / user' },
+  { scope: 'Push subscribe/unsubscribe', limit: '20 / hr / user' },
 ]
 
 const METHOD_COLOR: Record<string, string> = {
@@ -336,7 +338,9 @@ export default function Api() {
             <span className='font-mono text-accent'>X-RateLimit-Remaining</span>
             , and{' '}
             <span className='font-mono text-accent'>X-RateLimit-Reset</span>{' '}
-            headers.
+            headers. If the limiter itself is unavailable, ingest and auth fail
+            closed with <span className='text-ink'>503</span>; read paths stay
+            open.
           </p>
         </div>
 
