@@ -52,7 +52,7 @@ function toSessionView(s: FeaturedSession): SessionView {
       name: l.lang,
       time: formatDuration(l.duration_s),
       pct: Math.round(l.pct),
-      swatch: langStyle(l.lang)?.color ?? '#7a746a',
+      swatch: langStyle(l.lang)?.color ?? 'var(--color-ink-mute)',
     })),
     files: s.files.map((f) => {
       const parts = f.path.split('/')
@@ -75,10 +75,10 @@ const MOCK_SESSION: SessionView = {
   pace: 184,
   peakCpm: 241,
   langs: [
-    { name: 'TypeScript', time: '1h 12m', pct: 52, swatch: '#FF4D1A' },
-    { name: 'Python', time: '31m', pct: 22, swatch: '#9CF76D' },
-    { name: 'SQL', time: '18m', pct: 13, swatch: '#EFEAD8' },
-    { name: 'Markdown', time: '17m', pct: 13, swatch: '#7A746A' },
+    { name: 'TypeScript', time: '1h 12m', pct: 52, swatch: 'var(--color-accent)' },
+    { name: 'Python', time: '31m', pct: 22, swatch: 'var(--color-live)' },
+    { name: 'SQL', time: '18m', pct: 13, swatch: 'var(--color-ink)' },
+    { name: 'Markdown', time: '17m', pct: 13, swatch: 'var(--color-ink-mute)' },
   ],
   files: [
     { name: 'sessions.ts', path: 'apps/api/src/', changes: 423 },
@@ -176,7 +176,7 @@ function Hero() {
             <div className='flex gap-3 items-center flex-wrap opacity-0 animate-rise-700 delay-640'>
               <a
                 href='https://marketplace.visualstudio.com'
-                className='group inline-flex items-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium
+                className='group inline-flex items-center gap-2.5 h-[44px] px-5 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium
                   bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors'
               >
                 Install the extension
@@ -186,7 +186,7 @@ function Hero() {
               </a>
               <Link
                 to='/leaderboard'
-                className='inline-flex items-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[15px] uppercase tracking-wider
+                className='inline-flex items-center gap-2.5 h-[44px] px-5 rounded-full font-mono text-[15px] uppercase tracking-wider
                   text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint transition-colors'
               >
                 See a sample profile
@@ -402,8 +402,8 @@ function ActivityCard({
         >
           <defs>
             <linearGradient id='cfill' x1='0' x2='0' y1='0' y2='1'>
-              <stop offset='0%' stopColor='#FF4D1A' stopOpacity='0.28' />
-              <stop offset='100%' stopColor='#FF4D1A' stopOpacity='0' />
+              <stop offset='0%' stopColor='var(--color-accent)' stopOpacity='0.28' />
+              <stop offset='100%' stopColor='var(--color-accent)' stopOpacity='0' />
             </linearGradient>
             <pattern
               id='cgrid'
@@ -414,16 +414,16 @@ function ActivityCard({
               <path
                 d='M50 0 L0 0 0 40'
                 fill='none'
-                stroke='#221f1a'
+                stroke='var(--color-rule)'
                 strokeWidth='0.5'
               />
             </pattern>
           </defs>
           <rect width={W} height={H} fill='url(#cgrid)' />
           <path d={area} fill='url(#cfill)' />
-          <path d={line} fill='none' stroke='#FF4D1A' strokeWidth='1.5' />
+          <path d={line} fill='none' stroke='var(--color-accent)' strokeWidth='1.5' />
         </svg>
-        <div className='grid grid-cols-4 sm:grid-cols-8 mt-2.5 font-mono text-[15px] text-ink-faint tracking-wider'>
+        <div className='grid grid-cols-4 sm:grid-cols-8 mt-2.5 font-mono text-[15px] text-ink-mute tracking-wider'>
           {CHART_DATE_LABELS.map((label, i) => (
             <span
               key={label + i}
@@ -665,7 +665,8 @@ function LeaderRow({
 function Leaderboard() {
   const { user } = useAuth()
   const [entries, setEntries] = useState<LeaderboardEntry[]>([])
-  const [aside, setAside] = useState('loading…')
+  const [loading, setLoading] = useState(true)
+  const [aside, setAside] = useState('')
 
   useEffect(() => {
     getLeaderboard('week')
@@ -676,7 +677,10 @@ function Leaderboard() {
         )
         setAside(`updated · ${minAgo} min ago`)
       })
-      .catch(() => void 0)
+      .catch(() => {
+        setAside('unable to load')
+      })
+      .finally(() => setLoading(false))
   }, [])
 
   return (
@@ -699,7 +703,13 @@ function Leaderboard() {
             <span className='hidden md:block'>Lang · Streak</span>
             <span className='hidden md:block' />
           </div>
-          {entries.length === 0 ? (
+          {loading ? (
+            <div className='px-4 sm:px-6 py-10 space-y-3'>
+              {[1, 2, 3].map((i) => (
+                <div key={i} className='h-[52px] rounded bg-paper-3 animate-pulse' />
+              ))}
+            </div>
+          ) : entries.length === 0 ? (
             <div className='px-4 sm:px-6 py-10 font-mono text-[15px] text-ink-mute text-center'>
               No data yet — be the first to log a session.
             </div>

@@ -245,7 +245,7 @@ function SessionRow({ session }: { session: SessionSummary }) {
             {style.label}
           </span>
         ) : (
-          <span className='font-mono text-[13px] text-ink-faint'>—</span>
+          <span className='font-mono text-[13px] text-ink-mute'>—</span>
         )}
         <span className='font-mono text-[13px] text-ink-soft tnum'>
           {formatDuration(duration_s)}
@@ -285,7 +285,7 @@ function SessionFeed({
         <span className='font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute'>
           Sessions
         </span>
-        <span className='font-mono text-[13px] text-ink-faint tnum'>
+        <span className='font-mono text-[13px] text-ink-mute tnum'>
           {sessions.length.toLocaleString()}
           {nextCursor ? '+' : ''}
         </span>
@@ -494,7 +494,7 @@ export default function Profile() {
 
   const { profile, sessions, nextCursor } = state
   const isOwnProfile = user?.handle === handle
-  const isFree = !user?.plan || user.plan === 'free'
+  const isFree = user?.plan !== 'pro' && user?.plan !== 'team'
   const showHistoryGate = isOwnProfile && isFree
   return (
     <Shell>

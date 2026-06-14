@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Shell, StatusPanel } from '../components/chrome'
 import { ApiError, getFeed, type FeedEntry, type FeedPage } from '../lib/api'
 import { useAuth } from '../lib/auth'
@@ -10,16 +10,13 @@ function FeedCard({ entry }: { entry: FeedEntry }) {
   const { session, user } = entry
   const { id, started_at, duration_s, lines_delta, top_lang } = session
   const style = top_lang ? langStyle(top_lang) : null
-  const navigate = useNavigate()
   return (
-    <div
-      role='link'
-      tabIndex={0}
-      aria-label={`Session by @${user.handle} on ${formatDate(started_at)} — ${formatDuration(duration_s)}`}
-      onClick={() => navigate(`/sessions/${id}`)}
-      onKeyDown={(e) => e.key === 'Enter' && navigate(`/sessions/${id}`)}
-      className='group cursor-pointer border-b border-rule last:border-b-0 px-5 sm:px-8 py-5 sm:py-6 hover:bg-paper-2/40 transition-colors'
-    >
+    <div className='group relative border-b border-rule last:border-b-0 px-5 sm:px-8 py-5 sm:py-6 hover:bg-paper-2/40 transition-colors'>
+      <Link
+        to={`/sessions/${id}`}
+        className='absolute inset-0'
+        aria-label={`Session by @${user.handle} on ${formatDate(started_at)} — ${formatDuration(duration_s)}`}
+      />
       <div className='flex items-center gap-3 mb-3.5'>
         {user.avatar_url ? (
           <img
@@ -35,15 +32,14 @@ function FeedCard({ entry }: { entry: FeedEntry }) {
         )}
         <Link
           to={`/@${user.handle}`}
-          onClick={(e) => e.stopPropagation()}
           className='relative z-10 font-serif text-[16px] leading-none tracking-[-0.01em] text-ink hover:text-accent transition-colors'
         >
           @{user.handle}
         </Link>
-        <span className='text-ink-faint text-[12px]'>·</span>
+        <span className='text-ink-mute text-[12px]'>·</span>
         <span className='font-mono text-[12px] text-ink-mute tnum'>
           {formatDate(started_at)}
-          <span className='mx-1.5 text-ink-faint'>·</span>
+          <span className='mx-1.5 text-ink-mute'>·</span>
           {formatClock(started_at)}
         </span>
       </div>
@@ -64,7 +60,7 @@ function FeedCard({ entry }: { entry: FeedEntry }) {
         <span className='font-mono text-[13px] text-ink-mute tnum'>
           {lines_delta.toLocaleString()}∆
         </span>
-        <span className='ml-auto font-mono text-[13px] text-ink-faint group-hover:text-ink-soft group-hover:translate-x-0.5 transition-all'>
+        <span className='ml-auto font-mono text-[13px] text-ink-mute group-hover:text-ink-soft group-hover:translate-x-0.5 transition-all'>
           →
         </span>
       </div>
@@ -101,7 +97,7 @@ function FeedList({
             type='button'
             onClick={onLoadMore}
             disabled={loadingMore}
-            className='font-mono text-[11px] uppercase tracking-wider text-ink-mute hover:text-ink disabled:opacity-40 transition-colors'
+            className='font-mono text-[12px] uppercase tracking-wider text-ink-mute hover:text-ink disabled:opacity-40 transition-colors'
           >
             {loadingMore ? 'Loading…' : 'Load more'}
           </button>
@@ -181,7 +177,7 @@ export default function Feed() {
 
   const header = (
     <div className='px-5 sm:px-8 py-5 sm:py-6 border-b border-rule'>
-      <div className='font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-mute mb-1'>
+      <div className='font-mono text-[12px] tracking-[0.16em] uppercase text-ink-mute mb-1'>
         activity
       </div>
       <h1 className='font-serif text-[clamp(28px,4vw,48px)] leading-none tracking-[-0.02em] m-0 text-ink'>

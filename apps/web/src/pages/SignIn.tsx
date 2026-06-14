@@ -51,9 +51,9 @@ export default function SignIn() {
       >
         ← back
       </Link>
-      <a href='/' className='mb-16'>
+      <Link to='/' className='mb-16'>
         <Wordmark size='text-[36px]' />
-      </a>
+      </Link>
 
       <div className='w-full max-w-[480px] text-center'>
         <h1 className='font-serif text-[clamp(48px,8vw,80px)] leading-[0.95] tracking-[-0.03em] m-0 text-ink mb-5'>
@@ -73,12 +73,12 @@ export default function SignIn() {
           Sign in with GitHub
         </button>
 
-        <p className='font-mono text-[13px] text-ink-faint m-0'>
+        <p className='font-mono text-[13px] text-ink-mute m-0'>
           No account needed — GitHub sign-in creates one automatically.
         </p>
 
         <div className='mt-14 pt-8 border-t border-rule'>
-          <p className='font-mono text-[13px] text-ink-faint m-0 leading-relaxed'>
+          <p className='font-mono text-[13px] text-ink-mute m-0 leading-relaxed'>
             <span className='text-ink-mute'>Privacy first.</span> Only key
             counts and file paths leave your machine. Never code or content.
           </p>
