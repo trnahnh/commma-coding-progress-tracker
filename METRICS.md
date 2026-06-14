@@ -60,7 +60,7 @@ ingest 202-path p95 ~38 ms (within `<50 ms`) with a hard 1,000/hr-per-user cap
 and clean `429` backpressure (zero `5xx`). It surfaced and fixed an
 empty-leaderboard-period rebuild storm — a session-less week never created its
 Redis key, so every read re-ran the cold rebuild (now negative-cached). The
-prod-sized gate (`<150 ms` p95 @ 1k concurrent on t3.micro + Neon + Upstash via
+prod-sized gate (`<150 ms` p95 @ 1k concurrent on t4g.micro + Neon + Upstash via
 k6, from a separate load box) is still open (`ROADMAP.md` Phase 3).
 
 Aggregation lag: 5-min interval + 15-min idle gap (ADR-010); event `ts` →

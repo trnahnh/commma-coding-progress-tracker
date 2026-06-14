@@ -339,7 +339,8 @@ call.
 ## ADR-009: Deployment Infrastructure — AWS Compute (EC2 + S3/CloudFront)
 
 **Status:** Accepted — 2026-05 (web target revised 2026-06: Vercel → S3 +
-CloudFront)
+CloudFront; compute revised 2026-06: t3.micro → t4g Graviton, see "Compute &
+networking" below)
 
 **Decision:** Host both compute tiers on AWS. The API runs on EC2; the web app
 is a static Vite build served from **S3 + CloudFront**. PostgreSQL stays on
@@ -347,24 +348,42 @@ Neon and Redis on Upstash (both third-party managed) — they are unaffected by
 the all-AWS hosting move and migrate to RDS/ElastiCache only at the scale points
 below.
 
-| Layer      | Provider               | Cost                            |
-| ---------- | ---------------------- | ------------------------------- |
-| API        | AWS EC2 t3.micro + PM2 | $0 free tier (12mo), then $8/mo |
-| Web        | AWS S3 + CloudFront    | ~$0 free tier, then <$1/mo MVP  |
-| Redis      | Upstash free tier      | $0                              |
-| PostgreSQL | Neon free tier         | $0                              |
-| **Total**  |                        | **~$0/mo (free tier)**          |
+| Layer       | Provider                         | Cost                    |
+| ----------- | -------------------------------- | ----------------------- |
+| API         | AWS EC2 t4g (Graviton) + PM2     | $0 trial → ~$6/mo       |
+| Public IPv4 | 1 Elastic IP (API)               | $0 12mo → ~$3.65/mo     |
+| Web         | AWS S3 + CloudFront (dual-stack) | ~$0 → <$1/mo            |
+| Redis       | Upstash free tier                | $0                      |
+| PostgreSQL  | Neon free tier                   | $0                      |
+| **Total**   |                                  | **~$0 trial → ~$10/mo** |
 
 **Rationale:** Zero users at launch — no need for load balancers or containers.
-EC2 t3.micro free tier runs PM2 + Hono/Node with plenty of headroom. The web app
-has no SSR or serverless functions — `vite build` emits a static `dist/`, so an
-S3 origin behind CloudFront gives global CDN delivery at near-zero cost and
+A single burstable EC2 box runs PM2 + Hono/Node with plenty of headroom. The web
+app has no SSR or serverless functions — `vite build` emits a static `dist/`, so
+an S3 origin behind CloudFront gives global CDN delivery at near-zero cost and
 keeps the whole stack under one AWS account/billing/IAM boundary alongside the
 API. SPA deep-link routing (`/sessions/:id`, `/@handle`) is handled by a
 CloudFront custom error response mapping 403/404 to `/index.html`;
 `VITE_API_BASE_URL` is injected at build time in CI before the `aws s3 sync`.
 Upstash serverless Redis is free at MVP scale; Neon gives zero-config managed
 serverless Postgres with a 5 GB free tier.
+
+**Compute & networking (revised 2026-06):** the API box is a **t4g (Graviton /
+ARM)** instance, not t3.micro — ARM gives ~20% better price/performance for
+identical specs. Start on **t4g.small** (2 GiB, free under the trial through end
+of 2026) for headroom over `sharp` PNG renders plus the in-process schedulers,
+then drop to **t4g.micro** (1 GiB, ~$6/mo) when the trial ends — still cheaper
+than the t3.micro it replaces. **t4g.nano (0.5 GiB) is rejected:** concurrent
+`sharp` renders + the aggregation/recap/push schedulers + on-box `tsc` builds
+overrun 512 MB, and the resulting swap thrash would blow the `<150 ms` read-p95
+gate (METRICS.md) for ~$3/mo of savings. ARM cost: launch an **arm64 AMI**
+(AL2023 arm64); `sharp` resolves its arm64 prebuilt (`@img/sharp-linux-arm64`)
+automatically and Node/pnpm/PM2 are unaffected, so `provision-ec2.sh` needs no
+change. The API keeps **one public IPv4** (Elastic IP) — required for IPv4-only
+clients and the VSCode extension; it is free for the first 12 months (750 hr/mo)
+then ~$3.65/mo (AWS's Feb-2024 public-IPv4 charge). **IPv6-only is rejected for
+the API** — it would drop IPv4-only reachability — while the web tier gets IPv6
+free via CloudFront's dual-stack, so only the one API EIP is billable.
 
 **Vercel — temporary interim only:** Vercel (with `vercel.json` SPA rewrites)
 may be used as a stopgap web host during early development for its zero-config

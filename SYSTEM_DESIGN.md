@@ -400,10 +400,11 @@ src/
 
 ## 10. Scalability Plan
 
-- **MVP:** EC2 t3.micro free tier · S3 + CloudFront (web) · Upstash Redis free ·
-  Neon free tier = ~$0/mo (fully AWS-hosted compute; see ADR-009)
+- **MVP:** EC2 t4g (Graviton) — t4g.small on the free trial, then t4g.micro ·
+  S3 + CloudFront (web, dual-stack IPv6) · Upstash Redis free · Neon free tier =
+  ~$0 trial → ~$10/mo incl. one IPv4 EIP (fully AWS-hosted compute; see ADR-009)
 - **1k DAU:** Same stack
-- **5k DAU:** Upgrade to t3.small, add Neon read replica
+- **5k DAU:** Upgrade to t4g.small/medium, add Neon read replica
 - **10k DAU:** Migrate API to ECS Fargate + ALB, move data tier to RDS +
   ElastiCache (web stays on S3 + CloudFront)
 - **50k DAU:** ECS auto-scaling, separate ingest/read services

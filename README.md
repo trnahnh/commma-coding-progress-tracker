@@ -42,7 +42,7 @@ original to this project.
 | Auth                | GitHub OAuth, JWT + HTTP-only refresh token                                                          |
 | Billing             | Stripe (Pro/Team subscriptions, signature-verified webhooks)                                         |
 | Monorepo            | pnpm workspaces                                                                                      |
-| Deployment (MVP)    | AWS-hosted compute — EC2 t3.micro + PM2 (API), S3 + CloudFront (web); Neon PostgreSQL, Upstash Redis |
+| Deployment (MVP)    | AWS-hosted compute — EC2 t4g (Graviton) + PM2 (API), S3 + CloudFront (web); Neon PG, Upstash Redis   |
 
 ---
 
