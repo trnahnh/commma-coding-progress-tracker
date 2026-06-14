@@ -9,7 +9,10 @@ availability.
 Metric targets in the Definition-of-Done sections (latency, Lighthouse, growth)
 are defined canonically in `METRICS.md` — update numbers there, not here.
 
-Current phase: Phase 1 — Foundation
+Current phase: Phase 3 — Hardening (wrapping up) → Phase 4. **Live in production
+since 2026-06-14** — `commma.dev` (web) and `api.commma.dev` (API) on AWS (EC2
+t4g with PM2, S3 and CloudFront, Neon Postgres, Upstash Redis), TLS everywhere
+with auto-renew. Deploys auto-run on push to `main` via GitHub Actions.
 
 ---
 
@@ -162,9 +165,10 @@ Goal: production-safe. No known P0/P1 bugs. Published extension.
   - [x] **Follow-up:** public `GET` heatmap-card variant for crawler `og:image`
         — unauthenticated, `privacy='full'` only (404 otherwise), 120/hr per IP,
         `Cache-Control: public, max-age=600` plus the shared Redis PNG cache.
-  - [ ] **Deploy note:** the API host must provide a monospace font (e.g.
+  - [x] **Deploy note:** the API host must provide a monospace font (e.g.
         DejaVu/Liberation) for server-side text; `⌘` already renders as `Cmd` to
-        avoid a glyph gap.
+        avoid a glyph gap. Satisfied on the live box — `infra/provision-ec2.sh`
+        installs DejaVu Sans Mono.
 - [x] Route/integration test harness (throwaway Postgres) —
       `apps/api/test/helpers/integration.ts` + `test/routes/integration.test.ts`
       exercise the real app via `app.request()` against Postgres + Redis, gated

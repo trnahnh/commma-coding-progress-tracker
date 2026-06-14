@@ -2,6 +2,9 @@
 
 > Every commit is a step.
 
+**Live:** [commma.dev](https://commma.dev) · API at
+[api.commma.dev](https://api.commma.dev)
+
 commma turns your editor into a logbook — pace, splits, streaks, podiums — all
 the rituals of a real sport, for the work you already do. A VSCode extension
 captures your editor activity; an API ingests and aggregates it; a web app

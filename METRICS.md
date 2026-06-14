@@ -21,7 +21,9 @@ Each metric lists:
 
 - **Today:** structured JSON logs (`apps/api/src/logger.ts`) and the Hono
   request logger (per-request method/path/status/ms). No metrics aggregation,
-  export, or dashboards exist.
+  export, or dashboards exist. The stack is **deployed live** as of 2026-06-14
+  (`commma.dev` / `api.commma.dev`), but production is still uninstrumented — the
+  `now` values below remain local/not-measured until a sink is added.
 - **Planned (Phase 3 / infra):** choose a metrics sink (e.g. OpenTelemetry →
   hosted backend), derive the SLOs below from request logs, add alerting. Until
   then, values are read ad-hoc from logs, the DB, and the Upstash/Neon
