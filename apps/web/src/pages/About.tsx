@@ -151,7 +151,7 @@ const STACK_GROUPS = [
         no: '016',
         name: 'AWS EC2',
         role: 'API compute',
-        why: 't3.micro behind PM2. Cheap enough to run 24/7 at MVP scale, powerful enough for the 5-min aggregation loop and Sharp renders.',
+        why: 't4g Graviton behind PM2. ARM keeps it cheap to run 24/7 at MVP scale, with enough RAM for the 5-min aggregation loop and Sharp renders.',
       },
       {
         no: '017',
