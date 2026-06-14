@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { QWERTY_LAYOUT } from '@commma/shared'
 import { LiveDot, Shell, StatusPanel } from '../components/chrome'
 import KeyboardHeatmapCanvas from '../components/KeyboardHeatmap'
@@ -22,16 +22,28 @@ function splitPath(path: string): { dir: string; name: string } {
   return { dir: trimmed.slice(0, slash + 1), name: trimmed.slice(slash + 1) }
 }
 
+type BackTarget = { to: string; label: string }
+
+function useBackTarget(): BackTarget {
+  const { state } = useLocation()
+  const origin = state as { from?: string; fromLabel?: string } | null
+  if (origin?.from && origin.fromLabel) {
+    return { to: origin.from, label: origin.fromLabel }
+  }
+  return { to: '/', label: 'Back to activity' }
+}
+
 function BackLink() {
+  const { to, label } = useBackTarget()
   return (
     <Link
-      to='/'
+      to={to}
       className='group inline-flex items-center gap-2 font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute hover:text-ink transition-colors mb-8'
     >
       <span className='inline-block transition-transform group-hover:-translate-x-1'>
         ←
       </span>
-      Back to activity
+      {label}
     </Link>
   )
 }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { LiveDot, Shell, StatusPanel } from '../components/chrome'
 import {
   ApiError,
@@ -220,9 +220,12 @@ function StatCell({
 function SessionRow({ session }: { session: SessionSummary }) {
   const { top_lang, duration_s, lines_delta, started_at } = session
   const style = top_lang ? langStyle(top_lang) : null
+  const { pathname, search } = useLocation()
+  const handle = pathname.replace(/^\/@?/, '')
   return (
     <Link
       to={`/sessions/${session.id}`}
+      state={{ from: `${pathname}${search}`, fromLabel: `Back to @${handle}` }}
       className='flex items-center gap-4 px-5 sm:px-8 py-3.5 border-b border-rule last:border-b-0 hover:bg-paper-2/50 transition-colors group'
     >
       <div className='min-w-0 flex-1'>
