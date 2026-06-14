@@ -112,7 +112,12 @@ builds the API, and (on first run) copies `apps/api/.env.example` to
 Edit `/home/ec2-user/commma/apps/api/.env` with real values. Key fields beyond
 `.env.example`:
 
-- `DATABASE_URL`, `REDIS_URL` — from step 1.
+- `DATABASE_URL`, `REDIS_URL` — from step 1. For Neon, use the **direct**
+  connection host, **not** the `-pooler` host: `postgres.js` (in `createDb`)
+  sends prepared statements, which Neon's PgBouncer transaction-mode pooler
+  rejects. A single box with a fixed pool of 10 connections has no need for the
+  pooler. Only switch to the `-pooler` host on a multi-instance deploy, and then
+  set `prepare: false` on the `postgres()` client.
 - `GITHUB_CALLBACK_URL=https://api.commma.dev/v1/auth/github/callback`. This
   must exactly match the **Authorization callback URL** set on the GitHub OAuth
   App (GitHub -> Settings -> Developer settings -> OAuth Apps).
