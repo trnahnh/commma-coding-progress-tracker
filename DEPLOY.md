@@ -97,6 +97,13 @@ outside the box. The API binds `0.0.0.0:3000`, so if the security group leaves
 defeating the `TRUST_PROXY_HOPS=1` rate limiting. nginx (on the same box) is the
 only thing that talks to `:3000`.
 
+If you deploy the API with the `deploy-api` GitHub Action (it SSHes in from
+GitHub-hosted runners), open `22` to `0.0.0.0/0` rather than a single IP —
+GitHub's runner IP ranges are too many and too dynamic to allowlist. This is
+safe because the box is **key-only**: Amazon Linux 2023 ships
+`PasswordAuthentication no`, so only the holder of the `.pem` can connect
+(confirm with `sudo sshd -T | grep -E 'passwordauthentication|pubkeyauth'`).
+
 SSH in and run the bootstrap script:
 
 ```bash
@@ -178,12 +185,19 @@ committed HTTP config and sets up auto-renewal. The proxy forwards to
   the ACM console creates it for you.
 - Create a CloudFront distribution with that bucket as origin (via Origin Access
   Control), `commma.dev` as an alternate domain (CNAME), and the ACM cert above.
+  In the current console the **"Single website or app"** wizard +
+  **"Allow private S3 bucket access to CloudFront"** creates the OAC and writes
+  the bucket policy for you — no manual policy copy needed; the alternate
+  domain, cert, default root object, and error pages are then set by editing the
+  distribution after it is created.
 - Set the distribution's **default root object** to `index.html`.
 - Add a CloudFront **custom error response** mapping both `403` and `404` to
   `/index.html` with response code `200` — this serves SPA deep links like
   `/@handle` and `/sessions/:id`.
 - In the Route 53 hosted zone, create an **Alias A** record for `commma.dev`
   targeting the distribution (the apex aliases directly — no `www` indirection).
+  Add a matching **Alias AAAA** record to the same distribution so the
+  IPv6-enabled CloudFront is reachable over IPv6 as well.
 
 ### 6. GitHub secrets and variables
 
@@ -211,6 +225,16 @@ The `deploy-web` workflow authenticates to AWS with GitHub OIDC (no long-lived
 keys): create an IAM role trusting the repo's OIDC provider, granting only
 `s3:PutObject`/`s3:DeleteObject`/`s3:ListBucket` on the web bucket and
 `cloudfront:CreateInvalidation` on the distribution.
+
+Actions must be enabled at **both** the org and repo level (Org/Repo Settings ->
+Actions -> General -> "Allow all actions and reusable workflows"). A new account
+or org can be auto-flagged by GitHub, which disables Actions even when those
+settings allow it — `gh workflow run` then fails with `HTTP 422: Actions has
+been disabled for this user`, and the repo's Actions tab shows "GitHub Actions
+is currently disabled for your account." That is an account flag, not a config
+error; clear it via a reinstatement request at `support.github.com` (Account
+restrictions). The secrets/variables and workflows can all be set up while the
+flag is pending — they run unchanged once it is lifted.
 
 ### 7. Billing (Stripe, optional)
 
