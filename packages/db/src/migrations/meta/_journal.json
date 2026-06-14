@@ -64,6 +64,13 @@
       "when": 1781481600000,
       "tag": "0008_recap_emails",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1781568000000,
+      "tag": "0009_session_indexes",
+      "breakpoints": true
     }
   ]
 }

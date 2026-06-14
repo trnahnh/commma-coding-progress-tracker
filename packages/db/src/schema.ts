@@ -1,4 +1,3 @@
-import { sql } from 'drizzle-orm'
 import {
   boolean,
   date,
@@ -68,9 +67,7 @@ export const events = pgTable(
   },
   (t) => [
     primaryKey({ columns: [t.id, t.ts] }),
-    index('events_user_unprocessed')
-      .on(t.userId, t.ts)
-      .where(sql`${t.processed} = false`),
+    index('events_user_ts').on(t.userId, t.ts),
   ],
 )
 
@@ -93,7 +90,10 @@ export const sessions = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (t) => [index('sessions_user_started').on(t.userId, t.startedAt.desc())],
+  (t) => [
+    index('sessions_user_started').on(t.userId, t.startedAt.desc()),
+    index('sessions_started').on(t.startedAt.desc()),
+  ],
 )
 
 export const sessionLangs = pgTable(
