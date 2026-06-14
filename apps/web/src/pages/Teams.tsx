@@ -20,8 +20,8 @@ function RoleChip({ role }: { role: string }) {
       className={[
         'inline-flex items-center h-[22px] px-2.5 rounded-full font-mono text-[10px] uppercase tracking-widest border',
         isOwner
-          ? 'text-accent border-accent/40 bg-accent/10'
-          : 'text-ink-faint border-rule',
+          ? 'text-accent border-accent-line bg-accent-soft'
+          : 'text-ink-mute border-rule',
       ].join(' ')}
     >
       {role}
@@ -31,7 +31,7 @@ function RoleChip({ role }: { role: string }) {
 
 function FrozenBadge() {
   return (
-    <span className='inline-flex items-center h-[22px] px-2.5 rounded-full font-mono text-[10px] uppercase tracking-widest border text-ink-faint border-rule bg-paper-3'>
+    <span className='inline-flex items-center h-[22px] px-2.5 rounded-full font-mono text-[10px] uppercase tracking-widest border text-ink-mute border-rule bg-paper-3'>
       plan inactive
     </span>
   )
@@ -76,7 +76,7 @@ function InviteRow({
           type='button'
           disabled={busy !== null}
           onClick={() => void handle('accept')}
-          className='inline-flex items-center h-[34px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
+          className='inline-flex items-center h-[44px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
             bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors disabled:opacity-40'
         >
           {busy === 'accept' ? '…' : 'Accept'}
@@ -85,7 +85,7 @@ function InviteRow({
           type='button'
           disabled={busy !== null}
           onClick={() => void handle('decline')}
-          className='inline-flex items-center h-[34px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
+          className='inline-flex items-center h-[44px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
             text-ink-soft border border-rule-strong hover:text-ink hover:border-ink-faint transition-colors disabled:opacity-40'
         >
           {busy === 'decline' ? '…' : 'Decline'}
@@ -100,7 +100,7 @@ function TeamCard({ team }: { team: TeamSummary }) {
     <Link
       to={`/teams/${team.slug}`}
       className='group flex flex-col gap-3 p-5 sm:p-6 border border-rule-strong rounded bg-linear-to-b from-paper-2 to-paper
-        hover:border-accent/50 hover:from-paper-3 transition-all'
+        hover:border-accent-line hover:from-paper-3 transition-all'
     >
       <div className='flex items-start justify-between gap-2'>
         <span className='font-serif text-[20px] sm:text-[22px] leading-tight tracking-[-0.01em] text-ink group-hover:text-accent transition-colors'>
@@ -115,7 +115,7 @@ function TeamCard({ team }: { team: TeamSummary }) {
         /{team.slug}
       </div>
       <div className='mt-auto pt-2 border-t border-rule flex items-center justify-between'>
-        <span className='font-mono text-[12px] uppercase tracking-wider text-ink-faint'>
+        <span className='font-mono text-[12px] uppercase tracking-wider text-ink-mute'>
           {new Date(team.created_at).toLocaleDateString(undefined, {
             month: 'short',
             year: 'numeric',
@@ -217,7 +217,7 @@ function CreateTeamPanel({
               focus:outline-none focus:border-accent transition-colors'
           />
           {slug && (
-            <span className='font-mono text-[11px] text-ink-faint'>
+            <span className='font-mono text-[12px] text-ink-mute'>
               commma.dev/teams/{slug}
             </span>
           )}
@@ -415,7 +415,7 @@ export default function Teams() {
             <Link
               to='/pricing'
               className='shrink-0 inline-flex items-center h-[38px] px-5 rounded-full font-mono text-[12px] uppercase tracking-wider
-                text-accent border border-accent/50 hover:bg-accent hover:text-paper hover:border-accent transition-colors'
+                text-accent border border-accent-line hover:bg-accent hover:text-paper hover:border-accent transition-colors'
             >
               Upgrade →
             </Link>

@@ -97,7 +97,7 @@ export default function Changelog() {
                     key={c}
                     className='flex items-start gap-3 font-sans text-[15px] leading-snug text-ink-soft'
                   >
-                    <span className='font-mono text-[13px] text-ink-faint mt-0.5 shrink-0'>
+                    <span className='font-mono text-[13px] text-ink-mute mt-0.5 shrink-0'>
                       —
                     </span>
                     {c}

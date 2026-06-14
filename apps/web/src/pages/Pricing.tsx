@@ -56,7 +56,7 @@ function FeatureList({ features }: { features: string[] }) {
           key={f}
           className='flex items-start gap-3 py-2.5 border-b border-dashed border-rule last:border-b-0'
         >
-          <span className='font-mono text-[14px] text-ink-faint mt-0.5 shrink-0'>
+          <span className='font-mono text-[14px] text-ink-mute mt-0.5 shrink-0'>
             —
           </span>
           <span className='font-mono text-[14px] text-ink-soft leading-snug'>
@@ -147,7 +147,7 @@ export default function Pricing() {
 
   return (
     <Shell>
-      <div className='max-w-[1000px] mx-auto'>
+      <div>
         <div className='mb-[clamp(40px,6vw,80px)]'>
           <div className='font-mono text-[14px] tracking-[0.18em] uppercase text-ink-mute mb-5'>
             § pricing
@@ -165,7 +165,7 @@ export default function Pricing() {
           <button
             type='button'
             onClick={() => setAnnual(false)}
-            className={`h-[40px] px-5 rounded-full border transition-colors ${
+            className={`h-[44px] px-5 rounded-full border transition-colors ${
               !annual
                 ? 'bg-ink text-paper border-ink'
                 : 'text-ink-mute border-rule-strong hover:text-ink hover:border-ink-faint'
@@ -176,7 +176,7 @@ export default function Pricing() {
           <button
             type='button'
             onClick={() => setAnnual(true)}
-            className={`h-[40px] px-5 rounded-full border transition-colors ${
+            className={`h-[44px] px-5 rounded-full border transition-colors ${
               annual
                 ? 'bg-ink text-paper border-ink'
                 : 'text-ink-mute border-rule-strong hover:text-ink hover:border-ink-faint'

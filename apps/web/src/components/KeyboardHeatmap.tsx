@@ -189,9 +189,9 @@ export default function KeyboardHeatmap({
               type='button'
               onClick={() => setLayoutName(name)}
               className={[
-                'h-[26px] px-2.5 rounded font-mono text-[10px] uppercase tracking-wider transition-colors',
+                'h-[36px] px-3 rounded font-mono text-[11px] uppercase tracking-wider transition-colors',
                 layoutName === name
-                  ? 'bg-accent/15 text-accent border border-accent/40'
+                  ? 'bg-accent-soft text-accent border border-accent-line'
                   : 'text-ink-mute border border-transparent hover:text-ink-soft hover:border-rule',
               ].join(' ')}
             >
@@ -207,7 +207,7 @@ export default function KeyboardHeatmap({
               aria-label={t.label}
               aria-pressed={themeId === t.id}
               onClick={() => setThemeId(t.id)}
-              className='flex items-center justify-center w-7 h-7 rounded transition-all focus:outline-none'
+              className='flex items-center justify-center w-[36px] h-[36px] rounded transition-all focus:outline-none'
             >
               <span
                 className={[
@@ -242,13 +242,13 @@ export default function KeyboardHeatmap({
       </div>
       <p
         aria-hidden='true'
-        className='mt-1.5 text-center font-mono text-[10px] uppercase tracking-widest text-ink-faint sm:hidden'
+        className='mt-1.5 text-center font-mono text-[12px] uppercase tracking-widest text-ink-mute sm:hidden'
       >
         swipe to explore
       </p>
       {isPro ? (
         <div className='mt-4 flex flex-wrap items-center justify-end gap-2'>
-          <span className='font-mono text-[10px] uppercase tracking-wider text-ink-faint'>
+          <span className='font-mono text-[12px] uppercase tracking-wider text-ink-mute'>
             Export
           </span>
           {PRESETS.map(({ label, w, h }) => (

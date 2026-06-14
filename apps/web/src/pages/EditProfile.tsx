@@ -41,19 +41,19 @@ function Field({
 }) {
   return (
     <div className='flex flex-col gap-1.5'>
-      <label className='font-mono text-[11px] uppercase tracking-[0.16em] text-ink-mute'>
+      <label className='font-mono text-[12px] uppercase tracking-[0.16em] text-ink-mute'>
         {label}
       </label>
       {children}
       {hint && (
-        <p className='font-mono text-[11px] text-ink-faint m-0'>{hint}</p>
+        <p className='font-mono text-[12px] text-ink-mute m-0'>{hint}</p>
       )}
     </div>
   )
 }
 
 const inputCls =
-  'w-full bg-paper-3 border border-rule-strong rounded px-3 py-2.5 font-mono text-[13px] text-ink placeholder:text-ink-faint focus:outline-none focus:border-accent/60 transition-colors'
+  'w-full bg-paper-3 border border-rule-strong rounded px-3 py-2.5 font-mono text-[13px] text-ink placeholder:text-ink-faint focus:outline-none focus:border-accent-line transition-colors'
 
 function NotificationsSection({ token }: { token: string }) {
   const [state, setState] = useState<PushState | 'loading'>('loading')
@@ -84,30 +84,30 @@ function NotificationsSection({ token }: { token: string }) {
 
   return (
     <div className='px-5 sm:px-8 py-6 sm:py-7 flex flex-col gap-4'>
-      <div className='font-mono text-[11px] uppercase tracking-[0.18em] text-ink-mute'>
+      <div className='font-mono text-[12px] uppercase tracking-[0.18em] text-ink-mute'>
         Notifications
       </div>
       <div className='flex items-start justify-between gap-4'>
         <div>
           <p className='font-mono text-[13px] text-ink m-0'>Streak reminders</p>
-          <p className='font-mono text-[11px] text-ink-mute m-0 mt-0.5'>
+          <p className='font-mono text-[12px] text-ink-mute m-0 mt-0.5'>
             {unsupported
               ? 'Not supported in this browser.'
               : state === 'denied'
                 ? 'Notifications are blocked. Allow them in browser settings.'
                 : 'Get a daily reminder when you haven\'t coded yet and your streak is at risk.'}
           </p>
-          {err && <p className='font-mono text-[11px] text-accent m-0 mt-1'>{err}</p>}
+          {err && <p className='font-mono text-[12px] text-accent m-0 mt-1'>{err}</p>}
         </div>
         <button
           type='button'
           disabled={busy || unsupported || state === 'denied' || state === 'loading'}
           onClick={() => void toggle()}
           className={[
-            'shrink-0 inline-flex items-center h-[34px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider border transition-colors disabled:opacity-40',
+            'shrink-0 inline-flex items-center h-[44px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider border transition-colors disabled:opacity-40',
             state === 'subscribed'
               ? 'text-ink-soft border-rule-strong hover:text-ink hover:border-ink-faint'
-              : 'text-accent border-accent/50 hover:bg-accent hover:text-paper hover:border-accent',
+              : 'text-accent border-accent-line hover:bg-accent hover:text-paper hover:border-accent',
           ].join(' ')}
         >
           {busy ? '…' : state === 'subscribed' ? 'Disable' : 'Enable'}
@@ -152,7 +152,7 @@ function BillingSection({
 
   return (
     <div className='px-5 sm:px-8 py-6 sm:py-7 flex flex-col gap-4'>
-      <div className='font-mono text-[11px] uppercase tracking-[0.18em] text-ink-mute'>
+      <div className='font-mono text-[12px] uppercase tracking-[0.18em] text-ink-mute'>
         Billing
       </div>
       <div className='flex items-start justify-between gap-4'>
@@ -163,13 +163,13 @@ function BillingSection({
               {PLAN_LABELS[plan] ?? plan}
             </span>
           </p>
-          <p className='font-mono text-[11px] text-ink-mute m-0 mt-0.5'>
+          <p className='font-mono text-[12px] text-ink-mute m-0 mt-0.5'>
             {isPaid
               ? 'Manage your subscription, payment method, or invoices.'
               : 'Upgrade to unlock full history, PNG export, and more.'}
           </p>
           {err && (
-            <p className='font-mono text-[11px] text-accent m-0 mt-1'>{err}</p>
+            <p className='font-mono text-[12px] text-accent m-0 mt-1'>{err}</p>
           )}
         </div>
         {isPaid ? (
@@ -177,14 +177,14 @@ function BillingSection({
             type='button'
             disabled={busy}
             onClick={() => void openPortal()}
-            className='shrink-0 inline-flex items-center h-[34px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider border transition-colors disabled:opacity-40 text-ink-soft border-rule-strong hover:text-ink hover:border-ink-faint'
+            className='shrink-0 inline-flex items-center h-[44px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider border transition-colors disabled:opacity-40 text-ink-soft border-rule-strong hover:text-ink hover:border-ink-faint'
           >
             {busy ? '…' : 'Manage billing'}
           </button>
         ) : (
           <Link
             to='/pricing'
-            className='shrink-0 inline-flex items-center h-[34px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider border transition-colors text-accent border-accent/50 hover:bg-accent hover:text-paper hover:border-accent'
+            className='shrink-0 inline-flex items-center h-[44px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider border transition-colors text-accent border-accent-line hover:bg-accent hover:text-paper hover:border-accent'
           >
             Upgrade
           </Link>
@@ -315,7 +315,7 @@ export default function EditProfile() {
         <form onSubmit={handleSubmit} noValidate>
           <div className='border border-rule-strong rounded bg-linear-to-b from-paper-2 to-paper overflow-hidden divide-y divide-rule'>
             <div className='px-5 sm:px-8 py-6 sm:py-7 flex flex-col gap-5'>
-              <div className='font-mono text-[11px] uppercase tracking-[0.18em] text-ink-mute'>
+              <div className='font-mono text-[12px] uppercase tracking-[0.18em] text-ink-mute'>
                 About
               </div>
               <Field
@@ -354,7 +354,7 @@ export default function EditProfile() {
                     placeholder='One-line tagline about you or your work'
                     className={`${inputCls} resize-none`}
                   />
-                  <span className='absolute bottom-2.5 right-3 font-mono text-[10px] text-ink-faint pointer-events-none'>
+                  <span className='absolute bottom-2.5 right-3 font-mono text-[12px] text-ink-mute pointer-events-none'>
                     {bio.length}/160
                   </span>
                 </div>
@@ -382,7 +382,7 @@ export default function EditProfile() {
             </div>
 
             <div className='px-5 sm:px-8 py-6 sm:py-7 flex flex-col gap-5'>
-              <div className='font-mono text-[11px] uppercase tracking-[0.18em] text-ink-mute'>
+              <div className='font-mono text-[12px] uppercase tracking-[0.18em] text-ink-mute'>
                 Work
               </div>
               <Field label='Company'>
@@ -426,7 +426,7 @@ export default function EditProfile() {
                   <span className='font-mono text-[13px] text-ink'>
                     Open to work
                   </span>
-                  <p className='font-mono text-[11px] text-ink-mute m-0 mt-0.5'>
+                  <p className='font-mono text-[12px] text-ink-mute m-0 mt-0.5'>
                     Show an “open to work” badge on your public profile.
                   </p>
                 </div>
@@ -434,7 +434,7 @@ export default function EditProfile() {
             </div>
 
             <div className='px-5 sm:px-8 py-6 sm:py-7 flex flex-col gap-5'>
-              <div className='font-mono text-[11px] uppercase tracking-[0.18em] text-ink-mute'>
+              <div className='font-mono text-[12px] uppercase tracking-[0.18em] text-ink-mute'>
                 Education
               </div>
               <Field label='School'>
@@ -460,7 +460,7 @@ export default function EditProfile() {
             </div>
 
             <div className='px-5 sm:px-8 py-6 sm:py-7 flex flex-col gap-4'>
-              <div className='font-mono text-[11px] uppercase tracking-[0.18em] text-ink-mute'>
+              <div className='font-mono text-[12px] uppercase tracking-[0.18em] text-ink-mute'>
                 Privacy
               </div>
               {PRIVACY_OPTIONS.map((opt) => (
@@ -482,7 +482,7 @@ export default function EditProfile() {
                     >
                       {opt.label}
                     </span>
-                    <p className='font-mono text-[11px] text-ink-mute m-0 mt-0.5'>
+                    <p className='font-mono text-[12px] text-ink-mute m-0 mt-0.5'>
                       {opt.description}
                     </p>
                   </div>

@@ -217,7 +217,7 @@ function HeatmapSlot({
           {heatmap.total.toLocaleString()} keys
         </span>
       </div>
-      <p className='mb-5 font-mono text-[11.5px] tracking-wide text-ink-mute m-0 flex flex-wrap items-center gap-x-2 gap-y-1'>
+      <p className='mb-5 font-mono text-[12px] tracking-wide text-ink-mute m-0 flex flex-wrap items-center gap-x-2 gap-y-1'>
         {top[1] > 0 && (
           <span className='inline-flex items-center gap-2'>
             <span className='w-1.5 h-1.5 rounded-full bg-accent' />
@@ -228,7 +228,7 @@ function HeatmapSlot({
             </span>
           </span>
         )}
-        {top[1] > 0 && other > 0 && <span className='text-ink-faint'>·</span>}
+        {top[1] > 0 && other > 0 && <span className='text-ink-mute'>·</span>}
         {other > 0 && (
           <span className='tnum'>
             +{other.toLocaleString()} other keystrokes
@@ -257,7 +257,7 @@ function SessionCard({ session, isPro }: { session: Session; isPro: boolean }) {
         </h1>
         <p className='font-mono text-[14px] text-ink-mute mt-3 m-0 tnum'>
           {formatClock(session.started_at)}–{formatClock(session.ended_at)}
-          <span className='text-ink-faint'> · </span>
+          <span className='text-ink-mute'> · </span>
           {formatDuration(session.duration_s)}
         </p>
       </div>

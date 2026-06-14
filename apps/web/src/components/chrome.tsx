@@ -163,7 +163,7 @@ export function Nav() {
               type='button'
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
               onClick={() => setMobileOpen((o) => !o)}
-              className='md:hidden flex items-center justify-center w-9 h-9 text-ink-mute hover:text-ink transition-colors'
+              className='md:hidden flex items-center justify-center w-11 h-11 text-ink-mute hover:text-ink transition-colors'
             >
               {mobileOpen ? (
                 <svg
@@ -297,7 +297,7 @@ export function Footer() {
         <div className='pb-10 border-b border-rule'>
           <div className='flex flex-wrap justify-center gap-[clamp(40px,6vw,140px)]'>
             <div>
-              <p className='font-mono text-[11px] tracking-[0.18em] uppercase text-ink-mute mb-4 m-0'>
+              <p className='font-mono text-[12px] tracking-[0.18em] uppercase text-ink-mute mb-4 m-0'>
                 Product
               </p>
               <ul className='m-0 p-0 list-none flex flex-col gap-3'>
@@ -315,7 +315,7 @@ export function Footer() {
             </div>
 
             <div>
-              <p className='font-mono text-[11px] tracking-[0.18em] uppercase text-ink-mute mb-4 m-0'>
+              <p className='font-mono text-[12px] tracking-[0.18em] uppercase text-ink-mute mb-4 m-0'>
                 Company
               </p>
               <ul className='m-0 p-0 list-none flex flex-col gap-3'>
@@ -344,7 +344,7 @@ export function Footer() {
             </div>
 
             <div>
-              <p className='font-mono text-[11px] tracking-[0.18em] uppercase text-ink-mute mb-4 m-0'>
+              <p className='font-mono text-[12px] tracking-[0.18em] uppercase text-ink-mute mb-4 m-0'>
                 Legal
               </p>
               <ul className='m-0 p-0 list-none flex flex-col gap-3'>

@@ -32,8 +32,8 @@ function RoleChip({ role }: { role: string }) {
       className={[
         'inline-flex items-center h-[22px] px-2.5 rounded-full font-mono text-[10px] uppercase tracking-widest border',
         isOwner
-          ? 'text-accent border-accent/40 bg-accent/10'
-          : 'text-ink-faint border-rule',
+          ? 'text-accent border-accent-line bg-accent-soft'
+          : 'text-ink-mute border-rule',
       ].join(' ')}
     >
       {role}
@@ -55,7 +55,7 @@ function PeriodTabs({
           key={value}
           type='button'
           onClick={() => onChange(value)}
-          className={`h-[36px] sm:h-[40px] px-3 sm:px-4 rounded-full font-mono text-[12px] sm:text-[13px] uppercase tracking-wider whitespace-nowrap border transition-colors ${
+          className={`h-[40px] sm:h-[44px] px-3 sm:px-4 rounded-full font-mono text-[12px] sm:text-[13px] uppercase tracking-wider whitespace-nowrap border transition-colors ${
             active === value
               ? 'bg-accent border-accent text-paper'
               : 'border-rule-strong text-ink-mute hover:text-ink'
@@ -128,7 +128,7 @@ function MemberRow({
             type='button'
             disabled={busy}
             onClick={() => void handleRemove()}
-            className='font-mono text-[11px] uppercase tracking-wider text-ink-faint hover:text-accent transition-colors disabled:opacity-40'
+            className='font-mono text-[11px] uppercase tracking-wider text-ink-mute hover:text-accent transition-colors disabled:opacity-40'
           >
             {busy ? '…' : isSelf ? 'Leave' : 'Remove'}
           </button>
@@ -152,7 +152,7 @@ function LeaderboardRow({
       ? 'text-accent font-semibold'
       : rank <= 3
         ? 'text-ink-soft'
-        : 'text-ink-faint'
+        : 'text-ink-mute'
   return (
     <div className='flex items-center gap-3 sm:gap-4 px-5 sm:px-8 py-4 sm:py-5 border-b border-rule last:border-b-0 hover:bg-paper-2/40 transition-colors'>
       <span
@@ -349,7 +349,7 @@ function DeleteTeamButton({
       <button
         type='button'
         onClick={() => setConfirm(true)}
-        className='font-mono text-[12px] uppercase tracking-wider text-ink-faint hover:text-accent transition-colors'
+        className='font-mono text-[12px] uppercase tracking-wider text-ink-mute hover:text-accent transition-colors'
       >
         Delete team
       </button>
@@ -374,7 +374,7 @@ function DeleteTeamButton({
         <button
           type='button'
           onClick={() => setConfirm(false)}
-          className='font-mono text-[12px] uppercase tracking-wider text-ink-faint hover:text-ink transition-colors'
+          className='font-mono text-[12px] uppercase tracking-wider text-ink-mute hover:text-ink transition-colors'
         >
           Cancel
         </button>
@@ -537,7 +537,7 @@ export default function TeamDashboard() {
               </h1>
               <div className='flex items-center gap-2 mt-1'>
                 <RoleChip role={myRole} />
-                <span className='font-mono text-[13px] text-ink-faint'>
+                <span className='font-mono text-[13px] text-ink-mute'>
                   {team.member_count}/{team.max_members} members
                 </span>
               </div>
@@ -547,7 +547,7 @@ export default function TeamDashboard() {
           <div className='grid grid-cols-1 lg:grid-cols-[1fr_300px]'>
             <div className='border-b lg:border-b-0 lg:border-r border-rule'>
               <div className='px-5 sm:px-8 py-4 border-b border-rule'>
-                <span className='font-mono text-[12px] uppercase tracking-[0.14em] text-ink-faint'>
+                <span className='font-mono text-[12px] uppercase tracking-[0.14em] text-ink-mute'>
                   Members
                 </span>
               </div>
@@ -630,7 +630,7 @@ export default function TeamDashboard() {
                 <LeaderboardRow key={e.handle} entry={e} />
               ))}
               <div className='px-5 sm:px-8 py-3 border-t border-rule'>
-                <span className='font-mono text-[13px] text-ink-faint'>
+                <span className='font-mono text-[13px] text-ink-mute'>
                   Updated{' '}
                   {new Date(leaderboard.updated_at).toLocaleTimeString()}
                 </span>

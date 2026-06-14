@@ -31,7 +31,7 @@ function PeriodTabs({
           key={value}
           type='button'
           onClick={() => onChange(value)}
-          className={`h-[38px] sm:h-[42px] px-3.5 sm:px-5 rounded-full font-mono text-[13px] sm:text-[15px] uppercase tracking-wider whitespace-nowrap border transition-colors ${
+          className={`h-[40px] sm:h-[44px] px-3.5 sm:px-5 rounded-full font-mono text-[13px] sm:text-[15px] uppercase tracking-wider whitespace-nowrap border transition-colors ${
             active === value
               ? 'bg-accent border-accent text-paper'
               : 'border-rule-strong text-ink-mute hover:text-ink hover:border-rule-strong'
@@ -50,7 +50,7 @@ function RankBadge({ rank }: { rank: number }) {
       ? 'text-accent font-semibold'
       : rank <= 3
         ? 'text-ink-soft'
-        : 'text-ink-faint'
+        : 'text-ink-mute'
   return (
     <span
       className={`font-mono text-[15px] tnum w-7 text-right shrink-0 ${cls}`}
@@ -140,18 +140,18 @@ function LeaderboardCard({
           <div className='hidden sm:flex items-center gap-3 sm:gap-4 px-5 sm:px-8 py-3 border-b border-rule bg-paper-3/60'>
             <span className='w-7 shrink-0' />
             <span className='w-8 shrink-0' />
-            <span className='flex-1 font-mono text-[15px] uppercase tracking-[0.14em] text-ink-faint'>
+            <span className='flex-1 font-mono text-[15px] uppercase tracking-[0.14em] text-ink-mute'>
               Player
             </span>
             <div className='flex items-center gap-5 shrink-0'>
-              <span className='font-mono text-[15px] uppercase tracking-[0.14em] text-ink-faint w-[90px] text-right'>
+              <span className='font-mono text-[15px] uppercase tracking-[0.14em] text-ink-mute w-[90px] text-right'>
                 Lang
               </span>
-              <span className='font-mono text-[15px] uppercase tracking-[0.14em] text-ink-faint w-[48px] text-right'>
+              <span className='font-mono text-[15px] uppercase tracking-[0.14em] text-ink-mute w-[48px] text-right'>
                 Streak
               </span>
             </div>
-            <span className='font-mono text-[15px] uppercase tracking-[0.14em] text-ink-faint shrink-0 w-[52px] text-right'>
+            <span className='font-mono text-[15px] uppercase tracking-[0.14em] text-ink-mute shrink-0 w-[52px] text-right'>
               Time
             </span>
           </div>
@@ -159,7 +159,7 @@ function LeaderboardCard({
             <EntryRow key={e.handle} entry={e} />
           ))}
           <div className='px-5 sm:px-8 py-3 border-t border-rule'>
-            <span className='font-mono text-[15px] text-ink-faint'>
+            <span className='font-mono text-[15px] text-ink-mute'>
               Updated {new Date(data.updated_at).toLocaleTimeString()}
             </span>
           </div>
