@@ -223,7 +223,7 @@ function StackCard({
   const [open, setOpen] = useState(false)
   return (
     <div
-      className={`border rounded-lg p-4 bg-paper-2 transition-colors cursor-pointer overflow-hidden focus-visible:outline-none ${open ? 'border-accent-line bg-accent-soft' : 'border-rule'} ${visible ? 'animate-fade-up' : 'opacity-0'}`}
+      className={`border rounded-lg p-4 transition-colors cursor-pointer overflow-hidden focus-visible:outline-none ${open ? 'border-accent-line bg-accent-soft' : 'border-rule bg-paper-2'} ${visible ? 'animate-fade-up' : 'opacity-0'}`}
       tabIndex={0}
       style={{ animationDelay: `${delay}ms` }}
       onFocus={() => setOpen(true)}
