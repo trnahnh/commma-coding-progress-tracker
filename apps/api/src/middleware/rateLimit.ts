@@ -21,6 +21,7 @@ export interface RateLimitOptions {
   limit: number
   windowS: number
   key: (c: Context<AppEnv>) => string
+  failClosed?: boolean
 }
 
 export function rateLimit(options: RateLimitOptions) {
@@ -44,6 +45,13 @@ export function rateLimit(options: RateLimitOptions) {
         scope: options.scope,
         message: err instanceof Error ? err.message : String(err),
       })
+      if (options.failClosed) {
+        return apiError(
+          c,
+          'SERVICE_UNAVAILABLE',
+          'Rate limiter unavailable, try again shortly',
+        )
+      }
       await next()
       return
     }

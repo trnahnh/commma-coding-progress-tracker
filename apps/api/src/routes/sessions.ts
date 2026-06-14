@@ -26,12 +26,14 @@ import { redis } from '../redis.js'
 import { log } from '../logger.js'
 import type { AppEnv } from '../types.js'
 
-const heatmapCardSchema = z.object({
-  layout: z.enum(['qwerty', 'dvorak', 'colemak']).default('qwerty'),
-  aspect: z.enum(['9:16', '1:1', '16:9']).default('16:9'),
-  show_handle: z.boolean().default(true),
-  show_stats: z.boolean().default(true),
-})
+const heatmapCardSchema = z
+  .object({
+    layout: z.enum(['qwerty', 'dvorak', 'colemak']).default('qwerty'),
+    aspect: z.enum(['9:16', '1:1', '16:9']).default('16:9'),
+    show_handle: z.boolean().default(true),
+    show_stats: z.boolean().default(true),
+  })
+  .strict()
 
 const heatmapCardQuerySchema = z.object({
   layout: z.enum(['qwerty', 'dvorak', 'colemak']).default('qwerty'),

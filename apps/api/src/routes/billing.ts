@@ -9,17 +9,19 @@ import { env } from '../env.js'
 import { log } from '../logger.js'
 import { apiError } from '../lib/errors.js'
 import { requireAuth } from '../middleware/auth.js'
-import { rateLimit, userKey } from '../middleware/rateLimit.js'
+import { ipKey, rateLimit, userKey } from '../middleware/rateLimit.js'
 import { priceTable, stripe, stripeWebhookSecret } from '../lib/stripe.js'
 import { planFromSubscription, priceIdFor } from '../lib/billing.js'
 import type { AppEnv } from '../types.js'
 
 export const billingRoutes = new Hono<AppEnv>()
 
-const checkoutSchema = z.object({
-  plan: z.enum(['pro', 'team']),
-  interval: z.enum(['monthly', 'yearly']),
-})
+const checkoutSchema = z
+  .object({
+    plan: z.enum(['pro', 'team']),
+    interval: z.enum(['monthly', 'yearly']),
+  })
+  .strict()
 
 function customerId(
   ref: string | Stripe.Customer | Stripe.DeletedCustomer,
@@ -136,7 +138,10 @@ billingRoutes.post(
   },
 )
 
-billingRoutes.post('/webhook', async (c) => {
+billingRoutes.post(
+  '/webhook',
+  rateLimit({ scope: 'webhook', limit: 600, windowS: 3600, key: ipKey }),
+  async (c) => {
   if (!stripe || !stripeWebhookSecret)
     return apiError(c, 'SERVICE_UNAVAILABLE', 'Billing is not configured')
 

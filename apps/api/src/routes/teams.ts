@@ -96,14 +96,16 @@ async function loadMembers(teamId: string) {
     .orderBy(teamMembers.joinedAt)
 }
 
-const createSchema = z.object({
-  name: z.string().min(1).max(64),
-  slug: z.string().min(1).max(39),
-})
+const createSchema = z
+  .object({
+    name: z.string().min(1).max(64),
+    slug: z.string().min(1).max(39),
+  })
+  .strict()
 
-const patchSchema = z.object({ name: z.string().min(1).max(64) })
+const patchSchema = z.object({ name: z.string().min(1).max(64) }).strict()
 
-const inviteSchema = z.object({ handle: z.string().min(1).max(39) })
+const inviteSchema = z.object({ handle: z.string().min(1).max(39) }).strict()
 
 function invalid(
   result: { success: boolean; error?: ZodError },

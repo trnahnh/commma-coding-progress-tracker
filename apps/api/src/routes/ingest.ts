@@ -14,7 +14,13 @@ export const ingestRoutes = new Hono<AppEnv>()
 ingestRoutes.post(
   '/',
   requireAuth,
-  rateLimit({ scope: 'ingest', limit: 1000, windowS: 3600, key: userKey }),
+  rateLimit({
+    scope: 'ingest',
+    limit: 1000,
+    windowS: 3600,
+    key: userKey,
+    failClosed: true,
+  }),
   zValidator('json', heartbeatBatchSchema, (result, c) => {
     if (!result.success) {
       return apiError(

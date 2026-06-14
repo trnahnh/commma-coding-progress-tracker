@@ -2,6 +2,9 @@ import { and, gte, lt, sql } from 'drizzle-orm'
 import { sessions } from '@commma/db'
 import { db } from '../db.js'
 import { redis } from '../redis.js'
+import { acquireLock, delay, releaseLock } from '../lib/scheduling.js'
+
+const REBUILD_LOCK_TTL_MS = 30 * 1000
 
 const WEEK_TTL_S = 14 * 24 * 60 * 60
 const MONTH_TTL_S = 40 * 24 * 60 * 60
@@ -122,7 +125,18 @@ export async function topLeaderboard(
 ): Promise<LeaderboardEntry[]> {
   const { key, ttlS } = keyForPeriod(period, date)
   if ((await redis.exists(key)) === 0) {
-    await rebuildPeriod(period, date, key, ttlS)
+    const lockKey = `lock:rebuild:${key}`
+    if (await acquireLock(lockKey, REBUILD_LOCK_TTL_MS)) {
+      try {
+        await rebuildPeriod(period, date, key, ttlS)
+      } finally {
+        await releaseLock(lockKey)
+      }
+    } else {
+      for (let i = 0; i < 20 && (await redis.exists(key)) === 0; i++) {
+        await delay(100)
+      }
+    }
   }
 
   const raw = await redis.zrevrange(key, 0, limit - 1, 'WITHSCORES')

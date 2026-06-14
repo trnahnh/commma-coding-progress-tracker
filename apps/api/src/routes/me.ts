@@ -11,20 +11,22 @@ import type { AppEnv } from '../types.js'
 
 export const meRoutes = new Hono<AppEnv>()
 
-const patchMeSchema = z.object({
-  display_name: z.string().max(64).nullable().optional(),
-  bio: z.string().max(160).nullable().optional(),
-  website: z.union([z.string().url().max(256), z.null()]).optional(),
-  location: z.string().max(64).nullable().optional(),
-  school: z.string().max(128).nullable().optional(),
-  field_of_study: z.string().max(64).nullable().optional(),
-  company: z.string().max(128).nullable().optional(),
-  job_title: z.string().max(64).nullable().optional(),
-  pronouns: z.string().max(32).nullable().optional(),
-  linkedin: z.union([z.string().url().max(160), z.null()]).optional(),
-  open_to_work: z.boolean().optional(),
-  privacy: z.enum(['full', 'summary', 'off']).optional(),
-})
+const patchMeSchema = z
+  .object({
+    display_name: z.string().max(64).nullable().optional(),
+    bio: z.string().max(160).nullable().optional(),
+    website: z.union([z.string().url().max(256), z.null()]).optional(),
+    location: z.string().max(64).nullable().optional(),
+    school: z.string().max(128).nullable().optional(),
+    field_of_study: z.string().max(64).nullable().optional(),
+    company: z.string().max(128).nullable().optional(),
+    job_title: z.string().max(64).nullable().optional(),
+    pronouns: z.string().max(32).nullable().optional(),
+    linkedin: z.union([z.string().url().max(160), z.null()]).optional(),
+    open_to_work: z.boolean().optional(),
+    privacy: z.enum(['full', 'summary', 'off']).optional(),
+  })
+  .strict()
 
 type UserRow = typeof users.$inferSelect
 type StreakRow = typeof streaks.$inferSelect

@@ -54,6 +54,7 @@ authRoutes.use(
     limit: process.env.NODE_ENV === 'production' ? 20 : 100,
     windowS: 3600,
     key: ipKey,
+    failClosed: true,
   }),
 )
 
