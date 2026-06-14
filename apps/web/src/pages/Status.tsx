@@ -10,7 +10,7 @@ const COMPONENTS = [
   { name: 'API — Teams & Billing', note: 'Invite only' },
   { name: 'API — Recap & Push', note: 'Invite only' },
   { name: 'Web App', note: 'Invite only' },
-  { name: 'Database (Railway PostgreSQL)', note: 'Invite only' },
+  { name: 'Database (Neon PostgreSQL)', note: 'Invite only' },
   { name: 'Cache (Upstash Redis)', note: 'Invite only' },
   { name: 'Public Launch', note: 'Pending' },
 ]

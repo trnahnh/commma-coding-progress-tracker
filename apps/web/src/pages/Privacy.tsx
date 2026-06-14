@@ -158,7 +158,7 @@ export default function Privacy() {
             <p>
               We use GitHub OAuth for sign-in. We do not sell, share, or license
               your data to any third party. Infrastructure runs on AWS
-              (compute), Railway (database), and Upstash (cache). All data is
+              (compute), Neon (database), and Upstash (cache). All data is
               stored in the United States.
             </p>
           </Section>

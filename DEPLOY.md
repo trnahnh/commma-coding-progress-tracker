@@ -3,7 +3,7 @@
 This is the operational runbook for shipping commma to AWS. It follows the
 all-AWS compute target in ADR-009: the **API** runs on an EC2 t3.micro under
 PM2, and the **web** app is a static Vite build served from **S3 + CloudFront**.
-PostgreSQL stays on Railway and Redis on Upstash.
+PostgreSQL stays on Neon and Redis on Upstash.
 
 The work is split in two:
 
@@ -52,7 +52,7 @@ typecheck, lint, tests, and markdown lint on every push and PR independently.
 
 ### 1. Managed data tier
 
-- **PostgreSQL** — create a Railway Postgres instance, apply migrations with
+- **PostgreSQL** — create a Neon Postgres project, apply migrations with
   `drizzle-kit migrate` against its connection string, and keep that string for
   `DATABASE_URL`.
 - **Redis** — create an Upstash database and keep its TLS URL for `REDIS_URL`.
@@ -98,7 +98,7 @@ Edit `/home/ec2-user/commma/apps/api/.env` with real values. Key fields beyond
 - `TRUST_PROXY_HOPS=1` — one nginx hop in front (only valid with the security
   group from step 2).
 
-Apply database migrations against Railway, then re-run the bootstrap script to
+Apply database migrations against Neon, then re-run the bootstrap script to
 start PM2 (on its second pass, with `.env` present, it runs
 `pm2 start ecosystem.config.cjs --env production` and `pm2 save` for you):
 

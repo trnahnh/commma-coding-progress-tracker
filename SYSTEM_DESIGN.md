@@ -378,9 +378,9 @@ src/
 ## 10. Scalability Plan
 
 - **MVP:** EC2 t3.micro free tier · S3 + CloudFront (web) · Upstash Redis free ·
-  Railway $5/mo = ~$5/mo (fully AWS-hosted compute; see ADR-009)
+  Neon free tier = ~$0/mo (fully AWS-hosted compute; see ADR-009)
 - **1k DAU:** Same stack
-- **5k DAU:** Upgrade to t3.small, add Railway read replica
+- **5k DAU:** Upgrade to t3.small, add Neon read replica
 - **10k DAU:** Migrate API to ECS Fargate + ALB, move data tier to RDS +
   ElastiCache (web stays on S3 + CloudFront)
 - **50k DAU:** ECS auto-scaling, separate ingest/read services

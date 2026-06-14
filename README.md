@@ -29,20 +29,20 @@ original to this project.
 
 ## Tech Stack
 
-| Layer               | Technology                                                                                              |
-| ------------------- | ------------------------------------------------------------------------------------------------------- |
-| Extension           | TypeScript, VSCode API                                                                                  |
-| API                 | Hono, Node.js, `@hono/node-server`                                                                      |
-| Web App             | React 19, Vite 8, Tailwind v4                                                                           |
-| Database            | PostgreSQL (Drizzle ORM)                                                                                |
-| Cache / Leaderboard | Redis (rate limits + leaderboard sorted sets)                                                           |
-| Shared              | Zod schemas, TypeScript types                                                                           |
-| Heatmap (client)    | Canvas API → transparent PNG                                                                            |
-| Heatmap (server OG) | sharp                                                                                                   |
-| Auth                | GitHub OAuth, JWT + HTTP-only refresh token                                                             |
-| Billing             | Stripe (Pro/Team subscriptions, signature-verified webhooks)                                            |
-| Monorepo            | pnpm workspaces                                                                                         |
-| Deployment (MVP)    | AWS-hosted compute — EC2 t3.micro + PM2 (API), S3 + CloudFront (web); Railway PostgreSQL, Upstash Redis |
+| Layer               | Technology                                                                                           |
+| ------------------- | ---------------------------------------------------------------------------------------------------- |
+| Extension           | TypeScript, VSCode API                                                                               |
+| API                 | Hono, Node.js, `@hono/node-server`                                                                   |
+| Web App             | React 19, Vite 8, Tailwind v4                                                                        |
+| Database            | PostgreSQL (Drizzle ORM)                                                                             |
+| Cache / Leaderboard | Redis (rate limits + leaderboard sorted sets)                                                        |
+| Shared              | Zod schemas, TypeScript types                                                                        |
+| Heatmap (client)    | Canvas API → transparent PNG                                                                         |
+| Heatmap (server OG) | sharp                                                                                                |
+| Auth                | GitHub OAuth, JWT + HTTP-only refresh token                                                          |
+| Billing             | Stripe (Pro/Team subscriptions, signature-verified webhooks)                                         |
+| Monorepo            | pnpm workspaces                                                                                      |
+| Deployment (MVP)    | AWS-hosted compute — EC2 t3.micro + PM2 (API), S3 + CloudFront (web); Neon PostgreSQL, Upstash Redis |
 
 ---
 

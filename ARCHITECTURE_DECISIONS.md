@@ -343,7 +343,7 @@ CloudFront)
 
 **Decision:** Host both compute tiers on AWS. The API runs on EC2; the web app
 is a static Vite build served from **S3 + CloudFront**. PostgreSQL stays on
-Railway and Redis on Upstash (both third-party managed) — they are unaffected by
+Neon and Redis on Upstash (both third-party managed) — they are unaffected by
 the all-AWS hosting move and migrate to RDS/ElastiCache only at the scale points
 below.
 
@@ -352,8 +352,8 @@ below.
 | API        | AWS EC2 t3.micro + PM2 | $0 free tier (12mo), then $8/mo |
 | Web        | AWS S3 + CloudFront    | ~$0 free tier, then <$1/mo MVP  |
 | Redis      | Upstash free tier      | $0                              |
-| PostgreSQL | Railway Hobby          | $5/mo                           |
-| **Total**  |                        | **~$5/mo**                      |
+| PostgreSQL | Neon free tier         | $0                              |
+| **Total**  |                        | **~$0/mo (free tier)**          |
 
 **Rationale:** Zero users at launch — no need for load balancers or containers.
 EC2 t3.micro free tier runs PM2 + Hono/Node with plenty of headroom. The web app
@@ -363,8 +363,8 @@ keeps the whole stack under one AWS account/billing/IAM boundary alongside the
 API. SPA deep-link routing (`/sessions/:id`, `/@handle`) is handled by a
 CloudFront custom error response mapping 403/404 to `/index.html`;
 `VITE_API_BASE_URL` is injected at build time in CI before the `aws s3 sync`.
-Upstash serverless Redis is free at MVP scale; Railway gives zero-config managed
-Postgres.
+Upstash serverless Redis is free at MVP scale; Neon gives zero-config managed
+serverless Postgres with a 5 GB free tier.
 
 **Vercel — temporary interim only:** Vercel (with `vercel.json` SPA rewrites)
 may be used as a stopgap web host during early development for its zero-config
@@ -376,7 +376,7 @@ Fargate + ALB and move the data tier to RDS + ElastiCache. App code and the web
 build stay identical — only the deploy target changes.
 
 **Rejected:** ECS Fargate at launch — ALB costs $18/mo fixed regardless of
-traffic. ElastiCache / RDS at launch — Upstash and Railway free/hobby tiers are
+traffic. ElastiCache / RDS at launch — Upstash and Neon free tiers are
 sufficient. AWS Amplify Hosting for the web — closer to Vercel's UX (PR
 previews, managed rewrites) but adds a managed-service cost and abstraction over
 the same S3 + CloudFront primitives we can wire directly.
@@ -416,7 +416,7 @@ horizontally.
   Upstash free tier.
 - Finalizing only closed sessions makes re-runs **idempotent** — a session is
   written exactly once and never rewritten, which also makes deleting its events
-  safe (strong Railway storage discipline).
+  safe (strong storage discipline keeps Neon's free-tier storage bounded).
 - No external queue dependency, no separate worker process to deploy (pure
   backend code; PM2/EC2 setup is unchanged).
 - **Lost:** BullMQ's automatic retry, dead-letter queue, and Bull Board

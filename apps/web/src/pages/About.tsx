@@ -161,9 +161,9 @@ const STACK_GROUPS = [
       },
       {
         no: '018',
-        name: 'Railway',
+        name: 'Neon',
         role: 'Postgres hosting',
-        why: 'Managed Postgres with automatic backups. Upgrading is a plan slider — no migration ceremony when the dataset grows.',
+        why: 'Serverless Postgres with a 5 GB free tier, built-in connection pooling via PgBouncer, and database branching for cheap dev/staging copies.',
       },
       {
         no: '019',

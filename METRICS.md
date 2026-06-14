@@ -24,7 +24,7 @@ Each metric lists:
   export, or dashboards exist.
 - **Planned (Phase 3 / infra):** choose a metrics sink (e.g. OpenTelemetry →
   hosted backend), derive the SLOs below from request logs, add alerting. Until
-  then, values are read ad-hoc from logs, the DB, and the Upstash/Railway
+  then, values are read ad-hoc from logs, the DB, and the Upstash/Neon
   consoles.
 
 ---
@@ -58,13 +58,13 @@ Aggregation lag: 5-min interval + 15-min idle gap (ADR-010); event `ts` →
 
 ## 2. Cost guardrails
 
-| Metric            | now                   | target       | source                 |
-| ----------------- | --------------------- | ------------ | ---------------------- |
-| Redis cmds/mo     | ~0 idle (ADR-010)     | <500k/mo     | Upstash / commandstats |
-| `events` rows     | pruned after finalize | bounded      | `count(*)`             |
-| `sessions` growth | historical (rebuild)  | Railway plan | count + table size     |
-| Postgres storage  | not measured          | ~$5 MVP plan | Railway console        |
-| Recap LLM spend   | ~$0.0002/recap        | <$1/wk MVP   | OpenAI usage console   |
+| Metric            | now                   | target         | source                 |
+| ----------------- | --------------------- | -------------- | ---------------------- |
+| Redis cmds/mo     | ~0 idle (ADR-010)     | <500k/mo       | Upstash / commandstats |
+| `events` rows     | pruned after finalize | bounded        | `count(*)`             |
+| `sessions` growth | historical (rebuild)  | Neon free tier | count + table size     |
+| Postgres storage  | not measured          | 5 GB free      | Neon console           |
+| Recap LLM spend   | ~$0.0002/recap        | <$1/wk MVP     | OpenAI usage console   |
 
 Redis cost drivers: per-request rate limits + per-finalize `ZINCRBY` (no
 BullMQ), plus a handful of cache-aside entries — the heatmap-card PNG
