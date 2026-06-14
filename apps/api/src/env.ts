@@ -16,6 +16,7 @@ const envSchema = z.object({
   REFRESH_TOKEN_SECRET: z.string().min(1),
   WEB_ORIGIN: z.string().url(),
   PORT: z.coerce.number().int().positive().default(3000),
+  DB_POOL_MAX: z.coerce.number().int().positive().max(100).default(10),
   RUN_AGGREGATION: z
     .enum(['true', 'false'])
     .default('true')

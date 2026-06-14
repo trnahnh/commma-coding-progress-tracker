@@ -1,5 +1,6 @@
 import { env } from '../env.js'
 import { log } from '../logger.js'
+import { acquireLeader } from '../lib/scheduling.js'
 import { isEmailEnabled } from '../lib/email.js'
 import { runRecapTick } from '../recap/run.js'
 import { isRecapSendTime } from '../recap/week.js'
@@ -14,6 +15,7 @@ async function tick(): Promise<void> {
   if (running) return
   const now = new Date()
   if (!isRecapSendTime(now, env.RECAP_SEND_HOUR_UTC)) return
+  if (!(await acquireLeader('recap', INTERVAL_MS))) return
   running = true
   try {
     await runRecapTick(now)

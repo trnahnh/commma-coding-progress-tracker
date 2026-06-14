@@ -1,4 +1,5 @@
 import { log } from '../logger.js'
+import { acquireLeader } from '../lib/scheduling.js'
 import { deleteExpiredRefreshTokens } from '../lib/refresh.js'
 
 const INTERVAL_MS = 24 * 60 * 60 * 1000
@@ -8,6 +9,7 @@ let running = false
 
 async function tick(): Promise<void> {
   if (running) return
+  if (!(await acquireLeader('refresh-token-cleanup', INTERVAL_MS))) return
   running = true
   try {
     const count = await deleteExpiredRefreshTokens()
