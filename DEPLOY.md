@@ -13,26 +13,46 @@ The work is split in two:
 - **Deploying** (anyone, every release) — click **Run workflow** on the two
   GitHub Actions below. No SSH, no AWS console.
 
-## Before you have a domain
+## Domain & DNS (Route 53)
 
-No domain is registered yet, so `commma.dev` / `api.commma.dev` throughout this
-doc are **placeholders**. Until a real domain is bought:
+`commma.dev` is registered at **Namecheap**, but DNS is **delegated to AWS
+Route 53** so the apex can ALIAS straight to CloudFront. Namecheap's BasicDNS
+cannot point an apex record at CloudFront (no ALIAS/ANAME at the root), and the
+apex `commma.dev` is the canonical web origin — so delegation, not Namecheap's
+own DNS, is the supported setup. This also keeps every record in AWS alongside
+the rest of ADR-009's all-AWS stack.
 
-- **Static preview only.** You can ship the web build and view it on the
-  CloudFront default domain (`https://<id>.cloudfront.net`) — no ACM cert or DNS
-  needed for that.
-- **Auth will not work end-to-end.** The API needs HTTPS on a real domain (Let's
-  Encrypt won't issue a cert for a bare EC2 IP), and the refresh cookie is
-  `Secure; SameSite=Strict` — so web and API must live on one registrable
-  domain. The CloudFront default domain plus any API stopgap are different
-  sites, which drops the cookie.
+Delegate once, before wiring CloudFront or nginx:
 
-Once the domain is registered, update these four config spots, point DNS, and
-set the GitHub OAuth App callback to match:
+1. In Route 53, **create a public hosted zone** for `commma.dev`. It is created
+   with four authoritative **NS** records and one **SOA** — note the four NS
+   hostnames.
+2. In the **Namecheap dashboard** for the domain → **Nameservers** → choose
+   **Custom DNS**, and enter those four Route 53 NS hostnames (drop any trailing
+   dot). Save. Delegation propagates in minutes to a few hours; confirm with
+   `dig NS commma.dev +short` returning the Route 53 nameservers.
+3. From here on, **all records are created in the Route 53 hosted zone**, not at
+   Namecheap. Namecheap only holds the registration and the NS delegation.
 
-- `VITE_API_BASE_URL` and `WEB_URL` GitHub variables.
-- `WEB_ORIGIN` and `GITHUB_CALLBACK_URL` in the server `.env`.
-- `server_name` in the nginx config.
+The two records this deploy needs (created in steps 4 and 5 below):
+
+| Record           | Type      | Target                            |
+| ---------------- | --------- | --------------------------------- |
+| `commma.dev`     | A — Alias | the CloudFront distribution (web) |
+| `api.commma.dev` | A         | the EC2 Elastic IP (API)          |
+
+Because the apex is an **Alias A** to a CloudFront distribution (not a CNAME),
+it is free and resolves at the zone root. Give the EC2 box an **Elastic IP**
+first so `api.commma.dev` points at a stable address that survives a stop/start.
+
+The canonical config values these records back (already the defaults below):
+
+- `VITE_API_BASE_URL=https://api.commma.dev` and `WEB_URL=https://commma.dev`
+  GitHub variables.
+- `WEB_ORIGIN=https://commma.dev` and
+  `GITHUB_CALLBACK_URL=https://api.commma.dev/v1/auth/github/callback` in the
+  server `.env`, matching the GitHub OAuth App callback.
+- `server_name api.commma.dev` in the nginx config.
 
 ## Deploying (the click)
 
@@ -59,10 +79,16 @@ typecheck, lint, tests, and markdown lint on every push and PR independently.
 
 ### 2. Provision the EC2 box
 
-Launch an EC2 t3.micro on **Amazon Linux 2023 or Ubuntu 20.04+** — never Amazon
-Linux 2. The `sharp` dependency (heatmap PNG) needs glibc >= 2.28; AL2 ships
-glibc 2.26 and the server will not boot. A monospace font is also required for
-the card text; `provision-ec2.sh` installs DejaVu Mono.
+Launch an EC2 **t4g (Graviton / ARM)** box on **Amazon Linux 2023 or Ubuntu
+20.04+** — never Amazon Linux 2. Use **t4g.small** while its free trial lasts
+(through end of 2026; 2 GiB), else **t4g.micro** (1 GiB, ~$6/mo). Avoid
+**t4g.nano** (0.5 GiB) — too little RAM for `sharp` renders + the in-process
+schedulers + on-box builds (see ADR-009). Because t4g is ARM, pick the
+instance's **arm64 AMI**, not x86; `sharp` resolves its arm64 prebuilt
+automatically and `provision-ec2.sh` is arch-agnostic, so nothing else changes.
+The `sharp` dependency (heatmap PNG) needs glibc >= 2.28; AL2 ships glibc 2.26
+and the server will not boot. A monospace font is also required for the card
+text; `provision-ec2.sh` installs DejaVu Mono.
 
 **Security group (do not skip):** expose only `80` and `443` to the internet,
 plus `22` from your own IP for SSH. Port `3000` must **never** be reachable from
@@ -114,9 +140,13 @@ command, run it once so PM2 resurrects on reboot.
 
 ### 4. nginx reverse proxy + TLS
 
-The provision script installs and starts nginx. Point a DNS `A` record for
-`api.commma.dev` at the instance's public IP, install certbot, then wire up the
-proxy and TLS:
+The provision script installs and starts nginx. In the Route 53 hosted zone,
+create an `A` record for `api.commma.dev` pointing at the instance's **Elastic
+IP** (allocate and associate one first so the address survives a stop/start),
+install certbot, then wire up the proxy and TLS. That one public IPv4 is free
+for the first 12 months (750 hr/mo) then ~$3.65/mo — it stays IPv4 on purpose so
+IPv4-only clients and the VSCode extension can reach the API (ADR-009); allocate
+exactly one EIP, since spare/unassociated ones also bill:
 
 ```bash
 sudo dnf install -y certbot python3-certbot-nginx
@@ -137,14 +167,18 @@ committed HTTP config and sets up auto-renewal. The proxy forwards to
 ### 5. Web hosting (S3 + CloudFront)
 
 - Create a private S3 bucket for the static build.
+- Request an ACM cert for `commma.dev` in **`us-east-1`** (CloudFront only reads
+  certs from that region, regardless of the bucket's region). Validate it by
+  **DNS** — ACM gives a CNAME to add to the Route 53 hosted zone; one click from
+  the ACM console creates it for you.
 - Create a CloudFront distribution with that bucket as origin (via Origin Access
-  Control) and `commma.dev` as an alternate domain. The ACM cert for CloudFront
-  **must be issued in `us-east-1`**, regardless of the bucket's region.
+  Control), `commma.dev` as an alternate domain (CNAME), and the ACM cert above.
 - Set the distribution's **default root object** to `index.html`.
 - Add a CloudFront **custom error response** mapping both `403` and `404` to
   `/index.html` with response code `200` — this serves SPA deep links like
   `/@handle` and `/sessions/:id`.
-- Point DNS for `commma.dev` at the distribution.
+- In the Route 53 hosted zone, create an **Alias A** record for `commma.dev`
+  targeting the distribution (the apex aliases directly — no `www` indirection).
 
 ### 6. GitHub secrets and variables
 
@@ -218,15 +252,15 @@ Prerequisites:
   API process — there is no separate worker or cron — so the box (PM2) must be
   up during the send window. It fires Monday at/after `RECAP_SEND_HOUR_UTC` and
   catches up later that week if the process was down on Monday.
-- **A registered domain + verified Resend sender.** Because no domain is bought
-  yet (see "Before you have a domain"), this step is blocked until then: Resend
-  will only send from a domain you have verified via its DNS records (SPF + DKIM
-  CNAMEs, optionally DMARC). `RECAP_FROM_EMAIL` must use that verified domain,
-  e.g. `Commma <recap@commma.dev>`. The throwaway `onboarding@resend.dev` sender
+- **A verified Resend sender on `commma.dev`.** Resend will only send from a
+  domain you have verified via its DNS records (SPF + DKIM CNAMEs, optionally
+  DMARC) — publish those in the **Route 53 hosted zone** (not at Namecheap).
+  `RECAP_FROM_EMAIL` must use that verified domain, e.g.
+  `Commma <recap@commma.dev>`. The throwaway `onboarding@resend.dev` sender
   works for a smoke test but **only delivers to your own Resend account email**,
   so it is not usable for real recipients.
 
-Setup, once a domain exists:
+Setup:
 
 1. Create a Resend account and an API key (Sending access); put it in
    `RESEND_API_KEY`.
