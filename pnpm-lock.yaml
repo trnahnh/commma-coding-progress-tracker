@@ -63,6 +63,9 @@ importers:
       '@types/web-push':
         specifier: ^3.6.4
         version: 3.6.4
+      esbuild:
+        specifier: ^0.24.2
+        version: 0.24.2
       tsx:
         specifier: ^4.7.1
         version: 4.22.3
