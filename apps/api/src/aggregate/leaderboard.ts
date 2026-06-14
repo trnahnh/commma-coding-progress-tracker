@@ -5,6 +5,11 @@ import { redis } from '../redis.js'
 import { acquireLock, delay, releaseLock } from '../lib/scheduling.js'
 
 const REBUILD_LOCK_TTL_MS = 30 * 1000
+const EMPTY_TTL_S = 60
+
+function emptyKeyFor(key: string): string {
+  return `lbempty:${key}`
+}
 
 const WEEK_TTL_S = 14 * 24 * 60 * 60
 const MONTH_TTL_S = 40 * 24 * 60 * 60
@@ -39,6 +44,9 @@ export async function addLeaderboardScore(
     .expire(keys.week, WEEK_TTL_S)
     .zincrby(keys.month, durationS, userId)
     .expire(keys.month, MONTH_TTL_S)
+    .del(emptyKeyFor(keys.alltime))
+    .del(emptyKeyFor(keys.week))
+    .del(emptyKeyFor(keys.month))
     .exec()
 }
 
@@ -84,7 +92,7 @@ async function rebuildPeriod(
   date: Date,
   key: string,
   ttlS: number | null,
-): Promise<void> {
+): Promise<number> {
   const window = periodWindow(period, date)
   const rows = await db
     .select({
@@ -103,7 +111,7 @@ async function rebuildPeriod(
     .groupBy(sessions.userId)
 
   const scored = rows.filter((row) => row.total > 0)
-  if (scored.length === 0) return
+  if (scored.length === 0) return 0
 
   const pipeline = redis.pipeline()
   for (const row of scored) {
@@ -111,6 +119,7 @@ async function rebuildPeriod(
   }
   if (ttlS !== null) pipeline.expire(key, ttlS)
   await pipeline.exec()
+  return scored.length
 }
 
 export interface LeaderboardEntry {
@@ -124,16 +133,25 @@ export async function topLeaderboard(
   limit: number,
 ): Promise<LeaderboardEntry[]> {
   const { key, ttlS } = keyForPeriod(period, date)
+  const emptyKey = emptyKeyFor(key)
   if ((await redis.exists(key)) === 0) {
+    if ((await redis.exists(emptyKey)) === 1) return []
     const lockKey = `lock:rebuild:${key}`
     if (await acquireLock(lockKey, REBUILD_LOCK_TTL_MS)) {
       try {
-        await rebuildPeriod(period, date, key, ttlS)
+        const added = await rebuildPeriod(period, date, key, ttlS)
+        if (added === 0) await redis.set(emptyKey, '1', 'EX', EMPTY_TTL_S)
       } finally {
         await releaseLock(lockKey)
       }
     } else {
-      for (let i = 0; i < 20 && (await redis.exists(key)) === 0; i++) {
+      for (let i = 0; i < 20; i++) {
+        const ready = await redis
+          .pipeline()
+          .exists(key)
+          .exists(emptyKey)
+          .exec()
+        if (ready?.some(([, v]) => v === 1)) break
         await delay(100)
       }
     }
