@@ -11,13 +11,13 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
-- **Web** — `/about` page in the Company footer section. Covers the origin
-  story (GitHub × Strava inspiration), a scroll-animated "insight"
-  visualization showing how commma merges commit history with athletic-style
-  session data, a manifesto section, and a full stack catalogue — 23 entries
-  across 7 groups (Language & Tooling, API, Data, Frontend, Extension,
-  Infrastructure, Services). Stack cards reveal the rationale for each choice
-  on hover (desktop) or always on mobile.
+- **Web** — `/about` page in the Company footer section. Covers the origin story
+  (GitHub × Strava inspiration), a scroll-animated "insight" visualization
+  showing how commma merges commit history with athletic-style session data, a
+  manifesto section, and a full stack catalogue — 23 entries across 7 groups
+  (Language & Tooling, API, Data, Frontend, Extension, Infrastructure,
+  Services). Stack cards reveal the rationale for each choice on hover (desktop)
+  or always on mobile.
 - **Web, API** — Weekly recap page (`/recap`) for Pro and Team users. A new
   `GET /v1/recap` endpoint returns current-week stats (session count, total and
   best session time, top language, streak, week-over-week delta, and a prose
@@ -166,6 +166,25 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   section with an Enable/Disable toggle.
 
 ### Changed
+
+- **Web** — Pre-deploy frontend audit pass across all 13 pages and components.
+  Fixes: `FeedCard` replaced `<div role="link">` with a stretched `<Link>`
+  (semantic navigation); `Profile` plan gate hardened from falsy `!user?.plan`
+  to explicit `!== 'pro' && !== 'team'` allowlist; `SignIn` wordmark
+  `<a href="/">` replaced with `<Link to="/">` (SPA, no full reload);
+  landing-page leaderboard now distinguishes loading from empty (skeleton during
+  fetch, empty state only after resolve); SVG chart fills/strokes changed from
+  raw hex to `var(--color-*)` CSS variables. Contrast: `text-ink-faint` replaced
+  with `text-ink-mute` on all readable text (column headers, rank numbers,
+  timestamps, dash bullets, separators). Font sizes: all sub-12 px labels bumped
+  to minimum 12 px (`EditProfile` form labels/hints, `Feed` eyebrow,
+  `KeyboardHeatmap` hint and Export label, `SessionDetail` heatmap stats). Tap
+  targets: notification, billing, invite, and billing-interval toggle buttons
+  raised to `h-[44px]`; mobile nav toggle `w-9` → `w-11`; heatmap layout/theme
+  controls enlarged. Token discipline: `accent/40`, `accent/50`, `accent/60`
+  opacity modifiers replaced with `accent-line` / `accent-soft` named tokens;
+  `Pricing` inner `max-w-[1000px]` wrapper removed (Shell already constrains the
+  page).
 
 - **API, DB** — Pre-deploy reliability hardening from the backend/infra audit.
   The server now shuts down gracefully on `SIGTERM`/`SIGINT` (stop schedulers,
