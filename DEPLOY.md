@@ -311,9 +311,11 @@ Prerequisites:
   API process — there is no separate worker or cron — so the box (PM2) must be
   up during the send window. It fires Monday at/after `RECAP_SEND_HOUR_UTC` and
   catches up later that week if the process was down on Monday.
-- **A verified Resend sender on `commma.dev`.** Resend will only send from a
-  domain you have verified via its DNS records (SPF + DKIM CNAMEs, optionally
-  DMARC) — publish those in the **Route 53 hosted zone** (not at Namecheap).
+- **A verified Resend sender on `commma.dev`.** Resend only sends from a domain
+  you have verified via DNS records — a DKIM `TXT` (`resend._domainkey`), an SPF
+  pair on a `send` subdomain (an `MX` to `feedback-smtp.<region>.amazonses.com`
+  plus a `TXT` `v=spf1 include:amazonses.com ~all`), and an optional DMARC `TXT`
+  (`_dmarc`) — published in the **Route 53 hosted zone** (not at Namecheap).
   `RECAP_FROM_EMAIL` must use that verified domain, e.g.
   `Commma <recap@commma.dev>`. The throwaway `onboarding@resend.dev` sender
   works for a smoke test but **only delivers to your own Resend account email**,
@@ -323,8 +325,10 @@ Setup:
 
 1. Create a Resend account and an API key (Sending access); put it in
    `RESEND_API_KEY`.
-2. Add the domain in Resend → **Domains**, publish the shown DNS records, and
-   wait for **Verified**.
+2. Add the domain in Resend → **Domains** (region `us-east-1`, matching the rest
+   of the stack), publish the shown records into the Route 53 hosted zone, and
+   wait for **Verified** — confirm they resolve first with `dig` or
+   `Resolve-DnsName`.
 3. Set the server `.env`:
    - `RESEND_API_KEY=re_...`
    - `RECAP_FROM_EMAIL=Commma <recap@commma.dev>` (verified domain)
