@@ -331,7 +331,7 @@ export function Footer() {
                 ))}
                 <li>
                   <a
-                    href='https://github.com/NauriFive/commma-coding-progress-tracker'
+                    href='https://github.com/trnahnh/commma-coding-progress-tracker'
                     target='_blank'
                     rel='noopener noreferrer'
                     className='font-mono text-[13px] text-ink-soft hover:text-ink transition-colors inline-flex items-center gap-1'

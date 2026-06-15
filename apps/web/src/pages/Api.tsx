@@ -348,7 +348,7 @@ export default function Api() {
           <p className='font-sans text-[15px] text-ink-mute leading-relaxed m-0'>
             Questions or issues?{' '}
             <a
-              href='https://github.com/NauriFive/commma-coding-progress-tracker'
+              href='https://github.com/trnahnh/commma-coding-progress-tracker'
               target='_blank'
               rel='noopener noreferrer'
               className='text-accent hover:text-ink-soft transition-colors'
