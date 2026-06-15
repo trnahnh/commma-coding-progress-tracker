@@ -33,8 +33,8 @@ Welcome. commma is an open-source project and we take contributions seriously.
 ## Local Setup
 
 ```bash
-git clone https://github.com/[org]/commma.git
-cd commma
+git clone https://github.com/trnahnh/commma-coding-progress-tracker.git
+cd commma-coding-progress-tracker
 pnpm install
 
 # start PostgreSQL and Redis

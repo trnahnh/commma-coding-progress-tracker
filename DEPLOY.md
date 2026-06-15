@@ -1,17 +1,19 @@
 # Deploying commma
 
 This is the operational runbook for shipping commma to AWS. It follows the
-all-AWS compute target in ADR-009: the **API** runs on an EC2 t3.micro under
-PM2, and the **web** app is a static Vite build served from **S3 + CloudFront**.
-PostgreSQL stays on Neon and Redis on Upstash.
+all-AWS compute target in ADR-009: the **API** runs on an EC2 t4g (Graviton)
+box under PM2, and the **web** app is a static Vite build served from **S3 +
+CloudFront**. PostgreSQL stays on Neon and Redis on Upstash.
 
 The work is split in two:
 
 - **One-time setup** (the owner, once per environment) — provision the box, wire
   DNS/TLS, create the AWS web hosting, and register GitHub secrets. All of it is
   config-first: the scripts and configs live in `infra/`.
-- **Deploying** (anyone, every release) — click **Run workflow** on the two
-  GitHub Actions below. No SSH, no AWS console.
+- **Deploying** (every release) — push to `main` and the two GitHub Actions
+  below deploy the changed app automatically; you can also run them by hand from
+  the Actions tab. While Actions is unavailable, deploy from a laptop with the
+  AWS CLI (web) and SSH (API) — see "Manual deploy" below.
 
 ## Domain & DNS (Route 53)
 
@@ -54,19 +56,50 @@ The canonical config values these records back (already the defaults below):
   server `.env`, matching the GitHub OAuth App callback.
 - `server_name api.commma.dev` in the nginx config.
 
-## Deploying (the click)
+## Deploying
 
-Once the one-time setup is done, a release is two manual workflow runs in the
-GitHub **Actions** tab:
+Once the one-time setup is done, the two workflows in `.github/workflows/` ship
+a release:
 
 | Workflow     | File                               | What it does                                             |
 | ------------ | ---------------------------------- | -------------------------------------------------------- |
 | `Deploy API` | `.github/workflows/deploy-api.yml` | SSH to EC2, pull, build, PM2 restart, `/health` check    |
 | `Deploy Web` | `.github/workflows/deploy-web.yml` | Build, `s3 sync`, CloudFront invalidate, URL smoke check |
 
-Both trigger on `workflow_dispatch` only, so deploying is intentional. Open the
-workflow, press **Run workflow**, pick `main`, confirm. CI (`ci.yml`) runs
+Both run automatically on **push to `main`**, path-filtered so each side only
+deploys when its own files change (`Deploy API` on `apps/api`/`packages/db`/
+`packages/shared`, `Deploy Web` on `apps/web`/`packages/shared`), with a
+`concurrency` guard so two runs never overlap. Both also keep
+`workflow_dispatch`, so you can deploy by hand from the **Actions** tab (open the
+workflow, **Run workflow**, pick `main`). Push triggers fire only on a new push
+after Actions is enabled — they do not replay retroactively. CI (`ci.yml`) runs
 typecheck, lint, tests, and markdown lint on every push and PR independently.
+
+### Manual deploy (when Actions is unavailable)
+
+If GitHub Actions is disabled (e.g. the account-flag case in step 6 below),
+run the same steps by hand. **Web** — from the repo root, with the AWS CLI
+configured for an IAM user scoped to write the bucket and invalidate the
+distribution (S3 `List`/`Get`/`Put`/`Delete` on the bucket, CloudFront
+`CreateInvalidation`):
+
+```bash
+VITE_API_BASE_URL=https://api.commma.dev pnpm --filter @commma/web build
+aws s3 sync apps/web/dist s3://<WEB_S3_BUCKET> --delete --exclude index.html \
+  --cache-control "public,max-age=31536000,immutable"
+aws s3 cp apps/web/dist/index.html s3://<WEB_S3_BUCKET>/index.html \
+  --cache-control "no-cache"
+aws cloudfront create-invalidation --distribution-id <DIST_ID> --paths "/*"
+```
+
+**API** — SSH to the box and pull/build/restart:
+
+```bash
+ssh -i <key>.pem ec2-user@api.commma.dev \
+  "cd ~/commma && git pull && pnpm --filter @commma/api build && pm2 restart commma-api"
+```
+
+These mirror exactly what the workflows automate, so the result is identical.
 
 ## One-time setup
 
@@ -226,15 +259,18 @@ keys): create an IAM role trusting the repo's OIDC provider, granting only
 `s3:PutObject`/`s3:DeleteObject`/`s3:ListBucket` on the web bucket and
 `cloudfront:CreateInvalidation` on the distribution.
 
-Actions must be enabled at **both** the org and repo level (Org/Repo Settings ->
-Actions -> General -> "Allow all actions and reusable workflows"). A new account
-or org can be auto-flagged by GitHub, which disables Actions even when those
-settings allow it — `gh workflow run` then fails with `HTTP 422: Actions has
-been disabled for this user`, and the repo's Actions tab shows "GitHub Actions
-is currently disabled for your account." That is an account flag, not a config
-error; clear it via a reinstatement request at `support.github.com` (Account
-restrictions). The secrets/variables and workflows can all be set up while the
-flag is pending — they run unchanged once it is lifted.
+Actions must be enabled at the repo level (Settings -> Actions -> General ->
+"Allow all actions and reusable workflows"). Beyond that, GitHub can auto-flag a
+**whole account**, disabling Actions even when the repo setting allows it —
+`gh workflow run` then fails with `HTTP 422: Actions has been disabled for this
+user` and the Actions tab shows "GitHub Actions is currently disabled for your
+account." The flag follows the **account** (the actor), so it applies to every
+repo that account owns and to any org it acts in — transferring or re-creating
+the repo does not clear it. It is an account flag, not a config error; clear it
+via a reinstatement request at `support.github.com` (Account restrictions). The
+secrets/variables and workflows can all be set up while the flag is pending, and
+in the meantime deploy by hand (see "Manual deploy" above); everything runs
+unchanged once the flag is lifted.
 
 ### 7. Billing (Stripe, optional)
 
