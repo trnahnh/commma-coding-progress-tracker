@@ -98,9 +98,9 @@ Legend: `[x]` done · `[ ]` open · **Blocked** / **Before launch** call out gat
 - [x] `OPENAI_API_KEY` set on prod — valid (`HTTP 200`); optional recap prose
       (`gpt-4.1-nano`, ~$0.0002/recap, aggregate stats only — no paths/keystrokes)
 - [x] Recap scheduler runs in-process (gated by `RUN_AGGREGATION=true`)
-- [ ] **Before launch:** verify `commma.dev` in Resend (publish SPF/DKIM in
-      Route 53), then switch `RECAP_FROM_EMAIL` from `onboarding@resend.dev`
-      (throwaway — delivers only to your own Resend email) to `recap@commma.dev`
+- [x] `commma.dev` verified in Resend (SPF/DKIM/DMARC in Route 53);
+      `RECAP_FROM_EMAIL` switched to `Commma <recap@commma.dev>` on the prod box;
+      test email from `recap@commma.dev` delivered to a real inbox
 - Pre-launch there are no Pro/Team recipients, so no recap actually sends yet
 
 ## Pre-launch gate
@@ -110,7 +110,7 @@ Run before the first public launch:
 - [ ] GitHub Actions re-enabled → OIDC role + `AWS_ROLE_ARN` → both workflows
       verified green
 - [ ] Stripe switched to **live** mode (or deliberately left off)
-- [ ] Resend `commma.dev` sender domain verified + `RECAP_FROM_EMAIL` switched
+- [x] Resend `commma.dev` sender domain verified + `RECAP_FROM_EMAIL` switched
       off the throwaway `onboarding@resend.dev`
 - [ ] `commma-deploy-local` access key rotated
 - [ ] EC2 box git remote updated to the `trnahnh` URL
