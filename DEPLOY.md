@@ -78,28 +78,22 @@ typecheck, lint, tests, and markdown lint on every push and PR independently.
 ### Manual deploy (when Actions is unavailable)
 
 If GitHub Actions is disabled (e.g. the account-flag case in step 6 below),
-run the same steps by hand. **Web** — from the repo root, with the AWS CLI
-configured for an IAM user scoped to write the bucket and invalidate the
-distribution (S3 `List`/`Get`/`Put`/`Delete` on the bucket, CloudFront
-`CreateInvalidation`):
+deploy by hand with the wrapper scripts in `infra/`. Both are env-overridable
+and default to the production targets, so a release is one command each:
 
 ```bash
-VITE_API_BASE_URL=https://api.commma.dev pnpm --filter @commma/web build
-aws s3 sync apps/web/dist s3://<WEB_S3_BUCKET> --delete --exclude index.html \
-  --cache-control "public,max-age=31536000,immutable"
-aws s3 cp apps/web/dist/index.html s3://<WEB_S3_BUCKET>/index.html \
-  --cache-control "no-cache"
-aws cloudfront create-invalidation --distribution-id <DIST_ID> --paths "/*"
+pnpm deploy:web   # build -> s3 sync -> index.html -> CloudFront invalidate
+pnpm deploy:api   # ssh box -> pull -> build -> pm2 restart -> health check
 ```
 
-**API** — SSH to the box and pull/build/restart:
-
-```bash
-ssh -i <key>.pem ec2-user@api.commma.dev \
-  "cd ~/commma && git pull && pnpm --filter @commma/api build && pm2 restart commma-api"
-```
-
-These mirror exactly what the workflows automate, so the result is identical.
+`deploy:web` needs the AWS CLI configured for an IAM user scoped to the web
+bucket (S3 `List`/`Get`/`Put`/`Delete`) and `cloudfront:CreateInvalidation`;
+`deploy:api` needs the EC2 SSH key. Override any default inline, e.g.
+`WEB_S3_BUCKET=other-bucket pnpm deploy:web` or
+`SSH_KEY=~/.ssh/other.pem pnpm deploy:api` (see the script headers for every
+variable: `WEB_S3_BUCKET`, `CLOUDFRONT_DISTRIBUTION_ID`, `VITE_API_BASE_URL`,
+`AWS`; `SSH_KEY`, `API_HOST`, `APP_DIR`, `BRANCH`). The scripts run the exact
+steps the workflows automate, so the result is identical.
 
 ## One-time setup
 

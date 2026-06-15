@@ -11,7 +11,9 @@
     "lint": "pnpm -r run lint",
     "typecheck": "pnpm -r run typecheck",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "deploy:web": "bash infra/deploy-web.sh",
+    "deploy:api": "bash infra/deploy-api.sh"
   },
   "packageManager": "pnpm@10.28.1",
   "devDependencies": {
