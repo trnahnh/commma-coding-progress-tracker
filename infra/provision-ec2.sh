@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_URL="${REPO_URL:-https://github.com/NauriFive/commma-coding-progress-tracker.git}"
+REPO_URL="${REPO_URL:-https://github.com/trnahnh/commma-coding-progress-tracker.git}"
 APP_DIR="${APP_DIR:-/home/ec2-user/commma}"
 NODE_MAJOR="${NODE_MAJOR:-20}"
 PNPM_VERSION="${PNPM_VERSION:-10.28.1}"

@@ -107,7 +107,7 @@ safe because the box is **key-only**: Amazon Linux 2023 ships
 SSH in and run the bootstrap script:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/NauriFive/commma-coding-progress-tracker/main/infra/provision-ec2.sh | bash
+curl -fsSL https://raw.githubusercontent.com/trnahnh/commma-coding-progress-tracker/main/infra/provision-ec2.sh | bash
 ```
 
 It installs Node 20, pnpm, and PM2, clones the repo to `/home/ec2-user/commma`,
