@@ -3,6 +3,19 @@ import { Shell } from '../components/chrome'
 
 const ENTRIES = [
   {
+    version: '0.5.0',
+    date: 'Jun 2026',
+    tag: 'Production',
+    changes: [
+      'commma.dev is live — deployed on AWS (EC2 t4g + PM2 for the API, S3 + CloudFront for the web) with Neon Postgres and Upstash Redis; TLS everywhere',
+      'Backend hardening: graceful SIGTERM shutdown, scheduler leader lock (safe to run on multiple instances), rate limiter fails closed on Redis outage for auth and ingest routes',
+      'Fixed empty-leaderboard cold-rebuild race condition — negative cache reduces read p95 from ~2 s to ~161 ms under concurrency',
+      'Session-detail back link is origin-aware: shows "Back to @handle" when navigating from a profile page',
+      'Weekly recap email delivered from recap@commma.dev (verified sender domain on Resend)',
+      'One-command deploy scripts: pnpm deploy:web and pnpm deploy:api',
+    ],
+  },
+  {
     version: '0.4.0',
     date: 'Jun 2026',
     tag: 'Phase 4 cont.',

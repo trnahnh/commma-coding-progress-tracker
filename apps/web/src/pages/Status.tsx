@@ -2,16 +2,16 @@ import { useEffect } from 'react'
 import { Shell, LiveDot } from '../components/chrome'
 
 const COMPONENTS = [
-  { name: 'VSCode Extension', note: 'Invite only' },
-  { name: 'API — Auth', note: 'Invite only' },
-  { name: 'API — Ingest & Aggregation', note: 'Invite only' },
-  { name: 'API — Sessions & Feed', note: 'Invite only' },
-  { name: 'API — Leaderboard', note: 'Invite only' },
-  { name: 'API — Teams & Billing', note: 'Invite only' },
-  { name: 'API — Recap & Push', note: 'Invite only' },
-  { name: 'Web App', note: 'Invite only' },
-  { name: 'Database (Neon PostgreSQL)', note: 'Invite only' },
-  { name: 'Cache (Upstash Redis)', note: 'Invite only' },
+  { name: 'VSCode Extension', note: 'Operational' },
+  { name: 'API — Auth', note: 'Operational' },
+  { name: 'API — Ingest & Aggregation', note: 'Operational' },
+  { name: 'API — Sessions & Feed', note: 'Operational' },
+  { name: 'API — Leaderboard', note: 'Operational' },
+  { name: 'API — Teams & Billing', note: 'Operational' },
+  { name: 'API — Recap & Push', note: 'Operational' },
+  { name: 'Web App', note: 'Operational' },
+  { name: 'Database (Neon PostgreSQL)', note: 'Operational' },
+  { name: 'Cache (Upstash Redis)', note: 'Operational' },
   { name: 'Public Launch', note: 'Pending' },
 ]
 
@@ -28,18 +28,19 @@ export default function Status() {
         </p>
         <h1 className='font-serif font-normal text-[clamp(36px,6vw,80px)] leading-[0.95] tracking-[-0.03em] m-0 mb-4 text-ink'>
           All systems{' '}
-          <em className='italic text-accent'>pending operations.</em>
+          <em className='italic text-accent'>operational.</em>
         </h1>
         <p className='font-sans text-[16px] leading-relaxed text-ink-soft m-0 mb-12 max-w-[48ch]'>
-          commma infrastructure is online and running in invite-only early
-          access. Full public operations are pending launch.
+          commma is live on AWS — EC2 t4g (API), S3 + CloudFront (web), Neon
+          Postgres, Upstash Redis — running in invite-only early access. Public
+          launch is pending.
         </p>
 
         <div className='border border-rule-strong rounded overflow-hidden mb-8'>
           <div className='flex items-center gap-3 px-5 sm:px-7 py-4 bg-paper-2 border-b border-rule'>
-            <LiveDot color='accent' />
+            <LiveDot color='live' />
             <span className='font-mono text-[13px] text-ink-soft tracking-wide'>
-              Invite-only early access
+              Live · invite-only early access
             </span>
           </div>
           {COMPONENTS.map((c, i) => (
