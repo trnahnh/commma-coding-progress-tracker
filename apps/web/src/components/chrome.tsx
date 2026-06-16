@@ -40,13 +40,13 @@ function NavActions() {
             alt={user.handle}
             width={32}
             height={32}
-            className='w-8 h-8 rounded-full border border-rule group-hover:border-accent transition-colors object-cover'
+            className='w-8 h-8 rounded-full border border-rule ring-depth group-hover:border-accent transition-colors object-cover'
           />
         </Link>
         <Link
           to='/profile'
           className='hidden sm:inline-flex items-center h-[34px] sm:h-[38px] px-3 sm:px-4 rounded-full font-mono text-[12px] sm:text-[13px] uppercase tracking-wider
-            text-ink-soft hover:text-ink border border-transparent hover:border-rule-strong transition-colors'
+            text-ink-soft hover:text-ink border border-transparent hover:border-rule-strong transition-colors press'
         >
           Edit profile
         </Link>
@@ -54,7 +54,7 @@ function NavActions() {
           type='button'
           onClick={() => void signOut()}
           className='inline-flex items-center h-[34px] sm:h-[38px] px-3 sm:px-4 rounded-full font-mono text-[12px] sm:text-[13px] uppercase tracking-wider
-            text-ink-soft hover:text-ink border border-transparent hover:border-rule-strong transition-colors'
+            text-ink-soft hover:text-ink border border-transparent hover:border-rule-strong transition-colors press'
         >
           Sign out
         </button>
@@ -66,14 +66,14 @@ function NavActions() {
       <Link
         to='/signin'
         className='inline-flex items-center h-[34px] sm:h-[38px] px-3 sm:px-4 rounded-full font-mono text-[12px] sm:text-[13px] uppercase tracking-wider
-          text-ink-soft hover:text-ink border border-transparent hover:border-rule-strong transition-colors'
+          text-ink-soft hover:text-ink border border-transparent hover:border-rule-strong transition-colors press'
       >
         Sign in
       </Link>
       <a
         href='https://marketplace.visualstudio.com'
         className='group inline-flex items-center gap-2.5 h-[38px] px-3.5 sm:px-4 rounded-full font-mono text-[12px] sm:text-[13px] uppercase tracking-wider font-medium
-          bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors whitespace-nowrap'
+          bg-accent text-paper border border-accent bevel press hover:bg-ink hover:border-ink transition-colors whitespace-nowrap'
       >
         <span className='hidden sm:inline'>Install for VSCode</span>
         <span className='sm:hidden'>Install</span>
@@ -126,111 +126,117 @@ export function Nav() {
 
   return (
     <>
-    <nav className={`fixed top-0 left-0 right-0 z-50 border-b border-rule backdrop-blur-xl backdrop-saturate-150 bg-paper/70 transition-transform duration-300 ${visible || mobileOpen ? 'translate-y-0' : '-translate-y-full'}`}>
-      <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
-        <div className='grid grid-cols-[1fr_auto] md:grid-cols-[1fr_auto_1fr] items-center h-16'>
-          <Link to='/' className='justify-self-start' onClick={homeClick}>
-            <Wordmark />
-          </Link>
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 border-b border-rule backdrop-blur-xl backdrop-saturate-150 bg-paper/70 elev-bar transition-transform duration-300 ${visible || mobileOpen ? 'translate-y-0' : '-translate-y-full'}`}
+      >
+        <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
+          <div className='grid grid-cols-[1fr_auto] md:grid-cols-[1fr_auto_1fr] items-center h-16'>
+            <Link to='/' className='justify-self-start' onClick={homeClick}>
+              <Wordmark />
+            </Link>
 
-          <div className='hidden md:flex gap-7 font-mono text-[13px] tracking-wider text-ink-soft'>
-            {[
-              ...NAV_LINKS,
-              ...(token ? [{ label: 'Teams', to: '/teams' }] : []),
-              ...(user?.plan === 'pro' || user?.plan === 'team' ? [{ label: 'Recap', to: '/recap' }] : []),
-            ].map(({ label, to }) => {
-              const active =
-                to === '/' ? pathname === '/' : pathname.startsWith(to)
-              return (
-                <Link
-                  key={label}
-                  to={to}
-                  onClick={to === '/' ? homeClick : undefined}
-                  className={`relative py-1 transition-colors hover:text-ink
+            <div className='hidden md:flex gap-7 font-mono text-[13px] tracking-wider text-ink-soft'>
+              {[
+                ...NAV_LINKS,
+                ...(token ? [{ label: 'Teams', to: '/teams' }] : []),
+                ...(user?.plan === 'pro' || user?.plan === 'team'
+                  ? [{ label: 'Recap', to: '/recap' }]
+                  : []),
+              ].map(({ label, to }) => {
+                const active =
+                  to === '/' ? pathname === '/' : pathname.startsWith(to)
+                return (
+                  <Link
+                    key={label}
+                    to={to}
+                    onClick={to === '/' ? homeClick : undefined}
+                    className={`relative py-1 transition-colors hover:text-ink
                     after:absolute after:left-0 after:right-0 after:-bottom-0.5 after:h-px after:bg-accent
                     after:origin-left after:transition-transform
                     ${active ? 'text-ink after:scale-x-100' : 'after:scale-x-0 hover:after:scale-x-100'}`}
-                >
-                  {label}
-                </Link>
-              )
-            })}
-          </div>
+                  >
+                    {label}
+                  </Link>
+                )
+              })}
+            </div>
 
-          <div className='justify-self-end flex items-center gap-2'>
-            <NavActions />
-            <button
-              type='button'
-              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-              onClick={() => setMobileOpen((o) => !o)}
-              className='md:hidden flex items-center justify-center w-11 h-11 text-ink-mute hover:text-ink transition-colors'
-            >
-              {mobileOpen ? (
-                <svg
-                  viewBox='0 0 16 16'
-                  fill='none'
-                  stroke='currentColor'
-                  strokeWidth='1.5'
-                  strokeLinecap='round'
-                  className='w-5 h-5'
-                >
-                  <path d='M3 3l10 10M13 3L3 13' />
-                </svg>
-              ) : (
-                <svg
-                  viewBox='0 0 16 16'
-                  fill='none'
-                  stroke='currentColor'
-                  strokeWidth='1.5'
-                  strokeLinecap='round'
-                  className='w-5 h-5'
-                >
-                  <path d='M2 4h12M2 8h12M2 12h12' />
-                </svg>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {mobileOpen && (
-        <div className='md:hidden border-t border-rule bg-paper/95 backdrop-blur-xl'>
-          <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)] flex flex-col py-2'>
-            {[
-              ...NAV_LINKS,
-              ...(token ? [{ label: 'Teams', to: '/teams' }] : []),
-              ...(user?.plan === 'pro' || user?.plan === 'team' ? [{ label: 'Recap', to: '/recap' }] : []),
-            ].map(({ label, to }) => {
-              const active =
-                to === '/' ? pathname === '/' : pathname.startsWith(to)
-              return (
-                <Link
-                  key={label}
-                  to={to}
-                  onClick={(e) => {
-                    if (to === '/') homeClick(e)
-                    setMobileOpen(false)
-                  }}
-                  className={`font-mono text-[15px] tracking-wide py-4 border-b border-rule last:border-b-0 transition-colors ${active ? 'text-ink' : 'text-ink-soft hover:text-ink'}`}
-                >
-                  {label}
-                </Link>
-              )
-            })}
-            {token && (
-              <Link
-                to='/profile'
-                onClick={() => setMobileOpen(false)}
-                className={`font-mono text-[15px] tracking-wide py-4 border-t border-rule transition-colors ${pathname === '/profile' ? 'text-ink' : 'text-ink-soft hover:text-ink'}`}
+            <div className='justify-self-end flex items-center gap-2'>
+              <NavActions />
+              <button
+                type='button'
+                aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+                onClick={() => setMobileOpen((o) => !o)}
+                className='md:hidden flex items-center justify-center w-11 h-11 text-ink-mute hover:text-ink transition-colors'
               >
-                Edit profile
-              </Link>
-            )}
+                {mobileOpen ? (
+                  <svg
+                    viewBox='0 0 16 16'
+                    fill='none'
+                    stroke='currentColor'
+                    strokeWidth='1.5'
+                    strokeLinecap='round'
+                    className='w-5 h-5'
+                  >
+                    <path d='M3 3l10 10M13 3L3 13' />
+                  </svg>
+                ) : (
+                  <svg
+                    viewBox='0 0 16 16'
+                    fill='none'
+                    stroke='currentColor'
+                    strokeWidth='1.5'
+                    strokeLinecap='round'
+                    className='w-5 h-5'
+                  >
+                    <path d='M2 4h12M2 8h12M2 12h12' />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
         </div>
-      )}
-    </nav>
-    <div className='h-16' aria-hidden='true' />
+
+        {mobileOpen && (
+          <div className='md:hidden border-t border-rule bg-paper/95 backdrop-blur-xl'>
+            <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)] flex flex-col py-2'>
+              {[
+                ...NAV_LINKS,
+                ...(token ? [{ label: 'Teams', to: '/teams' }] : []),
+                ...(user?.plan === 'pro' || user?.plan === 'team'
+                  ? [{ label: 'Recap', to: '/recap' }]
+                  : []),
+              ].map(({ label, to }) => {
+                const active =
+                  to === '/' ? pathname === '/' : pathname.startsWith(to)
+                return (
+                  <Link
+                    key={label}
+                    to={to}
+                    onClick={(e) => {
+                      if (to === '/') homeClick(e)
+                      setMobileOpen(false)
+                    }}
+                    className={`font-mono text-[15px] tracking-wide py-4 border-b border-rule last:border-b-0 transition-colors ${active ? 'text-ink' : 'text-ink-soft hover:text-ink'}`}
+                  >
+                    {label}
+                  </Link>
+                )
+              })}
+              {token && (
+                <Link
+                  to='/profile'
+                  onClick={() => setMobileOpen(false)}
+                  className={`font-mono text-[15px] tracking-wide py-4 border-t border-rule transition-colors ${pathname === '/profile' ? 'text-ink' : 'text-ink-soft hover:text-ink'}`}
+                >
+                  Edit profile
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
+      </nav>
+      <div className='h-16' aria-hidden='true' />
     </>
   )
 }
@@ -255,7 +261,7 @@ export function StatusPanel({
   body: ReactNode
 }) {
   return (
-    <div className='border border-rule-strong rounded bg-paper-2/60 px-6 sm:px-10 py-16 sm:py-24 text-center'>
+    <div className='border border-rule-strong rounded bg-paper-2/60 surface px-6 sm:px-10 py-16 sm:py-24 text-center'>
       <h1 className='font-serif text-[clamp(30px,5vw,56px)] leading-none tracking-[-0.02em] m-0 mb-5 text-ink'>
         {title}
       </h1>
@@ -290,7 +296,7 @@ export function Footer() {
   return (
     <footer className='border-t border-rule pt-14 pb-8'>
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
-        <div className='font-serif text-[clamp(52px,16vw,440px)] leading-[0.78] tracking-[-0.06em] text-ink m-0 mb-12 text-center'>
+        <div className='font-serif text-[clamp(52px,16vw,440px)] leading-[0.78] tracking-[-0.06em] text-ink lift-text m-0 mb-12 text-center'>
           commma<span className='text-accent'>.</span>
         </div>
 

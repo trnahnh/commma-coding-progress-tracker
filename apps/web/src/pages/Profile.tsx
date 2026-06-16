@@ -63,14 +63,14 @@ function ProfileHero({ profile }: { profile: UserProfile }) {
   const topStyle = stats.top_lang ? langStyle(stats.top_lang) : null
   const work = [job_title, company].filter(Boolean).join(' · ')
   return (
-    <div className='border border-rule-strong rounded bg-linear-to-b from-paper-2 to-paper overflow-hidden'>
+    <div className='border border-rule-strong rounded-lg bg-linear-to-b from-paper-2 to-paper overflow-hidden surface'>
       <div className='px-5 sm:px-8 py-6 sm:py-8 flex items-start gap-5 sm:gap-6 border-b border-rule'>
         <img
           src={avatar_url}
           alt={handle}
           width={80}
           height={80}
-          className='w-16 sm:w-20 h-16 sm:h-20 rounded-full border border-rule-strong object-cover shrink-0 mt-1'
+          className='w-16 sm:w-20 h-16 sm:h-20 rounded-full border border-rule-strong ring-depth object-cover shrink-0 mt-1'
         />
         <div className='min-w-0'>
           <div className='font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute mb-1.5'>
@@ -283,7 +283,7 @@ function SessionFeed({
   showHistoryGate: boolean
 }) {
   return (
-    <div className='border border-rule-strong rounded overflow-hidden mt-6'>
+    <div className='border border-rule-strong rounded-lg overflow-hidden surface mt-6'>
       <div className='px-5 sm:px-8 py-4 border-b border-rule flex items-center justify-between'>
         <span className='font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute'>
           Sessions

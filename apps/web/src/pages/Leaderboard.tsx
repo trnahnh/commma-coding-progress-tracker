@@ -31,7 +31,7 @@ function PeriodTabs({
           key={value}
           type='button'
           onClick={() => onChange(value)}
-          className={`h-[40px] sm:h-[44px] px-3.5 sm:px-5 rounded-full font-mono text-[13px] sm:text-[15px] uppercase tracking-wider whitespace-nowrap border transition-colors ${
+          className={`h-[40px] sm:h-[44px] px-3.5 sm:px-5 rounded-full font-mono text-[13px] sm:text-[15px] uppercase tracking-wider whitespace-nowrap border transition-colors press ${
             active === value
               ? 'bg-accent border-accent text-paper'
               : 'border-rule-strong text-ink-mute hover:text-ink hover:border-rule-strong'
@@ -119,7 +119,7 @@ function LeaderboardCard({
   onPeriodChange: (p: LeaderboardPeriod) => void
 }) {
   return (
-    <div className='border border-rule-strong rounded bg-linear-to-b from-paper-2 to-paper overflow-hidden'>
+    <div className='border border-rule-strong rounded-lg bg-linear-to-b from-paper-2 to-paper overflow-hidden surface'>
       <div className='px-5 sm:px-8 py-6 sm:py-7 border-b border-rule flex flex-col sm:flex-row sm:items-center justify-between gap-6'>
         <div>
           <div className='font-mono text-[15px] tracking-[0.16em] uppercase text-ink-mute mb-1'>

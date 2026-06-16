@@ -222,8 +222,14 @@ const ENDPOINTS = [
 const RATE_LIMITS = [
   { scope: 'POST /v1/ingest', limit: '1,000 / hr / user' },
   { scope: 'GET reads (/me, /sessions, /recap, …)', limit: '300 / hr / user' },
-  { scope: 'Public reads (leaderboard, profiles, activity)', limit: '300 / hr / IP' },
-  { scope: 'Auth endpoints', limit: '100 / hr / IP (dev) · 20 / hr / IP (prod)' },
+  {
+    scope: 'Public reads (leaderboard, profiles, activity)',
+    limit: '300 / hr / IP',
+  },
+  {
+    scope: 'Auth endpoints',
+    limit: '100 / hr / IP (dev) · 20 / hr / IP (prod)',
+  },
   { scope: 'POST /v1/billing/checkout · /portal', limit: '30 / hr / user' },
   { scope: 'POST /v1/billing/webhook', limit: '600 / hr / IP' },
   { scope: 'GET /v1/sessions/:id/heatmap-card', limit: '120 / hr / IP' },
@@ -249,20 +255,19 @@ export default function Api() {
         <p className='font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute m-0 mb-6'>
           API Reference
         </p>
-        <h1 className='font-serif font-normal text-[clamp(36px,6vw,80px)] leading-[0.95] tracking-[-0.03em] m-0 mb-4 text-ink'>
+        <h1 className='font-serif font-normal text-[clamp(36px,6vw,80px)] leading-[0.95] tracking-[-0.03em] m-0 mb-4 text-ink lift-text'>
           Build on <em className='italic text-accent'>commma.</em>
         </h1>
 
         <div className='flex items-center gap-2.5 mb-12'>
           <LiveDot color='live' />
           <span className='font-mono text-[13px] text-ink-mute'>
-            v1 · base URL:{' '}
-            <span className='text-ink-soft'>api.commma.dev</span>
+            v1 · base URL: <span className='text-ink-soft'>api.commma.dev</span>
           </span>
         </div>
 
         <div className='space-y-2 mb-12'>
-          <div className='border border-rule-strong rounded bg-paper-2/40 px-5 sm:px-7 py-5'>
+          <div className='border border-rule-strong rounded-lg bg-paper-2/40 surface px-5 sm:px-7 py-5'>
             <p className='font-mono text-[12px] tracking-[0.16em] uppercase text-ink-mute m-0 mb-3'>
               Authentication
             </p>
@@ -274,7 +279,7 @@ export default function Api() {
               </span>{' '}
               to rotate.
             </p>
-            <pre className='font-mono text-[13px] text-ink bg-paper-3 border border-rule px-4 py-3 rounded m-0 overflow-x-auto'>
+            <pre className='font-mono text-[13px] text-ink bg-paper-3 border border-rule px-4 py-3 rounded m-0 overflow-x-auto well'>
               {'Authorization: Bearer <access_token>'}
             </pre>
           </div>
@@ -286,7 +291,7 @@ export default function Api() {
               <p className='font-mono text-[12px] tracking-[0.18em] uppercase text-ink-mute m-0 mb-3'>
                 {group.group}
               </p>
-              <div className='border border-rule-strong rounded overflow-hidden'>
+              <div className='border border-rule-strong rounded-lg overflow-hidden surface'>
                 {group.routes.map((r, i) => (
                   <div
                     key={r.path + r.method}

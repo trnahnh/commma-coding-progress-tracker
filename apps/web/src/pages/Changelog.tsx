@@ -3,6 +3,17 @@ import { Shell } from '../components/chrome'
 
 const ENTRIES = [
   {
+    version: '0.6.0',
+    date: 'Jun 2026',
+    tag: 'Design',
+    changes: [
+      'Depth pass across every page — raised cards, recessed inputs, a floating navbar, lifted headlines, and glowing CTAs, all lit from above (palette, type, and colors unchanged)',
+      'Landing hero is now a cursor-driven 3D scene: parallax depth layers, an accent light that follows your cursor, and a tilting glass stat panel with a moving glare',
+      'Always-on 3D backdrop on the landing page — a perspective speed-grid tunnel and drifting glow-orbs, rendered in pure CSS so the motion runs on mobile too',
+      'Motion respects prefers-reduced-motion, and cursor-only effects switch off on touch devices',
+    ],
+  },
+  {
     version: '0.5.0',
     date: 'Jun 2026',
     tag: 'Production',
@@ -83,7 +94,7 @@ export default function Changelog() {
         <p className='font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute m-0 mb-6'>
           Changelog
         </p>
-        <h1 className='font-serif font-normal text-[clamp(36px,6vw,80px)] leading-[0.95] tracking-[-0.03em] m-0 mb-12 text-ink'>
+        <h1 className='font-serif font-normal text-[clamp(36px,6vw,80px)] leading-[0.95] tracking-[-0.03em] m-0 mb-12 text-ink lift-text'>
           What's <em className='italic text-accent'>shipped.</em>
         </h1>
 
@@ -97,7 +108,7 @@ export default function Changelog() {
                 <span className='font-serif text-[clamp(22px,2.5vw,32px)] leading-none tracking-[-0.02em] text-ink tnum'>
                   {entry.version}
                 </span>
-                <span className='font-mono text-[11px] tracking-[0.16em] uppercase text-accent-2 border border-accent-2-line bg-accent-2-soft px-2.5 py-1 rounded-full'>
+                <span className='font-mono text-[11px] tracking-[0.16em] uppercase text-accent-2 border border-accent-2-line bg-accent-2-soft px-2.5 py-1 rounded-full bevel'>
                   {entry.tag}
                 </span>
                 <span className='font-mono text-[13px] text-ink-mute ml-auto'>

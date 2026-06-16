@@ -31,7 +31,7 @@ export default function Terms() {
         <p className='font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute m-0 mb-6'>
           Legal
         </p>
-        <h1 className='font-serif font-normal text-[clamp(36px,6vw,80px)] leading-[0.95] tracking-[-0.03em] m-0 mb-3 text-ink'>
+        <h1 className='font-serif font-normal text-[clamp(36px,6vw,80px)] leading-[0.95] tracking-[-0.03em] m-0 mb-3 text-ink lift-text'>
           Terms of <em className='italic text-accent'>service.</em>
         </h1>
         <p className='font-mono text-[13px] text-ink-mute m-0 mb-12'>

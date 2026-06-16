@@ -25,7 +25,7 @@ function formatWeekRange(start: string, end: string): string {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className='flex flex-col gap-3 p-5 sm:p-6 rounded-xl border border-rule bg-paper-2/40'>
+    <div className='flex flex-col gap-3 p-5 sm:p-6 rounded-xl border border-rule bg-paper-2/40 surface'>
       <span className='font-mono text-[12px] uppercase tracking-[0.12em] text-ink-mute'>
         {label}
       </span>
@@ -48,7 +48,10 @@ function RecapSkeleton() {
       <div className='h-[3px] w-full bg-paper-3 rounded animate-pulse' />
       <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4'>
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className='h-[100px] bg-paper-3 rounded-xl animate-pulse' />
+          <div
+            key={i}
+            className='h-[100px] bg-paper-3 rounded-xl animate-pulse'
+          />
         ))}
       </div>
       <div className='h-[130px] bg-paper-3 rounded-xl animate-pulse' />
@@ -112,7 +115,9 @@ export default function Recap() {
     { label: 'Sessions', value: String(recap.session_count) },
     { label: 'Coding time', value: formatDuration(recap.total_duration_s) },
     { label: 'Best session', value: formatDuration(recap.best_duration_s) },
-    ...(recap.top_lang ? [{ label: 'Top language', value: recap.top_lang }] : []),
+    ...(recap.top_lang
+      ? [{ label: 'Top language', value: recap.top_lang }]
+      : []),
     ...(recap.current_streak_days > 0
       ? [{ label: 'Streak', value: `${recap.current_streak_days}d` }]
       : []),
@@ -126,13 +131,15 @@ export default function Recap() {
             Weekly recap
           </span>
           <span className='font-mono text-[13px] text-ink-mute'>·</span>
-          <span className='font-mono text-[13px] text-ink-soft'>{weekLabel}</span>
-          <span className='ml-auto font-mono text-[11px] uppercase tracking-[0.1em] text-ink-soft border border-ink-mute rounded-full px-3 py-1'>
+          <span className='font-mono text-[13px] text-ink-soft'>
+            {weekLabel}
+          </span>
+          <span className='ml-auto font-mono text-[11px] uppercase tracking-widest text-ink-soft border border-ink-mute rounded-full px-3 py-1'>
             {user?.plan === 'team' ? 'Team' : 'Pro'}
           </span>
         </div>
 
-        <h1 className='font-serif text-[clamp(30px,6vw,64px)] leading-[1.1] tracking-[-0.025em] text-ink m-0 mb-5 max-w-[900px]'>
+        <h1 className='font-serif text-[clamp(30px,6vw,64px)] leading-[1.1] tracking-tight text-ink m-0 mb-5 max-w-[900px] lift-text'>
           {recap.headline}
         </h1>
         <p className='font-sans text-[15px] sm:text-[17px] text-ink-soft leading-[1.65] m-0 max-w-[600px]'>
@@ -149,9 +156,9 @@ export default function Recap() {
             Day {dayNum} / 7
           </span>
         </div>
-        <div className='h-[3px] rounded-full bg-paper-3 overflow-hidden'>
+        <div className='h-[3px] rounded-full bg-paper-3 overflow-hidden well'>
           <div
-            className='h-full rounded-full bg-accent transition-all duration-700'
+            className='h-full rounded-full bg-accent glow-accent transition-all duration-700'
             style={{ width: `${Math.round(progress * 100)}%` }}
           />
         </div>
@@ -163,7 +170,7 @@ export default function Recap() {
         ))}
       </div>
 
-      <div className='border border-rule-strong rounded-xl bg-paper-2/40 p-6 sm:p-8 lg:p-10 flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-10 justify-between'>
+      <div className='border border-rule-strong rounded-xl bg-paper-2/40 surface p-6 sm:p-8 lg:p-10 flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-10 justify-between'>
         <div className='min-w-0'>
           <span className='font-mono text-[12px] uppercase tracking-[0.12em] text-ink-mute block mb-3'>
             Vs last week
@@ -194,7 +201,7 @@ export default function Recap() {
           {recap.best_session_id ? (
             <Link
               to={`/sessions/${recap.best_session_id}`}
-              className='group inline-flex items-center gap-2.5 h-[44px] px-6 rounded-full font-mono text-[13px] uppercase tracking-wider font-medium bg-accent text-paper hover:bg-ink transition-colors whitespace-nowrap'
+              className='group inline-flex items-center gap-2.5 h-[44px] px-6 rounded-full font-mono text-[13px] uppercase tracking-wider font-medium bg-accent text-paper glow-accent press hover:bg-ink transition-colors whitespace-nowrap'
             >
               View best session
               <span className='inline-block transition-transform group-hover:translate-x-1'>

@@ -26,9 +26,8 @@ export default function Status() {
         <p className='font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute m-0 mb-6'>
           System Status
         </p>
-        <h1 className='font-serif font-normal text-[clamp(36px,6vw,80px)] leading-[0.95] tracking-[-0.03em] m-0 mb-4 text-ink'>
-          All systems{' '}
-          <em className='italic text-accent'>operational.</em>
+        <h1 className='font-serif font-normal text-[clamp(36px,6vw,80px)] leading-[0.95] tracking-[-0.03em] m-0 mb-4 text-ink lift-text'>
+          All systems <em className='italic text-accent'>operational.</em>
         </h1>
         <p className='font-sans text-[16px] leading-relaxed text-ink-soft m-0 mb-12 max-w-[48ch]'>
           commma is live on AWS — EC2 t4g (API), S3 + CloudFront (web), Neon
@@ -36,7 +35,7 @@ export default function Status() {
           launch is pending.
         </p>
 
-        <div className='border border-rule-strong rounded overflow-hidden mb-8'>
+        <div className='border border-rule-strong rounded-lg overflow-hidden surface mb-8'>
           <div className='flex items-center gap-3 px-5 sm:px-7 py-4 bg-paper-2 border-b border-rule'>
             <LiveDot color='live' />
             <span className='font-mono text-[13px] text-ink-soft tracking-wide'>

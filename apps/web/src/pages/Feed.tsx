@@ -189,7 +189,7 @@ export default function Feed() {
   if (authLoading) {
     return (
       <Shell>
-        <div className='border border-rule-strong rounded bg-linear-to-b from-paper-2 to-paper overflow-hidden'>
+        <div className='border border-rule-strong rounded-lg bg-linear-to-b from-paper-2 to-paper overflow-hidden surface'>
           {header}
           <div className='px-5 sm:px-8 py-16 text-center font-mono text-[12px] text-ink-mute'>
             Loading…
@@ -202,7 +202,7 @@ export default function Feed() {
   if (!token) {
     return (
       <Shell>
-        <div className='border border-rule-strong rounded bg-linear-to-b from-paper-2 to-paper overflow-hidden'>
+        <div className='border border-rule-strong rounded-lg bg-linear-to-b from-paper-2 to-paper overflow-hidden surface'>
           {header}
           <div className='px-5 sm:px-8 py-24 flex flex-col items-center gap-14'>
             <p className='font-mono text-[15px] text-ink-mute m-0 text-center max-w-[36ch]'>
@@ -210,7 +210,7 @@ export default function Feed() {
             </p>
             <Link
               to='/signin'
-              className='inline-flex items-center gap-2.5 h-[46px] px-7 rounded-full font-mono text-[13px] uppercase tracking-wider bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors'
+              className='inline-flex items-center gap-2.5 h-[46px] px-7 rounded-full font-mono text-[13px] uppercase tracking-wider bg-accent text-paper border border-accent glow-accent press hover:bg-ink hover:border-ink transition-colors'
             >
               Sign in →
             </Link>
@@ -250,7 +250,7 @@ export default function Feed() {
 
   return (
     <Shell>
-      <div className='border border-rule-strong rounded bg-linear-to-b from-paper-2 to-paper overflow-hidden'>
+      <div className='border border-rule-strong rounded-lg bg-linear-to-b from-paper-2 to-paper overflow-hidden surface'>
         {header}
         <FeedList
           entries={state.entries}

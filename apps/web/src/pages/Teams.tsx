@@ -77,7 +77,7 @@ function InviteRow({
           disabled={busy !== null}
           onClick={() => void handle('accept')}
           className='inline-flex items-center h-[44px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
-            bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors disabled:opacity-40'
+            bg-accent text-paper border border-accent bevel press hover:bg-ink hover:border-ink transition-colors disabled:opacity-40'
         >
           {busy === 'accept' ? '…' : 'Accept'}
         </button>
@@ -99,7 +99,7 @@ function TeamCard({ team }: { team: TeamSummary }) {
   return (
     <Link
       to={`/teams/${team.slug}`}
-      className='group flex flex-col gap-3 p-5 sm:p-6 border border-rule-strong rounded bg-linear-to-b from-paper-2 to-paper
+      className='group flex flex-col gap-3 p-5 sm:p-6 border border-rule-strong rounded-lg bg-linear-to-b from-paper-2 to-paper surface lift
         hover:border-accent-line hover:from-paper-3 transition-all'
     >
       <div className='flex items-start justify-between gap-2'>
@@ -111,9 +111,7 @@ function TeamCard({ team }: { team: TeamSummary }) {
           <RoleChip role={team.role} />
         </div>
       </div>
-      <div className='font-mono text-[13px] text-ink-mute'>
-        /{team.slug}
-      </div>
+      <div className='font-mono text-[13px] text-ink-mute'>/{team.slug}</div>
       <div className='mt-auto pt-2 border-t border-rule flex items-center justify-between'>
         <span className='font-mono text-[12px] uppercase tracking-wider text-ink-mute'>
           {new Date(team.created_at).toLocaleDateString(undefined, {
@@ -166,15 +164,13 @@ function CreateTeamPanel({
       onCreated(slug.trim())
       navigate(`/teams/${slug.trim()}`)
     } catch (err) {
-      setError(
-        err instanceof ApiError ? err.message : 'Something went wrong',
-      )
+      setError(err instanceof ApiError ? err.message : 'Something went wrong')
       setBusy(false)
     }
   }
 
   return (
-    <div className='border border-rule-strong rounded bg-linear-to-b from-paper-2 to-paper overflow-hidden'>
+    <div className='border border-rule-strong rounded-lg bg-linear-to-b from-paper-2 to-paper overflow-hidden surface'>
       <div className='px-5 sm:px-8 py-5 sm:py-6 border-b border-rule'>
         <div className='font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute mb-1'>
           new team
@@ -183,7 +179,10 @@ function CreateTeamPanel({
           Create a team
         </h2>
       </div>
-      <form onSubmit={(e) => void handleSubmit(e)} className='px-5 sm:px-8 py-6 flex flex-col gap-4'>
+      <form
+        onSubmit={(e) => void handleSubmit(e)}
+        className='px-5 sm:px-8 py-6 flex flex-col gap-4'
+      >
         <div className='flex flex-col gap-1.5'>
           <label className='font-mono text-[12px] uppercase tracking-wider text-ink-mute'>
             Team name
@@ -195,7 +194,7 @@ function CreateTeamPanel({
             placeholder='My awesome team'
             maxLength={64}
             required
-            className='h-[42px] px-4 rounded border border-rule-strong bg-paper-3 font-mono text-[14px] text-ink placeholder-ink-faint
+            className='h-[42px] px-4 rounded border border-rule-strong bg-paper-3 well font-mono text-[14px] text-ink placeholder-ink-faint
               focus:outline-none focus:border-accent transition-colors'
           />
         </div>
@@ -213,7 +212,7 @@ function CreateTeamPanel({
             placeholder='my-team'
             maxLength={39}
             required
-            className='h-[42px] px-4 rounded border border-rule-strong bg-paper-3 font-mono text-[14px] text-ink placeholder-ink-faint
+            className='h-[42px] px-4 rounded border border-rule-strong bg-paper-3 well font-mono text-[14px] text-ink placeholder-ink-faint
               focus:outline-none focus:border-accent transition-colors'
           />
           {slug && (
@@ -222,14 +221,12 @@ function CreateTeamPanel({
             </span>
           )}
         </div>
-        {error && (
-          <p className='font-mono text-[13px] text-accent'>{error}</p>
-        )}
+        {error && <p className='font-mono text-[13px] text-accent'>{error}</p>}
         <button
           type='submit'
           disabled={busy || !name.trim() || !slug.trim()}
           className='self-start inline-flex items-center h-[42px] px-6 rounded-full font-mono text-[13px] uppercase tracking-wider
-            bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors disabled:opacity-40'
+            bg-accent text-paper border border-accent bevel press hover:bg-ink hover:border-ink transition-colors disabled:opacity-40'
         >
           {busy ? 'Creating…' : 'Create team'}
         </button>
@@ -332,7 +329,10 @@ export default function Teams() {
       .then(() => {
         setState((prev) => {
           if (prev.phase !== 'ready') return prev
-          return { ...prev, invites: prev.invites.filter((inv) => inv.id !== id) }
+          return {
+            ...prev,
+            invites: prev.invites.filter((inv) => inv.id !== id),
+          }
         })
       })
       .catch(() => void 0)
@@ -342,7 +342,7 @@ export default function Teams() {
     <Shell>
       <div className='flex flex-col gap-6'>
         {invites.length > 0 && (
-          <div className='border border-rule-strong rounded bg-linear-to-b from-paper-2 to-paper overflow-hidden'>
+          <div className='border border-rule-strong rounded-lg bg-linear-to-b from-paper-2 to-paper overflow-hidden surface'>
             <div className='px-5 sm:px-8 py-5 sm:py-6 border-b border-rule flex items-center gap-3'>
               <div>
                 <div className='font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute mb-1'>
@@ -369,7 +369,7 @@ export default function Teams() {
           </div>
         )}
 
-        <div className='border border-rule-strong rounded bg-linear-to-b from-paper-2 to-paper overflow-hidden'>
+        <div className='border border-rule-strong rounded-lg bg-linear-to-b from-paper-2 to-paper overflow-hidden surface'>
           <div className='px-5 sm:px-8 py-5 sm:py-6 border-b border-rule'>
             <div className='font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute mb-1'>
               teams
@@ -403,7 +403,7 @@ export default function Teams() {
             }
           />
         ) : (
-          <div className='border border-rule rounded px-5 sm:px-8 py-5 flex flex-col sm:flex-row sm:items-center gap-4'>
+          <div className='border border-rule rounded-lg px-5 sm:px-8 py-5 surface flex flex-col sm:flex-row sm:items-center gap-4'>
             <div className='flex-1'>
               <div className='font-mono text-[12px] uppercase tracking-wider text-ink-mute mb-1'>
                 team plan

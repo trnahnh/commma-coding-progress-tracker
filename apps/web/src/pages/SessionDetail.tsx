@@ -199,7 +199,7 @@ function HeatmapSlot({
     return (
       <div className='px-5 sm:px-8 py-6 sm:py-8'>
         <HeatmapHeader />
-        <div className='rounded border border-dashed border-rule-strong bg-paper-2/60 px-5 sm:px-8 py-8 sm:py-10'>
+        <div className='rounded-lg border border-dashed border-rule-strong bg-paper-2/60 well px-5 sm:px-8 py-8 sm:py-10'>
           <p className='font-mono text-[13px] text-ink-mute m-0 text-center'>
             No keyboard data captured for this session.
           </p>
@@ -258,13 +258,13 @@ function HeatmapSlot({
 
 function SessionCard({ session, isPro }: { session: Session; isPro: boolean }) {
   return (
-    <div className='relative border border-rule-strong bg-linear-to-b from-paper-2 to-paper rounded overflow-hidden'>
+    <div className='relative border border-rule-strong bg-linear-to-b from-paper-2 to-paper rounded-lg overflow-hidden surface-lg'>
       <div className='px-5 sm:px-8 py-6 sm:py-7 border-b border-rule'>
         <div className='font-mono text-[13px] tracking-[0.16em] text-accent uppercase mb-2.5 flex items-center gap-2.5'>
           <LiveDot color='accent' />
           session
         </div>
-        <h1 className='font-serif text-[clamp(28px,4vw,52px)] leading-[1.04] tracking-[-0.02em] m-0 text-ink'>
+        <h1 className='font-serif text-[clamp(28px,4vw,52px)] leading-[1.04] tracking-[-0.02em] m-0 text-ink lift-text'>
           {formatDate(session.started_at)}
         </h1>
         <p className='font-mono text-[14px] text-ink-mute mt-3 m-0 tnum'>

@@ -56,7 +56,7 @@ export default function SignIn() {
       </Link>
 
       <div className='w-full max-w-[480px] text-center'>
-        <h1 className='font-serif text-[clamp(48px,8vw,80px)] leading-[0.95] tracking-[-0.03em] m-0 text-ink mb-5'>
+        <h1 className='font-serif text-[clamp(48px,8vw,80px)] leading-[0.95] tracking-[-0.03em] m-0 text-ink mb-5 lift-text'>
           Welcome back.
         </h1>
         <p className='font-mono text-[14px] text-ink-mute m-0 mb-12 leading-relaxed'>
@@ -67,7 +67,7 @@ export default function SignIn() {
         <button
           type='button'
           onClick={signIn}
-          className='group w-full inline-flex items-center justify-center gap-3 h-[56px] px-8 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium bg-ink text-paper border border-ink hover:bg-paper hover:text-ink transition-colors mb-5'
+          className='group w-full inline-flex items-center justify-center gap-3 h-[56px] px-8 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium bg-ink text-paper border border-ink bevel press hover:bg-paper hover:text-ink transition-colors mb-5'
         >
           <GithubMark />
           Sign in with GitHub

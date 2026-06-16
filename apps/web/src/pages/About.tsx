@@ -14,7 +14,7 @@ function useReveal(threshold = 0.1) {
           obs.disconnect()
         }
       },
-      { threshold }
+      { threshold },
     )
     obs.observe(el)
     return () => obs.disconnect()
@@ -223,7 +223,7 @@ function StackCard({
   const [open, setOpen] = useState(false)
   return (
     <div
-      className={`border rounded-lg p-4 transition-colors cursor-pointer overflow-hidden focus-visible:outline-none ${open ? 'border-accent-line bg-accent-soft' : 'border-rule bg-paper-2'} ${visible ? 'animate-fade-up' : 'opacity-0'}`}
+      className={`border rounded-lg p-4 transition-colors cursor-pointer overflow-hidden focus-visible:outline-none surface lift ${open ? 'border-accent-line bg-accent-soft' : 'border-rule bg-paper-2'} ${visible ? 'animate-fade-up' : 'opacity-0'}`}
       tabIndex={0}
       style={{ animationDelay: `${delay}ms` }}
       onFocus={() => setOpen(true)}
@@ -235,10 +235,15 @@ function StackCard({
         }
       }}
     >
-      <div className='font-mono text-[12px] text-ink-mute mb-2' aria-hidden='true'>
+      <div
+        className='font-mono text-[12px] text-ink-mute mb-2'
+        aria-hidden='true'
+      >
         {no}
       </div>
-      <div className='font-mono text-[14px] sm:text-[15px] text-ink mb-1'>{name}</div>
+      <div className='font-mono text-[14px] sm:text-[15px] text-ink mb-1'>
+        {name}
+      </div>
       <div className='font-mono text-[12px] text-ink-mute'>{role}</div>
       <p
         className={`font-mono text-[13px] text-ink-soft leading-snug m-0 overflow-hidden transition-all duration-300 ease-out ${open ? 'max-h-32 mt-2' : 'max-h-0 mt-0'}`}
@@ -271,15 +276,15 @@ export default function About() {
         <p className='font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute m-0 mb-6'>
           About
         </p>
-        <h1 className='font-serif font-normal text-[clamp(40px,7vw,96px)] leading-[0.92] tracking-[-0.03em] m-0 mb-8 text-ink max-w-[800px]'>
+        <h1 className='font-serif font-normal text-[clamp(40px,7vw,96px)] leading-[0.92] tracking-[-0.03em] m-0 mb-8 text-ink max-w-[800px] lift-text'>
           We built the app{' '}
           <em className='italic text-accent'>we wished existed.</em>
         </h1>
         <div className='max-w-[56ch]'>
           <p className='font-sans text-[17px] leading-relaxed text-ink-soft m-0 mb-4'>
             GitHub tells you what you committed. Strava tells you how hard you
-            trained. We wanted both — the record and the effort — applied to
-            the craft of writing software.
+            trained. We wanted both — the record and the effort — applied to the
+            craft of writing software.
           </p>
           <p className='font-sans text-[17px] leading-relaxed text-ink-soft m-0'>
             commma treats your coding sessions like race splits. Sessions, pace,
@@ -289,10 +294,7 @@ export default function About() {
         </div>
       </section>
 
-      <section
-        ref={originRef}
-        className='mb-[clamp(80px,12vw,160px)]'
-      >
+      <section ref={originRef} className='mb-[clamp(80px,12vw,160px)]'>
         <p
           className={`font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute m-0 mb-10 ${originVisible ? 'animate-fade-up' : 'opacity-0'}`}
         >
@@ -301,16 +303,21 @@ export default function About() {
 
         <div className='grid grid-cols-1 md:grid-cols-[1fr_44px_1fr] gap-3 md:gap-0 mb-3 md:mb-4'>
           <div
-            className={`border border-rule-strong bg-paper-2 rounded-lg p-5 sm:p-6 font-mono ${originVisible ? 'animate-fade-left' : 'opacity-0'}`}
+            className={`border border-rule-strong bg-paper-2 rounded-lg p-5 sm:p-6 surface font-mono ${originVisible ? 'animate-fade-left' : 'opacity-0'}`}
             style={{ animationDelay: '80ms' }}
           >
             <div className='text-[12px] tracking-[0.18em] uppercase text-ink-mute mb-5 flex items-center gap-2'>
-              <span className='w-2 h-2 rounded-full bg-rule-strong inline-block' aria-hidden='true' />
+              <span
+                className='w-2 h-2 rounded-full bg-rule-strong inline-block'
+                aria-hidden='true'
+              />
               GitHub
             </div>
             <div className='space-y-2 text-[13px] leading-relaxed mb-5'>
               <div className='text-ink'>feat: ingest pipeline refactor</div>
-              <div className='text-ink-soft'>fix: session boundary edge case</div>
+              <div className='text-ink-soft'>
+                fix: session boundary edge case
+              </div>
               <div className='text-ink-soft'>chore: append-only migration</div>
             </div>
             <div className='pt-4 border-t border-rule grid grid-cols-3 text-[12px] gap-2'>
@@ -333,11 +340,14 @@ export default function About() {
           </div>
 
           <div
-            className={`border border-rule-strong bg-paper-2 rounded-lg p-5 sm:p-6 font-mono ${originVisible ? 'animate-fade-right' : 'opacity-0'}`}
+            className={`border border-rule-strong bg-paper-2 rounded-lg p-5 sm:p-6 surface font-mono ${originVisible ? 'animate-fade-right' : 'opacity-0'}`}
             style={{ animationDelay: '80ms' }}
           >
             <div className='text-[12px] tracking-[0.18em] uppercase text-ink-mute mb-5 flex items-center gap-2'>
-              <span className='w-2 h-2 rounded-full bg-rule-strong inline-block' aria-hidden='true' />
+              <span
+                className='w-2 h-2 rounded-full bg-rule-strong inline-block'
+                aria-hidden='true'
+              />
               Strava
             </div>
             <div className='space-y-2 text-[13px] leading-relaxed mb-5'>
@@ -364,22 +374,21 @@ export default function About() {
         </div>
 
         <div
-          className={`border border-accent-line bg-accent-soft rounded-lg p-5 sm:p-6 font-mono max-w-[520px] mx-auto ${originVisible ? 'animate-fade-up' : 'opacity-0'}`}
+          className={`border border-accent-line bg-accent-soft rounded-lg p-5 sm:p-6 font-mono max-w-[520px] mx-auto glow-accent ${originVisible ? 'animate-fade-up' : 'opacity-0'}`}
           style={{ animationDelay: '420ms' }}
         >
           <div className='text-[12px] tracking-[0.18em] uppercase text-accent mb-5 flex items-center gap-2'>
-            <span className='w-2 h-2 rounded-full bg-accent inline-block animate-pulse-dot' aria-hidden='true' />
+            <span
+              className='w-2 h-2 rounded-full bg-accent inline-block animate-pulse-dot'
+              aria-hidden='true'
+            />
             commma
           </div>
           <div className='space-y-2 text-[13px] leading-relaxed mb-5'>
             <div className='text-ink'>TypeScript session · 2h 18m</div>
+            <div className='text-ink-soft'>Avg pace 184 kpm · Peak 241 kpm</div>
             <div className='text-ink-soft'>
-              Avg pace 184 kpm · Peak 241 kpm
-            </div>
-            <div className='text-ink-soft'>
-              Streak:{' '}
-              <span className='text-live'>12 days</span>
-              {' '}· Rank:{' '}
+              Streak: <span className='text-live'>12 days</span> · Rank:{' '}
               <span className='text-accent'>#3 today</span>
             </div>
           </div>
@@ -394,10 +403,7 @@ export default function About() {
         </div>
       </section>
 
-      <section
-        ref={beliefsRef}
-        className='mb-[clamp(80px,12vw,160px)]'
-      >
+      <section ref={beliefsRef} className='mb-[clamp(80px,12vw,160px)]'>
         <p
           className={`font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute m-0 mb-10 ${beliefsVisible ? 'animate-fade-up' : 'opacity-0'}`}
         >

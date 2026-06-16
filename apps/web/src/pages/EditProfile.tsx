@@ -53,7 +53,7 @@ function Field({
 }
 
 const inputCls =
-  'w-full bg-paper-3 border border-rule-strong rounded px-3 py-2.5 font-mono text-[13px] text-ink placeholder:text-ink-faint focus:outline-none focus:border-accent-line transition-colors'
+  'w-full bg-paper-3 border border-rule-strong rounded well px-3 py-2.5 font-mono text-[13px] text-ink placeholder:text-ink-faint focus:outline-none focus:border-accent-line transition-colors'
 
 function NotificationsSection({ token }: { token: string }) {
   const [state, setState] = useState<PushState | 'loading'>('loading')
@@ -61,7 +61,9 @@ function NotificationsSection({ token }: { token: string }) {
   const [err, setErr] = useState<string | null>(null)
 
   useEffect(() => {
-    getPushState().then(setState).catch(() => setState('unsupported'))
+    getPushState()
+      .then(setState)
+      .catch(() => setState('unsupported'))
   }, [])
 
   const toggle = async () => {
@@ -95,13 +97,17 @@ function NotificationsSection({ token }: { token: string }) {
               ? 'Not supported in this browser.'
               : state === 'denied'
                 ? 'Notifications are blocked. Allow them in browser settings.'
-                : 'Get a daily reminder when you haven\'t coded yet and your streak is at risk.'}
+                : "Get a daily reminder when you haven't coded yet and your streak is at risk."}
           </p>
-          {err && <p className='font-mono text-[12px] text-accent m-0 mt-1'>{err}</p>}
+          {err && (
+            <p className='font-mono text-[12px] text-accent m-0 mt-1'>{err}</p>
+          )}
         </div>
         <button
           type='button'
-          disabled={busy || unsupported || state === 'denied' || state === 'loading'}
+          disabled={
+            busy || unsupported || state === 'denied' || state === 'loading'
+          }
           onClick={() => void toggle()}
           className={[
             'shrink-0 inline-flex items-center h-[44px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider border transition-colors disabled:opacity-40',
@@ -223,20 +229,22 @@ export default function EditProfile() {
   useEffect(() => {
     if (!token || initialized.current) return
     initialized.current = true
-    getMe(token).then((me) => {
-      setDisplayName(me.display_name ?? '')
-      setPronouns(me.pronouns ?? '')
-      setBio(me.bio ?? '')
-      setWebsite(me.website ?? '')
-      setLocation(me.location ?? '')
-      setCompany(me.company ?? '')
-      setJobTitle(me.job_title ?? '')
-      setLinkedin(me.linkedin ?? '')
-      setOpenToWork(me.open_to_work ?? false)
-      setSchool(me.school ?? '')
-      setFieldOfStudy(me.field_of_study ?? '')
-      setPrivacy((me.privacy as 'full' | 'summary' | 'off') ?? 'full')
-    }).catch(() => void 0)
+    getMe(token)
+      .then((me) => {
+        setDisplayName(me.display_name ?? '')
+        setPronouns(me.pronouns ?? '')
+        setBio(me.bio ?? '')
+        setWebsite(me.website ?? '')
+        setLocation(me.location ?? '')
+        setCompany(me.company ?? '')
+        setJobTitle(me.job_title ?? '')
+        setLinkedin(me.linkedin ?? '')
+        setOpenToWork(me.open_to_work ?? false)
+        setSchool(me.school ?? '')
+        setFieldOfStudy(me.field_of_study ?? '')
+        setPrivacy((me.privacy as 'full' | 'summary' | 'off') ?? 'full')
+      })
+      .catch(() => void 0)
   }, [token])
 
   useEffect(() => {
@@ -313,7 +321,7 @@ export default function EditProfile() {
         </div>
 
         <form onSubmit={handleSubmit} noValidate>
-          <div className='border border-rule-strong rounded bg-linear-to-b from-paper-2 to-paper overflow-hidden divide-y divide-rule'>
+          <div className='border border-rule-strong rounded-lg bg-linear-to-b from-paper-2 to-paper overflow-hidden surface divide-y divide-rule'>
             <div className='px-5 sm:px-8 py-6 sm:py-7 flex flex-col gap-5'>
               <div className='font-mono text-[12px] uppercase tracking-[0.18em] text-ink-mute'>
                 About
@@ -507,7 +515,7 @@ export default function EditProfile() {
             <button
               type='submit'
               disabled={saving}
-              className='inline-flex items-center h-[42px] px-6 rounded-full font-mono text-[13px] uppercase tracking-wider bg-accent text-paper border border-accent hover:bg-ink hover:border-ink disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+              className='inline-flex items-center h-[42px] px-6 rounded-full font-mono text-[13px] uppercase tracking-wider bevel press bg-accent text-paper border border-accent hover:bg-ink hover:border-ink disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
             >
               {saving ? 'Saving…' : 'Save changes'}
             </button>

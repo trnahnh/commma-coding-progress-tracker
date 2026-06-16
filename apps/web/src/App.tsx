@@ -13,6 +13,8 @@ import {
 import { useAuth } from './lib/auth'
 import { formatClock, formatDate, formatDuration } from './lib/format'
 import { langStyle } from './lib/langColors'
+import { useScene } from './lib/useScene'
+import { SceneBackdrop } from './components/SceneBackdrop'
 
 interface SessionView {
   id: string | null
@@ -75,7 +77,12 @@ const MOCK_SESSION: SessionView = {
   pace: 184,
   peakCpm: 241,
   langs: [
-    { name: 'TypeScript', time: '1h 12m', pct: 52, swatch: 'var(--color-accent)' },
+    {
+      name: 'TypeScript',
+      time: '1h 12m',
+      pct: 52,
+      swatch: 'var(--color-accent)',
+    },
     { name: 'Python', time: '31m', pct: 22, swatch: 'var(--color-live)' },
     { name: 'SQL', time: '18m', pct: 13, swatch: 'var(--color-ink)' },
     { name: 'Markdown', time: '17m', pct: 13, swatch: 'var(--color-ink-mute)' },
@@ -139,9 +146,12 @@ function Hero() {
     return () => clearInterval(id)
   }, [])
 
+  const sceneRef = useScene<HTMLElement>()
+
   return (
-    <section className='relative'>
-      <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)] pt-[clamp(56px,9vw,120px)] pb-[clamp(48px,6vw,96px)]'>
+    <section ref={sceneRef} className='relative scene-perspective'>
+      <div aria-hidden='true' className='hero-spotlight' />
+      <div className='relative z-10 mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)] pt-[clamp(56px,9vw,120px)] pb-[clamp(48px,6vw,96px)]'>
         <div className='flex items-center gap-3.5 mb-10 sm:mb-12 opacity-0 animate-rise-700 delay-100'>
           <LiveDot />
           <span className='font-mono text-[15px] tracking-[0.16em] uppercase text-ink-mute'>
@@ -149,7 +159,7 @@ function Hero() {
           </span>
         </div>
 
-        <h1 className='font-serif font-normal text-[clamp(44px,10.5vw,168px)] leading-[0.92] tracking-[-0.035em] m-0'>
+        <h1 className='font-serif font-normal text-[clamp(44px,10.5vw,168px)] leading-[0.92] tracking-[-0.035em] m-0 lift-text par-2'>
           <span className='block overflow-hidden reveal-clip py-[0.12em] my-[-0.12em]'>
             <span className='animate-rise-900 delay-120 inline-block'>
               Every commit
@@ -162,8 +172,8 @@ function Hero() {
           </span>
         </h1>
 
-        <div className='grid md:grid-cols-[1.4fr_1fr] gap-[clamp(36px,6vw,96px)] items-end mt-[clamp(36px,6vw,80px)]'>
-          <div>
+        <div className='grid md:grid-cols-[1.4fr_1fr] gap-[clamp(36px,6vw,96px)] items-end mt-[clamp(36px,6vw,80px)] par-1'>
+          <div className='par-3'>
             <p
               className='font-sans text-[clamp(16px,1.3vw,19px)] leading-relaxed text-ink-soft max-w-[46ch] m-0 mb-8
               opacity-0 animate-rise-700 delay-520'
@@ -177,7 +187,7 @@ function Hero() {
               <a
                 href='https://marketplace.visualstudio.com'
                 className='group inline-flex items-center gap-2.5 h-[44px] px-5 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium
-                  bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors'
+                  bg-accent text-paper border border-accent glow-accent press hover:bg-ink hover:border-ink transition-colors'
               >
                 Install the extension
                 <span className='inline-block transition-transform group-hover:translate-x-1'>
@@ -187,7 +197,7 @@ function Hero() {
               <Link
                 to='/leaderboard'
                 className='inline-flex items-center gap-2.5 h-[44px] px-5 rounded-full font-mono text-[15px] uppercase tracking-wider
-                  text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint transition-colors'
+                  text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint transition-colors press'
               >
                 See a sample profile
               </Link>
@@ -195,8 +205,9 @@ function Hero() {
           </div>
 
           <div className='opacity-0 animate-rise delay-720'>
-            <div className='grid grid-cols-2 border-t border-rule'>
-              <div className='py-5 pr-4 sm:pr-6 border-b border-r border-rule'>
+            <div className='scene-card relative grid grid-cols-2 rounded-xl overflow-hidden bg-linear-to-b from-paper-2 to-paper surface'>
+              <div aria-hidden='true' className='glare' />
+              <div className='px-5 sm:px-7 py-6 border-b border-r border-rule'>
                 <span className='block font-serif text-[clamp(34px,4vw,56px)] leading-none tracking-[-0.02em] tnum'>
                   {pulse.toLocaleString()}
                 </span>
@@ -204,7 +215,7 @@ function Hero() {
                   active right now
                 </span>
               </div>
-              <div className='py-5 pl-4 sm:pl-6 border-b border-rule'>
+              <div className='px-5 sm:px-7 py-6 border-b border-rule'>
                 <span className='block font-serif text-[clamp(34px,4vw,56px)] leading-none tracking-[-0.02em] tnum'>
                   211
                   <span className='text-ink-mute text-[0.5em] align-baseline'>
@@ -215,7 +226,7 @@ function Hero() {
                   longest streak
                 </span>
               </div>
-              <div className='py-5 pr-4 sm:pr-6 border-b border-r border-rule'>
+              <div className='px-5 sm:px-7 py-6 border-r border-rule'>
                 <span className='block font-serif text-[clamp(34px,4vw,56px)] leading-none tracking-[-0.02em] tnum'>
                   1.4M
                 </span>
@@ -223,7 +234,7 @@ function Hero() {
                   hours logged
                 </span>
               </div>
-              <div className='py-5 pl-4 sm:pl-6 border-b border-rule'>
+              <div className='px-5 sm:px-7 py-6'>
                 <span className='block font-serif text-[clamp(34px,4vw,56px)] leading-none tracking-[-0.02em] tnum'>
                   92
                   <span className='text-ink-mute text-[0.5em] align-baseline'>
@@ -256,7 +267,7 @@ function Ticker() {
 
   const items = [...entries, ...entries, ...entries, ...entries]
   return (
-    <div className='border-y border-rule bg-paper-2 overflow-hidden whitespace-nowrap'>
+    <div className='border-y border-rule bg-paper-2 well overflow-hidden whitespace-nowrap'>
       <div className='inline-flex gap-14 py-3.5 animate-marquee font-mono text-[15px] tracking-wide text-ink-mute'>
         {items.map((t, i) => (
           <span key={i} className='inline-flex items-center gap-2'>
@@ -309,9 +320,14 @@ function ActivityCard({
   const line = buildChartPath(chart, W, H)
   const area = buildAreaPath(chart, W, H)
   const peakMin = Math.max(0, ...chart)
+  const cardRef = useScene<HTMLDivElement>()
 
   return (
-    <div className='relative border border-rule-strong bg-linear-to-b from-paper-2 to-paper rounded overflow-hidden'>
+    <div
+      ref={cardRef}
+      className='scene-card-soft relative border border-rule-strong bg-linear-to-b from-paper-2 to-paper rounded-lg overflow-hidden surface-lg'
+    >
+      <div aria-hidden='true' className='glare' />
       <div className='grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto] sm:gap-6 items-start px-5 sm:px-8 py-6 sm:py-7 border-b border-rule'>
         <div>
           <div className='font-mono text-[15px] tracking-[0.16em] text-accent uppercase mb-2.5 flex items-center gap-2.5'>
@@ -382,7 +398,7 @@ function ActivityCard({
         ))}
       </div>
 
-      <div className='px-5 sm:px-8 py-6 sm:py-8'>
+      <div className='px-5 sm:px-8 py-6 sm:py-8 well bg-paper/30'>
         <div className='flex justify-between items-baseline gap-3 mb-4 font-mono text-[15px] tracking-[0.14em] uppercase text-ink-mute'>
           <span>Daily coding activity</span>
           {peakMin > 0 && (
@@ -402,8 +418,16 @@ function ActivityCard({
         >
           <defs>
             <linearGradient id='cfill' x1='0' x2='0' y1='0' y2='1'>
-              <stop offset='0%' stopColor='var(--color-accent)' stopOpacity='0.28' />
-              <stop offset='100%' stopColor='var(--color-accent)' stopOpacity='0' />
+              <stop
+                offset='0%'
+                stopColor='var(--color-accent)'
+                stopOpacity='0.28'
+              />
+              <stop
+                offset='100%'
+                stopColor='var(--color-accent)'
+                stopOpacity='0'
+              />
             </linearGradient>
             <pattern
               id='cgrid'
@@ -421,7 +445,12 @@ function ActivityCard({
           </defs>
           <rect width={W} height={H} fill='url(#cgrid)' />
           <path d={area} fill='url(#cfill)' />
-          <path d={line} fill='none' stroke='var(--color-accent)' strokeWidth='1.5' />
+          <path
+            d={line}
+            fill='none'
+            stroke='var(--color-accent)'
+            strokeWidth='1.5'
+          />
         </svg>
         <div className='grid grid-cols-4 sm:grid-cols-8 mt-2.5 font-mono text-[15px] text-ink-mute tracking-wider'>
           {CHART_DATE_LABELS.map((label, i) => (
@@ -573,7 +602,7 @@ function HowItWorks() {
                 <span>{s.no}</span>
                 <span className='flex-1 h-px bg-rule' />
               </div>
-              <pre className='font-mono text-[15px] leading-snug text-accent bg-paper-2 border border-rule px-4 py-3.5 rounded-[2px] mb-6 whitespace-pre overflow-x-auto'>
+              <pre className='font-mono text-[15px] leading-snug text-accent bg-paper-2 border border-rule px-4 py-3.5 rounded-md mb-6 whitespace-pre overflow-x-auto well'>
                 {s.ascii}
               </pre>
               <h3 className='font-serif font-normal text-[28px] leading-tight tracking-[-0.015em] m-0 mb-3.5 text-ink'>
@@ -695,7 +724,7 @@ function Leaderboard() {
           }
           aside={aside}
         />
-        <div className='border-y border-rule-strong'>
+        <div className='border border-rule-strong rounded-lg overflow-hidden surface'>
           <div className='grid grid-cols-[40px_1fr_auto] md:grid-cols-[56px_1.4fr_1fr_1fr_32px] items-center px-4 sm:px-6 py-3.5 gap-3 font-mono text-[15px] tracking-[0.14em] uppercase text-ink-soft bg-paper-2 border-b border-rule'>
             <span>Rank</span>
             <span>Athlete</span>
@@ -706,7 +735,10 @@ function Leaderboard() {
           {loading ? (
             <div className='px-4 sm:px-6 py-10 space-y-3'>
               {[1, 2, 3].map((i) => (
-                <div key={i} className='h-[52px] rounded bg-paper-3 animate-pulse' />
+                <div
+                  key={i}
+                  className='h-[52px] rounded bg-paper-3 animate-pulse'
+                />
               ))}
             </div>
           ) : entries.length === 0 ? (
@@ -735,13 +767,13 @@ function Final() {
         <p className='font-mono text-[15px] tracking-[0.18em] uppercase text-ink-mute m-0 mb-9'>
           <LiveDot /> &nbsp; 2,841 athletes logging right now
         </p>
-        <h2 className='font-serif font-normal text-[clamp(44px,9vw,140px)] leading-[0.95] tracking-[-0.035em] m-0 mb-10 mx-auto max-w-[14ch] text-ink'>
+        <h2 className='font-serif font-normal text-[clamp(44px,9vw,140px)] leading-[0.95] tracking-[-0.035em] m-0 mb-10 mx-auto max-w-[14ch] text-ink lift-text'>
           Stop coding into the <em className='italic text-accent'>void.</em>
         </h2>
         <div className='flex flex-col sm:flex-row items-center justify-center gap-3'>
           <Link
             to='/pricing'
-            className='group inline-flex items-center gap-2.5 h-[52px] px-8 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium bg-accent text-paper border border-accent hover:bg-ink hover:border-ink transition-colors'
+            className='group inline-flex items-center gap-2.5 h-[52px] px-8 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium bg-accent text-paper border border-accent glow-accent press hover:bg-ink hover:border-ink transition-colors'
           >
             Get early access
             <span className='inline-block transition-transform group-hover:translate-x-1'>
@@ -750,7 +782,7 @@ function Final() {
           </Link>
           <a
             href='https://marketplace.visualstudio.com'
-            className='group inline-flex items-center gap-2.5 h-[52px] px-8 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint transition-colors'
+            className='group inline-flex items-center gap-2.5 h-[52px] px-8 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint transition-colors press'
           >
             Install free
             <span className='inline-block transition-transform group-hover:translate-x-1'>
@@ -814,7 +846,7 @@ function BackToTop() {
       }}
       className='fixed bottom-6 right-5 sm:right-6 z-50 w-9 h-9 sm:w-10 sm:h-10 rounded-full
         bg-paper-3 border border-rule-strong text-ink-mute hover:text-ink hover:border-ink-faint
-        font-serif text-[18px] flex items-center justify-center'
+        font-serif text-[18px] flex items-center justify-center bevel press'
     >
       ↑
     </button>
@@ -828,6 +860,7 @@ export default function App() {
 
   return (
     <div className='min-h-screen flex flex-col'>
+      <SceneBackdrop />
       <Nav />
       <ProgressBar />
       <main className='flex-1 animate-page-in'>

@@ -6,6 +6,7 @@ import {
   type LayoutName,
 } from '@commma/shared'
 import type { KeyboardHeatmap as Heatmap } from '../lib/api'
+import { useTilt } from '../lib/useTilt'
 
 const PRESETS = [
   { label: '1:1', w: 1080, h: 1080 },
@@ -133,6 +134,7 @@ export default function KeyboardHeatmap({
   const theme = THEMES.find((t) => t.id === themeId) ?? THEMES[0]
   const logicalW = layout.cols * UNIT + PAD * 2
   const logicalH = layout.rows * UNIT + PAD * 2
+  const frameRef = useTilt<HTMLDivElement>(5)
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current
@@ -228,7 +230,10 @@ export default function KeyboardHeatmap({
           ))}
         </div>
       </div>
-      <div className='rounded border border-rule bg-paper/40'>
+      <div
+        ref={frameRef}
+        className='tilt rounded-lg border border-rule bg-paper/40 well'
+      >
         <div className='relative overflow-x-auto p-3 sm:p-4'>
           <canvas
             ref={canvasRef}
@@ -237,7 +242,7 @@ export default function KeyboardHeatmap({
             aria-label={`Keyboard heatmap for ${sessionLabel ?? 'session'} — ${LAYOUT_LABELS[layoutName]} layout, ${theme.label} theme`}
             role='img'
           />
-          <div className='pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-paper/90 to-transparent sm:hidden' />
+          <div className='pointer-events-none absolute inset-y-0 right-0 w-16 bg-linear-to-l from-paper/90 to-transparent sm:hidden' />
         </div>
       </div>
       <p
@@ -256,7 +261,7 @@ export default function KeyboardHeatmap({
               key={label}
               type='button'
               onClick={() => exportPreset(w, h, label)}
-              className='group inline-flex items-center gap-1.5 h-[44px] sm:h-[32px] px-5 sm:px-3 rounded-full font-mono text-[13px] sm:text-[11px] uppercase tracking-wider text-ink-soft border border-rule-strong hover:text-paper hover:bg-accent hover:border-accent transition-colors'
+              className='group inline-flex items-center gap-1.5 h-[44px] sm:h-[32px] px-5 sm:px-3 rounded-full font-mono text-[13px] sm:text-[11px] uppercase tracking-wider text-ink-soft border border-rule-strong press hover:text-paper hover:bg-accent hover:border-accent transition-colors'
             >
               {label}
               <span className='inline-block transition-transform group-hover:translate-y-0.5'>

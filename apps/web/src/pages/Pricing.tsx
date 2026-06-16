@@ -165,7 +165,7 @@ export default function Pricing() {
           <button
             type='button'
             onClick={() => setAnnual(false)}
-            className={`h-[44px] px-5 rounded-full border transition-colors ${
+            className={`h-[44px] px-5 rounded-full border transition-colors press ${
               !annual
                 ? 'bg-ink text-paper border-ink'
                 : 'text-ink-mute border-rule-strong hover:text-ink hover:border-ink-faint'
@@ -176,7 +176,7 @@ export default function Pricing() {
           <button
             type='button'
             onClick={() => setAnnual(true)}
-            className={`h-[44px] px-5 rounded-full border transition-colors ${
+            className={`h-[44px] px-5 rounded-full border transition-colors press ${
               annual
                 ? 'bg-ink text-paper border-ink'
                 : 'text-ink-mute border-rule-strong hover:text-ink hover:border-ink-faint'
@@ -189,10 +189,12 @@ export default function Pricing() {
           </button>
         </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-3 border border-rule-strong rounded overflow-hidden'>
+        <div className='grid grid-cols-1 md:grid-cols-3 border border-rule-strong rounded-lg overflow-hidden surface'>
           <div
             className={`relative flex flex-col px-6 sm:px-8 pt-8 sm:pt-10 pb-8 sm:pb-10 border-b md:border-b-0 md:border-r border-rule bg-paper ${
-              currentPlan === 'free' ? 'ring-1 ring-inset ring-accent-2-line' : ''
+              currentPlan === 'free'
+                ? 'ring-1 ring-inset ring-accent-2-line'
+                : ''
             }`}
           >
             <div className='flex flex-col md:min-h-[220px]'>
@@ -233,10 +235,12 @@ export default function Pricing() {
 
           <div
             className={`relative flex flex-col px-6 sm:px-8 pt-8 sm:pt-10 pb-8 sm:pb-10 border-b md:border-b-0 md:border-r border-rule bg-paper-2 ${
-              currentPlan === 'pro' ? 'ring-1 ring-inset ring-accent-2-line' : ''
+              currentPlan === 'pro'
+                ? 'ring-1 ring-inset ring-accent-2-line'
+                : ''
             }`}
           >
-            <span className='absolute inset-x-0 top-0 h-0.5 bg-accent' />
+            <span className='absolute inset-x-0 top-0 h-0.5 bg-accent glow-accent' />
             <div className='flex flex-col md:min-h-[220px]'>
               <div className='flex items-start justify-between gap-3 mb-6'>
                 <span className='font-serif text-[clamp(26px,2.8vw,36px)] leading-none tracking-[-0.02em] text-accent'>
@@ -286,7 +290,7 @@ export default function Pricing() {
                   void startCheckout('pro', annual ? 'yearly' : 'monthly')
                 }
                 disabled={pending !== null}
-                className='group inline-flex items-center justify-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors bg-accent text-paper border border-accent hover:bg-ink hover:border-ink disabled:opacity-50 disabled:cursor-not-allowed'
+                className='group inline-flex items-center justify-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors glow-accent press bg-accent text-paper border border-accent hover:bg-ink hover:border-ink disabled:opacity-50 disabled:cursor-not-allowed'
               >
                 {pending === 'pro' ? 'Redirecting…' : 'Upgrade to Pro'}
                 {pending !== 'pro' && (
@@ -300,7 +304,9 @@ export default function Pricing() {
 
           <div
             className={`relative flex flex-col px-6 sm:px-8 pt-8 sm:pt-10 pb-8 sm:pb-10 bg-paper ${
-              currentPlan === 'team' ? 'ring-1 ring-inset ring-accent-2-line' : ''
+              currentPlan === 'team'
+                ? 'ring-1 ring-inset ring-accent-2-line'
+                : ''
             }`}
           >
             <div className='flex flex-col md:min-h-[220px]'>
