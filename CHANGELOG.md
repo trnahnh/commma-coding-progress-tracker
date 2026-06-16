@@ -11,6 +11,16 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Web** — Visual depth + 3D motion overhaul. Every page is re-lit as raised,
+  layered surfaces (top-highlit cards, recessed inputs and code/chart wells, a
+  floating navbar, lifted display headlines, glowing primary CTAs) via a small
+  design-system layer in `index.css` — no palette, font-size, or text-color
+  changes. The landing page gains a cursor-driven 3D hero (parallax depth
+  layers, a cursor-following accent spotlight, and a tilting "glass" stat panel
+  with a moving glare) and an always-on, pure-CSS 3D backdrop: a perspective
+  speed-grid tunnel with drifting glow-orbs that animates on mobile without a
+  cursor. All motion honors `prefers-reduced-motion`, and cursor-only effects
+  are disabled on touch devices.
 - **Web** — `/about` page in the Company footer section. Covers the origin story
   (GitHub × Strava inspiration), a scroll-animated "insight" visualization
   showing how commma merges commit history with athletic-style session data, a
