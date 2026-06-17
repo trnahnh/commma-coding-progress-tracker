@@ -13,6 +13,7 @@ ssh -i "$SSH_KEY" -o StrictHostKeyChecking=accept-new "$API_HOST" \
    git checkout '$BRANCH'
    git pull --ff-only origin '$BRANCH'
    pnpm install --frozen-lockfile
+   pnpm --filter @commma/db migrate
    pnpm --filter @commma/api build
    pm2 restart commma-api
    curl -fsS --retry 5 --retry-delay 2 --retry-all-errors -o /dev/null \
