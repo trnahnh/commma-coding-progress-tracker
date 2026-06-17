@@ -3,6 +3,14 @@ import { useSeo } from '../lib/seo'
 
 const ENTRIES = [
   {
+    version: '0.7.2',
+    date: 'Jun 2026',
+    tag: 'Brand',
+    changes: [
+      'Brand film on the About page — a 15-second teaser that floods the keyboard with heat, scores the session like a race, and lands on the wordmark; autoplays muted in view, pauses off-screen, and respects reduced-motion',
+    ],
+  },
+  {
     version: '0.7.1',
     date: 'Jun 2026',
     tag: 'SEO',

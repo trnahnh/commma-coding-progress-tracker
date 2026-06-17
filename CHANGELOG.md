@@ -11,6 +11,14 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Web** — Brand film on the About page. A 15-second motion teaser — keyboard
+  heat flood, a session scored like a race (pace / elapsed / streak with an
+  activity readout), then the wordmark reveal and `commma.dev` — tells the
+  commma story in the brand palette and type. It autoplays muted when scrolled
+  into view, pauses off-screen, and honors `prefers-reduced-motion` (manual
+  controls instead of autoplay). Ships as a ~900 KB 1080p `commma-intro.mp4`
+  with a poster frame; the deterministic HTML/canvas source and the 4K social
+  masters (9:16 Instagram, 16:9 LinkedIn) live under `assets/video/`.
 - **Web** — commma is now on LinkedIn
   ([commma-dev](https://www.linkedin.com/company/commma-dev/)). Linked from the
   footer's Company column, the Contact page, and the `Organization` JSON-LD

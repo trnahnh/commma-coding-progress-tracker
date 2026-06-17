@@ -271,6 +271,32 @@ export default function About() {
   const { ref: originRef, visible: originVisible } = useReveal(0.08)
   const { ref: beliefsRef, visible: beliefsVisible } = useReveal(0.08)
   const { ref: stackRef, visible: stackVisible } = useReveal(0.05)
+  const { ref: filmRef, visible: filmVisible } = useReveal(0.08)
+
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [reducedMotion, setReducedMotion] = useState(
+    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  )
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const onChange = (e: MediaQueryListEvent) => setReducedMotion(e.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+  useEffect(() => {
+    if (reducedMotion) return
+    const v = videoRef.current
+    if (!v) return
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) v.play().catch(() => {})
+        else v.pause()
+      },
+      { threshold: 0.25 },
+    )
+    obs.observe(v)
+    return () => obs.disconnect()
+  }, [reducedMotion])
 
   return (
     <Shell>
@@ -294,6 +320,35 @@ export default function About() {
             performance, in your editor.
           </p>
         </div>
+      </section>
+
+      <section ref={filmRef} className='mb-[clamp(80px,12vw,160px)]'>
+        <p
+          className={`font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute m-0 mb-6 ${filmVisible ? 'animate-fade-up' : 'opacity-0'}`}
+        >
+          The film
+        </p>
+        <div
+          className={`rounded-xl overflow-hidden border border-rule-strong surface ${filmVisible ? 'animate-fade-up' : 'opacity-0'}`}
+          style={{ animationDelay: '80ms' }}
+        >
+          <video
+            ref={videoRef}
+            className='block w-full aspect-video bg-paper'
+            src='/commma-intro.mp4'
+            poster='/commma-intro-poster.jpg'
+            muted
+            loop
+            playsInline
+            preload='metadata'
+            controls={reducedMotion}
+            aria-label='commma brand film — every commit is a step'
+          />
+        </div>
+        <p className='font-sans text-[15px] leading-relaxed text-ink-mute m-0 mt-4 max-w-[56ch]'>
+          Fifteen seconds of what commma sees — every keystroke mapped to the
+          board, a session scored like a race, a streak that keeps the count.
+        </p>
       </section>
 
       <section ref={originRef} className='mb-[clamp(80px,12vw,160px)]'>
