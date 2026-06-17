@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>commma intro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;500;600&display=swap"
+    />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #0c0b08;
+        overflow: hidden;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="stage"></canvas>
+    <script>
+      const PAPER = '#0c0b08'
+      const INK = '#efead8'
+      const INK_SOFT = '#c9c2ad'
+      const INK_MUTE = '#7a746a'
+      const ACCENT = '#ff4d1a'
+
+      const params = new URLSearchParams(location.search)
+      const DUR = parseFloat(params.get('dur') || '10')
+      const CAPTURE = params.get('capture') === '1'
+
+      const canvas = document.getElementById('stage')
+      const ctx = canvas.getContext('2d')
+
+      let W = 0
+      let H = 0
+      function resize() {
+        W = window.innerWidth
+        H = window.innerHeight
+        canvas.width = W
+        canvas.height = H
+        canvas.style.width = W + 'px'
+        canvas.style.height = H + 'px'
+      }
+      resize()
+      window.addEventListener('resize', resize)
+
+      const ROWS = [
+        ['`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='],
+        ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', '\\'],
+        ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', "'"],
+        ['Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/'],
+      ]
+      const ROW_OFFSET = [0, 0.45, 0.75, 1.1]
+
+      function mulberry32(seed) {
+        return function () {
+          seed |= 0
+          seed = (seed + 0x6d2b79f5) | 0
+          let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
+          t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+        }
+      }
+
+      const WEIGHTS = [
+        ['E', 13], ['T', 9], ['A', 8], ['O', 7.5], ['I', 7], ['N', 7],
+        ['S', 6.3], ['R', 6], ['H', 5], ['L', 4], ['D', 4], ['C', 3],
+        ['U', 2.8], ['M', 2.4], ['space', 12], ['F', 2.2], ['G', 2],
+        ['P', 1.9], ['Y', 2], ['B', 1.5], ['V', 1], ['K', 1.3], [';', 1.4],
+        ['.', 1.6], [',', 1.5], ['(', 0], ['=', 1.2], ['/', 1.1], ['W', 2.4],
+        ['1', 0.6], ['0', 0.6], ['2', 0.5],
+      ]
+      let weightTotal = 0
+      for (const [, w] of WEIGHTS) weightTotal += w
+
+      const keyIndex = new Map()
+      for (let r = 0; r < ROWS.length; r++) {
+        for (let c = 0; c < ROWS[r].length; c++) {
+          keyIndex.set(ROWS[r][c], r + '-' + c)
+        }
+      }
+      function idForChar(ch) {
+        if (ch === 'space') return 'space'
+        return keyIndex.get(ch) || null
+      }
+
+      const rand = mulberry32(0x5eed42)
+      const hasStats = DUR >= 12
+      const introEnd = Math.min(1.8, DUR * 0.14)
+      const revealStart = DUR - (hasStats ? 3.3 : 1.9)
+      const statsStart = revealStart - 3.8
+      const statsEnd = revealStart - 0.6
+      const floodEnd = hasStats ? statsStart - 0.5 : revealStart
+      const climaxStart = floodEnd - 0.8
+
+      const N = 230
+      const strokes = []
+      for (let i = 0; i < N; i++) {
+        const p = i / (N - 1)
+        const eased = Math.pow(p, 1.7)
+        const ts = introEnd + (floodEnd - introEnd) * eased
+        let pick = rand() * weightTotal
+        let chosen = 'E'
+        for (const [ch, w] of WEIGHTS) {
+          pick -= w
+          if (pick <= 0) {
+            chosen = ch
+            break
+          }
+        }
+        const id = idForChar(chosen)
+        if (id) strokes.push({ ts, id })
+      }
+      for (let k = 0; k < 22; k++) {
+        const ts = climaxStart + (floodEnd - climaxStart) * (k / 22)
+        const r = 1 + Math.floor(rand() * 3)
+        const c = Math.floor(rand() * ROWS[r].length)
+        strokes.push({ ts, id: r + '-' + c })
+      }
+      strokes.sort((a, b) => a.ts - b.ts)
+
+      const barRand = mulberry32(0xba1207)
+      const BARS = Array.from({ length: 30 }, () => {
+        const base = 0.18 + 0.82 * Math.pow(barRand(), 0.85)
+        return base
+      })
+
+      const TAU = 0.85
+      function heatAt(t) {
+        const heat = new Map()
+        let recent = 0
+        for (const s of strokes) {
+          if (s.ts > t) break
+          const dt = t - s.ts
+          const contrib = Math.exp(-dt / TAU)
+          heat.set(s.id, (heat.get(s.id) || 0) + contrib)
+          if (dt < 1.5) recent++
+        }
+        return { heat, recent }
+      }
+
+      function hexToRgb(h) {
+        return [
+          parseInt(h.slice(1, 3), 16),
+          parseInt(h.slice(3, 5), 16),
+          parseInt(h.slice(5, 7), 16),
+        ]
+      }
+      const RAMP = [
+        [0.0, hexToRgb('#16140f')],
+        [0.32, hexToRgb('#4a1f10')],
+        [0.62, hexToRgb('#c23a13')],
+        [0.85, hexToRgb('#ff4d1a')],
+        [1.0, hexToRgb('#ffc09a')],
+      ]
+      function ramp(x) {
+        x = Math.max(0, Math.min(1, x))
+        for (let i = 1; i < RAMP.length; i++) {
+          if (x <= RAMP[i][0]) {
+            const [x0, c0] = RAMP[i - 1]
+            const [x1, c1] = RAMP[i]
+            const f = (x - x0) / (x1 - x0 || 1)
+            return [
+              Math.round(c0[0] + (c1[0] - c0[0]) * f),
+              Math.round(c0[1] + (c1[1] - c0[1]) * f),
+              Math.round(c0[2] + (c1[2] - c0[2]) * f),
+            ]
+          }
+        }
+        return RAMP[RAMP.length - 1][1]
+      }
+
+      function roundRect(x, y, w, h, r) {
+        ctx.beginPath()
+        ctx.moveTo(x + r, y)
+        ctx.arcTo(x + w, y, x + w, y + h, r)
+        ctx.arcTo(x + w, y + h, x, y + h, r)
+        ctx.arcTo(x, y + h, x, y, r)
+        ctx.arcTo(x, y, x + w, y, r)
+        ctx.closePath()
+      }
+
+      function easeOut(x) {
+        return 1 - Math.pow(1 - x, 3)
+      }
+      function clamp01(x) {
+        return Math.max(0, Math.min(1, x))
+      }
+
+      function drawKeyboard(t, alpha, heatT) {
+        const { heat, recent } = heatAt(heatT === undefined ? t : heatT)
+        const U = Math.min(W, H)
+        const maxCols = 13
+        const keyW = U * 0.062
+        const keyH = keyW
+        const gap = keyW * 0.16
+        const kbWidth = maxCols * keyW + (maxCols - 1) * gap
+        const margin = W / 2 - kbWidth / 2
+        const totalH = ROWS.length * keyH + (ROWS.length - 1) * gap + keyH * 1.1
+        const startY = H * 0.5 - totalH / 2
+
+        let topId = null
+        let topHeat = 0
+        heat.forEach((v, id) => {
+          if (v > topHeat) {
+            topHeat = v
+            topId = id
+          }
+        })
+
+        ctx.save()
+        ctx.globalAlpha = alpha
+
+        const cx = W / 2
+        const cy = startY + totalH / 2
+        const appear = clamp01((t - introEnd * 0.5) / 0.7)
+        const scale = 0.96 + 0.04 * easeOut(appear)
+        ctx.translate(cx, cy)
+        ctx.scale(scale, scale)
+        ctx.translate(-cx, -cy)
+
+        for (let r = 0; r < ROWS.length; r++) {
+          const rowW =
+            ROWS[r].length * keyW +
+            (ROWS[r].length - 1) * gap +
+            ROW_OFFSET[r] * (keyW + gap)
+          let x = W / 2 - rowW / 2 + ROW_OFFSET[r] * (keyW + gap)
+          const y = startY + r * (keyH + gap)
+          for (let c = 0; c < ROWS[r].length; c++) {
+            const id = r + '-' + c
+            const hv = heat.get(id) || 0
+            const intensity = 1 - Math.exp(-hv / 1.1)
+            const col = ramp(intensity)
+            ctx.shadowBlur = intensity * 34
+            ctx.shadowColor = 'rgba(255,77,26,' + intensity * 0.9 + ')'
+            ctx.fillStyle = 'rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')'
+            roundRect(x, y, keyW, keyH, keyW * 0.16)
+            ctx.fill()
+            ctx.shadowBlur = 0
+            ctx.strokeStyle = 'rgba(45,41,34,' + (0.5 + intensity * 0.5) + ')'
+            ctx.lineWidth = Math.max(1, keyW * 0.02)
+            ctx.stroke()
+            x += keyW + gap
+          }
+        }
+
+        const spaceW = keyW * 6.2
+        const spaceX = W / 2 - spaceW / 2
+        const spaceY = startY + ROWS.length * (keyH + gap)
+        const sv = heat.get('space') || 0
+        const sIntensity = 1 - Math.exp(-sv / 1.1)
+        const sCol = ramp(sIntensity)
+        ctx.shadowBlur = sIntensity * 34
+        ctx.shadowColor = 'rgba(255,77,26,' + sIntensity * 0.9 + ')'
+        ctx.fillStyle = 'rgb(' + sCol[0] + ',' + sCol[1] + ',' + sCol[2] + ')'
+        roundRect(spaceX, spaceY, spaceW, keyH * 0.92, keyW * 0.16)
+        ctx.fill()
+        ctx.shadowBlur = 0
+        ctx.strokeStyle = 'rgba(45,41,34,' + (0.5 + sIntensity * 0.5) + ')'
+        ctx.lineWidth = Math.max(1, keyW * 0.02)
+        ctx.stroke()
+
+        ctx.restore()
+
+        const telAlpha = alpha * clamp01((t - introEnd) / 0.6)
+        if (telAlpha > 0.01) {
+          ctx.save()
+          ctx.globalAlpha = telAlpha
+          const kpm = Math.min(960, Math.round(recent * 15.5))
+          const labelY = startY - U * 0.105
+          const numY = labelY + U * 0.075
+          const labelFont = '600 ' + U * 0.017 + 'px "Geist Mono", monospace'
+          const numFont = '500 ' + U * 0.058 + 'px "Geist Mono", monospace'
+          ctx.textBaseline = 'alphabetic'
+
+          ctx.textAlign = 'left'
+          ctx.fillStyle = INK_MUTE
+          ctx.font = labelFont
+          ctx.fillText('KEYS / MIN', margin, labelY)
+          ctx.fillStyle = INK
+          ctx.font = numFont
+          ctx.fillText(String(kpm).padStart(3, '0'), margin, numY)
+
+          ctx.textAlign = 'right'
+          ctx.fillStyle = INK_MUTE
+          ctx.font = labelFont
+          ctx.fillText('TOP KEY', W - margin, labelY)
+          ctx.fillStyle = ACCENT
+          ctx.font = numFont
+          let label = '—'
+          if (topId === 'space') label = 'SPC'
+          else if (topId) {
+            const [rr, cc] = topId.split('-').map(Number)
+            label = ROWS[rr][cc]
+          }
+          ctx.fillText(label, W - margin, numY)
+          ctx.restore()
+        }
+      }
+
+      function drawIntro(t) {
+        const a = clamp01(t / 0.5) * clamp01((introEnd - t) / 0.5)
+        if (a <= 0.01) return
+        const U = Math.min(W, H)
+        const blink = t % 0.9 < 0.5 ? 1 : 0.15
+        ctx.save()
+        ctx.globalAlpha = a * blink
+        ctx.fillStyle = ACCENT
+        ctx.fillRect(W / 2 - U * 0.0035, H / 2 - U * 0.045, U * 0.007, U * 0.09)
+        ctx.restore()
+      }
+
+      function drawReveal(t) {
+        const rt = t - revealStart
+        if (rt < 0) return
+        const U = Math.min(W, H)
+        const a = easeOut(clamp01(rt / 0.6))
+        const drift = (1 - a) * U * 0.02
+        ctx.save()
+        ctx.globalAlpha = a
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+
+        const markSize = U * 0.15
+        const scale = 0.92 + 0.08 * a
+        const baseY = H * 0.5 + drift
+        ctx.save()
+        ctx.translate(W / 2, baseY)
+        ctx.scale(scale, scale)
+        ctx.font = '400 ' + markSize + 'px "Instrument Serif", serif'
+        const word = 'commma'
+        const wWord = ctx.measureText(word).width
+        ctx.measureText('.')
+        const dotW = ctx.measureText('.').width
+        const totalW = wWord + dotW
+        ctx.fillStyle = INK
+        ctx.textAlign = 'left'
+        ctx.fillText(word, -totalW / 2, 0)
+        ctx.fillStyle = ACCENT
+        ctx.fillText('.', -totalW / 2 + wWord, 0)
+        ctx.restore()
+
+        const tagAlpha = easeOut(clamp01((rt - 0.35) / 0.5))
+        if (tagAlpha > 0.01) {
+          ctx.globalAlpha = tagAlpha
+          ctx.textAlign = 'center'
+          ctx.fillStyle = INK_SOFT
+          const tagSize = U * 0.019
+          ctx.font = '500 ' + tagSize + 'px "Geist Mono", monospace'
+          const tag = 'E V E R Y   C O M M I T   I S   A   S T E P'
+          ctx.fillText(tag, W / 2, baseY + markSize * 0.62)
+        }
+
+        if (hasStats) {
+          const urlAlpha = easeOut(clamp01((rt - 0.9) / 0.5))
+          if (urlAlpha > 0.01) {
+            ctx.globalAlpha = urlAlpha
+            ctx.textAlign = 'center'
+            ctx.fillStyle = ACCENT
+            ctx.letterSpacing = U * 0.004 + 'px'
+            ctx.font = '500 ' + U * 0.016 + 'px "Geist Mono", monospace'
+            ctx.fillText('commma.dev', W / 2, baseY + markSize * 0.92)
+            ctx.letterSpacing = '0px'
+          }
+        }
+        ctx.restore()
+      }
+
+      function vignette() {
+        const g = ctx.createRadialGradient(
+          W / 2,
+          H * 0.5,
+          Math.min(W, H) * 0.25,
+          W / 2,
+          H * 0.5,
+          Math.max(W, H) * 0.75,
+        )
+        g.addColorStop(0, 'rgba(0,0,0,0)')
+        g.addColorStop(1, 'rgba(0,0,0,0.55)')
+        ctx.fillStyle = g
+        ctx.fillRect(0, 0, W, H)
+      }
+
+      function topGlow(t) {
+        const energy = clamp01((t - introEnd) / (floodEnd - introEnd))
+        const g = ctx.createRadialGradient(
+          W / 2,
+          H * 0.5,
+          0,
+          W / 2,
+          H * 0.5,
+          Math.max(W, H) * 0.6,
+        )
+        g.addColorStop(0, 'rgba(255,77,26,' + 0.06 * energy + ')')
+        g.addColorStop(1, 'rgba(255,77,26,0)')
+        ctx.fillStyle = g
+        ctx.fillRect(0, 0, W, H)
+      }
+
+      function fmtClock(s) {
+        const h = Math.floor(s / 3600)
+        const m = Math.floor((s % 3600) / 60)
+        const sec = s % 60
+        return h + ':' + String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0')
+      }
+
+      function drawFlash(t, at, width) {
+        const f = Math.max(0, 1 - Math.abs(t - at) / width)
+        if (f <= 0.01 || t > at + 0.32) return
+        ctx.save()
+        ctx.globalAlpha = f * 0.5
+        const fg = ctx.createRadialGradient(
+          W / 2,
+          H * 0.5,
+          0,
+          W / 2,
+          H * 0.5,
+          Math.max(W, H) * 0.5,
+        )
+        fg.addColorStop(0, 'rgba(255,176,136,0.9)')
+        fg.addColorStop(0.4, 'rgba(255,77,26,0.5)')
+        fg.addColorStop(1, 'rgba(255,77,26,0)')
+        ctx.fillStyle = fg
+        ctx.fillRect(0, 0, W, H)
+        ctx.restore()
+      }
+
+      function drawBars(t, cx, top, width, height, U) {
+        const n = BARS.length
+        const step = width / n
+        const bw = step * 0.58
+        const p = clamp01((t - statsStart - 0.25) / 1.7)
+        const left = cx - width / 2
+        for (let i = 0; i < n; i++) {
+          const reveal = clamp01(p * n - i)
+          if (reveal <= 0) continue
+          const h = BARS[i] * height * easeOut(reveal)
+          const x = left + i * step
+          const lit = 0.4 + 0.6 * BARS[i]
+          ctx.fillStyle = 'rgba(255,77,26,' + lit * reveal + ')'
+          ctx.shadowBlur = 12 * BARS[i] * reveal
+          ctx.shadowColor = 'rgba(255,77,26,0.6)'
+          roundRect(x, top + height - h, bw, h, bw * 0.32)
+          ctx.fill()
+          ctx.shadowBlur = 0
+        }
+      }
+
+      function drawStat(x, cy, label, value, unit, U) {
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'alphabetic'
+
+        ctx.fillStyle = INK_MUTE
+        ctx.letterSpacing = U * 0.005 + 'px'
+        ctx.font = '600 ' + U * 0.015 + 'px "Geist Mono", monospace'
+        ctx.fillText(label, x, cy - U * 0.052)
+        ctx.letterSpacing = '0px'
+
+        ctx.fillStyle = INK
+        ctx.font = '500 ' + U * 0.07 + 'px "Geist Mono", monospace'
+        ctx.fillText(value, x, cy)
+
+        if (unit) {
+          ctx.fillStyle = INK_MUTE
+          ctx.font = '500 ' + U * 0.019 + 'px "Geist Mono", monospace'
+          ctx.fillText(unit, x, cy + U * 0.032)
+        }
+      }
+
+      function drawStats(t, alpha) {
+        const U = Math.min(W, H)
+        const landscape = W >= H
+        const cy = H * 0.5
+        const grow = easeOut(clamp01((t - statsStart) / 1.5))
+        const pace = Math.round(412 * grow)
+        const streak = Math.round(47 * grow)
+        const secs = Math.round(6429 * grow)
+        const stats = [
+          ['PACE', String(pace), 'CHARS / MIN'],
+          ['SESSION', fmtClock(secs), 'ELAPSED'],
+          ['STREAK', String(streak), 'DAYS'],
+        ]
+
+        ctx.save()
+        ctx.globalAlpha = alpha
+
+        ctx.textAlign = 'center'
+        ctx.fillStyle = INK_MUTE
+        ctx.letterSpacing = U * 0.008 + 'px'
+        ctx.font = '600 ' + U * 0.016 + 'px "Geist Mono", monospace'
+        ctx.fillText(
+          'SESSION COMPLETE',
+          W / 2,
+          cy - U * (landscape ? 0.145 : 0.235),
+        )
+        ctx.letterSpacing = '0px'
+
+        if (landscape) {
+          const colGap = U * 0.45
+          drawStat(W / 2 - colGap, cy, stats[0][0], stats[0][1], stats[0][2], U)
+          drawStat(W / 2, cy, stats[1][0], stats[1][1], stats[1][2], U)
+          drawStat(W / 2 + colGap, cy, stats[2][0], stats[2][1], stats[2][2], U)
+          drawBars(t, W / 2, cy + U * 0.075, U * 0.86, U * 0.08, U)
+        } else {
+          const rowGap = U * 0.16
+          drawStat(W / 2, cy - rowGap, stats[0][0], stats[0][1], stats[0][2], U)
+          drawStat(W / 2, cy, stats[1][0], stats[1][1], stats[1][2], U)
+          drawStat(W / 2, cy + rowGap, stats[2][0], stats[2][1], stats[2][2], U)
+          drawBars(t, W / 2, cy + rowGap * 1.6, U * 0.78, U * 0.07, U)
+        }
+
+        ctx.restore()
+      }
+
+      window.renderFrame = function (t) {
+        ctx.fillStyle = PAPER
+        ctx.fillRect(0, 0, W, H)
+
+        const heatT = Math.min(t, floodEnd)
+        const kbAlpha = hasStats
+          ? clamp01((floodEnd + 0.5 - t) / 0.5)
+          : clamp01((revealStart - t) / 0.18)
+        if (kbAlpha > 0.01) {
+          topGlow(heatT)
+          drawKeyboard(t, kbAlpha, heatT)
+          drawIntro(t)
+        }
+
+        if (hasStats) {
+          const statsAlpha =
+            clamp01((t - statsStart) / 0.5) * clamp01((statsEnd + 0.4 - t) / 0.4)
+          if (statsAlpha > 0.01) drawStats(t, statsAlpha)
+          drawFlash(t, floodEnd, 0.22)
+        }
+
+        drawFlash(t, revealStart, 0.22)
+        drawReveal(t)
+        vignette()
+
+        const outro = clamp01((t - (DUR - 0.3)) / 0.3)
+        if (outro > 0.01) {
+          ctx.fillStyle = 'rgba(12,11,8,' + outro + ')'
+          ctx.fillRect(0, 0, W, H)
+        }
+      }
+
+      async function init() {
+        try {
+          await document.fonts.load('400 80px "Instrument Serif"')
+          await document.fonts.load('500 40px "Geist Mono"')
+          await document.fonts.load('600 40px "Geist Mono"')
+          await document.fonts.ready
+        } catch (e) {}
+        window.__ready = true
+        if (!CAPTURE) {
+          const start = performance.now()
+          function loop(now) {
+            let t = ((now - start) / 1000) % DUR
+            window.renderFrame(t)
+            requestAnimationFrame(loop)
+          }
+          requestAnimationFrame(loop)
+        } else {
+          window.renderFrame(0)
+        }
+      }
+      init()
+    </script>
+  </body>
+</html>
