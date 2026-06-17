@@ -36,8 +36,43 @@ export class PushError extends Error {
   }
 }
 
+function isIosNonStandalone(): boolean {
+  if (typeof navigator === 'undefined') return false
+  const isIos =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  if (!isIos) return false
+  const nav = window.navigator as Navigator & { standalone?: boolean }
+  return (
+    nav.standalone !== true &&
+    !window.matchMedia('(display-mode: standalone)').matches
+  )
+}
+
+async function subscribeWithRetry(
+  reg: ServiceWorkerRegistration,
+  applicationServerKey: BufferSource,
+): Promise<PushSubscription> {
+  try {
+    return await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey,
+    })
+  } catch (err) {
+    const stale = await reg.pushManager.getSubscription()
+    if (!stale) throw err
+    await stale.unsubscribe().catch(() => undefined)
+    return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey })
+  }
+}
+
 export async function subscribePush(token: string): Promise<PushState> {
   if (!isPushSupported()) return 'unsupported'
+  if (isIosNonStandalone()) {
+    throw new PushError(
+      'On iPhone or iPad, add commma to your Home Screen first (Share → Add to Home Screen), then enable notifications from there.',
+    )
+  }
 
   const perm = await Notification.requestPermission()
   if (perm === 'denied') return 'denied'
@@ -50,10 +85,17 @@ export async function subscribePush(token: string): Promise<PushState> {
   const { key } = (await keyRes.json()) as { key: string }
 
   const reg = await navigator.serviceWorker.ready
-  const sub = await reg.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(key) as BufferSource,
-  })
+  let sub: PushSubscription
+  try {
+    sub = await subscribeWithRetry(
+      reg,
+      urlBase64ToUint8Array(key) as BufferSource,
+    )
+  } catch {
+    throw new PushError(
+      'Your browser blocked the subscription. Check notification permissions and try again.',
+    )
+  }
 
   const json = sub.toJSON() as {
     endpoint: string
