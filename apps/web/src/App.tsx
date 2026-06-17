@@ -843,8 +843,8 @@ function Waitlist() {
           aside='early access · rolling invites'
         />
         <Reveal>
-          <div className='rounded-xl border border-rule-strong bg-paper-2/60 surface px-[clamp(24px,5vw,72px)] py-[clamp(36px,6vw,72px)]'>
-            <div className='grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:items-center'>
+          <div className='rounded-xl border border-rule-strong bg-paper-2/60 surface px-5 py-8 sm:px-8 sm:py-[clamp(36px,6vw,72px)] lg:px-[clamp(40px,5vw,72px)]'>
+            <div className='grid gap-8 lg:gap-12 lg:grid-cols-[1.1fr_1fr] lg:items-center'>
               <div className='min-w-0'>
                 <p className='font-mono text-[12px] sm:text-[13px] tracking-[0.18em] uppercase text-ink-mute m-0 mb-5 inline-flex items-center gap-2.5'>
                   <LiveDot /> seats open in waves
@@ -893,7 +893,7 @@ function Waitlist() {
                         disabled={status === 'loading'}
                         aria-invalid={status === 'error'}
                         className='flex-1 min-w-0 h-[52px] px-5 rounded-full bg-paper border border-rule-strong
-                          font-mono text-[15px] text-ink placeholder:text-ink-faint
+                          font-mono text-[16px] sm:text-[15px] text-ink placeholder:text-ink-faint
                           focus:outline-none focus:border-accent transition-colors disabled:opacity-60'
                       />
                       <button
