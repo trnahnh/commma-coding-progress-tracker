@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Footer, LiveDot, Nav } from './components/chrome'
+import { LiveKeyboard } from './components/LiveKeyboard'
+import { Reveal } from './components/Reveal'
 import {
   getActivityStats,
   getActivityStream,
@@ -136,6 +138,12 @@ function buildAreaPath(data: number[], w: number, h: number, pad = 4) {
   return `${buildChartPath(data, w, h, pad)} L ${w - pad} ${h - pad} L ${pad} ${h - pad} Z`
 }
 
+const HERO_STATS = [
+  { value: '211', unit: 'd', label: 'longest streak' },
+  { value: '1.4', unit: 'M', label: 'hours logged' },
+  { value: '92', unit: '%', label: 'return next-day' },
+] as const
+
 function Hero() {
   const [pulse, setPulse] = useState(14233)
   useEffect(() => {
@@ -149,104 +157,89 @@ function Hero() {
   const sceneRef = useScene<HTMLElement>()
 
   return (
-    <section ref={sceneRef} className='relative scene-perspective'>
+    <section ref={sceneRef} className='relative scene-perspective overflow-hidden'>
       <div aria-hidden='true' className='hero-spotlight' />
-      <div className='relative z-10 mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)] pt-[clamp(56px,9vw,120px)] pb-[clamp(48px,6vw,96px)]'>
-        <div className='flex items-center gap-3.5 mb-10 sm:mb-12 opacity-0 animate-rise-700 delay-100'>
+      <div className='relative z-10 mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)] pt-[clamp(40px,7vw,92px)] pb-[clamp(44px,6vw,88px)]'>
+        <div className='flex items-center gap-3.5 mb-8 sm:mb-11 opacity-0 animate-rise-700 delay-100'>
           <LiveDot />
-          <span className='font-mono text-[15px] tracking-[0.16em] uppercase text-ink-mute'>
-            v0.1 · invite-only · 2,841 athletes
+          <span className='font-mono text-[13px] sm:text-[15px] tracking-[0.16em] uppercase text-ink-mute'>
+            v0.1 · invite-only ·{' '}
+            <span className='text-ink-soft tnum'>{pulse.toLocaleString()}</span>{' '}
+            typing right now
           </span>
         </div>
 
-        <h1 className='font-serif font-normal text-[clamp(44px,10.5vw,168px)] leading-[0.92] tracking-[-0.035em] m-0 lift-text par-2'>
+        <h1 className='font-serif font-normal text-[clamp(46px,11vw,164px)] leading-[0.9] tracking-[-0.04em] m-0 lift-text par-2'>
           <span className='block overflow-hidden reveal-clip py-[0.12em] my-[-0.12em]'>
             <span className='animate-rise-900 delay-120 inline-block'>
-              Every commit
+              Every keystroke
             </span>
           </span>
           <span className='block overflow-hidden reveal-clip py-[0.12em] my-[-0.12em]'>
             <span className='animate-rise-900 delay-240 inline-block'>
-              is a <em className='font-serif italic text-accent'>step.</em>
+              leaves a <em className='font-serif italic text-accent'>mark</em>
+              <span className='caret text-accent'>|</span>
             </span>
           </span>
         </h1>
 
-        <div className='grid md:grid-cols-[1.4fr_1fr] gap-[clamp(36px,6vw,96px)] items-end mt-[clamp(36px,6vw,80px)] par-1'>
-          <div className='par-3'>
-            <p
-              className='font-sans text-[clamp(16px,1.3vw,19px)] leading-relaxed text-ink-soft max-w-[46ch] m-0 mb-8
-              opacity-0 animate-rise-700 delay-520'
+        <div className='grid md:grid-cols-[1.5fr_1fr] gap-[clamp(28px,5vw,72px)] items-end mt-[clamp(32px,5vw,64px)]'>
+          <p className='font-sans text-[clamp(16px,1.3vw,19px)] leading-relaxed text-ink-soft max-w-[48ch] m-0 opacity-0 animate-rise-700 delay-520 par-3'>
+            commma turns your editor into a logbook — pace, splits, streaks,
+            podiums, all the rituals of a real sport for the work you already do.
+            Install once, code as usual, then read the week back like an athlete
+            reviewing the tape.
+          </p>
+          <div className='flex gap-3 items-center flex-wrap md:justify-end opacity-0 animate-rise-700 delay-640'>
+            <a
+              href='https://marketplace.visualstudio.com'
+              className='group inline-flex items-center gap-2.5 h-[48px] px-6 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium
+                bg-accent text-paper border border-accent glow-accent press hover:bg-ink hover:border-ink transition-colors'
             >
-              commma turns your editor into a logbook. Pace, splits, streaks,
-              podiums — all the rituals of a real sport, for the work you
-              already do. Install once, code as usual, then look back at the
-              week like an athlete reviewing the tape.
-            </p>
-            <div className='flex gap-3 items-center flex-wrap opacity-0 animate-rise-700 delay-640'>
-              <a
-                href='https://marketplace.visualstudio.com'
-                className='group inline-flex items-center gap-2.5 h-[44px] px-5 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium
-                  bg-accent text-paper border border-accent glow-accent press hover:bg-ink hover:border-ink transition-colors'
-              >
-                Install the extension
-                <span className='inline-block transition-transform group-hover:translate-x-1'>
-                  →
-                </span>
-              </a>
-              <Link
-                to='/leaderboard'
-                className='inline-flex items-center gap-2.5 h-[44px] px-5 rounded-full font-mono text-[15px] uppercase tracking-wider
-                  text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint transition-colors press'
-              >
-                See a sample profile
-              </Link>
-            </div>
+              Install the extension
+              <span className='inline-block transition-transform group-hover:translate-x-1'>
+                →
+              </span>
+            </a>
+            <Link
+              to='/leaderboard'
+              className='inline-flex items-center gap-2.5 h-[48px] px-6 rounded-full font-mono text-[15px] uppercase tracking-wider
+                text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint transition-colors press'
+            >
+              See a sample
+            </Link>
           </div>
+        </div>
 
-          <div className='opacity-0 animate-rise delay-720'>
-            <div className='scene-card relative grid grid-cols-2 rounded-xl overflow-hidden bg-linear-to-b from-paper-2 to-paper surface'>
-              <div aria-hidden='true' className='glare' />
-              <div className='px-5 sm:px-7 py-6 border-b border-r border-rule'>
-                <span className='block font-serif text-[clamp(34px,4vw,56px)] leading-none tracking-[-0.02em] tnum'>
-                  {pulse.toLocaleString()}
-                </span>
-                <span className='block font-mono text-[15px] tracking-[0.14em] uppercase text-ink-mute mt-2.5'>
-                  active right now
-                </span>
-              </div>
-              <div className='px-5 sm:px-7 py-6 border-b border-rule'>
-                <span className='block font-serif text-[clamp(34px,4vw,56px)] leading-none tracking-[-0.02em] tnum'>
-                  211
-                  <span className='text-ink-mute text-[0.5em] align-baseline'>
-                    d
-                  </span>
-                </span>
-                <span className='block font-mono text-[15px] tracking-[0.14em] uppercase text-ink-mute mt-2.5'>
-                  longest streak
-                </span>
-              </div>
-              <div className='px-5 sm:px-7 py-6 border-r border-rule'>
-                <span className='block font-serif text-[clamp(34px,4vw,56px)] leading-none tracking-[-0.02em] tnum'>
-                  1.4M
-                </span>
-                <span className='block font-mono text-[15px] tracking-[0.14em] uppercase text-ink-mute mt-2.5'>
-                  hours logged
-                </span>
-              </div>
-              <div className='px-5 sm:px-7 py-6'>
-                <span className='block font-serif text-[clamp(34px,4vw,56px)] leading-none tracking-[-0.02em] tnum'>
-                  92
-                  <span className='text-ink-mute text-[0.5em] align-baseline'>
-                    %
-                  </span>
-                </span>
-                <span className='block font-mono text-[15px] tracking-[0.14em] uppercase text-ink-mute mt-2.5'>
-                  return next-day
-                </span>
-              </div>
-            </div>
+        <div className='mt-[clamp(36px,5vw,72px)] opacity-0 animate-rise delay-720 par-1'>
+          <LiveKeyboard />
+        </div>
+
+        <div className='mt-7 grid grid-cols-2 sm:grid-cols-4 border border-rule rounded-xl overflow-hidden surface bg-paper-2/40 opacity-0 animate-rise-700 delay-720'>
+          <div className='px-5 sm:px-7 py-5 border-b sm:border-b-0 border-r border-rule'>
+            <span className='flex items-baseline gap-1 font-serif text-[clamp(28px,3.4vw,46px)] leading-none tracking-[-0.02em] tnum'>
+              {pulse.toLocaleString()}
+            </span>
+            <span className='block font-mono text-[12px] sm:text-[13px] tracking-[0.14em] uppercase text-ink-mute mt-2.5'>
+              active right now
+            </span>
           </div>
+          {HERO_STATS.map((s, i) => (
+            <div
+              key={s.label}
+              className={`px-5 sm:px-7 py-5 ${i < 1 ? 'border-b sm:border-b-0' : ''} ${i < 2 ? 'border-r' : ''} border-rule`}
+            >
+              <span className='flex items-baseline font-serif text-[clamp(28px,3.4vw,46px)] leading-none tracking-[-0.02em] tnum'>
+                {s.value}
+                <span className='text-ink-mute text-[0.5em] align-baseline ml-0.5'>
+                  {s.unit}
+                </span>
+              </span>
+              <span className='block font-mono text-[12px] sm:text-[13px] tracking-[0.14em] uppercase text-ink-mute mt-2.5'>
+                {s.label}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -267,7 +260,12 @@ function Ticker() {
 
   const items = [...entries, ...entries, ...entries, ...entries]
   return (
-    <div className='border-y border-rule bg-paper-2 well overflow-hidden whitespace-nowrap'>
+    <div className='relative border-y border-rule bg-paper-2 well overflow-hidden whitespace-nowrap'>
+      <div className='absolute left-0 top-0 bottom-0 z-10 flex items-center gap-2 px-4 sm:px-6 bg-paper-3/90 backdrop-blur-sm border-r border-rule-strong font-mono text-[12px] sm:text-[13px] tracking-[0.18em] uppercase text-accent'>
+        <LiveDot color='accent' />
+        <span className='hidden sm:inline'>Live feed</span>
+      </div>
+      <div className='pointer-events-none absolute right-0 top-0 bottom-0 z-10 w-16 bg-linear-to-l from-paper-2 to-transparent' />
       <div className='inline-flex gap-14 py-3.5 animate-marquee font-mono text-[15px] tracking-wide text-ink-mute'>
         {items.map((t, i) => (
           <span key={i} className='inline-flex items-center gap-2'>
@@ -284,26 +282,36 @@ function Ticker() {
 
 function SectionHead({
   no,
+  kicker,
   title,
   aside,
 }: {
   no: string
+  kicker: string
   title: ReactNode
   aside?: string
 }) {
   return (
-    <div className='grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-3 md:gap-8 items-baseline pb-[clamp(36px,5vw,72px)]'>
-      <span className='font-mono text-[15px] tracking-[0.18em] uppercase text-ink-mute'>
-        § {no}
+    <div className='relative pb-[clamp(32px,5vw,64px)]'>
+      <span
+        aria-hidden='true'
+        className='pointer-events-none select-none absolute right-0 -top-[0.08em] font-serif leading-none tracking-[-0.04em] text-ink-faint/35 text-[clamp(60px,12vw,190px)]'
+      >
+        {no}
       </span>
-      <h2 className='font-serif font-normal text-[clamp(30px,4.5vw,64px)] leading-none tracking-tight m-0'>
-        {title}
-      </h2>
-      {aside && (
-        <span className='font-mono text-[15px] tracking-[0.14em] uppercase text-ink-mute md:text-right'>
-          {aside}
+      <div className='relative flex flex-col gap-3 sm:gap-4 pr-[clamp(52px,14vw,180px)]'>
+        <span className='font-mono text-[12px] sm:text-[13px] tracking-[0.26em] uppercase text-accent'>
+          § {no} — {kicker}
         </span>
-      )}
+        <h2 className='font-serif font-normal text-[clamp(30px,5vw,68px)] leading-[0.98] tracking-[-0.02em] m-0 text-ink'>
+          {title}
+        </h2>
+        {aside && (
+          <span className='font-mono text-[13px] tracking-[0.14em] uppercase text-ink-mute'>
+            {aside}
+          </span>
+        )}
+      </div>
     </div>
   )
 }
@@ -329,12 +337,12 @@ function ActivityCard({
     >
       <div aria-hidden='true' className='glare' />
       <div className='grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto] sm:gap-6 items-start px-5 sm:px-8 py-6 sm:py-7 border-b border-rule'>
-        <div>
+        <div className='min-w-0'>
           <div className='font-mono text-[15px] tracking-[0.16em] text-accent uppercase mb-2.5 flex items-center gap-2.5'>
             <LiveDot color='accent' />
             session · {session.shortDate}
           </div>
-          <h3 className='font-serif text-[clamp(26px,3vw,42px)] leading-[1.05] tracking-[-0.02em] m-0 text-ink'>
+          <h3 className='font-serif text-[clamp(26px,3vw,42px)] leading-[1.05] tracking-[-0.02em] m-0 text-ink break-words'>
             {session.title}
             <span className='block italic text-ink-mute text-[0.6em] mt-1.5'>
               {session.subtitle}
@@ -478,10 +486,10 @@ function ActivityCard({
                 className='w-2.5 h-2.5 rounded-sm'
                 style={{ background: l.swatch }}
               />
-              <span>
+              <span className='min-w-0 truncate'>
                 <strong className='text-ink font-medium'>{l.name}</strong>
               </span>
-              <span className='tnum'>
+              <span className='tnum whitespace-nowrap'>
                 {l.time} · {l.pct}%
               </span>
             </div>
@@ -496,11 +504,11 @@ function ActivityCard({
               key={f.path + f.name}
               className='grid grid-cols-[1fr_auto] items-baseline gap-3 py-2 font-mono text-[15px] text-ink-soft border-b border-dashed border-rule last:border-b-0'
             >
-              <span className='truncate'>
+              <span className='truncate min-w-0'>
                 <span className='text-ink-mute'>{f.path}</span>
                 <strong className='text-ink font-medium'>{f.name}</strong>
               </span>
-              <span className='tnum'>{f.changes}∆</span>
+              <span className='tnum whitespace-nowrap'>{f.changes}∆</span>
             </div>
           ))}
         </div>
@@ -528,19 +536,26 @@ function Activity() {
   return (
     <section className='py-[clamp(56px,9vw,140px)]'>
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
-        <SectionHead
-          no='01'
-          title={
-            <>
-              An <em className='italic text-accent'>activity</em>, not a
-              screenshot.
-            </>
-          }
-          aside={
-            isLive ? 'rendered live · real data' : 'rendered live · sample data'
-          }
-        />
-        <ActivityCard session={session} chart={chart} />
+        <Reveal>
+          <SectionHead
+            no='01'
+            kicker='the artifact'
+            title={
+              <>
+                An <em className='italic text-accent'>activity</em>, not a
+                screenshot.
+              </>
+            }
+            aside={
+              isLive
+                ? 'rendered live · real data'
+                : 'rendered live · sample data'
+            }
+          />
+        </Reveal>
+        <Reveal delay={120}>
+          <ActivityCard session={session} chart={chart} />
+        </Reveal>
       </div>
     </section>
   )
@@ -583,23 +598,29 @@ function HowItWorks() {
   return (
     <section className='py-[clamp(56px,9vw,140px)] border-t border-rule'>
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
-        <SectionHead
-          no='02'
-          title={
-            <>
-              Three pieces. <em className='italic text-accent'>No fuss.</em>
-            </>
-          }
-          aside='extension · api · web'
-        />
+        <Reveal>
+          <SectionHead
+            no='02'
+            kicker='the loop'
+            title={
+              <>
+                Three pieces. <em className='italic text-accent'>No fuss.</em>
+              </>
+            }
+            aside='extension · api · web'
+          />
+        </Reveal>
         <div className='grid grid-cols-1 md:grid-cols-3 border-y border-rule'>
           {steps.map((s, i) => (
-            <div
+            <Reveal
               key={s.no}
+              delay={i * 110}
               className={`px-5 sm:px-8 py-8 sm:py-10 ${i < 2 ? 'md:border-r' : ''} ${i < 2 ? 'border-b md:border-b-0' : ''} border-rule`}
             >
               <div className='font-mono text-[15px] tracking-[0.16em] text-ink-mute flex items-center gap-3 mb-7'>
-                <span>{s.no}</span>
+                <span className='font-serif text-[22px] text-accent tnum'>
+                  {s.no}
+                </span>
                 <span className='flex-1 h-px bg-rule' />
               </div>
               <pre className='font-mono text-[15px] leading-snug text-accent bg-paper-2 border border-rule px-4 py-3.5 rounded-md mb-6 whitespace-pre overflow-x-auto well'>
@@ -611,7 +632,7 @@ function HowItWorks() {
               <p className='text-[15px] leading-relaxed text-ink-soft m-0 max-w-[36ch]'>
                 {s.body}
               </p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -715,46 +736,51 @@ function Leaderboard() {
   return (
     <section className='py-[clamp(56px,9vw,140px)] border-t border-rule'>
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
-        <SectionHead
-          no='03'
-          title={
-            <>
-              This week's <em className='italic text-accent'>podium.</em>
-            </>
-          }
-          aside={aside}
-        />
-        <div className='border border-rule-strong rounded-lg overflow-hidden surface'>
-          <div className='grid grid-cols-[40px_1fr_auto] md:grid-cols-[56px_1.4fr_1fr_1fr_32px] items-center px-4 sm:px-6 py-3.5 gap-3 font-mono text-[15px] tracking-[0.14em] uppercase text-ink-soft bg-paper-2 border-b border-rule'>
-            <span>Rank</span>
-            <span>Athlete</span>
-            <span className='text-right md:text-left'>Time</span>
-            <span className='hidden md:block'>Lang · Streak</span>
-            <span className='hidden md:block' />
-          </div>
-          {loading ? (
-            <div className='px-4 sm:px-6 py-10 space-y-3'>
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className='h-[52px] rounded bg-paper-3 animate-pulse'
+        <Reveal>
+          <SectionHead
+            no='03'
+            kicker='the podium'
+            title={
+              <>
+                This week's <em className='italic text-accent'>podium.</em>
+              </>
+            }
+            aside={aside}
+          />
+        </Reveal>
+        <Reveal delay={120}>
+          <div className='border border-rule-strong rounded-lg overflow-hidden surface'>
+            <div className='grid grid-cols-[40px_1fr_auto] md:grid-cols-[56px_1.4fr_1fr_1fr_32px] items-center px-4 sm:px-6 py-3.5 gap-3 font-mono text-[15px] tracking-[0.14em] uppercase text-ink-soft bg-paper-2 border-b border-rule'>
+              <span>Rank</span>
+              <span>Athlete</span>
+              <span className='text-right md:text-left'>Time</span>
+              <span className='hidden md:block'>Lang · Streak</span>
+              <span className='hidden md:block' />
+            </div>
+            {loading ? (
+              <div className='px-4 sm:px-6 py-10 space-y-3'>
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className='h-[52px] rounded bg-paper-3 animate-pulse'
+                  />
+                ))}
+              </div>
+            ) : entries.length === 0 ? (
+              <div className='px-4 sm:px-6 py-10 font-mono text-[15px] text-ink-mute text-center'>
+                No data yet — be the first to log a session.
+              </div>
+            ) : (
+              entries.map((entry) => (
+                <LeaderRow
+                  key={entry.handle}
+                  entry={entry}
+                  isSelf={user?.handle === entry.handle}
                 />
-              ))}
-            </div>
-          ) : entries.length === 0 ? (
-            <div className='px-4 sm:px-6 py-10 font-mono text-[15px] text-ink-mute text-center'>
-              No data yet — be the first to log a session.
-            </div>
-          ) : (
-            entries.map((entry) => (
-              <LeaderRow
-                key={entry.handle}
-                entry={entry}
-                isSelf={user?.handle === entry.handle}
-              />
-            ))
-          )}
-        </div>
+              ))
+            )}
+          </div>
+        </Reveal>
       </div>
     </section>
   )
@@ -762,37 +788,41 @@ function Leaderboard() {
 
 function Final() {
   return (
-    <section className='py-[clamp(72px,12vw,200px)] text-center border-t border-rule relative'>
+    <section className='py-[clamp(72px,12vw,200px)] text-center border-t border-rule relative overflow-hidden'>
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
-        <p className='font-mono text-[15px] tracking-[0.18em] uppercase text-ink-mute m-0 mb-9'>
-          <LiveDot /> &nbsp; 2,841 athletes logging right now
-        </p>
-        <h2 className='font-serif font-normal text-[clamp(44px,9vw,140px)] leading-[0.95] tracking-[-0.035em] m-0 mb-10 mx-auto max-w-[14ch] text-ink lift-text'>
-          Stop coding into the <em className='italic text-accent'>void.</em>
-        </h2>
-        <div className='flex flex-col sm:flex-row items-center justify-center gap-3'>
-          <Link
-            to='/pricing'
-            className='group inline-flex items-center gap-2.5 h-[52px] px-8 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium bg-accent text-paper border border-accent glow-accent press hover:bg-ink hover:border-ink transition-colors'
-          >
-            Get early access
-            <span className='inline-block transition-transform group-hover:translate-x-1'>
-              →
-            </span>
-          </Link>
-          <a
-            href='https://marketplace.visualstudio.com'
-            className='group inline-flex items-center gap-2.5 h-[52px] px-8 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint transition-colors press'
-          >
-            Install free
-            <span className='inline-block transition-transform group-hover:translate-x-1'>
-              →
-            </span>
-          </a>
-        </div>
-        <p className='font-mono text-[15px] tracking-wider uppercase text-ink-mute mt-8'>
-          free during early access · no card · leave anytime
-        </p>
+        <Reveal>
+          <p className='font-mono text-[13px] sm:text-[15px] tracking-[0.18em] uppercase text-ink-mute m-0 mb-9 inline-flex items-center gap-2.5'>
+            <LiveDot /> 2,841 athletes logging right now
+          </p>
+          <h2 className='font-serif font-normal text-[clamp(46px,10vw,150px)] leading-[0.93] tracking-[-0.04em] m-0 mb-10 mx-auto max-w-[14ch] text-ink lift-text'>
+            Stop coding into the <em className='italic text-accent'>void.</em>
+          </h2>
+        </Reveal>
+        <Reveal delay={120}>
+          <div className='flex flex-col sm:flex-row items-center justify-center gap-3'>
+            <Link
+              to='/pricing'
+              className='group inline-flex items-center gap-2.5 h-[52px] px-8 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium bg-accent text-paper border border-accent glow-accent press hover:bg-ink hover:border-ink transition-colors'
+            >
+              Get early access
+              <span className='inline-block transition-transform group-hover:translate-x-1'>
+                →
+              </span>
+            </Link>
+            <a
+              href='https://marketplace.visualstudio.com'
+              className='group inline-flex items-center gap-2.5 h-[52px] px-8 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint transition-colors press'
+            >
+              Install free
+              <span className='inline-block transition-transform group-hover:translate-x-1'>
+                →
+              </span>
+            </a>
+          </div>
+          <p className='font-mono text-[13px] sm:text-[15px] tracking-wider uppercase text-ink-mute mt-8'>
+            free during early access · no card · leave anytime
+          </p>
+        </Reveal>
       </div>
     </section>
   )
@@ -844,7 +874,7 @@ function BackToTop() {
         pointerEvents: 'none',
         transition: 'opacity 250ms, transform 250ms',
       }}
-      className='fixed bottom-6 right-5 sm:right-6 z-50 w-9 h-9 sm:w-10 sm:h-10 rounded-full
+      className='fixed bottom-6 right-5 sm:right-6 z-50 w-11 h-11 rounded-full
         bg-paper-3 border border-rule-strong text-ink-mute hover:text-ink hover:border-ink-faint
         font-serif text-[18px] flex items-center justify-center bevel press'
     >
@@ -855,7 +885,7 @@ function BackToTop() {
 
 export default function App() {
   useEffect(() => {
-    document.title = 'commma — every commit is a step'
+    document.title = 'commma — every keystroke leaves a mark'
   }, [])
 
   return (
