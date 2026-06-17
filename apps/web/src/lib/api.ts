@@ -574,3 +574,14 @@ export function getRecap(token: string): Promise<RecapData> {
     headers: { Authorization: `Bearer ${token}` },
   })
 }
+
+export function joinWaitlist(
+  email: string,
+  source = 'landing',
+): Promise<{ ok: boolean }> {
+  return getJson<{ ok: boolean }>('/v1/waitlist', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, source }),
+  })
+}

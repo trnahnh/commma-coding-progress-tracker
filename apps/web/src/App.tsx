@@ -9,6 +9,8 @@ import {
   getActivityStream,
   getFeaturedSession,
   getLeaderboard,
+  joinWaitlist,
+  ApiError,
   type FeaturedSession,
   type LeaderboardEntry,
   type StreamEntry,
@@ -787,6 +789,150 @@ function Leaderboard() {
   )
 }
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+type WaitlistStatus = 'idle' | 'loading' | 'done' | 'error'
+
+function Waitlist() {
+  const [email, setEmail] = useState('')
+  const [status, setStatus] = useState<WaitlistStatus>('idle')
+  const [message, setMessage] = useState('')
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (status === 'loading') return
+    const value = email.trim()
+    if (!EMAIL_RE.test(value)) {
+      setStatus('error')
+      setMessage('Enter a valid email address.')
+      return
+    }
+    setStatus('loading')
+    setMessage('')
+    try {
+      await joinWaitlist(value)
+      setStatus('done')
+      setEmail('')
+    } catch (err) {
+      setStatus('error')
+      if (err instanceof ApiError && err.code === 'RATE_LIMITED') {
+        setMessage('Too many tries — give it a minute, then retry.')
+      } else if (err instanceof ApiError && err.status === 0) {
+        setMessage('Could not reach the server. Check your connection.')
+      } else {
+        setMessage('Something went wrong. Try again in a moment.')
+      }
+    }
+  }
+
+  return (
+    <section
+      id='waitlist'
+      className='py-[clamp(56px,9vw,140px)] border-t border-rule'
+    >
+      <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
+        <SectionHead
+          no='04'
+          kicker='the list'
+          title={
+            <>
+              Be there when the <em className='italic text-accent'>gun</em> goes
+              off.
+            </>
+          }
+          aside='early access · rolling invites'
+        />
+        <Reveal>
+          <div className='rounded-xl border border-rule-strong bg-paper-2/60 surface px-[clamp(24px,5vw,72px)] py-[clamp(36px,6vw,72px)]'>
+            <div className='grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:items-center'>
+              <div className='min-w-0'>
+                <p className='font-mono text-[12px] sm:text-[13px] tracking-[0.18em] uppercase text-ink-mute m-0 mb-5 inline-flex items-center gap-2.5'>
+                  <LiveDot /> seats open in waves
+                </p>
+                <h3 className='font-serif font-normal text-[clamp(28px,4.5vw,52px)] leading-[1.02] tracking-[-0.02em] m-0 mb-4 text-ink'>
+                  Join the waitlist
+                </h3>
+                <p className='font-sans text-[15px] sm:text-[16px] leading-relaxed text-ink-soft m-0 max-w-[48ch]'>
+                  Drop your email and we&apos;ll send your invite the moment the
+                  next wave opens. No spam, no card — just a heads-up when it
+                  lands.
+                </p>
+              </div>
+
+              <div className='min-w-0'>
+                {status === 'done' ? (
+                  <div className='rounded-lg border border-accent-line bg-accent-soft px-6 py-7 text-center'>
+                    <p className='font-mono text-[12px] tracking-[0.18em] uppercase text-accent m-0 mb-2'>
+                      You&apos;re on the list
+                    </p>
+                    <p className='font-sans text-[15px] leading-relaxed text-ink-soft m-0'>
+                      Watch your inbox — your invite ships with the next wave.
+                    </p>
+                  </div>
+                ) : (
+                  <form
+                    onSubmit={onSubmit}
+                    noValidate
+                    className='flex flex-col gap-3'
+                  >
+                    <label htmlFor='waitlist-email' className='sr-only'>
+                      Email address
+                    </label>
+                    <div className='flex flex-col sm:flex-row gap-3'>
+                      <input
+                        id='waitlist-email'
+                        type='email'
+                        inputMode='email'
+                        autoComplete='email'
+                        placeholder='you@domain.dev'
+                        value={email}
+                        onChange={(e) => {
+                          setEmail(e.target.value)
+                          if (status === 'error') setStatus('idle')
+                        }}
+                        disabled={status === 'loading'}
+                        aria-invalid={status === 'error'}
+                        className='flex-1 min-w-0 h-[52px] px-5 rounded-full bg-paper border border-rule-strong
+                          font-mono text-[15px] text-ink placeholder:text-ink-faint
+                          focus:outline-none focus:border-accent transition-colors disabled:opacity-60'
+                      />
+                      <button
+                        type='submit'
+                        disabled={status === 'loading'}
+                        className='group inline-flex items-center justify-center gap-2.5 h-[52px] px-7 rounded-full
+                          font-mono text-[15px] uppercase tracking-wider font-medium whitespace-nowrap
+                          bg-accent text-paper border border-accent glow-accent press
+                          hover:bg-ink hover:border-ink transition-colors disabled:opacity-60'
+                      >
+                        {status === 'loading' ? 'Joining…' : 'Join waitlist'}
+                        {status !== 'loading' && (
+                          <span className='inline-block transition-transform group-hover:translate-x-1'>
+                            →
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                    <p
+                      role={status === 'error' ? 'alert' : undefined}
+                      className={`font-mono text-[13px] tracking-wide m-0 min-h-[18px] ${
+                        status === 'error' ? 'text-accent' : 'text-ink-mute'
+                      }`}
+                    >
+                      {status === 'error'
+                        ? message
+                        : 'We only email you about access. Unsubscribe anytime.'}
+                    </p>
+                  </form>
+                )}
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  )
+}
+
 function Final() {
   return (
     <section className='py-[clamp(72px,12vw,200px)] text-center border-t border-rule relative overflow-hidden'>
@@ -865,6 +1011,7 @@ export default function App() {
         <Activity />
         <HowItWorks />
         <Leaderboard />
+        <Waitlist />
         <Final />
       </main>
       <Footer />
