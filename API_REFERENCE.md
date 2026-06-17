@@ -1069,6 +1069,48 @@ client subtracts one day to show the inclusive Sunday label.
 
 ---
 
+## Waitlist Endpoint
+
+Public pre-launch email capture for the landing page. No auth.
+
+---
+
+### `POST /v1/waitlist`
+
+**Auth:** none (public) **Rate limit:** 10/hr per IP (fails closed)
+
+**Request:**
+
+```json
+{
+  "email": "you@domain.dev",
+  "source": "landing"
+}
+```
+
+| Field    | Type     | Notes                                                  |
+| -------- | -------- | ------------------------------------------------------ |
+| `email`  | `string` | Required. Trimmed, lowercased, validated, max 254      |
+| `source` | `string` | Optional. Where the signup came from, max 64           |
+
+The body is validated with Zod `.strict()` — unknown fields are rejected. The
+insert is idempotent on a unique email: a repeat signup returns the same `201`
+without revealing that the address already exists (no enumeration). A genuinely
+new signup also triggers a best-effort confirmation email via Resend; the send
+never blocks or fails the request.
+
+**Response:** `201 Created`
+
+```json
+{ "ok": true }
+```
+
+**Errors:** `400 VALIDATION_ERROR` invalid/missing email or unknown field ·
+`429 RATE_LIMITED` too many signups from this IP · `503 SERVICE_UNAVAILABLE`
+limiter backing store unreachable (fails closed)
+
+---
+
 ## Error Format
 
 All errors follow this shape:
@@ -1108,6 +1150,7 @@ All errors follow this shape:
 | `POST /v1/billing/checkout`, `/portal` | 30 requests    | 1 hour (per user) |
 | All team reads and writes              | 300 requests   | 1 hour (per user) |
 | `POST`/`DELETE /v1/push/subscribe`     | 20 requests    | 1 hour (per user) |
+| `POST /v1/waitlist`                    | 10 requests    | 1 hour (per IP)   |
 | Public reads (leaderboard, profiles…)  | 300 requests   | 1 hour (per IP)   |
 | `POST /v1/billing/webhook`             | 600 requests   | 1 hour (per IP)   |
 | Auth endpoints                         | 20 requests    | 1 hour (per IP)   |
@@ -1127,8 +1170,9 @@ it to the number of proxies in front (1 = ALB, 2 = CloudFront→ALB) so a forged
 `x-forwarded-for` cannot spoof or exhaust another visitor's bucket.
 
 **Limiter availability:** when Redis backing the limiter is unreachable, the
-write paths that must stay protected — `POST /v1/ingest` and all auth
-endpoints — **fail closed** with `503 SERVICE_UNAVAILABLE`; read paths and the
+write paths that must stay protected — `POST /v1/ingest`, `POST /v1/waitlist`,
+and all auth endpoints — **fail closed** with `503 SERVICE_UNAVAILABLE`; read
+paths and the
 Stripe webhook **fail open** so a limiter blip does not take down browsing or
 drop a legitimate Stripe retry.
 

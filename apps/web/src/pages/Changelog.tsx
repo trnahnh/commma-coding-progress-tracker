@@ -11,6 +11,8 @@ const ENTRIES = [
       'Every landing section rebuilt with oversized index numerals, scroll-reveal motion, and a broadcast-style live activity ticker',
       'New headline — "Every keystroke leaves a mark"',
       'Back-to-top button now appears on every page, not just the landing page',
+      'Join the waitlist — a new section on the landing page captures your email and sends a confirmation, so you get pinged the moment the next access wave opens',
+      'Fixed the notification toggle in Edit profile — enabling streak reminders now reports clearly when permission is dismissed or push is unavailable, instead of silently doing nothing',
     ],
   },
   {

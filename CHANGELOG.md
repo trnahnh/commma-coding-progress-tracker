@@ -11,6 +11,13 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Web, API** — Join the waitlist. A new section on the landing page captures
+  an email and posts it to `POST /v1/waitlist` (public, IP rate-limited, Zod
+  `.strict()` validation, idempotent insert keyed on a unique email so duplicate
+  signups never leak whether an address already exists). Genuinely new signups
+  receive a confirmation email via the existing Resend transport; the send is
+  best-effort and never blocks or fails the signup. Backed by a new `waitlist`
+  table (migration `0010`).
 - **Web** — Landing page reimagined around a live keyboard heatmap. The hero is
   a self-animating keyboard that floods keys with the cold-to-accent heat ramp
   as a ghost typist types, surfaced with a live keys-per-minute, top-key, and
@@ -473,6 +480,11 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- **Web** — The notification toggle in Edit profile silently did nothing when
+  permission was dismissed or push was unavailable server-side. Enabling streak
+  reminders now surfaces a clear message in each case, and a subscription the
+  browser created but the server rejected is rolled back so the toggle state
+  stays honest.
 - **Aggregator** — session `duration_s` is floored to
   `span + one heartbeat window` (~60s) so sub-minute sessions are no longer 0
   seconds; they now earn leaderboard credit and produce non-zero language
