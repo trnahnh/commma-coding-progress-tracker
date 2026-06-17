@@ -71,6 +71,13 @@
       "when": 1781568000000,
       "tag": "0009_session_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1781654400000,
+      "tag": "0010_waitlist",
+      "breakpoints": true
     }
   ]
 }

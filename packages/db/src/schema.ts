@@ -234,6 +234,19 @@ export const recapEmails = pgTable(
   (t) => [primaryKey({ columns: [t.userId, t.weekStart] })],
 )
 
+export const waitlist = pgTable(
+  'waitlist',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    email: text('email').notNull().unique(),
+    source: varchar('source', { length: 64 }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index('waitlist_created').on(t.createdAt.desc())],
+)
+
 export const teamInvites = pgTable(
   'team_invites',
   {
