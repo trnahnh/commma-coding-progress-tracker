@@ -264,6 +264,8 @@ sessionRoutes.get(
       keyboard_heatmap: suppressDetail
         ? null
         : (session.keyboardHeatmap ?? null),
+      card_available:
+        owner.privacy === 'full' && (session.keyboardHeatmap?.total ?? 0) > 0,
     })
   },
 )
