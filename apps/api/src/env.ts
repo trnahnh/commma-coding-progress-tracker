@@ -35,6 +35,7 @@ const envSchema = z.object({
   RECAP_FROM_EMAIL: optionalSecret,
   OPENAI_API_KEY: optionalSecret,
   RECAP_SEND_HOUR_UTC: z.coerce.number().int().min(0).max(23).default(13),
+  PUSH_REMINDER_HOUR_UTC: z.coerce.number().int().min(0).max(23).default(17),
 })
 
 export const env = envSchema.parse(process.env)

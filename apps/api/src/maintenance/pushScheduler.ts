@@ -1,11 +1,12 @@
 import { and, eq, gt, lt, sql } from 'drizzle-orm'
 import { pushSubscriptions, streaks } from '@commma/db'
 import { db } from '../db.js'
+import { env } from '../env.js'
 import { log } from '../logger.js'
 import { acquireLeader } from '../lib/scheduling.js'
 import { isWebPushEnabled, sendPush } from '../lib/webPush.js'
 
-const INTERVAL_MS = 24 * 60 * 60 * 1000
+const INTERVAL_MS = 60 * 60 * 1000
 
 let timer: NodeJS.Timeout | null = null
 let running = false
@@ -13,6 +14,7 @@ let running = false
 async function tick(): Promise<void> {
   if (!isWebPushEnabled()) return
   if (running) return
+  if (new Date().getUTCHours() !== env.PUSH_REMINDER_HOUR_UTC) return
   if (!(await acquireLeader('push-reminders', INTERVAL_MS))) return
   running = true
   try {
