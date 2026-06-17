@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
 import { Shell } from '../components/chrome'
+import { useSeo } from '../lib/seo'
 
 export default function Careers() {
-  useEffect(() => {
-    document.title = 'Careers · commma'
-  }, [])
+  useSeo({
+    title: 'Careers · commma',
+    description: 'Open roles at commma — help build a developer-activity tracker styled as a sport.',
+  })
 
   return (
     <Shell>

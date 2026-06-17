@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
 import { Shell, LiveDot } from '../components/chrome'
+import { useSeo } from '../lib/seo'
 
 const COMPONENTS = [
   { name: 'VSCode Extension', note: 'Operational' },
@@ -16,9 +16,10 @@ const COMPONENTS = [
 ]
 
 export default function Status() {
-  useEffect(() => {
-    document.title = 'Status · commma'
-  }, [])
+  useSeo({
+    title: 'Status · commma',
+    description: 'Live status for the commma API, web app, and ingest pipeline.',
+  })
 
   return (
     <Shell>

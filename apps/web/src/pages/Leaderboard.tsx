@@ -10,6 +10,7 @@ import {
 } from '../lib/api'
 import { formatDuration } from '../lib/format'
 import { langStyle } from '../lib/langColors'
+import { useSeo } from '../lib/seo'
 
 const PERIODS: { value: LeaderboardPeriod; label: string }[] = [
   { value: 'week', label: 'Week' },
@@ -204,9 +205,10 @@ export default function Leaderboard() {
     }
   }, [period])
 
-  useEffect(() => {
-    document.title = 'Leaderboard · commma'
-  }, [])
+  useSeo({
+    title: 'Leaderboard · commma',
+    description: "This week's global coding leaderboard on commma.",
+  })
 
   if (state.phase === 'loading') {
     return (

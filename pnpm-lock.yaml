@@ -137,9 +137,15 @@ importers:
       globals:
         specifier: ^17.6.0
         version: 17.6.0
+      sharp:
+        specifier: ^0.34.5
+        version: 0.34.5
       tailwindcss:
         specifier: ^4.3.0
         version: 4.3.0
+      tsx:
+        specifier: ^4.7.1
+        version: 4.22.3
       typescript:
         specifier: ~6.0.2
         version: 6.0.3

@@ -2,13 +2,12 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Shell } from '../components/chrome'
 import { useAuth } from '../lib/auth'
+import { useSeo } from '../lib/seo'
 
 export default function BillingSuccess() {
   const { user, refreshUser } = useAuth()
 
-  useEffect(() => {
-    document.title = 'Subscription confirmed · commma'
-  }, [])
+  useSeo({ title: 'Subscription confirmed · commma', noindex: true })
 
   useEffect(() => {
     void refreshUser()

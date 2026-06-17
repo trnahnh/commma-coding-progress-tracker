@@ -5,6 +5,7 @@ import { ApiError, getFeed, type FeedEntry, type FeedPage } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { formatClock, formatDate, formatDuration } from '../lib/format'
 import { langStyle } from '../lib/langColors'
+import { useSeo } from '../lib/seo'
 
 function FeedCard({ entry }: { entry: FeedEntry }) {
   const { session, user } = entry
@@ -121,9 +122,11 @@ export default function Feed() {
   const [state, setState] = useState<LoadState>({ phase: 'loading' })
   const [loadingMore, setLoadingMore] = useState(false)
 
-  useEffect(() => {
-    document.title = 'Feed · commma'
-  }, [])
+  useSeo({
+    title: 'Feed · commma',
+    description: 'Sessions from the developers you follow on commma.',
+    noindex: true,
+  })
 
   useEffect(() => {
     if (!token) return

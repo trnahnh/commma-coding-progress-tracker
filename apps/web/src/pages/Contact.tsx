@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
 import { Shell } from '../components/chrome'
+import { useSeo } from '../lib/seo'
 
 export default function Contact() {
-  useEffect(() => {
-    document.title = 'Contact · commma'
-  }, [])
+  useSeo({
+    title: 'Contact · commma',
+    description: 'Get in touch with the commma team — support, partnerships, and press.',
+  })
 
   return (
     <Shell>

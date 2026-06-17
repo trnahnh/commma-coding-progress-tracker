@@ -12,6 +12,7 @@ import {
   type TeamSummary,
 } from '../lib/api'
 import { useAuth } from '../lib/auth'
+import { useSeo } from '../lib/seo'
 
 function RoleChip({ role }: { role: string }) {
   const isOwner = role === 'owner'
@@ -274,9 +275,7 @@ export default function Teams() {
     }
   }, [token, authLoading, navigate])
 
-  useEffect(() => {
-    document.title = 'Teams · commma'
-  }, [])
+  useSeo({ title: 'Teams · commma', noindex: true })
 
   if (authLoading || state.phase === 'loading') {
     return (

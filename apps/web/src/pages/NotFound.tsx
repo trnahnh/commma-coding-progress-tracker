@@ -1,11 +1,13 @@
-import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Shell, StatusPanel } from '../components/chrome'
+import { useSeo } from '../lib/seo'
 
 export default function NotFound() {
-  useEffect(() => {
-    document.title = 'Page not found · commma'
-  }, [])
+  useSeo({
+    title: 'Page not found · commma',
+    description: "The page you're looking for doesn't exist.",
+    noindex: true,
+  })
 
   return (
     <Shell>

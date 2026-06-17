@@ -18,6 +18,7 @@ import {
 } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { formatDuration } from '../lib/format'
+import { useSeo } from '../lib/seo'
 
 const PERIODS: { value: LeaderboardPeriod; label: string }[] = [
   { value: 'week', label: 'Week' },
@@ -443,11 +444,10 @@ export default function TeamDashboard() {
     }
   }, [token, authLoading, slug, navigate])
 
-  useEffect(() => {
-    if (state.phase === 'ready') {
-      document.title = `${state.team.name} · commma`
-    }
-  }, [state])
+  useSeo({
+    title: state.phase === 'ready' ? `${state.team.name} · commma` : 'Team · commma',
+    noindex: true,
+  })
 
   const changePeriod = useCallback(
     (p: LeaderboardPeriod) => {

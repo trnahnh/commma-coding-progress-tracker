@@ -4,6 +4,7 @@ import { LiveDot, Shell, StatusPanel } from '../components/chrome'
 import { ApiError, getRecap, type RecapData } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { formatDuration } from '../lib/format'
+import { useSeo } from '../lib/seo'
 
 function weekProgress(start: string, end: string): number {
   const s = new Date(start + 'T00:00:00Z').getTime()
@@ -64,6 +65,12 @@ export default function Recap() {
   const navigate = useNavigate()
   const [recap, setRecap] = useState<RecapData | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  useSeo({
+    title: 'Weekly recap · commma',
+    description: 'Your week in code — pace, streaks, and highlights.',
+    noindex: true,
+  })
 
   useEffect(() => {
     if (isLoading) return

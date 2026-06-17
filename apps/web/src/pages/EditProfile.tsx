@@ -11,6 +11,7 @@ import {
   unsubscribePush,
   type PushState,
 } from '../lib/push'
+import { useSeo } from '../lib/seo'
 
 const PRIVACY_OPTIONS = [
   {
@@ -256,9 +257,7 @@ export default function EditProfile() {
       .catch(() => void 0)
   }, [token])
 
-  useEffect(() => {
-    document.title = 'Edit profile · commma'
-  }, [])
+  useSeo({ title: 'Edit profile · commma', noindex: true })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

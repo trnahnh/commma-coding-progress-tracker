@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Wordmark } from '../components/chrome'
 import { useAuth } from '../lib/auth'
 import { takePostAuthRedirect } from '../lib/redirect'
+import { useSeo } from '../lib/seo'
 
 function GithubMark() {
   return (
@@ -34,9 +35,7 @@ export default function SignIn() {
   const { token, isLoading, signIn } = useAuth()
   const navigate = useNavigate()
 
-  useEffect(() => {
-    document.title = 'Sign in · commma'
-  }, [])
+  useSeo({ title: 'Sign in · commma', noindex: true })
 
   useEffect(() => {
     if (!isLoading && token)

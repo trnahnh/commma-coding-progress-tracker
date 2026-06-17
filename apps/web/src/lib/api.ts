@@ -30,6 +30,7 @@ export interface SessionDetail {
   langs: SessionLang[]
   files: SessionFile[]
   keyboard_heatmap: KeyboardHeatmap | null
+  card_available: boolean
 }
 
 interface ApiErrorBody {
@@ -232,6 +233,10 @@ export function updateProfile(
 
 export function getSession(id: string): Promise<SessionDetail> {
   return getJson<SessionDetail>(`/v1/sessions/${encodeURIComponent(id)}`)
+}
+
+export function heatmapCardUrl(id: string): string {
+  return `${API_BASE_URL}/v1/sessions/${encodeURIComponent(id)}/heatmap-card?aspect=16:9`
 }
 
 export type PaidPlan = 'pro' | 'team'

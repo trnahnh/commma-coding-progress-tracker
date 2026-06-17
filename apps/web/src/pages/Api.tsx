@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
 import { Shell, LiveDot } from '../components/chrome'
+import { useSeo } from '../lib/seo'
 
 const ENDPOINTS = [
   {
@@ -256,9 +256,10 @@ const METHOD_COLOR: Record<string, string> = {
 }
 
 export default function Api() {
-  useEffect(() => {
-    document.title = 'API · commma'
-  }, [])
+  useSeo({
+    title: 'API · commma',
+    description: 'The commma API reference — authentication, ingest, and session endpoints.',
+  })
 
   return (
     <Shell>

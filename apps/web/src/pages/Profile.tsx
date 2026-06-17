@@ -12,6 +12,7 @@ import {
 import { useAuth } from '../lib/auth'
 import { formatClock, formatDate, formatDuration } from '../lib/format'
 import { langStyle } from '../lib/langColors'
+import { useSeo } from '../lib/seo'
 
 const BADGE_CATALOG = [
   { id: 'vim-athlete', label: 'Vim athlete' },
@@ -393,57 +394,29 @@ export default function Profile() {
     }
   }, [handle, hasAt])
 
-  useEffect(() => {
-    const label =
-      state.phase === 'ready'
-        ? `@${state.profile.handle}`
-        : state.phase === 'error'
-          ? 'Profile not found'
-          : 'Loading profile'
-    document.title = `${label} · commma`
-
-    const setMeta = (property: string, content: string) => {
-      let el = document.querySelector<HTMLMetaElement>(
-        `meta[property="${property}"]`,
-      )
-      if (!el) {
-        el = document.createElement('meta')
-        el.setAttribute('property', property)
-        document.head.appendChild(el)
-      }
-      el.setAttribute('content', content)
-    }
-
-    const setNameMeta = (name: string, content: string) => {
-      let el = document.querySelector<HTMLMetaElement>(`meta[name="${name}"]`)
-      if (!el) {
-        el = document.createElement('meta')
-        el.setAttribute('name', name)
-        document.head.appendChild(el)
-      }
-      el.setAttribute('content', content)
-    }
-
-    if (state.phase === 'ready') {
-      const { profile } = state
-      const desc = [
-        `${profile.stats.total_sessions} sessions`,
-        profile.streak.current_days > 0
-          ? `${profile.streak.current_days}d streak`
-          : null,
-        profile.stats.top_lang ? `· ${profile.stats.top_lang}` : null,
-      ]
-        .filter(Boolean)
-        .join(' · ')
-      setNameMeta('description', desc)
-      setMeta('og:type', 'profile')
-      setMeta('og:title', `${label} · commma`)
-      setMeta('og:description', desc)
-      setMeta('twitter:card', 'summary')
-      setMeta('twitter:title', `${label} · commma`)
-      setMeta('twitter:description', desc)
-    }
-  }, [state])
+  const profileLabel =
+    state.phase === 'ready'
+      ? `@${state.profile.handle}`
+      : state.phase === 'error'
+        ? 'Profile not found'
+        : 'Loading profile'
+  const profileDescription =
+    state.phase === 'ready'
+      ? [
+          `${state.profile.stats.total_sessions} sessions`,
+          state.profile.streak.current_days > 0
+            ? `${state.profile.streak.current_days}d streak`
+            : null,
+          state.profile.stats.top_lang ? `· ${state.profile.stats.top_lang}` : null,
+        ]
+          .filter(Boolean)
+          .join(' · ')
+      : undefined
+  useSeo({
+    title: `${profileLabel} · commma`,
+    description: profileDescription,
+    ogType: 'profile',
+  })
 
   const loadMore = useCallback(async () => {
     if (state.phase !== 'ready' || !state.nextCursor || loadingMore) return

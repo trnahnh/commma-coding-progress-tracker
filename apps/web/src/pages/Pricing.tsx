@@ -10,6 +10,7 @@ import {
 } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { setPostAuthRedirect } from '../lib/redirect'
+import { useSeo } from '../lib/seo'
 
 function isPaidPlan(value: string | null): value is PaidPlan {
   return value === 'pro' || value === 'team'
@@ -79,9 +80,10 @@ export default function Pricing() {
   const [params, setParams] = useSearchParams()
   const resumed = useRef(false)
 
-  useEffect(() => {
-    document.title = 'Pricing · commma'
-  }, [])
+  useSeo({
+    title: 'Pricing · commma',
+    description: 'commma pricing — free early access, plus Pro and Team plans.',
+  })
 
   const startCheckout = useCallback(
     async (plan: PaidPlan, interval: BillingInterval) => {

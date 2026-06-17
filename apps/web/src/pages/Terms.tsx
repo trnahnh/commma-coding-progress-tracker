@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
 import { Shell } from '../components/chrome'
+import { useSeo } from '../lib/seo'
 
 function Section({
   title,
@@ -21,9 +21,10 @@ function Section({
 }
 
 export default function Terms() {
-  useEffect(() => {
-    document.title = 'Terms · commma'
-  }, [])
+  useSeo({
+    title: 'Terms · commma',
+    description: 'The terms of service for using commma.',
+  })
 
   return (
     <Shell>

@@ -6,6 +6,7 @@ import KeyboardHeatmapCanvas from '../components/KeyboardHeatmap'
 import {
   ApiError,
   getSession,
+  heatmapCardUrl,
   type KeyboardHeatmap,
   type SessionDetail as Session,
   type SessionFile,
@@ -14,6 +15,7 @@ import {
 import { useAuth } from '../lib/auth'
 import { formatClock, formatDate, formatDuration } from '../lib/format'
 import { langStyle } from '../lib/langColors'
+import { useSeo } from '../lib/seo'
 
 function splitPath(path: string): { dir: string; name: string } {
   const trimmed = path.replace(/\/+$/, '')
@@ -338,58 +340,33 @@ export default function SessionDetail() {
     }
   }, [id])
 
-  useEffect(() => {
-    const label =
-      state.phase === 'ready'
-        ? `${formatDate(state.session.started_at)} session`
-        : state.phase === 'error'
-          ? 'Session not found'
-          : 'Loading session'
-    document.title = `${label} · commma`
-
-    const setMeta = (property: string, content: string) => {
-      let el = document.querySelector<HTMLMetaElement>(
-        `meta[property="${property}"]`,
-      )
-      if (!el) {
-        el = document.createElement('meta')
-        el.setAttribute('property', property)
-        document.head.appendChild(el)
-      }
-      el.setAttribute('content', content)
-    }
-
-    const setNameMeta = (name: string, content: string) => {
-      let el = document.querySelector<HTMLMetaElement>(`meta[name="${name}"]`)
-      if (!el) {
-        el = document.createElement('meta')
-        el.setAttribute('name', name)
-        document.head.appendChild(el)
-      }
-      el.setAttribute('content', content)
-    }
-
-    if (state.phase === 'ready') {
-      const { session } = state
-      const topLang = session.langs[0]?.lang ?? null
-      const desc = [
-        formatDuration(session.duration_s),
-        topLang ? `in ${topLang}` : null,
-        session.lines_delta
-          ? `· ${session.lines_delta.toLocaleString()} loc`
-          : null,
-      ]
-        .filter(Boolean)
-        .join(' ')
-      setNameMeta('description', desc)
-      setMeta('og:type', 'article')
-      setMeta('og:title', `${label} · commma`)
-      setMeta('og:description', desc)
-      setMeta('twitter:card', 'summary')
-      setMeta('twitter:title', `${label} · commma`)
-      setMeta('twitter:description', desc)
-    }
-  }, [state])
+  const sessionLabel =
+    state.phase === 'ready'
+      ? `${formatDate(state.session.started_at)} session`
+      : state.phase === 'error'
+        ? 'Session not found'
+        : 'Loading session'
+  const sessionDescription =
+    state.phase === 'ready'
+      ? [
+          formatDuration(state.session.duration_s),
+          state.session.langs[0]?.lang ? `in ${state.session.langs[0].lang}` : null,
+          state.session.lines_delta
+            ? `· ${state.session.lines_delta.toLocaleString()} loc`
+            : null,
+        ]
+          .filter(Boolean)
+          .join(' ')
+      : undefined
+  useSeo({
+    title: `${sessionLabel} · commma`,
+    description: sessionDescription,
+    ogType: 'article',
+    image:
+      state.phase === 'ready' && state.session.card_available
+        ? { url: heatmapCardUrl(id), width: 1920, height: 1080 }
+        : undefined,
+  })
 
   if (state.phase === 'loading') {
     return (

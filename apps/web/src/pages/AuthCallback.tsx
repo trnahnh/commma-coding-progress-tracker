@@ -4,6 +4,7 @@ import { Shell, StatusPanel } from '../components/chrome'
 import { exchangeCode } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { takePostAuthRedirect } from '../lib/redirect'
+import { useSeo } from '../lib/seo'
 
 export default function AuthCallback() {
   const [params] = useSearchParams()
@@ -11,9 +12,7 @@ export default function AuthCallback() {
   const { setSession } = useAuth()
   const ran = useRef(false)
 
-  useEffect(() => {
-    document.title = 'Signing in · commma'
-  }, [])
+  useSeo({ title: 'Signing in · commma', noindex: true })
 
   useEffect(() => {
     if (ran.current) return

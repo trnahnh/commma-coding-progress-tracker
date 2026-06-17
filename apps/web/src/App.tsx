@@ -20,6 +20,7 @@ import { formatClock, formatDate, formatDuration } from './lib/format'
 import { langStyle } from './lib/langColors'
 import { useScene } from './lib/useScene'
 import { SceneBackdrop } from './components/SceneBackdrop'
+import { useSeo } from './lib/seo'
 
 interface SessionView {
   id: string | null
@@ -996,9 +997,11 @@ function ProgressBar() {
 }
 
 export default function App() {
-  useEffect(() => {
-    document.title = 'commma — every keystroke leaves a mark'
-  }, [])
+  useSeo({
+    title: 'commma — every keystroke leaves a mark',
+    description:
+      'Track your coding like an athlete. Pace, splits, streaks, leaderboards, and a shareable keyboard heatmap.',
+  })
 
   return (
     <div className='min-h-screen flex flex-col'>

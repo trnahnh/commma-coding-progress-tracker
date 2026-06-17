@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
 import { Shell } from '../components/chrome'
+import { useSeo } from '../lib/seo'
 
 function Section({
   title,
@@ -21,9 +21,10 @@ function Section({
 }
 
 export default function Privacy() {
-  useEffect(() => {
-    document.title = 'Privacy · commma'
-  }, [])
+  useSeo({
+    title: 'Privacy · commma',
+    description: 'How commma collects, stores, and protects your coding activity data.',
+  })
 
   return (
     <Shell>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Shell } from '../components/chrome'
+import { useSeo } from '../lib/seo'
 
 function useReveal(threshold = 0.1) {
   const ref = useRef<HTMLElement>(null)
@@ -262,9 +263,10 @@ const BELIEFS = [
 ]
 
 export default function About() {
-  useEffect(() => {
-    document.title = 'About · commma'
-  }, [])
+  useSeo({
+    title: 'About · commma',
+    description: 'About commma — why we built a sport out of coding.',
+  })
 
   const { ref: originRef, visible: originVisible } = useReveal(0.08)
   const { ref: beliefsRef, visible: beliefsVisible } = useReveal(0.08)

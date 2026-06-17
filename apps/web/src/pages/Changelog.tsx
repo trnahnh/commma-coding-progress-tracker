@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
 import { Shell } from '../components/chrome'
+import { useSeo } from '../lib/seo'
 
 const ENTRIES = [
   {
@@ -98,9 +98,10 @@ const ENTRIES = [
 ] as const
 
 export default function Changelog() {
-  useEffect(() => {
-    document.title = 'Changelog · commma'
-  }, [])
+  useSeo({
+    title: 'Changelog · commma',
+    description: "What's new in commma — release notes for the extension, API, and web app.",
+  })
 
   return (
     <Shell>
