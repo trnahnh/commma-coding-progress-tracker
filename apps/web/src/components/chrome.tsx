@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
+import { BackToTop } from './BackToTop'
 
 const NAV_LINKS = [
   { label: 'Activity', to: '/' },
@@ -249,6 +250,7 @@ export function Shell({ children }: { children: ReactNode }) {
         {children}
       </main>
       <Footer />
+      <BackToTop />
     </div>
   )
 }
