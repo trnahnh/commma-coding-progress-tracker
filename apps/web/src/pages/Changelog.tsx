@@ -3,6 +3,14 @@ import { useSeo } from '../lib/seo'
 
 const ENTRIES = [
   {
+    version: '0.7.1',
+    date: 'Jun 2026',
+    tag: 'SEO',
+    changes: [
+      'commma is now on LinkedIn — linked from the site footer, the Contact page, and Organization structured data',
+    ],
+  },
+  {
     version: '0.7.0',
     date: 'Jun 2026',
     tag: 'Design',

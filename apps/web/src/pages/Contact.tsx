@@ -52,6 +52,21 @@ export default function Contact() {
             </a>
           </div>
 
+          <div className='grid grid-cols-1 sm:grid-cols-[140px_1fr] items-baseline gap-1 sm:gap-6 py-6 border-b border-rule'>
+            <span className='font-mono text-[12px] tracking-[0.16em] uppercase text-ink-mute'>
+              LinkedIn
+            </span>
+            <a
+              href='https://www.linkedin.com/company/commma-dev/'
+              target='_blank'
+              rel='noopener noreferrer'
+              className='font-mono text-[14px] text-ink-soft hover:text-ink transition-colors inline-flex items-center gap-1.5 break-all'
+            >
+              commma-dev
+              <span className='text-ink-mute text-[12px] shrink-0'>↗</span>
+            </a>
+          </div>
+
           <div className='grid grid-cols-1 sm:grid-cols-[140px_1fr] items-start gap-1 sm:gap-6 py-6'>
             <span className='font-mono text-[12px] tracking-[0.16em] uppercase text-ink-mute sm:pt-1'>
               Response

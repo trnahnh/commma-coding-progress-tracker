@@ -348,6 +348,17 @@ export function Footer() {
                     <span className='text-[11px] text-ink-mute'>↗</span>
                   </a>
                 </li>
+                <li>
+                  <a
+                    href='https://www.linkedin.com/company/commma-dev/'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='font-mono text-[13px] text-ink-soft hover:text-ink transition-colors inline-flex items-center gap-1'
+                  >
+                    LinkedIn
+                    <span className='text-[11px] text-ink-mute'>↗</span>
+                  </a>
+                </li>
               </ul>
             </div>
 

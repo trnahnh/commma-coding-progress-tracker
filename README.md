@@ -3,7 +3,8 @@
 > Every commit is a step.
 
 **Live:** [commma.dev](https://commma.dev) · API at
-[api.commma.dev](https://api.commma.dev)
+[api.commma.dev](https://api.commma.dev) ·
+[LinkedIn](https://www.linkedin.com/company/commma-dev/)
 
 commma turns your editor into a logbook — pace, splits, streaks, podiums — all
 the rituals of a real sport, for the work you already do. A VSCode extension
@@ -32,20 +33,20 @@ original to this project.
 
 ## Tech Stack
 
-| Layer               | Technology                                                                                           |
-| ------------------- | ---------------------------------------------------------------------------------------------------- |
-| Extension           | TypeScript, VSCode API                                                                               |
-| API                 | Hono, Node.js, `@hono/node-server`                                                                   |
-| Web App             | React 19, Vite 8, Tailwind v4                                                                        |
-| Database            | PostgreSQL (Drizzle ORM)                                                                             |
-| Cache / Leaderboard | Redis (rate limits + leaderboard sorted sets)                                                        |
-| Shared              | Zod schemas, TypeScript types                                                                        |
-| Heatmap (client)    | Canvas API → transparent PNG                                                                         |
-| Heatmap (server OG) | sharp                                                                                                |
-| Auth                | GitHub OAuth, JWT + HTTP-only refresh token                                                          |
-| Billing             | Stripe (Pro/Team subscriptions, signature-verified webhooks)                                         |
-| Monorepo            | pnpm workspaces                                                                                      |
-| Deployment (MVP)    | AWS-hosted compute — EC2 t4g (Graviton) + PM2 (API), S3 + CloudFront (web); Neon PG, Upstash Redis   |
+| Layer               | Technology                                                                                         |
+| ------------------- | -------------------------------------------------------------------------------------------------- |
+| Extension           | TypeScript, VSCode API                                                                             |
+| API                 | Hono, Node.js, `@hono/node-server`                                                                 |
+| Web App             | React 19, Vite 8, Tailwind v4                                                                      |
+| Database            | PostgreSQL (Drizzle ORM)                                                                           |
+| Cache / Leaderboard | Redis (rate limits + leaderboard sorted sets)                                                      |
+| Shared              | Zod schemas, TypeScript types                                                                      |
+| Heatmap (client)    | Canvas API → transparent PNG                                                                       |
+| Heatmap (server OG) | sharp                                                                                              |
+| Auth                | GitHub OAuth, JWT + HTTP-only refresh token                                                        |
+| Billing             | Stripe (Pro/Team subscriptions, signature-verified webhooks)                                       |
+| Monorepo            | pnpm workspaces                                                                                    |
+| Deployment (MVP)    | AWS-hosted compute — EC2 t4g (Graviton) + PM2 (API), S3 + CloudFront (web); Neon PG, Upstash Redis |
 
 ---
 
@@ -102,14 +103,14 @@ functionally complete; Phase 5 is in progress:
 - **Phase 3 — Hardening (done):** Vitest suite (unit + gated route integration
   tests), server-side privacy enforcement, refresh-token cleanup, configurable
   proxy-trust for rate limiting, the heatmap-card image API (client + public
-  crawler `og:image` variant), and a site-wide SEO pass. Still open: publish
-  the extension to the VSCode Marketplace, a load test at 1,000 concurrent
-  users, and making the repo public.
+  crawler `og:image` variant), and a site-wide SEO pass. Still open: publish the
+  extension to the VSCode Marketplace, a load test at 1,000 concurrent users,
+  and making the repo public.
 - **Phase 4 — Scale & Community (done):** Stripe billing (Pro/Team), style
-  badges, the team model (invites, private leaderboard, aggregate heatmap),
-  the weekly recap email + page, Dvorak/Colemak layouts, and the landing page
-  fully wired to live data. Still open: contributor onboarding, external PR
-  merges, and the public launch itself.
+  badges, the team model (invites, private leaderboard, aggregate heatmap), the
+  weekly recap email + page, Dvorak/Colemak layouts, and the landing page fully
+  wired to live data. Still open: contributor onboarding, external PR merges,
+  and the public launch itself.
 - **Phase 5 — Growth (in progress):** mobile layout audit, PWA manifest, and
   push notifications are done. Not yet started: JetBrains/Neovim plugin
   scaffolds, a standalone CLI client, and a self-hosted Docker/Helm stack.

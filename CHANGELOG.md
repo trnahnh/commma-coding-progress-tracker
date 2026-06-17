@@ -11,21 +11,25 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Web** — commma is now on LinkedIn
+  ([commma-dev](https://www.linkedin.com/company/commma-dev/)). Linked from the
+  footer's Company column, the Contact page, and the `Organization` JSON-LD
+  `sameAs` array in `index.html`.
 - **Web, API** — SEO pass across the site. A generated brand `og-image.png`
   (1200×630, built from the live keyboard-heatmap layout via
   `apps/web/scripts/generate-og-image.ts`, regenerate with
-  `pnpm --filter @commma/web run og:generate`) now backs Open Graph and
-  Twitter Card previews (`summary_large_image`). A new `useSeo` hook
-  (`apps/web/src/lib/seo.ts`) sets a per-page title, meta description,
-  canonical URL, and `og:`/`twitter:` tags on every route, resetting to the
-  site defaults on navigation away; private or per-account pages (sign-in,
-  recap, teams, edit profile, billing success, auth callback, feed) are
-  marked `noindex`. Added `apps/web/public/sitemap.xml` covering the public
-  marketing and discovery routes (already referenced by `robots.txt`) and an
-  `Organization` JSON-LD block in `index.html`. `GET /v1/sessions/:id` gained
-  a `card_available` boolean so the session-detail page can finally point
-  `og:image` at the existing public heatmap-card endpoint instead of the
-  site default when one is renderable.
+  `pnpm --filter @commma/web run og:generate`) now backs Open Graph and Twitter
+  Card previews (`summary_large_image`). A new `useSeo` hook
+  (`apps/web/src/lib/seo.ts`) sets a per-page title, meta description, canonical
+  URL, and `og:`/`twitter:` tags on every route, resetting to the site defaults
+  on navigation away; private or per-account pages (sign-in, recap, teams, edit
+  profile, billing success, auth callback, feed) are marked `noindex`. Added
+  `apps/web/public/sitemap.xml` covering the public marketing and discovery
+  routes (already referenced by `robots.txt`) and an `Organization` JSON-LD
+  block in `index.html`. `GET /v1/sessions/:id` gained a `card_available`
+  boolean so the session-detail page can finally point `og:image` at the
+  existing public heatmap-card endpoint instead of the site default when one is
+  renderable.
 - **Web, API** — Join the waitlist. A new section on the landing page captures
   an email and posts it to `POST /v1/waitlist` (public, IP rate-limited, Zod
   `.strict()` validation, idempotent insert keyed on a unique email so duplicate
@@ -495,9 +499,9 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
-- **Web** — The API reference and Privacy Policy pages were missing the
-  waitlist endpoint and its email-collection disclosure, added after the
-  waitlist feature shipped.
+- **Web** — The API reference and Privacy Policy pages were missing the waitlist
+  endpoint and its email-collection disclosure, added after the waitlist feature
+  shipped.
 - **Web** — Enabling streak-reminder notifications could fail to register a
   subscription. `pushManager.subscribe()` now recovers from a stale browser
   subscription bound to a previous VAPID key (unsubscribe and retry instead of
