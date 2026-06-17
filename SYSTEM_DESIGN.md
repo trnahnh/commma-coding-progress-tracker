@@ -236,6 +236,19 @@ CREATE TABLE follows (
 CREATE INDEX follows_followee ON follows(followee_id);
 ```
 
+### waitlist
+
+```sql
+CREATE TABLE waitlist (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email       TEXT NOT NULL UNIQUE,
+  source      VARCHAR(64),
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX waitlist_created ON waitlist(created_at DESC);
+```
+
 ---
 
 ## 6. API Route Map
@@ -260,6 +273,7 @@ CREATE INDEX follows_followee ON follows(followee_id);
 | POST   | /v1/billing/checkout          | JWT            | Stripe Checkout session       |
 | POST   | /v1/billing/portal            | JWT            | Stripe Billing Portal session |
 | POST   | /v1/billing/webhook           | Stripe sig     | Subscription state → plan     |
+| POST   | /v1/waitlist                  | None           | Pre-launch email capture      |
 
 ---
 
