@@ -483,11 +483,19 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 - **Web** — The API reference and Privacy Policy pages were missing the
   waitlist endpoint and its email-collection disclosure, added after the
   waitlist feature shipped.
-- **Web** — The notification toggle in Edit profile silently did nothing when
-  permission was dismissed or push was unavailable server-side. Enabling streak
-  reminders now surfaces a clear message in each case, and a subscription the
-  browser created but the server rejected is rolled back so the toggle state
-  stays honest.
+- **Web** — Enabling streak-reminder notifications could fail to register a
+  subscription. `pushManager.subscribe()` now recovers from a stale browser
+  subscription bound to a previous VAPID key (unsubscribe and retry instead of
+  throwing `InvalidStateError`), detects iOS Safari outside an installed PWA and
+  explains that the app must be added to the Home Screen first, and reports any
+  other browser refusal clearly. The toggle also surfaces a message when
+  permission is dismissed or push is unavailable server-side, and rolls back a
+  subscription the browser created but the server rejected.
+- **API** — Streak-reminder push scheduler is now anchored to a wall-clock hour
+  (`PUSH_REMINDER_HOUR_UTC`, default 17 UTC) and ticks hourly, matching the
+  recap scheduler. Previously it used a 24-hour interval measured from process
+  start, so every deploy or restart reset the timer and reminders could go out
+  at drifting times or never fire.
 - **Aggregator** — session `duration_s` is floored to
   `span + one heartbeat window` (~60s) so sub-minute sessions are no longer 0
   seconds; they now earn leaderboard credit and produce non-zero language

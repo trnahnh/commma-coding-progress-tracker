@@ -12,7 +12,8 @@ const ENTRIES = [
       'New headline — "Every keystroke leaves a mark"',
       'Back-to-top button now appears on every page, not just the landing page',
       'Join the waitlist — a new section on the landing page captures your email and sends a confirmation, so you get pinged the moment the next access wave opens',
-      'Fixed the notification toggle in Edit profile — enabling streak reminders now reports clearly when permission is dismissed or push is unavailable, instead of silently doing nothing',
+      'Fixed streak-reminder notifications — enabling them now recovers from a stale subscription, explains the Add-to-Home-Screen step on iPhone/iPad, and reports any browser refusal instead of silently doing nothing',
+      'Streak reminders now send at a fixed daily time and survive server restarts, so they fire reliably',
     ],
   },
   {
