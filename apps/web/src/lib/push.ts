@@ -29,14 +29,24 @@ function urlBase64ToUint8Array(base64: string): Uint8Array {
   return bytes
 }
 
+export class PushError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'PushError'
+  }
+}
+
 export async function subscribePush(token: string): Promise<PushState> {
   if (!isPushSupported()) return 'unsupported'
 
   const perm = await Notification.requestPermission()
-  if (perm !== 'granted') return perm === 'denied' ? 'denied' : 'unsubscribed'
+  if (perm === 'denied') return 'denied'
+  if (perm !== 'granted') return 'unsubscribed'
 
   const keyRes = await fetch(`${API_BASE_URL}/v1/push/vapid-public-key`)
-  if (!keyRes.ok) return 'unsubscribed'
+  if (!keyRes.ok) {
+    throw new PushError('Notifications are not available right now.')
+  }
   const { key } = (await keyRes.json()) as { key: string }
 
   const reg = await navigator.serviceWorker.ready
@@ -45,12 +55,27 @@ export async function subscribePush(token: string): Promise<PushState> {
     applicationServerKey: urlBase64ToUint8Array(key) as BufferSource,
   })
 
-  const json = sub.toJSON() as { endpoint: string; keys: { p256dh: string; auth: string } }
-  await fetch(`${API_BASE_URL}/v1/push/subscribe`, {
+  const json = sub.toJSON() as {
+    endpoint: string
+    keys: { p256dh: string; auth: string }
+  }
+  const saveRes = await fetch(`${API_BASE_URL}/v1/push/subscribe`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ endpoint: json.endpoint, p256dh: json.keys.p256dh, auth: json.keys.auth }),
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      endpoint: json.endpoint,
+      p256dh: json.keys.p256dh,
+      auth: json.keys.auth,
+    }),
   })
+
+  if (!saveRes.ok) {
+    await sub.unsubscribe().catch(() => undefined)
+    throw new PushError('Could not save your subscription. Try again.')
+  }
 
   return 'subscribed'
 }

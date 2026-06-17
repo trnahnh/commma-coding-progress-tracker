@@ -6,6 +6,7 @@ import { useAuth } from '../lib/auth'
 import {
   getPushState,
   isPushSupported,
+  PushError,
   subscribePush,
   unsubscribePush,
   type PushState,
@@ -73,10 +74,18 @@ function NotificationsSection({ token }: { token: string }) {
       if (state === 'subscribed') {
         setState(await unsubscribePush(token))
       } else {
-        setState(await subscribePush(token))
+        const next = await subscribePush(token)
+        setState(next)
+        if (next === 'denied') {
+          setErr('Notifications are blocked. Allow them in browser settings.')
+        } else if (next === 'unsubscribed') {
+          setErr('Permission dismissed. Click Enable and allow notifications.')
+        }
       }
-    } catch {
-      setErr('Something went wrong. Try again.')
+    } catch (e) {
+      setErr(
+        e instanceof PushError ? e.message : 'Something went wrong. Try again.',
+      )
     } finally {
       setBusy(false)
     }
