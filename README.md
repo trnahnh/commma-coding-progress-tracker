@@ -90,7 +90,8 @@ privacy or security issue, see [SECURITY.md](./SECURITY.md).
 
 ## Status
 
-Active development. The full pipeline is real and verified end-to-end:
+**Live in production** at [commma.dev](https://commma.dev). Phases 1–4 are
+functionally complete; Phase 5 is in progress:
 
 - **Phase 1 — Foundation (done):** extension → ingest → in-process aggregation →
   query loop over Postgres + Redis. GitHub OAuth, JWT access + rotating refresh
@@ -98,9 +99,20 @@ Active development. The full pipeline is real and verified end-to-end:
   modes, offline queue).
 - **Phase 2 — Web (done):** session-detail page, Canvas keyboard heatmap + PNG
   export, leaderboard and profile endpoints, landing page wired to the API.
-- **Phase 3 — Hardening (in progress):** Vitest suite (unit + gated route
-  integration tests), server-side privacy enforcement, refresh-token cleanup,
-  configurable proxy-trust for rate limiting, and the heatmap-card image API.
+- **Phase 3 — Hardening (done):** Vitest suite (unit + gated route integration
+  tests), server-side privacy enforcement, refresh-token cleanup, configurable
+  proxy-trust for rate limiting, the heatmap-card image API (client + public
+  crawler `og:image` variant), and a site-wide SEO pass. Still open: publish
+  the extension to the VSCode Marketplace, a load test at 1,000 concurrent
+  users, and making the repo public.
+- **Phase 4 — Scale & Community (done):** Stripe billing (Pro/Team), style
+  badges, the team model (invites, private leaderboard, aggregate heatmap),
+  the weekly recap email + page, Dvorak/Colemak layouts, and the landing page
+  fully wired to live data. Still open: contributor onboarding, external PR
+  merges, and the public launch itself.
+- **Phase 5 — Growth (in progress):** mobile layout audit, PWA manifest, and
+  push notifications are done. Not yet started: JetBrains/Neovim plugin
+  scaffolds, a standalone CLI client, and a self-hosted Docker/Helm stack.
 
 See [ROADMAP.md](./ROADMAP.md) for the detailed phase plan and what remains.
 
