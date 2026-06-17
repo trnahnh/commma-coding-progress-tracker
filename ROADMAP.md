@@ -165,6 +165,11 @@ Goal: production-safe. No known P0/P1 bugs. Published extension.
   - [x] **Follow-up:** public `GET` heatmap-card variant for crawler `og:image`
         — unauthenticated, `privacy='full'` only (404 otherwise), 120/hr per IP,
         `Cache-Control: public, max-age=600` plus the shared Redis PNG cache.
+  - [x] **Follow-up:** SessionDetail now actually points its `og:image` at this
+        endpoint — `GET /v1/sessions/:id` returns a new `card_available`
+        boolean (`owner.privacy==='full'` and a non-empty heatmap), and the web
+        page swaps in the 1920×1080 `16:9` card only when it is true (it was
+        previously built but never wired to the frontend).
   - [x] **Deploy note:** the API host must provide a monospace font (e.g.
         DejaVu/Liberation) for server-side text; `⌘` already renders as `Cmd` to
         avoid a glyph gap. Satisfied on the live box — `infra/provision-ec2.sh`
@@ -177,6 +182,13 @@ Goal: production-safe. No known P0/P1 bugs. Published extension.
       404/401/validation shapes, and the ingest + `sessions/:id` privacy gates
       (full/summary/off). Verified green (9/9) against the local stack. Still
       pending: a dedicated CI test database + the heatmap-card endpoint case.
+- [x] Site-wide SEO pass — a shared `useSeo` hook (`apps/web/src/lib/seo.ts`)
+      sets `title`/description/canonical/`og:`/`twitter:` tags (incl. a
+      generated 1200×630 `og-image.png`, `summary_large_image`) on every
+      route, resetting to the site defaults on navigation away and marking
+      private/account pages `noindex`; `sitemap.xml` + an `Organization`
+      JSON-LD block round it out. Supersedes the SessionDetail/Profile-only
+      version below.
 - [x] Open Graph meta tags on public session and profile URLs — `og:title`,
       `og:description`, `og:type`, `twitter:card` injected dynamically on
       SessionDetail and Profile pages.

@@ -366,9 +366,16 @@ covers data captured before the user switched to `summary`.
     "counts": { "j": 1420, "k": 980, "Backspace": 610 },
     "freq": { "j": 0.21, "k": 0.14, "Backspace": 0.09 },
     "total": 6844
-  }
+  },
+  "card_available": true
 }
 ```
+
+`card_available` is `true` only when the owner is `privacy: "full"` and the
+session has a non-empty heatmap — exactly the condition the public
+`GET /v1/sessions/:id/heatmap-card` below requires to return `200` instead of
+`404`. The web session-detail page uses this flag to decide whether to point
+its `og:image` at the heatmap card or fall back to the site default.
 
 ---
 
