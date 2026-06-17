@@ -3,6 +3,17 @@ import { Shell } from '../components/chrome'
 
 const ENTRIES = [
   {
+    version: '0.7.0',
+    date: 'Jun 2026',
+    tag: 'Design',
+    changes: [
+      'Landing hero reimagined around a live keyboard heatmap — a self-typing board floods keys with heat in real time, with a live keys-per-minute, top-key, and session readout',
+      'Every landing section rebuilt with oversized index numerals, scroll-reveal motion, and a broadcast-style live activity ticker',
+      'New headline — "Every keystroke leaves a mark"',
+      'Back-to-top button now appears on every page, not just the landing page',
+    ],
+  },
+  {
     version: '0.6.0',
     date: 'Jun 2026',
     tag: 'Design',

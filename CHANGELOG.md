@@ -11,6 +11,14 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Web** — Landing page reimagined around a live keyboard heatmap. The hero is
+  a self-animating keyboard that floods keys with the cold-to-accent heat ramp
+  as a ghost typist types, surfaced with a live keys-per-minute, top-key, and
+  session readout; it scales to fit on mobile and falls back to a static board
+  under `prefers-reduced-motion`. Every section is rebuilt with oversized index
+  numerals, scroll-reveal choreography, and a broadcast-style live activity
+  ticker, all on the existing palette, type, and API wiring. The back-to-top
+  control now appears on every page, not just the landing page.
 - **Web** — Visual depth + 3D motion overhaul. Every page is re-lit as raised,
   layered surfaces (top-highlit cards, recessed inputs and code/chart wells, a
   floating navbar, lifted display headlines, glowing primary CTAs) via a small
