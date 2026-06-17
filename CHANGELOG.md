@@ -480,6 +480,9 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- **Web** — The API reference and Privacy Policy pages were missing the
+  waitlist endpoint and its email-collection disclosure, added after the
+  waitlist feature shipped.
 - **Web** — The notification toggle in Edit profile silently did nothing when
   permission was dismissed or push was unavailable server-side. Enabling streak
   reminders now surfaces a clear message in each case, and a subscription the

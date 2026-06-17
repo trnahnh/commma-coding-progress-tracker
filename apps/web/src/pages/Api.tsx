@@ -217,6 +217,16 @@ const ENDPOINTS = [
       },
     ],
   },
+  {
+    group: 'Waitlist',
+    routes: [
+      {
+        method: 'POST',
+        path: '/v1/waitlist',
+        desc: 'Join the early-access waitlist. Public endpoint, idempotent on email.',
+      },
+    ],
+  },
 ]
 
 const RATE_LIMITS = [
@@ -235,6 +245,7 @@ const RATE_LIMITS = [
   { scope: 'GET /v1/sessions/:id/heatmap-card', limit: '120 / hr / IP' },
   { scope: 'Team endpoints', limit: '300 / hr / user' },
   { scope: 'Push subscribe/unsubscribe', limit: '20 / hr / user' },
+  { scope: 'POST /v1/waitlist', limit: '10 / hr / IP' },
 ]
 
 const METHOD_COLOR: Record<string, string> = {

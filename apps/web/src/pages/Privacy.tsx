@@ -91,6 +91,12 @@ export default function Privacy() {
                 <strong className='text-ink font-medium'>GitHub profile</strong>{' '}
                 — handle, email, and avatar URL from your GitHub OAuth grant.
               </li>
+              <li>
+                <strong className='text-ink font-medium'>Waitlist email</strong>{' '}
+                — if you join the early-access waitlist, just the email address
+                you submit, used only to send a confirmation and notify you when
+                access opens.
+              </li>
             </ul>
           </Section>
 
@@ -156,10 +162,11 @@ export default function Privacy() {
 
           <Section title='Third parties'>
             <p>
-              We use GitHub OAuth for sign-in. We do not sell, share, or license
-              your data to any third party. Infrastructure runs on AWS
-              (compute), Neon (database), and Upstash (cache). All data is
-              stored in the United States.
+              We use GitHub OAuth for sign-in and Resend to deliver
+              transactional email (waitlist confirmations, weekly recaps). We
+              do not sell, share, or license your data to any third party.
+              Infrastructure runs on AWS (compute), Neon (database), and
+              Upstash (cache). All data is stored in the United States.
             </p>
           </Section>
 
