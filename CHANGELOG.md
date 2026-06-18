@@ -11,6 +11,18 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **API, Web** — commma is free for everyone during early access. A new
+  `FREE_MODE` flag (API env, default on; web `VITE_FREE_MODE`) unlocks every Pro
+  and Team feature — full history, keyboard-heatmap PNG export, the weekly recap
+  page, and team creation — with no payment path. Stripe checkout and the
+  billing portal return `SERVICE_UNAVAILABLE` while it is on, `/pricing` becomes
+  a single "free during early access" panel, and the upgrade/plan-management UI
+  is hidden. `GET /v1/me` now reports `billing_enabled`. The billing code and
+  the `users` Stripe columns are kept dormant, so paid plans can be re-enabled
+  later by turning the flag off and restoring the Stripe keys. The scheduled
+  weekly recap email stays gated to paid plans (so it sends to no one) — free
+  mode never auto-sends email. Supersedes the live-Stripe cutover below for
+  launch.
 - **API, Web** — A Team plan can create up to two teams. `POST /v1/teams`
   rejects an over-limit team for the same owner with `409 CONFLICT`
   (`TEAM_MAX_OWNED`), and the web teams page swaps the create form for an
