@@ -130,11 +130,39 @@ function FreePricing() {
           </p>
         </div>
 
-        <div className='mb-8 inline-flex max-w-full items-center gap-2.5 rounded-full border border-rule-strong bg-paper-2 px-4 py-2.5'>
-          <span className='w-[7px] h-[7px] shrink-0 rounded-full bg-live animate-pulse-dot' />
-          <span className='font-mono text-[13px] text-ink-soft min-w-0'>
-            All plans are free during early access — no charges yet.
-          </span>
+        <div className='relative mb-12 overflow-hidden rounded-lg border border-rule-strong bg-paper-2 surface px-6 sm:px-8 py-6 sm:py-7'>
+          <span className='absolute inset-x-0 top-0 h-0.5 bg-accent glow-accent' />
+          <div className='flex items-center gap-2.5 mb-3'>
+            <span className='w-[7px] h-[7px] shrink-0 rounded-full bg-live animate-pulse-dot' />
+            <span className='font-mono text-[12px] tracking-[0.18em] uppercase text-accent'>
+              Early access · live now
+            </span>
+          </div>
+          <h2 className='font-serif text-[clamp(22px,3vw,32px)] leading-[1.1] tracking-[-0.02em] text-ink m-0 mb-3'>
+            Right now, the free plan is the whole product.
+          </h2>
+          <p className='font-mono text-[14px] text-ink-soft leading-relaxed m-0 max-w-[64ch]'>
+            During early access, every account — free included — has every
+            feature unlocked: full session history, keyboard-heatmap PNG export,
+            the weekly recap, and team workspaces. No card, no limits. The Pro
+            and Team tiers below are the roadmap for when commma leaves early
+            access — until then, you get all of it for $0.
+          </p>
+          <div className='mt-4 flex flex-wrap gap-2'>
+            {[
+              'Full session history',
+              'Heatmap PNG export',
+              'Weekly recap',
+              'Team workspaces',
+            ].map((f) => (
+              <span
+                key={f}
+                className='font-mono text-[12px] tracking-wide text-ink-soft border border-rule-strong bg-paper-3 rounded-full px-3 py-1'
+              >
+                {f}
+              </span>
+            ))}
+          </div>
         </div>
 
         <div className='flex items-center gap-3 mb-10 font-mono text-[14px] tracking-wide'>
