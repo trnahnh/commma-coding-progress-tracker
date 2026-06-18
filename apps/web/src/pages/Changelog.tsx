@@ -3,6 +3,14 @@ import { useSeo } from '../lib/seo'
 
 const ENTRIES = [
   {
+    version: '0.7.5',
+    date: 'Jun 2026',
+    tag: 'Teams',
+    changes: [
+      'A Team plan now includes a single team — creating a second is blocked with a prompt to delete the current one first; joining other teams as a member stays unlimited and free',
+    ],
+  },
+  {
     version: '0.7.4',
     date: 'Jun 2026',
     tag: 'Teams',
