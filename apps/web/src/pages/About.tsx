@@ -178,6 +178,12 @@ const STACK_GROUPS = [
         role: 'Process manager',
         why: 'Keeps the API alive across crashes and deploys on EC2. RUN_AGGREGATION env ensures only one replica runs the scheduler.',
       },
+      {
+        no: '021',
+        name: 'Terraform',
+        role: 'Infrastructure as code',
+        why: 'The whole AWS footprint — EC2, S3, CloudFront, Route53, ACM, IAM — is imported into Terraform state with native S3 locking. Every change ships as a reviewed plan, never a console click.',
+      },
     ],
   },
   {
@@ -185,19 +191,19 @@ const STACK_GROUPS = [
     label: 'Services',
     items: [
       {
-        no: '021',
+        no: '022',
         name: 'Resend',
         role: 'Transactional email',
         why: 'Clean TypeScript SDK, generous free tier, and deliverability that does not require wrestling with SPF/DKIM from day one.',
       },
       {
-        no: '022',
+        no: '023',
         name: 'Sharp',
         role: 'OG image rendering',
         why: 'SVG keyboard heatmap rasterized server-side in ~120ms. No headless browser, no Puppeteer, no Chromium cold-start tax.',
       },
       {
-        no: '023',
+        no: '024',
         name: 'OpenAI',
         role: 'AI prose — optional',
         why: 'GPT-4.1-nano writes only the recap headline and note — numbers stay deterministic. Any failure falls back to the template.',
