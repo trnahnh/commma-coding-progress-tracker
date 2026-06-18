@@ -274,10 +274,6 @@ export function LiveKeyboard() {
 
         <div className='kb-stage relative px-4 sm:px-6 py-5 sm:py-7'>
           <div
-            aria-hidden='true'
-            className='kb-scan pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-linear-to-b from-accent-soft to-transparent opacity-60'
-          />
-          <div
             ref={stageRef}
             className='relative mx-auto w-full'
             style={{ height: LOGICAL_H * scale }}

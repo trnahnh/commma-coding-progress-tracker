@@ -218,24 +218,6 @@ body {
   perspective-origin: 50% 35%;
 }
 
-.hero-spotlight {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.45s ease;
-  background: radial-gradient(
-    560px circle at var(--mx, 50%) var(--my, 30%),
-    rgba(255, 77, 26, 0.13),
-    rgba(255, 77, 26, 0) 60%
-  );
-}
-
-.scene-perspective:hover .hero-spotlight {
-  opacity: 1;
-}
-
 .par-1 {
   transform: translate3d(calc(var(--px, 0) * 7px), calc(var(--py, 0) * 6px), 0);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -279,20 +261,6 @@ body {
   will-change: transform;
 }
 
-.glare {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  border-radius: inherit;
-  pointer-events: none;
-  mix-blend-mode: screen;
-  background: radial-gradient(
-    300px circle at calc(50% + var(--px, 0) * 42%) calc(50% + var(--py, 0) * 42%),
-    rgba(255, 255, 255, 0.13),
-    rgba(255, 255, 255, 0) 55%
-  );
-}
-
 @media (prefers-reduced-motion: reduce) {
   .par-1,
   .par-2,
@@ -300,10 +268,6 @@ body {
   .scene-card,
   .scene-card-soft {
     transform: none;
-  }
-  .hero-spotlight,
-  .glare {
-    display: none;
   }
 }
 
@@ -528,27 +492,13 @@ body {
     transform 110ms ease;
 }
 
-@keyframes scan {
-  from {
-    transform: translateY(-110%);
-  }
-  to {
-    transform: translateY(110%);
-  }
-}
-
-.kb-scan {
-  animation: scan 5.5s linear infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .reveal {
     opacity: 1;
     transform: none;
     transition: none;
   }
-  .caret,
-  .kb-scan {
+  .caret {
     animation: none;
   }
   .kb-key {

@@ -162,7 +162,6 @@ function Hero() {
 
   return (
     <section ref={sceneRef} className='relative scene-perspective overflow-hidden'>
-      <div aria-hidden='true' className='hero-spotlight' />
       <div className='relative z-10 mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)] pt-[clamp(40px,7vw,92px)] pb-[clamp(44px,6vw,88px)]'>
         <div className='flex items-center gap-3.5 mb-8 sm:mb-11 opacity-0 animate-rise-700 delay-100'>
           <LiveDot />
@@ -339,7 +338,6 @@ function ActivityCard({
       ref={cardRef}
       className='scene-card-soft relative border border-rule-strong bg-linear-to-b from-paper-2 to-paper rounded-lg overflow-hidden surface-lg'
     >
-      <div aria-hidden='true' className='glare' />
       <div className='grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto] sm:gap-6 items-start px-5 sm:px-8 py-6 sm:py-7 border-b border-rule'>
         <div className='min-w-0'>
           <div className='font-mono text-[15px] tracking-[0.16em] text-accent uppercase mb-2.5 flex items-center gap-2.5'>
