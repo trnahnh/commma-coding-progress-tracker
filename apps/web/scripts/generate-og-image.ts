@@ -91,7 +91,7 @@ const svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http
   <rect width="${W}" height="${H}" fill="url(#glowTop)"/>
   <rect width="${W}" height="${H}" fill="url(#glowBottom)"/>
 
-  <text x="72" y="180" font-family="Consolas, 'Courier New', monospace" font-size="16" letter-spacing="3" fill="${INK_MUTE}">V0.1 &#183; INVITE-ONLY</text>
+  <text x="72" y="180" font-family="Consolas, 'Courier New', monospace" font-size="16" letter-spacing="3" fill="${INK_MUTE}">FREE EARLY ACCESS</text>
 
   <text x="70" y="305" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="${INK}">commma<tspan font-size="100" fill="${ACCENT}" dx="2">,</tspan></text>
 
