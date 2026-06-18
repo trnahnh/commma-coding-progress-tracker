@@ -16,6 +16,7 @@ import {
   type StreamEntry,
 } from './lib/api'
 import { useAuth } from './lib/auth'
+import { LATEST_VERSION } from './lib/changelog'
 import { formatClock, formatDate, formatDuration } from './lib/format'
 import { langStyle } from './lib/langColors'
 import { useScene } from './lib/useScene'
@@ -166,7 +167,7 @@ function Hero() {
         <div className='flex items-center gap-3.5 mb-8 sm:mb-11 opacity-0 animate-rise-700 delay-100'>
           <LiveDot />
           <span className='font-mono text-[13px] sm:text-[15px] tracking-[0.16em] uppercase text-ink-mute'>
-            v0.8.0 · free ·{' '}
+            v{LATEST_VERSION} · free ·{' '}
             <span className='text-ink-soft tnum'>{pulse.toLocaleString()}</span>{' '}
             typing right now
           </span>
