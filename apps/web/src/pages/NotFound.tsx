@@ -13,7 +13,7 @@ export default function NotFound() {
     <Shell>
       <Link
         to='/'
-        className='group inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.16em] uppercase text-ink-mute hover:text-ink transition-colors mb-8'
+        className='group inline-flex items-center gap-2 min-h-[44px] font-mono text-[12px] tracking-[0.16em] uppercase text-ink-mute hover:text-ink transition-colors mb-8'
       >
         <span className='inline-block transition-transform group-hover:-translate-x-1'>
           ←

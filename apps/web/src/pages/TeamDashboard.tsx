@@ -531,7 +531,7 @@ export default function TeamDashboard() {
       <div className='flex flex-col gap-6'>
         <Link
           to='/teams'
-          className='group inline-flex items-center gap-2 self-start font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute hover:text-ink transition-colors'
+          className='group inline-flex items-center gap-2 self-start min-h-[44px] font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute hover:text-ink transition-colors'
         >
           <span className='inline-block transition-transform group-hover:-translate-x-1'>
             ←
