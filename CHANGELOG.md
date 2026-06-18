@@ -11,6 +11,15 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Web** — Pricing early-access section and a calmer landing hero. The pricing
+  page gains a section above the tiers spelling out that the free plan currently
+  includes the entire product during early access (full history, heatmap PNG
+  export, weekly recap, team workspaces), so the $0 column does not read as
+  bare; the Pro and Team tiers stay visible as the roadmap. Removed two
+  landing-hero motion effects — the cursor-following light glow and the sweeping
+  scan line over the keyboard — for a quieter first screen. The `/changelog` and
+  `/api` pages were updated to match (early-access notes on the recap, teams,
+  and billing endpoints).
 - **API, Web** — commma is free for everyone during early access. A new
   `FREE_MODE` flag (API env, default on; web `VITE_FREE_MODE`) unlocks every Pro
   and Team feature — full history, keyboard-heatmap PNG export, the weekly recap
