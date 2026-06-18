@@ -213,8 +213,14 @@ function FreePricing() {
                     forever
                   </span>
                 </div>
+                <p className='font-mono text-[14px] mt-1 m-0 invisible'>
+                  &nbsp;
+                </p>
                 <p className='font-mono text-[14px] text-ink-mute mt-2.5 m-0'>
                   Everything, unlocked, for everyone.
+                </p>
+                <p className='font-mono text-[13px] text-live mt-1 m-0'>
+                  Free for everyone, no card.
                 </p>
               </div>
             </div>
