@@ -19,7 +19,11 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   landing-hero motion effects — the cursor-following light glow and the sweeping
   scan line over the keyboard — for a quieter first screen. The `/changelog` and
   `/api` pages were updated to match (early-access notes on the recap, teams,
-  and billing endpoints).
+  and billing endpoints). Site copy was swept for the free launch: the landing
+  email signup is reframed from an invite waitlist to a launch-notify list, the
+  landing and status pages drop the "invite-only" framing, the final CTA starts
+  you free instead of linking to pricing, and the Teams at-limit notice no
+  longer assumes a paid plan.
 - **API, Web** — commma is free for everyone during early access. A new
   `FREE_MODE` flag (API env, default on; web `VITE_FREE_MODE`) unlocks every Pro
   and Team feature — full history, keyboard-heatmap PNG export, the weekly recap

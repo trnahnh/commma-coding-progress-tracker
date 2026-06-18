@@ -10,6 +10,7 @@ const ENTRIES = [
       'commma is free for everyone during early access — every Pro and Team feature is unlocked at no cost: full session history, keyboard-heatmap PNG export, the weekly recap, and team workspaces, with no card and no checkout',
       'Pricing page reworked — a new early-access section up top makes clear the $0 plan currently includes the whole product, while the Pro and Team tiers stay visible as the roadmap with "Coming later" actions',
       'Calmer landing hero — removed the cursor-following light glow and the sweeping scan line over the keyboard',
+      'Copy pass for the free launch — the landing signup is now a launch-notify list (not an invite gate), the home and status pages drop the "invite-only" language, and the final call-to-action starts you free instead of pointing at pricing',
     ],
   },
   {
