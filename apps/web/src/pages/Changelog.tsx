@@ -3,50 +3,14 @@ import { useSeo } from '../lib/seo'
 
 const ENTRIES = [
   {
-    version: '0.7.5',
-    date: 'Jun 2026',
-    tag: 'Teams',
-    changes: [
-      'A Team plan can create up to two teams — creating one beyond that is blocked with a prompt to delete one first; joining other teams as a member stays unlimited and free',
-    ],
-  },
-  {
-    version: '0.7.4',
-    date: 'Jun 2026',
-    tag: 'Teams',
-    changes: [
-      'Team dashboard layout pass — the members list and owner controls now sit in a balanced two-column block with aligned headers and a first-run prompt when you are the only member, so a new team no longer opens with a tall empty gap; every control also meets the mobile tap-target and readable-text minimums',
-    ],
-  },
-  {
-    version: '0.7.3',
-    date: 'Jun 2026',
-    tag: 'Billing',
-    changes: [
-      'Paid plans are live — subscribe to Pro or Team with a card through secure Stripe checkout, switch between monthly and annual billing, and manage or cancel anytime from the billing portal',
-    ],
-  },
-  {
-    version: '0.7.2',
-    date: 'Jun 2026',
-    tag: 'Brand',
-    changes: [
-      'Brand film on the About page — a 15-second teaser that floods the keyboard with heat, scores the session like a race, and lands on the wordmark; autoplays muted in view, pauses off-screen, and respects reduced-motion',
-    ],
-  },
-  {
-    version: '0.7.1',
-    date: 'Jun 2026',
-    tag: 'SEO',
-    changes: [
-      'commma is now on LinkedIn — linked from the site footer, the Contact page, and Organization structured data',
-    ],
-  },
-  {
     version: '0.7.0',
     date: 'Jun 2026',
-    tag: 'Design',
+    tag: 'Release',
     changes: [
+      'Team workspaces leveled up — the dashboard now uses a balanced two-column layout with a first-run prompt, every control meets the mobile tap-target and readable-text minimums, and a Team plan can create up to two teams (joining other teams stays unlimited and free)',
+      'Paid plans are live — subscribe to Pro or Team with a card through secure Stripe checkout, switch between monthly and annual billing, and manage or cancel anytime from the billing portal',
+      'Brand film on the About page — a 15-second teaser that floods the keyboard with heat, scores the session like a race, and lands on the wordmark; autoplays muted in view, pauses off-screen, and respects reduced-motion',
+      'commma is now on LinkedIn — linked from the site footer, the Contact page, and Organization structured data',
       'Landing hero reimagined around a live keyboard heatmap — a self-typing board floods keys with heat in real time, with a live keys-per-minute, top-key, and session readout',
       'Every landing section rebuilt with oversized index numerals, scroll-reveal motion, and a broadcast-style live activity ticker',
       'New headline — "Every keystroke leaves a mark"',
