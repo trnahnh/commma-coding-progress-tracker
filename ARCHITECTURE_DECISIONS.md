@@ -343,9 +343,9 @@ CloudFront; compute revised 2026-06: t3.micro → t4g Graviton, see "Compute &
 networking" below)
 
 **Decision:** Host both compute tiers on AWS. The API runs on EC2; the web app
-is a static Vite build served from **S3 + CloudFront**. PostgreSQL stays on
-Neon and Redis on Upstash (both third-party managed) — they are unaffected by
-the all-AWS hosting move and migrate to RDS/ElastiCache only at the scale points
+is a static Vite build served from **S3 + CloudFront**. PostgreSQL stays on Neon
+and Redis on Upstash (both third-party managed) — they are unaffected by the
+all-AWS hosting move and migrate to RDS/ElastiCache only at the scale points
 below.
 
 | Layer       | Provider                         | Cost                    |
@@ -638,3 +638,75 @@ are coerced to absent, every `/v1/billing/*` endpoint returns
   the initial purchase but not for later upgrades/downgrades/cancellations, and
   would mean two writers for `users.plan`; the subscription price/status is the
   durable source of truth.
+
+---
+
+## ADR-013: Terraform for AWS Infrastructure (import-to-adopt)
+
+**Status:** Accepted — 2026-06
+
+### Context
+
+The production stack (ADR-009) was provisioned by hand: an EC2 `t4g.small` API
+box with its security group and Elastic IP, the `commma-web` S3 bucket fronted
+by CloudFront with an Origin Access Control, an ACM certificate, the
+`commma.dev` Route53 zone, and the locked-down `commma-deploy-local` IAM user.
+That topology lived only in the console and in operator memory: no record of
+what existed, no review trail for changes, and no safe way to reproduce it. The
+resources were already live and serving traffic, so any IaC adoption had to
+avoid recreating or disrupting them.
+
+### Decision
+
+Manage the existing AWS resources with **Terraform**, adopting them via
+`terraform import` rather than recreating. Config lives in `infra/terraform/`,
+split by concern (`ec2.tf`, `s3.tf`, `cloudfront.tf`, `acm.tf`, `route53.tf`,
+`iam.tf`). State is stored in a dedicated, versioned, encrypted S3 bucket using
+**native S3 state locking** (`use_lockfile`) — the modern replacement for the
+deprecated DynamoDB lock table, so no second resource is needed.
+
+The adoption workflow is read-only discovery → write resource blocks matching
+the live config → `terraform import` each resource → iterate until
+`terraform plan` reports **no changes**. That clean plan is the acceptance
+proof: the code provably matches reality and nothing is queued for destruction.
+The only mutation on first apply is additive — `default_tags` (`Project` /
+`ManagedBy`) and a small set of state-only attribute defaults.
+
+Terraform runs under a **separate `commma-terraform` IAM identity** with broad
+access, kept distinct from `commma-deploy-local`, whose policy stays scoped to
+S3-sync + CloudFront-invalidate. The least-privilege deploy boundary is
+preserved and itself codified in `iam.tf`. Application deploys remain the
+existing `infra/deploy-*.sh` scripts; Terraform owns **infrastructure**, not
+release. Because GitHub Actions is disabled at the account level, Terraform is
+run locally, the same operator model as the deploy scripts.
+
+The EC2 key pair and the AWS-managed Route53 `NS`/`SOA` records are deliberately
+left unmanaged (the private key is not reproducible from config; `NS`/`SOA` are
+owned by the zone resource).
+
+### Consequences
+
+- The full production topology is version-controlled, reviewable, and
+  reproducible; drift is detectable with `terraform plan`.
+- Adoption carried zero downtime risk: import never recreates, and the
+  reconciled plan was `0 to add, 0 to destroy` before the first apply.
+- A privileged credential is required to run Terraform; it is a distinct IAM
+  user from the deploy key, and access keys are intentionally not managed in
+  state (no secrets in state beyond what AWS returns).
+- State now holds infrastructure detail and must be treated as sensitive — hence
+  the private, encrypted, versioned state bucket.
+
+### Rejected Alternatives
+
+- **Keep manual/ClickOps provisioning** — no record, no review, no
+  reproducibility; the status quo this ADR exists to end.
+- **Recreate resources from scratch under Terraform** — clean config but means
+  tearing down and rebuilding live, traffic-serving infrastructure (new IP, cert
+  revalidation, downtime). Import achieves the same end state with none of the
+  risk.
+- **DynamoDB-based state locking** — the long-standing pattern, but deprecated
+  in favour of native S3 locking; it would add a table and IAM surface for no
+  benefit here.
+- **AWS CloudFormation / CDK** — viable, but Terraform's `import` ergonomics and
+  multi-provider reach (the stack also touches Neon and Upstash, candidates for
+  later adoption) fit better, and Terraform is the more transferable skill.

@@ -47,6 +47,7 @@ original to this project.
 | Billing             | Stripe (Pro/Team subscriptions, signature-verified webhooks)                                       |
 | Monorepo            | pnpm workspaces                                                                                    |
 | Deployment (MVP)    | AWS-hosted compute — EC2 t4g (Graviton) + PM2 (API), S3 + CloudFront (web); Neon PG, Upstash Redis |
+| Infra as code       | Terraform (AWS footprint import-adopted; S3-locked remote state) — see ADR-013                     |
 
 ---
 

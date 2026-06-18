@@ -347,8 +347,8 @@ CREATE INDEX waitlist_created ON waitlist(created_at DESC);
   down during the Monday window the recap **catches up** on a later day instead
   of being skipped — the `recap_emails` dedup still guarantees exactly one send
   per user per week. No external cron.
-- **Eligibility:** `plan in ('pro','team')` users (recap is a Pro-tier perk,
-  see ROADMAP pricing) with **≥1 session** in the prior completed Mon–Sun week.
+- **Eligibility:** `plan in ('pro','team')` users (recap is a Pro-tier perk, see
+  ROADMAP pricing) with **≥1 session** in the prior completed Mon–Sun week.
   Users already recorded `sent` for that `week_start`, or past `attempts >= 3`,
   are skipped — the `recap_emails (user_id, week_start)` primary key is the
   idempotency + retry guard. **Scope note:** eligibility keys off the user's own
@@ -381,10 +381,11 @@ CREATE INDEX waitlist_created ON waitlist(created_at DESC);
   each tick: `SET leader:<name> <pid> NX PX <interval>`. Only the holder runs;
   the TTL equals the interval, so the lock self-expires before the next tick. A
   process-local re-entrancy flag still prevents a slow tick from overlapping the
-  next on the same instance. Net effect: `RUN_AGGREGATION` may safely stay `true`
-  on every replica — the lock, not the flag, is what guarantees a single run.
-  If Redis is unreachable when acquiring the lock, the tick is skipped and
-  retried next interval (the jobs are idempotent, so a skipped tick is harmless).
+  next on the same instance. Net effect: `RUN_AGGREGATION` may safely stay
+  `true` on every replica — the lock, not the flag, is what guarantees a single
+  run. If Redis is unreachable when acquiring the lock, the tick is skipped and
+  retried next interval (the jobs are idempotent, so a skipped tick is
+  harmless).
 - **Cold leaderboard rebuild is also locked.** `topLeaderboard` rebuilds a
   flushed sorted set from `sessions` on read; a `lock:rebuild:<key>` guard
   (`SET … NX`) lets a single request rebuild while concurrent callers briefly
@@ -446,6 +447,21 @@ invalidates the distribution. That path needs:
 SPA deep links are served by a CloudFront custom error response mapping 403/404
 to `/index.html` (the S3+CloudFront equivalent of the interim `vercel.json`
 rewrites).
+
+### Infrastructure as Code (Terraform)
+
+The live AWS footprint is managed by Terraform under `infra/terraform/`: the EC2
+API box (instance, security group, Elastic IP), the S3 + CloudFront web tier
+(bucket, policy, Origin Access Control, distribution), the `commma.dev` ACM
+certificate, the Route53 hosted zone and records, and the scoped
+`commma-deploy-local` deploy IAM user and policy. The already-running resources
+were **adopted via `terraform import`** — never recreated — and the
+configuration reconciles to a clean `terraform plan` (no drift). State lives in
+a private, versioned, encrypted S3 bucket with native S3 locking
+(`use_lockfile`, not a DynamoDB table). Terraform runs locally under a dedicated
+`commma-terraform` IAM identity, distinct from the narrow deploy user;
+application releases stay on the `infra/deploy-*.sh` scripts (Terraform owns
+infrastructure, not releases). See ADR-013 and `infra/terraform/README.md`.
 
 ---
 
