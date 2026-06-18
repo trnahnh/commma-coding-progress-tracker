@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Shell } from '../components/chrome'
 import { ApiError, getMe, openBillingPortal, updateProfile } from '../lib/api'
 import { useAuth } from '../lib/auth'
+import { FREE_MODE } from '../lib/config'
 import {
   getPushState,
   isPushSupported,
@@ -506,7 +507,9 @@ export default function EditProfile() {
               ))}
             </div>
             <NotificationsSection token={token} />
-            <BillingSection token={token} plan={user?.plan ?? 'free'} />
+            {!FREE_MODE && (
+              <BillingSection token={token} plan={user?.plan ?? 'free'} />
+            )}
           </div>
 
           <div className='mt-5 flex items-center justify-between gap-4'>
