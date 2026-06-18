@@ -14,12 +14,14 @@ import {
 import { useAuth } from '../lib/auth'
 import { useSeo } from '../lib/seo'
 
+const TEAM_OWN_LIMIT = 2
+
 function RoleChip({ role }: { role: string }) {
   const isOwner = role === 'owner'
   return (
     <span
       className={[
-        'inline-flex items-center h-[22px] px-2.5 rounded-full font-mono text-[10px] uppercase tracking-widest border',
+        'inline-flex items-center h-[24px] px-2.5 rounded-full font-mono text-[11px] uppercase tracking-widest border',
         isOwner
           ? 'text-accent border-accent-line bg-accent-soft'
           : 'text-ink-mute border-rule',
@@ -32,7 +34,7 @@ function RoleChip({ role }: { role: string }) {
 
 function FrozenBadge() {
   return (
-    <span className='inline-flex items-center h-[22px] px-2.5 rounded-full font-mono text-[10px] uppercase tracking-widest border text-ink-mute border-rule bg-paper-3'>
+    <span className='inline-flex items-center h-[24px] px-2.5 rounded-full font-mono text-[11px] uppercase tracking-widest border text-ink-mute border-rule bg-paper-3'>
       plan inactive
     </span>
   )
@@ -195,7 +197,7 @@ function CreateTeamPanel({
             placeholder='My awesome team'
             maxLength={64}
             required
-            className='h-[42px] px-4 rounded border border-rule-strong bg-paper-3 well font-mono text-[14px] text-ink placeholder-ink-faint
+            className='h-[44px] px-4 rounded border border-rule-strong bg-paper-3 well font-mono text-[14px] text-ink placeholder-ink-faint
               focus:outline-none focus:border-accent transition-colors'
           />
         </div>
@@ -213,7 +215,7 @@ function CreateTeamPanel({
             placeholder='my-team'
             maxLength={39}
             required
-            className='h-[42px] px-4 rounded border border-rule-strong bg-paper-3 well font-mono text-[14px] text-ink placeholder-ink-faint
+            className='h-[44px] px-4 rounded border border-rule-strong bg-paper-3 well font-mono text-[14px] text-ink placeholder-ink-faint
               focus:outline-none focus:border-accent transition-colors'
           />
           {slug && (
@@ -226,7 +228,7 @@ function CreateTeamPanel({
         <button
           type='submit'
           disabled={busy || !name.trim() || !slug.trim()}
-          className='self-start inline-flex items-center h-[42px] px-6 rounded-full font-mono text-[13px] uppercase tracking-wider
+          className='self-start inline-flex items-center h-[44px] px-6 rounded-full font-mono text-[13px] uppercase tracking-wider
             bg-accent text-paper border border-accent bevel press hover:bg-ink hover:border-ink transition-colors disabled:opacity-40'
         >
           {busy ? 'Creating…' : 'Create team'}
@@ -295,7 +297,7 @@ export default function Teams() {
 
   const { teams, invites } = state
   const isTeamPlan = user?.plan === 'team'
-  const ownedTeam = teams.find((t) => t.role === 'owner')
+  const ownedCount = teams.filter((t) => t.role === 'owner').length
 
   const handleAccept = (id: string) => {
     if (!token) return
@@ -391,25 +393,15 @@ export default function Teams() {
           )}
         </div>
 
-        {isTeamPlan && token && ownedTeam ? (
-          <div className='border border-rule rounded-lg px-5 sm:px-8 py-5 surface flex flex-col sm:flex-row sm:items-center gap-4'>
-            <div className='flex-1 min-w-0'>
-              <div className='font-mono text-[12px] uppercase tracking-wider text-ink-mute mb-1'>
-                team plan
-              </div>
-              <p className='font-mono text-[14px] text-ink-soft m-0'>
-                Your Team plan includes one team. Delete{' '}
-                <span className='text-ink'>{ownedTeam.name}</span> to create a
-                different one.
-              </p>
+        {isTeamPlan && token && ownedCount >= TEAM_OWN_LIMIT ? (
+          <div className='border border-rule rounded-lg px-5 sm:px-8 py-5 surface'>
+            <div className='font-mono text-[12px] uppercase tracking-wider text-ink-mute mb-1'>
+              team plan
             </div>
-            <Link
-              to={`/teams/${ownedTeam.slug}`}
-              className='shrink-0 inline-flex items-center h-[44px] px-5 rounded-full font-mono text-[12px] uppercase tracking-wider
-                text-accent border border-accent-line hover:bg-accent hover:text-paper hover:border-accent transition-colors'
-            >
-              Open team →
-            </Link>
+            <p className='font-mono text-[14px] text-ink-soft m-0 max-w-[60ch]'>
+              Your Team plan includes up to {TEAM_OWN_LIMIT} teams — you have
+              reached the limit. Delete one above to create another.
+            </p>
           </div>
         ) : isTeamPlan && token ? (
           <CreateTeamPanel
@@ -434,7 +426,7 @@ export default function Teams() {
             </div>
             <Link
               to='/pricing'
-              className='shrink-0 inline-flex items-center h-[38px] px-5 rounded-full font-mono text-[12px] uppercase tracking-wider
+              className='shrink-0 inline-flex items-center h-[44px] px-5 rounded-full font-mono text-[12px] uppercase tracking-wider
                 text-accent border border-accent-line hover:bg-accent hover:text-paper hover:border-accent transition-colors'
             >
               Upgrade →
