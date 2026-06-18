@@ -295,6 +295,7 @@ export default function Teams() {
 
   const { teams, invites } = state
   const isTeamPlan = user?.plan === 'team'
+  const ownedTeam = teams.find((t) => t.role === 'owner')
 
   const handleAccept = (id: string) => {
     if (!token) return
@@ -390,7 +391,27 @@ export default function Teams() {
           )}
         </div>
 
-        {isTeamPlan && token ? (
+        {isTeamPlan && token && ownedTeam ? (
+          <div className='border border-rule rounded-lg px-5 sm:px-8 py-5 surface flex flex-col sm:flex-row sm:items-center gap-4'>
+            <div className='flex-1 min-w-0'>
+              <div className='font-mono text-[12px] uppercase tracking-wider text-ink-mute mb-1'>
+                team plan
+              </div>
+              <p className='font-mono text-[14px] text-ink-soft m-0'>
+                Your Team plan includes one team. Delete{' '}
+                <span className='text-ink'>{ownedTeam.name}</span> to create a
+                different one.
+              </p>
+            </div>
+            <Link
+              to={`/teams/${ownedTeam.slug}`}
+              className='shrink-0 inline-flex items-center h-[44px] px-5 rounded-full font-mono text-[12px] uppercase tracking-wider
+                text-accent border border-accent-line hover:bg-accent hover:text-paper hover:border-accent transition-colors'
+            >
+              Open team →
+            </Link>
+          </div>
+        ) : isTeamPlan && token ? (
           <CreateTeamPanel
             token={token}
             onCreated={(slug) =>
