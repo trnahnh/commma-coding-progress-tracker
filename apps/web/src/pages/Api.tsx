@@ -33,7 +33,7 @@ const ENDPOINTS = [
       {
         method: 'GET',
         path: '/v1/me',
-        desc: 'Authenticated user profile, plan, streak, and privacy setting.',
+        desc: 'Authenticated user profile, plan, billing status, streak, and privacy setting.',
       },
       {
         method: 'PATCH',
@@ -93,7 +93,7 @@ const ENDPOINTS = [
       {
         method: 'GET',
         path: '/v1/recap',
-        desc: 'Current-week recap for the authenticated user. Pro and Team only.',
+        desc: 'Current-week recap for the authenticated user. Unlocked for everyone during early access.',
       },
     ],
   },
@@ -123,7 +123,7 @@ const ENDPOINTS = [
       {
         method: 'POST',
         path: '/v1/teams',
-        desc: 'Create a team. Team plan required. Caller becomes owner.',
+        desc: 'Create a team. Free for everyone during early access; Team plan when billing is enabled. Caller becomes owner.',
       },
       {
         method: 'GET',
@@ -183,12 +183,12 @@ const ENDPOINTS = [
       {
         method: 'POST',
         path: '/v1/billing/checkout',
-        desc: 'Open a Stripe Checkout session for Pro or Team. plan × interval.',
+        desc: 'Open a Stripe Checkout session for Pro or Team. plan × interval. Disabled during early access (503).',
       },
       {
         method: 'POST',
         path: '/v1/billing/portal',
-        desc: 'Open the Stripe Billing Portal to manage or cancel a subscription.',
+        desc: 'Open the Stripe Billing Portal to manage or cancel a subscription. Disabled during early access (503).',
       },
       {
         method: 'POST',
