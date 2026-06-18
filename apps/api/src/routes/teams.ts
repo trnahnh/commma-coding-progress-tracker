@@ -12,7 +12,9 @@ import {
   teams,
   users,
 } from '@commma/db'
+import { hasTeamAccess } from '@commma/shared'
 import { db } from '../db.js'
+import { env } from '../env.js'
 import { apiError } from '../lib/errors.js'
 import { requireAuth } from '../middleware/auth.js'
 import { rateLimit, userKey } from '../middleware/rateLimit.js'
@@ -79,7 +81,7 @@ async function teamFrozen(ownerId: string): Promise<boolean> {
     .from(users)
     .where(eq(users.id, ownerId))
     .limit(1)
-  return isTeamFrozen(rows[0]?.plan ?? 'free')
+  return isTeamFrozen(rows[0]?.plan ?? 'free', env.FREE_MODE)
 }
 
 async function loadMembers(teamId: string) {
@@ -131,7 +133,7 @@ teamRoutes.post('/', write, zValidator('json', createSchema, invalid), async (c)
     .from(users)
     .where(eq(users.id, userId))
     .limit(1)
-  if (owner[0]?.plan !== 'team') {
+  if (!hasTeamAccess(owner[0]?.plan ?? 'free', env.FREE_MODE)) {
     return apiError(c, 'FORBIDDEN', 'A Team plan is required to create a team')
   }
 
@@ -189,7 +191,7 @@ teamRoutes.get('/', read, async (c) => {
       name: r.name,
       role: r.role,
       created_at: r.created_at,
-      frozen: isTeamFrozen(r.ownerPlan),
+      frozen: isTeamFrozen(r.ownerPlan, env.FREE_MODE),
     })),
   })
 })

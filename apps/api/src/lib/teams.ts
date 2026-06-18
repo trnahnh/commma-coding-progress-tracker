@@ -16,8 +16,8 @@ export function canManageTeam(role: string): boolean {
   return role === 'owner'
 }
 
-export function isTeamFrozen(ownerPlan: string): boolean {
-  return ownerPlan !== 'team'
+export function isTeamFrozen(ownerPlan: string, freeMode = false): boolean {
+  return !freeMode && ownerPlan !== 'team'
 }
 
 export function mergeHeatmaps(maps: KeyboardHeatmap[]): KeyboardHeatmap {

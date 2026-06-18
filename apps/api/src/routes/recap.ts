@@ -1,7 +1,9 @@
 import { Hono } from 'hono'
 import { eq } from 'drizzle-orm'
+import { hasProAccess } from '@commma/shared'
 import { users } from '@commma/db'
 import { db } from '../db.js'
+import { env } from '../env.js'
 import { apiError } from '../lib/errors.js'
 import { requireAuth } from '../middleware/auth.js'
 import { rateLimit, userKey } from '../middleware/rateLimit.js'
@@ -30,7 +32,7 @@ recapRoutes.get('/', async (c) => {
     .limit(1)
 
   if (!user) return apiError(c, 'NOT_FOUND', 'User not found')
-  if (user.plan !== 'pro' && user.plan !== 'team') {
+  if (!hasProAccess(user.plan, env.FREE_MODE)) {
     return apiError(c, 'FORBIDDEN', 'Weekly recap requires Pro or Team plan')
   }
 

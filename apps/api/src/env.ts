@@ -22,6 +22,10 @@ const envSchema = z.object({
     .default('true')
     .transform((v) => v === 'true'),
   TRUST_PROXY_HOPS: z.coerce.number().int().nonnegative().default(0),
+  FREE_MODE: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((v) => v === 'true'),
   STRIPE_SECRET_KEY: optionalSecret,
   STRIPE_WEBHOOK_SECRET: optionalSecret,
   STRIPE_PRICE_PRO_MONTHLY: optionalSecret,

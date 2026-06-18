@@ -50,6 +50,8 @@ billingRoutes.post(
       )
   }),
   async (c) => {
+    if (env.FREE_MODE)
+      return apiError(c, 'SERVICE_UNAVAILABLE', 'Billing is disabled')
     if (!stripe)
       return apiError(c, 'SERVICE_UNAVAILABLE', 'Billing is not configured')
     const userId = c.get('userId')
@@ -116,6 +118,8 @@ billingRoutes.post(
   requireAuth,
   rateLimit({ scope: 'write', limit: 30, windowS: 3600, key: userKey }),
   async (c) => {
+    if (env.FREE_MODE)
+      return apiError(c, 'SERVICE_UNAVAILABLE', 'Billing is disabled')
     if (!stripe)
       return apiError(c, 'SERVICE_UNAVAILABLE', 'Billing is not configured')
     const userId = c.get('userId')

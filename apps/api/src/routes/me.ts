@@ -4,6 +4,7 @@ import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import { streaks, users } from '@commma/db'
 import { db } from '../db.js'
+import { env } from '../env.js'
 import { apiError } from '../lib/errors.js'
 import { requireAuth } from '../middleware/auth.js'
 import { rateLimit, userKey } from '../middleware/rateLimit.js'
@@ -38,6 +39,7 @@ function meJson(u: UserRow, s: StreakRow | undefined) {
     email: u.email,
     avatar_url: u.avatarUrl,
     plan: u.plan,
+    billing_enabled: !env.FREE_MODE,
     privacy: u.privacy,
     display_name: u.displayName,
     bio: u.bio,
