@@ -70,16 +70,32 @@ function FeatureList({ features }: { features: string[] }) {
   )
 }
 
-const FEATURES_ALL = [
-  'Full session history',
-  'Keyboard heatmap PNG export',
-  'Weekly recap',
-  'Private team leaderboards',
-  'Team aggregate heatmap',
-  'Invite up to 5 members per team',
-  'Public profile, feed & follows',
-  'Streak tracking',
+const PLANNED_TIERS = [
+  {
+    name: 'Pro',
+    monthly: '$5',
+    yearly: '$50',
+    yearlyNote: '$4.17 / month · save $10',
+    blurb: 'For athletes who want the full picture.',
+    features: FEATURES_PRO,
+  },
+  {
+    name: 'Team',
+    monthly: '$20',
+    yearly: '$200',
+    yearlyNote: '$16.67 / month · save $40',
+    blurb: 'Up to 5 members. Compete as a crew.',
+    features: FEATURES_TEAM,
+  },
 ]
+
+function ComingLater() {
+  return (
+    <span className='inline-flex items-center justify-center gap-2 min-h-[44px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium text-ink-mute border border-rule-strong bg-paper-3 cursor-default select-none'>
+      Coming later
+    </span>
+  )
+}
 
 export default function Pricing() {
   if (FREE_MODE) return <FreePricing />
@@ -88,10 +104,11 @@ export default function Pricing() {
 
 function FreePricing() {
   const { token } = useAuth()
+  const [annual, setAnnual] = useState(false)
   useSeo({
     title: 'Pricing · commma',
     description:
-      'commma is free for everyone during early access — every feature, no card.',
+      'commma is free for everyone during early access — every feature unlocked, no card.',
   })
 
   return (
@@ -102,77 +119,159 @@ function FreePricing() {
             § pricing
           </div>
           <h1 className='font-serif font-normal text-[clamp(40px,6vw,80px)] leading-[0.95] tracking-[-0.03em] m-0 mb-6 text-ink'>
-            Free for <em className='italic text-accent'>everyone.</em>
+            Free while we&apos;re in{' '}
+            <em className='italic text-accent'>early access.</em>
           </h1>
           <p className='font-mono text-[14px] text-ink-soft m-0 max-w-[56ch] leading-relaxed'>
-            Every feature is unlocked during early access — full history,
-            heatmap exports, recaps, and teams. No credit card, no trial timer.
-            Paid plans arrive later; everything you build now stays yours.
+            Everything is unlocked for everyone right now — full history, heatmap
+            exports, recaps, and teams, no card. The Pro and Team plans below are
+            where commma is headed; they switch on later, and nothing you build
+            now goes away.
           </p>
         </div>
 
-        <div className='border border-rule-strong rounded-lg overflow-hidden surface'>
-          <div className='relative flex flex-col px-6 sm:px-10 pt-10 pb-10 bg-paper-2'>
-            <span className='absolute inset-x-0 top-0 h-0.5 bg-accent glow-accent' />
-            <div className='flex items-start justify-between gap-3 mb-7'>
-              <span className='font-serif text-[clamp(28px,3vw,40px)] leading-none tracking-[-0.02em] text-ink'>
-                Early access
-              </span>
-              <span className='shrink-0 font-mono text-[14px] tracking-[0.16em] uppercase text-live border border-rule-strong bg-paper-3 px-2.5 py-1 rounded-full mt-0.5'>
-                Free
-              </span>
-            </div>
-            <div className='flex items-baseline gap-1.5 mb-8'>
-              <span className='font-serif text-[clamp(44px,5vw,64px)] leading-none tracking-[-0.04em] text-ink tnum'>
-                $0
-              </span>
-              <span className='font-mono text-[14px] text-ink-mute'>
-                while in early access
-              </span>
-            </div>
+        <div className='mb-8 inline-flex max-w-full items-center gap-2.5 rounded-full border border-rule-strong bg-paper-2 px-4 py-2.5'>
+          <span className='w-[7px] h-[7px] shrink-0 rounded-full bg-live animate-pulse-dot' />
+          <span className='font-mono text-[13px] text-ink-soft min-w-0'>
+            All plans are free during early access — no charges yet.
+          </span>
+        </div>
 
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-10 mb-9'>
-              {FEATURES_ALL.map((f) => (
-                <div
-                  key={f}
-                  className='flex items-start gap-3 py-2.5 border-b border-dashed border-rule'
-                >
-                  <span className='font-mono text-[14px] text-accent mt-0.5 shrink-0'>
-                    ✓
+        <div className='flex items-center gap-3 mb-10 font-mono text-[14px] tracking-wide'>
+          <button
+            type='button'
+            onClick={() => setAnnual(false)}
+            className={`h-[44px] px-5 rounded-full border transition-colors press ${
+              !annual
+                ? 'bg-ink text-paper border-ink'
+                : 'text-ink-mute border-rule-strong hover:text-ink hover:border-ink-faint'
+            }`}
+          >
+            Monthly
+          </button>
+          <button
+            type='button'
+            onClick={() => setAnnual(true)}
+            className={`h-[44px] px-5 rounded-full border transition-colors press ${
+              annual
+                ? 'bg-ink text-paper border-ink'
+                : 'text-ink-mute border-rule-strong hover:text-ink hover:border-ink-faint'
+            }`}
+          >
+            Yearly
+            <span className='ml-2 font-mono text-[14px] tracking-[0.12em] uppercase text-live'>
+              −17%
+            </span>
+          </button>
+        </div>
+
+        <div className='grid grid-cols-1 md:grid-cols-3 border border-rule-strong rounded-lg overflow-hidden surface'>
+          <div className='relative flex flex-col px-6 sm:px-8 pt-8 sm:pt-10 pb-8 sm:pb-10 border-b md:border-b-0 md:border-r border-rule bg-paper ring-1 ring-inset ring-accent-2-line'>
+            <div className='flex flex-col md:min-h-[220px]'>
+              <div className='flex items-start justify-between gap-3 mb-6'>
+                <span className='font-serif text-[clamp(26px,2.8vw,36px)] leading-none tracking-[-0.02em] text-ink'>
+                  Free
+                </span>
+                <span className='shrink-0 font-mono text-[14px] tracking-[0.16em] uppercase text-live border border-rule-strong bg-paper-3 px-2.5 py-1 rounded-full mt-0.5'>
+                  Live now
+                </span>
+              </div>
+              <div className='mb-7'>
+                <div className='flex items-baseline gap-1.5'>
+                  <span className='font-serif text-[clamp(44px,5vw,64px)] leading-none tracking-[-0.04em] text-ink tnum'>
+                    $0
                   </span>
-                  <span className='font-mono text-[14px] text-ink-soft leading-snug min-w-0'>
-                    {f}
+                  <span className='font-mono text-[14px] text-ink-mute'>
+                    forever
                   </span>
                 </div>
-              ))}
+                <p className='font-mono text-[14px] text-ink-mute mt-2.5 m-0'>
+                  Everything, unlocked, for everyone.
+                </p>
+              </div>
             </div>
-
-            <div className='flex flex-col sm:flex-row gap-3'>
-              <a
-                href='https://marketplace.visualstudio.com'
-                className='group inline-flex items-center justify-center gap-2.5 min-h-[44px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors glow-accent press bg-accent text-paper border border-accent hover:bg-ink hover:border-ink'
+            <FeatureList features={FEATURES_FREE} />
+            <a
+              href='https://marketplace.visualstudio.com'
+              className='group inline-flex items-center justify-center gap-2.5 min-h-[44px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors glow-accent press bg-accent text-paper border border-accent hover:bg-ink hover:border-ink'
+            >
+              Install the extension
+              <span className='inline-block transition-transform group-hover:translate-x-1'>
+                →
+              </span>
+            </a>
+            {!token && (
+              <Link
+                to='/signin'
+                className='mt-3 inline-flex items-center justify-center gap-2.5 min-h-[44px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint'
               >
-                Install the extension
-                <span className='inline-block transition-transform group-hover:translate-x-1'>
-                  →
-                </span>
-              </a>
-              {!token && (
-                <Link
-                  to='/signin'
-                  className='inline-flex items-center justify-center gap-2.5 min-h-[44px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint'
-                >
-                  Sign in with GitHub
-                </Link>
-              )}
-            </div>
+                Sign in with GitHub
+              </Link>
+            )}
           </div>
+
+          {PLANNED_TIERS.map((tier, i) => (
+            <div
+              key={tier.name}
+              className={`relative flex flex-col px-6 sm:px-8 pt-8 sm:pt-10 pb-8 sm:pb-10 ${
+                i === 0
+                  ? 'border-b md:border-b-0 md:border-r border-rule bg-paper-2'
+                  : 'bg-paper'
+              }`}
+            >
+              {i === 0 && (
+                <span className='absolute inset-x-0 top-0 h-0.5 bg-accent glow-accent' />
+              )}
+              <div className='flex flex-col md:min-h-[220px]'>
+                <div className='flex items-start justify-between gap-3 mb-6'>
+                  <span
+                    className={`font-serif text-[clamp(26px,2.8vw,36px)] leading-none tracking-[-0.02em] ${
+                      i === 0 ? 'text-accent' : 'text-ink'
+                    }`}
+                  >
+                    {tier.name}
+                  </span>
+                  <span className='shrink-0 font-mono text-[14px] tracking-[0.16em] uppercase text-ink-mute border border-rule-strong bg-paper-3 px-2.5 py-1 rounded-full mt-0.5'>
+                    Planned
+                  </span>
+                </div>
+                <div className='mb-7'>
+                  <div className='flex items-baseline gap-1.5'>
+                    <span className='font-serif text-[clamp(44px,5vw,64px)] leading-none tracking-[-0.04em] text-ink tnum'>
+                      {annual ? tier.yearly : tier.monthly}
+                    </span>
+                    <span className='font-mono text-[14px] text-ink-mute'>
+                      {annual ? '/ year' : '/ month'}
+                    </span>
+                  </div>
+                  {annual ? (
+                    <p className='font-mono text-[14px] text-live mt-1 m-0'>
+                      {tier.yearlyNote}
+                    </p>
+                  ) : (
+                    <p className='font-mono text-[14px] mt-1 m-0 invisible'>
+                      &nbsp;
+                    </p>
+                  )}
+                  <p className='font-mono text-[14px] text-ink-mute mt-2.5 m-0'>
+                    {tier.blurb}
+                  </p>
+                  <p className='font-mono text-[13px] text-live mt-1 m-0'>
+                    Free during early access.
+                  </p>
+                </div>
+              </div>
+              <FeatureList features={tier.features} />
+              <ComingLater />
+            </div>
+          ))}
         </div>
 
         <div className='mt-10 pt-8 border-t border-rule font-mono text-[14px] text-ink-mute leading-relaxed'>
           <p className='m-0'>
             All access includes GitHub OAuth sign-in, the VSCode extension, and
-            the full leaderboard and public feed. No card required.
+            the full leaderboard and public feed. No card required while commma
+            is in early access.
           </p>
         </div>
       </div>
