@@ -143,7 +143,7 @@ teamRoutes.post('/', write, zValidator('json', createSchema, invalid), async (c)
     return apiError(
       c,
       'CONFLICT',
-      'Your Team plan includes one team. Delete your current team to create a new one.',
+      `Your Team plan includes up to ${TEAM_MAX_OWNED} teams. Delete one to create another.`,
     )
   }
 

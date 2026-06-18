@@ -2,7 +2,7 @@ import type { KeyboardHeatmap } from '@commma/db'
 
 export const TEAM_MAX_MEMBERS = 5
 
-export const TEAM_MAX_OWNED = 1
+export const TEAM_MAX_OWNED = 2
 
 export type TeamRole = 'owner' | 'member'
 
