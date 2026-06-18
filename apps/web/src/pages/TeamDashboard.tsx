@@ -247,13 +247,13 @@ function InviteForm({
           onChange={(e) => setHandle(e.target.value)}
           placeholder='@handle'
           maxLength={39}
-          className='flex-1 h-[44px] px-3 rounded border border-rule-strong bg-paper-3 well font-mono text-[13px] text-ink placeholder-ink-faint
+          className='flex-1 min-w-0 h-[44px] px-3 rounded border border-rule-strong bg-paper-3 well font-mono text-[13px] text-ink placeholder-ink-faint
             focus:outline-none focus:border-accent transition-colors'
         />
         <button
           type='submit'
           disabled={busy || !handle.trim()}
-          className='h-[44px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
+          className='shrink-0 h-[44px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
             bg-accent text-paper border border-accent bevel press hover:bg-ink hover:border-ink transition-colors disabled:opacity-40'
         >
           {busy ? '…' : 'Invite'}
@@ -314,13 +314,13 @@ function RenameForm({
           value={name}
           onChange={(e) => setName(e.target.value)}
           maxLength={64}
-          className='flex-1 h-[44px] px-3 rounded border border-rule-strong bg-paper-3 well font-mono text-[13px] text-ink placeholder-ink-faint
+          className='flex-1 min-w-0 h-[44px] px-3 rounded border border-rule-strong bg-paper-3 well font-mono text-[13px] text-ink placeholder-ink-faint
             focus:outline-none focus:border-accent transition-colors'
         />
         <button
           type='submit'
           disabled={busy || !name.trim() || name.trim() === currentName}
-          className='h-[44px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
+          className='shrink-0 h-[44px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
             border border-rule-strong text-ink-soft hover:text-ink hover:border-ink-faint transition-colors disabled:opacity-40'
         >
           {busy ? '…' : 'Save'}
@@ -378,7 +378,7 @@ function DeleteTeamButton({
           type='button'
           disabled={busy}
           onClick={() => void handleDelete()}
-          className='h-[44px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
+          className='shrink-0 h-[44px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
             bg-accent text-paper border border-accent bevel press hover:bg-ink hover:border-ink transition-colors disabled:opacity-40'
         >
           {busy ? '…' : 'Confirm delete'}
@@ -586,12 +586,12 @@ export default function TeamDashboard() {
 
             {isOwner && (
               <div className='flex flex-col'>
-                <div className='px-5 sm:px-6 py-4 border-b border-rule'>
+                <div className='px-5 sm:px-8 py-4 border-b border-rule'>
                   <span className='font-mono text-[12px] uppercase tracking-[0.14em] text-ink-mute'>
                     Manage
                   </span>
                 </div>
-                <div className='px-5 sm:px-6 py-5 sm:py-6 flex flex-col gap-6'>
+                <div className='px-5 sm:px-8 py-5 sm:py-6 flex flex-col gap-6'>
                   {!team.frozen && (
                     <>
                       <InviteForm
@@ -669,7 +669,7 @@ export default function TeamDashboard() {
         </div>
 
         <div className='border border-rule-strong rounded-lg bg-linear-to-b from-paper-2 to-paper overflow-hidden surface'>
-          <div className='px-5 sm:px-8 py-5 sm:py-6 border-b border-rule flex items-center justify-between gap-4'>
+          <div className='px-5 sm:px-8 py-5 sm:py-6 border-b border-rule flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
             <div>
               <div className='font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute mb-1'>
                 heatmap
