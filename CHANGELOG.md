@@ -11,6 +11,13 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **API** — Paid plans are live. Production switched from the sandbox billing
+  rehearsal to live-mode Stripe: the live secret key, the four live Pro/Team
+  monthly and yearly prices, and a live billing webhook endpoint. Pro and Team
+  subscriptions now take real payments through Stripe Checkout, with the
+  monthly/annual switch and the manage-billing portal wired end to end. The
+  cutover is environment-only on the API host — no code change — and
+  `apps/api/.env.production` stays blank by design.
 - **Web** — Brand film on the About page. A 15-second motion teaser — keyboard
   heat flood, a session scored like a race (pace / elapsed / streak with an
   activity readout), then the wordmark reveal and `commma.dev` — tells the

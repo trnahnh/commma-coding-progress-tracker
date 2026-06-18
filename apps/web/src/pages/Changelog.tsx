@@ -3,6 +3,14 @@ import { useSeo } from '../lib/seo'
 
 const ENTRIES = [
   {
+    version: '0.7.3',
+    date: 'Jun 2026',
+    tag: 'Billing',
+    changes: [
+      'Paid plans are live — subscribe to Pro or Team with a card through secure Stripe checkout, switch between monthly and annual billing, and manage or cancel anytime from the billing portal',
+    ],
+  },
+  {
     version: '0.7.2',
     date: 'Jun 2026',
     tag: 'Brand',
