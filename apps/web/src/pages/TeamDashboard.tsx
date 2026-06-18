@@ -31,7 +31,7 @@ function RoleChip({ role }: { role: string }) {
   return (
     <span
       className={[
-        'inline-flex items-center h-[22px] px-2.5 rounded-full font-mono text-[10px] uppercase tracking-widest border',
+        'inline-flex items-center h-[24px] px-2.5 rounded-full font-mono text-[11px] uppercase tracking-widest border',
         isOwner
           ? 'text-accent border-accent-line bg-accent-soft'
           : 'text-ink-mute border-rule',
@@ -56,7 +56,7 @@ function PeriodTabs({
           key={value}
           type='button'
           onClick={() => onChange(value)}
-          className={`h-[40px] sm:h-[44px] px-3 sm:px-4 rounded-full font-mono text-[12px] sm:text-[13px] uppercase tracking-wider whitespace-nowrap border transition-colors press ${
+          className={`h-[44px] px-3 sm:px-4 rounded-full font-mono text-[12px] sm:text-[13px] uppercase tracking-wider whitespace-nowrap border transition-colors press ${
             active === value
               ? 'bg-accent border-accent text-paper'
               : 'border-rule-strong text-ink-mute hover:text-ink'
@@ -128,12 +128,12 @@ function MemberRow({
             type='button'
             disabled={busy}
             onClick={() => void handleRemove()}
-            className='font-mono text-[11px] uppercase tracking-wider text-ink-mute hover:text-accent transition-colors disabled:opacity-40'
+            className='min-h-[44px] inline-flex items-center font-mono text-[12px] uppercase tracking-wider text-ink-mute hover:text-accent transition-colors disabled:opacity-40'
           >
             {busy ? '…' : isSelf ? 'Leave' : 'Remove'}
           </button>
           {error && (
-            <span className='font-mono text-[10px] text-accent'>{error}</span>
+            <span className='font-mono text-[11px] text-accent'>{error}</span>
           )}
         </div>
       )}
@@ -237,7 +237,7 @@ function InviteForm({
       onSubmit={(e) => void handleSubmit(e)}
       className='flex flex-col gap-2'
     >
-      <label className='font-mono text-[11px] uppercase tracking-wider text-ink-mute'>
+      <label className='font-mono text-[12px] uppercase tracking-wider text-ink-mute'>
         Invite by handle
       </label>
       <div className='flex gap-2'>
@@ -247,13 +247,13 @@ function InviteForm({
           onChange={(e) => setHandle(e.target.value)}
           placeholder='@handle'
           maxLength={39}
-          className='flex-1 h-[38px] px-3 rounded border border-rule-strong bg-paper-3 well font-mono text-[13px] text-ink placeholder-ink-faint
+          className='flex-1 h-[44px] px-3 rounded border border-rule-strong bg-paper-3 well font-mono text-[13px] text-ink placeholder-ink-faint
             focus:outline-none focus:border-accent transition-colors'
         />
         <button
           type='submit'
           disabled={busy || !handle.trim()}
-          className='h-[38px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
+          className='h-[44px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
             bg-accent text-paper border border-accent bevel press hover:bg-ink hover:border-ink transition-colors disabled:opacity-40'
         >
           {busy ? '…' : 'Invite'}
@@ -305,7 +305,7 @@ function RenameForm({
       onSubmit={(e) => void handleSubmit(e)}
       className='flex flex-col gap-2'
     >
-      <label className='font-mono text-[11px] uppercase tracking-wider text-ink-mute'>
+      <label className='font-mono text-[12px] uppercase tracking-wider text-ink-mute'>
         Rename team
       </label>
       <div className='flex gap-2'>
@@ -314,13 +314,13 @@ function RenameForm({
           value={name}
           onChange={(e) => setName(e.target.value)}
           maxLength={64}
-          className='flex-1 h-[38px] px-3 rounded border border-rule-strong bg-paper-3 well font-mono text-[13px] text-ink placeholder-ink-faint
+          className='flex-1 h-[44px] px-3 rounded border border-rule-strong bg-paper-3 well font-mono text-[13px] text-ink placeholder-ink-faint
             focus:outline-none focus:border-accent transition-colors'
         />
         <button
           type='submit'
           disabled={busy || !name.trim() || name.trim() === currentName}
-          className='h-[38px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
+          className='h-[44px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
             border border-rule-strong text-ink-soft hover:text-ink hover:border-ink-faint transition-colors disabled:opacity-40'
         >
           {busy ? '…' : 'Save'}
@@ -361,7 +361,7 @@ function DeleteTeamButton({
       <button
         type='button'
         onClick={() => setConfirm(true)}
-        className='font-mono text-[12px] uppercase tracking-wider text-ink-mute hover:text-accent transition-colors'
+        className='min-h-[44px] inline-flex items-center font-mono text-[12px] uppercase tracking-wider text-ink-mute hover:text-accent transition-colors'
       >
         Delete team
       </button>
@@ -378,7 +378,7 @@ function DeleteTeamButton({
           type='button'
           disabled={busy}
           onClick={() => void handleDelete()}
-          className='h-[34px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
+          className='h-[44px] px-4 rounded-full font-mono text-[12px] uppercase tracking-wider
             bg-accent text-paper border border-accent bevel press hover:bg-ink hover:border-ink transition-colors disabled:opacity-40'
         >
           {busy ? '…' : 'Confirm delete'}
@@ -386,7 +386,7 @@ function DeleteTeamButton({
         <button
           type='button'
           onClick={() => setConfirm(false)}
-          className='font-mono text-[12px] uppercase tracking-wider text-ink-mute hover:text-ink transition-colors'
+          className='min-h-[44px] inline-flex items-center font-mono text-[12px] uppercase tracking-wider text-ink-mute hover:text-ink transition-colors'
         >
           Cancel
         </button>
@@ -555,7 +555,7 @@ export default function TeamDashboard() {
             </div>
           </div>
 
-          <div className='grid grid-cols-1 lg:grid-cols-[1fr_300px]'>
+          <div className='grid grid-cols-1 lg:grid-cols-[1fr_320px]'>
             <div className='border-b lg:border-b-0 lg:border-r border-rule'>
               <div className='px-5 sm:px-8 py-4 border-b border-rule'>
                 <span className='font-mono text-[12px] uppercase tracking-[0.14em] text-ink-mute'>
@@ -573,42 +573,60 @@ export default function TeamDashboard() {
                   onRemoved={handleMemberRemoved}
                 />
               ))}
+              {team.members.length === 1 && (
+                <div className='px-5 sm:px-8 py-7'>
+                  <p className='font-sans text-[15px] leading-relaxed text-ink-soft m-0 max-w-[46ch]'>
+                    {isOwner
+                      ? 'It’s just you so far. Invite teammates by their handle to build a shared leaderboard and a merged team heatmap.'
+                      : 'No teammates yet — the owner can invite more people to this team.'}
+                  </p>
+                </div>
+              )}
             </div>
 
             {isOwner && (
-              <div className='px-5 sm:px-6 py-5 sm:py-6 flex flex-col gap-6'>
-                {!team.frozen && (
-                  <>
-                    <InviteForm
+              <div className='flex flex-col'>
+                <div className='px-5 sm:px-6 py-4 border-b border-rule'>
+                  <span className='font-mono text-[12px] uppercase tracking-[0.14em] text-ink-mute'>
+                    Manage
+                  </span>
+                </div>
+                <div className='px-5 sm:px-6 py-5 sm:py-6 flex flex-col gap-6'>
+                  {!team.frozen && (
+                    <>
+                      <InviteForm
+                        slug={team.slug}
+                        token={token!}
+                        onInvited={() => {
+                          if (!token || !slug) return
+                          getTeam(token, slug)
+                            .then((updated) =>
+                              setState((prev) =>
+                                prev.phase === 'ready'
+                                  ? { ...prev, team: updated }
+                                  : prev,
+                              ),
+                            )
+                            .catch(() => void 0)
+                        }}
+                      />
+                      <RenameForm
+                        currentName={team.name}
+                        slug={team.slug}
+                        token={token!}
+                        onRenamed={handleRenamed}
+                      />
+                    </>
+                  )}
+                  <div
+                    className={team.frozen ? '' : 'pt-2 border-t border-rule'}
+                  >
+                    <DeleteTeamButton
                       slug={team.slug}
                       token={token!}
-                      onInvited={() => {
-                        if (!token || !slug) return
-                        getTeam(token, slug)
-                          .then((updated) =>
-                            setState((prev) =>
-                              prev.phase === 'ready'
-                                ? { ...prev, team: updated }
-                                : prev,
-                            ),
-                          )
-                          .catch(() => void 0)
-                      }}
+                      onDeleted={handleTeamDeleted}
                     />
-                    <RenameForm
-                      currentName={team.name}
-                      slug={team.slug}
-                      token={token!}
-                      onRenamed={handleRenamed}
-                    />
-                  </>
-                )}
-                <div className={team.frozen ? '' : 'pt-2 border-t border-rule'}>
-                  <DeleteTeamButton
-                    slug={team.slug}
-                    token={token!}
-                    onDeleted={handleTeamDeleted}
-                  />
+                  </div>
                 </div>
               </div>
             )}
@@ -664,7 +682,7 @@ export default function TeamDashboard() {
               <button
                 type='button'
                 onClick={loadHeatmap}
-                className='shrink-0 inline-flex items-center h-[38px] px-5 rounded-full font-mono text-[12px] uppercase tracking-wider
+                className='shrink-0 inline-flex items-center h-[44px] px-5 rounded-full font-mono text-[12px] uppercase tracking-wider
                   border border-rule-strong text-ink-soft hover:text-ink hover:border-ink-faint transition-colors'
               >
                 Load
