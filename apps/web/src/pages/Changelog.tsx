@@ -7,7 +7,7 @@ const ENTRIES = [
     date: 'Jun 2026',
     tag: 'Teams',
     changes: [
-      'A Team plan now includes a single team — creating a second is blocked with a prompt to delete the current one first; joining other teams as a member stays unlimited and free',
+      'A Team plan can create up to two teams — creating one beyond that is blocked with a prompt to delete one first; joining other teams as a member stays unlimited and free',
     ],
   },
   {

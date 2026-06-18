@@ -11,11 +11,11 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
-- **API, Web** — A Team plan now includes exactly one team. `POST /v1/teams`
-  rejects a second team for the same owner with `409 CONFLICT`, and the web
-  teams page swaps the create form for a notice pointing at the existing team
-  once you own one. Joining other teams as a member is unaffected — it stays
-  unlimited and needs no plan.
+- **API, Web** — A Team plan can create up to two teams. `POST /v1/teams`
+  rejects an over-limit team for the same owner with `409 CONFLICT`
+  (`TEAM_MAX_OWNED`), and the web teams page swaps the create form for an
+  at-limit notice once you own that many. Joining other teams as a member is
+  unaffected — it stays unlimited and needs no plan.
 - **Web** — Team dashboard layout pass. The members list and owner controls now
   sit in a balanced two-column block with aligned section headers and a
   first-run prompt when you are the team's only member, so a freshly created
