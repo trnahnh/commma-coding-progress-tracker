@@ -529,6 +529,16 @@ export default function TeamDashboard() {
   return (
     <Shell>
       <div className='flex flex-col gap-6'>
+        <Link
+          to='/teams'
+          className='group inline-flex items-center gap-2 self-start font-mono text-[13px] tracking-[0.16em] uppercase text-ink-mute hover:text-ink transition-colors'
+        >
+          <span className='inline-block transition-transform group-hover:-translate-x-1'>
+            ←
+          </span>
+          Back to teams
+        </Link>
+
         {team.frozen && (
           <div className='px-5 py-3 rounded border border-rule bg-paper-3 font-mono text-[13px] text-ink-mute flex items-center gap-2'>
             <span className='text-accent'>!</span> This team&apos;s plan is
