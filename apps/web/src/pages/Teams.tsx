@@ -398,11 +398,11 @@ export default function Teams() {
         {isTeamPlan && token && ownedCount >= TEAM_OWN_LIMIT ? (
           <div className='border border-rule rounded-lg px-5 sm:px-8 py-5 surface'>
             <div className='font-mono text-[12px] uppercase tracking-wider text-ink-mute mb-1'>
-              team plan
+              team limit
             </div>
             <p className='font-mono text-[14px] text-ink-soft m-0 max-w-[60ch]'>
-              Your Team plan includes up to {TEAM_OWN_LIMIT} teams — you have
-              reached the limit. Delete one above to create another.
+              You can create up to {TEAM_OWN_LIMIT} teams — you have reached the
+              limit. Delete one above to create another.
             </p>
           </div>
         ) : isTeamPlan && token ? (

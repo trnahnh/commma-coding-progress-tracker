@@ -166,7 +166,7 @@ function Hero() {
         <div className='flex items-center gap-3.5 mb-8 sm:mb-11 opacity-0 animate-rise-700 delay-100'>
           <LiveDot />
           <span className='font-mono text-[13px] sm:text-[15px] tracking-[0.16em] uppercase text-ink-mute'>
-            v0.1 · invite-only ·{' '}
+            v0.8.0 · free ·{' '}
             <span className='text-ink-soft tnum'>{pulse.toLocaleString()}</span>{' '}
             typing right now
           </span>
@@ -832,29 +832,28 @@ function Waitlist() {
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
         <SectionHead
           no='04'
-          kicker='the list'
+          kicker='stay in the loop'
           title={
             <>
-              Be there when the <em className='italic text-accent'>gun</em> goes
-              off.
+              Know the moment it <em className='italic text-accent'>launches.</em>
             </>
           }
-          aside='early access · rolling invites'
+          aside='free · no invite needed'
         />
         <Reveal>
           <div className='rounded-xl border border-rule-strong bg-paper-2/60 surface px-6 py-9 sm:px-8 sm:py-[clamp(36px,6vw,72px)] lg:px-[clamp(40px,5vw,72px)]'>
             <div className='grid gap-9 lg:gap-12 lg:grid-cols-[1.1fr_1fr] lg:items-center'>
               <div className='min-w-0'>
                 <p className='font-mono text-[12px] sm:text-[13px] tracking-[0.18em] uppercase text-ink-mute m-0 mb-5 inline-flex items-center gap-2.5'>
-                  <LiveDot /> seats open in waves
+                  <LiveDot /> shipping soon
                 </p>
                 <h3 className='font-serif font-normal text-[clamp(28px,4.5vw,52px)] leading-[1.02] tracking-[-0.02em] m-0 mb-4 text-ink'>
-                  Join the waitlist
+                  Get notified at launch
                 </h3>
                 <p className='font-sans text-[15px] sm:text-[16px] leading-relaxed text-ink-soft m-0 max-w-[48ch]'>
-                  Drop your email and we&apos;ll send your invite the moment the
-                  next wave opens. No spam, no card — just a heads-up when it
-                  lands.
+                  commma is free and open — drop your email and we&apos;ll ping
+                  you the moment the extension hits the Marketplace. No invite,
+                  no card, just a heads-up.
                 </p>
               </div>
 
@@ -865,7 +864,8 @@ function Waitlist() {
                       You&apos;re on the list
                     </p>
                     <p className='font-sans text-[15px] leading-relaxed text-ink-soft m-0'>
-                      Watch your inbox — your invite ships with the next wave.
+                      Watch your inbox — we&apos;ll email you the moment it
+                      ships.
                     </p>
                   </div>
                 ) : (
@@ -903,7 +903,7 @@ function Waitlist() {
                           bg-accent text-paper border border-accent glow-accent press
                           hover:bg-ink hover:border-ink transition-colors disabled:opacity-60'
                       >
-                        {status === 'loading' ? 'Joining…' : 'Join waitlist'}
+                        {status === 'loading' ? 'Joining…' : 'Notify me'}
                         {status !== 'loading' && (
                           <span className='inline-block transition-transform group-hover:translate-x-1'>
                             →
@@ -919,7 +919,7 @@ function Waitlist() {
                     >
                       {status === 'error'
                         ? message
-                        : 'We only email you about access. Unsubscribe anytime.'}
+                        : 'We only email you about launch. Unsubscribe anytime.'}
                     </p>
                   </form>
                 )}
@@ -947,10 +947,10 @@ function Final() {
         <Reveal delay={120}>
           <div className='flex flex-col sm:flex-row items-center justify-center gap-3'>
             <Link
-              to='/pricing'
+              to='/signin'
               className='group inline-flex items-center gap-2.5 h-[52px] px-8 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium bg-accent text-paper border border-accent glow-accent press hover:bg-ink hover:border-ink transition-colors'
             >
-              Get early access
+              Start free
               <span className='inline-block transition-transform group-hover:translate-x-1'>
                 →
               </span>

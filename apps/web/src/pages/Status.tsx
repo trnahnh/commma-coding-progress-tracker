@@ -32,15 +32,15 @@ export default function Status() {
         </h1>
         <p className='font-sans text-[16px] leading-relaxed text-ink-soft m-0 mb-12 max-w-[48ch]'>
           commma is live on AWS — EC2 t4g (API), S3 + CloudFront (web), Neon
-          Postgres, Upstash Redis — running in invite-only early access. Public
-          launch is pending.
+          Postgres, Upstash Redis — free and open in early access. Public launch
+          is pending.
         </p>
 
         <div className='border border-rule-strong rounded-lg overflow-hidden surface mb-8'>
           <div className='flex items-center gap-3 px-5 sm:px-7 py-4 bg-paper-2 border-b border-rule'>
             <LiveDot color='live' />
             <span className='font-mono text-[13px] text-ink-soft tracking-wide'>
-              Live · invite-only early access
+              Live · free early access
             </span>
           </div>
           {COMPONENTS.map((c, i) => (
