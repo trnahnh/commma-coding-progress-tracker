@@ -461,7 +461,7 @@
         ctx.fillStyle = INK_MUTE
         ctx.letterSpacing = U * 0.005 + 'px'
         ctx.font = '600 ' + U * 0.015 + 'px "Geist Mono", monospace'
-        ctx.fillText(label, x, cy - U * 0.052)
+        ctx.fillText(label, x, cy - U * 0.072)
         ctx.letterSpacing = '0px'
 
         ctx.fillStyle = INK
@@ -471,7 +471,7 @@
         if (unit) {
           ctx.fillStyle = INK_MUTE
           ctx.font = '500 ' + U * 0.019 + 'px "Geist Mono", monospace'
-          ctx.fillText(unit, x, cy + U * 0.032)
+          ctx.fillText(unit, x, cy + U * 0.04)
         }
       }
 
@@ -499,7 +499,7 @@
         ctx.fillText(
           'SESSION COMPLETE',
           W / 2,
-          cy - U * (landscape ? 0.145 : 0.235),
+          cy - U * (landscape ? 0.115 : 0.21),
         )
         ctx.letterSpacing = '0px'
 
@@ -508,7 +508,7 @@
           drawStat(W / 2 - colGap, cy, stats[0][0], stats[0][1], stats[0][2], U)
           drawStat(W / 2, cy, stats[1][0], stats[1][1], stats[1][2], U)
           drawStat(W / 2 + colGap, cy, stats[2][0], stats[2][1], stats[2][2], U)
-          drawBars(t, W / 2, cy + U * 0.075, U * 0.86, U * 0.08, U)
+          drawBars(t, W / 2, cy + U * 0.062, U * 0.9, U * 0.072, U)
         } else {
           const rowGap = U * 0.16
           drawStat(W / 2, cy - rowGap, stats[0][0], stats[0][1], stats[0][2], U)
