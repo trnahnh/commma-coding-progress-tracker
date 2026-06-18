@@ -2,6 +2,8 @@ import type { KeyboardHeatmap } from '@commma/db'
 
 export const TEAM_MAX_MEMBERS = 5
 
+export const TEAM_MAX_OWNED = 1
+
 export type TeamRole = 'owner' | 'member'
 
 export const TEAM_SLUG_RE = /^[a-z0-9-]{1,39}$/

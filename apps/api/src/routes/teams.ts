@@ -26,6 +26,7 @@ import {
   isValidSlug,
   mergeHeatmaps,
   TEAM_MAX_MEMBERS,
+  TEAM_MAX_OWNED,
 } from '../lib/teams.js'
 import { redis } from '../redis.js'
 import { log } from '../logger.js'
@@ -132,6 +133,18 @@ teamRoutes.post('/', write, zValidator('json', createSchema, invalid), async (c)
     .limit(1)
   if (owner[0]?.plan !== 'team') {
     return apiError(c, 'FORBIDDEN', 'A Team plan is required to create a team')
+  }
+
+  const owned = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(teams)
+    .where(eq(teams.ownerId, userId))
+  if ((owned[0]?.count ?? 0) >= TEAM_MAX_OWNED) {
+    return apiError(
+      c,
+      'CONFLICT',
+      'Your Team plan includes one team. Delete your current team to create a new one.',
+    )
   }
 
   const existing = await loadTeam(slug)
