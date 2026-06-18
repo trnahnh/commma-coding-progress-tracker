@@ -11,6 +11,12 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Web** — Team dashboard layout pass. The members list and owner controls now
+  sit in a balanced two-column block with aligned section headers and a
+  first-run prompt when you are the team's only member, so a freshly created
+  team no longer opens with a tall empty gap beside the controls. Brought every
+  control up to the project's mobile minimums — 44px tap targets on the invite,
+  rename, delete, and period-tab actions, and readable label/chip text sizes.
 - **API** — Paid plans are live. Production switched from the sandbox billing
   rehearsal to live-mode Stripe: the live secret key, the four live Pro/Team
   monthly and yearly prices, and a live billing webhook endpoint. Pro and Team

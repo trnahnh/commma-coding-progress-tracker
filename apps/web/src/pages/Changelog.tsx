@@ -3,6 +3,14 @@ import { useSeo } from '../lib/seo'
 
 const ENTRIES = [
   {
+    version: '0.7.4',
+    date: 'Jun 2026',
+    tag: 'Teams',
+    changes: [
+      'Team dashboard layout pass — the members list and owner controls now sit in a balanced two-column block with aligned headers and a first-run prompt when you are the only member, so a new team no longer opens with a tall empty gap; every control also meets the mobile tap-target and readable-text minimums',
+    ],
+  },
+  {
     version: '0.7.3',
     date: 'Jun 2026',
     tag: 'Billing',
