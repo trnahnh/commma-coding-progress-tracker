@@ -9,7 +9,9 @@ import {
   type SessionSummary,
   type UserProfile,
 } from '../lib/api'
+import { hasProAccess } from '@commma/shared'
 import { useAuth } from '../lib/auth'
+import { FREE_MODE } from '../lib/config'
 import { formatClock, formatDate, formatDuration } from '../lib/format'
 import { langStyle } from '../lib/langColors'
 import { useSeo } from '../lib/seo'
@@ -470,7 +472,7 @@ export default function Profile() {
 
   const { profile, sessions, nextCursor } = state
   const isOwnProfile = user?.handle === handle
-  const isFree = user?.plan !== 'pro' && user?.plan !== 'team'
+  const isFree = !hasProAccess(user?.plan ?? 'free', FREE_MODE)
   const showHistoryGate = isOwnProfile && isFree
   return (
     <Shell>

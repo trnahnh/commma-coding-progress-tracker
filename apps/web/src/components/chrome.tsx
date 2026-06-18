@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { hasProAccess } from '@commma/shared'
 import { useAuth } from '../lib/auth'
+import { FREE_MODE } from '../lib/config'
 import { BackToTop } from './BackToTop'
 
 const NAV_LINKS = [
@@ -90,6 +92,7 @@ export function Nav() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const { token, user } = useAuth()
+  const showRecap = !!token && hasProAccess(user?.plan ?? 'free', FREE_MODE)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [visible, setVisible] = useState(true)
   const lastY = useRef(0)
@@ -140,9 +143,7 @@ export function Nav() {
               {[
                 ...NAV_LINKS,
                 ...(token ? [{ label: 'Teams', to: '/teams' }] : []),
-                ...(user?.plan === 'pro' || user?.plan === 'team'
-                  ? [{ label: 'Recap', to: '/recap' }]
-                  : []),
+                ...(showRecap ? [{ label: 'Recap', to: '/recap' }] : []),
               ].map(({ label, to }) => {
                 const active =
                   to === '/' ? pathname === '/' : pathname.startsWith(to)
@@ -204,9 +205,7 @@ export function Nav() {
               {[
                 ...NAV_LINKS,
                 ...(token ? [{ label: 'Teams', to: '/teams' }] : []),
-                ...(user?.plan === 'pro' || user?.plan === 'team'
-                  ? [{ label: 'Recap', to: '/recap' }]
-                  : []),
+                ...(showRecap ? [{ label: 'Recap', to: '/recap' }] : []),
               ].map(({ label, to }) => {
                 const active =
                   to === '/' ? pathname === '/' : pathname.startsWith(to)

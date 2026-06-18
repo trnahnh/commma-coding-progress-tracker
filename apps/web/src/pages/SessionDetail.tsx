@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
-import { QWERTY_LAYOUT } from '@commma/shared'
+import { hasProAccess, QWERTY_LAYOUT } from '@commma/shared'
 import { LiveDot, Shell, StatusPanel } from '../components/chrome'
 import KeyboardHeatmapCanvas from '../components/KeyboardHeatmap'
 import {
@@ -13,6 +13,7 @@ import {
   type SessionLang,
 } from '../lib/api'
 import { useAuth } from '../lib/auth'
+import { FREE_MODE } from '../lib/config'
 import { formatClock, formatDate, formatDuration } from '../lib/format'
 import { langStyle } from '../lib/langColors'
 import { useSeo } from '../lib/seo'
@@ -310,7 +311,7 @@ type LoadState =
 export default function SessionDetail() {
   const { id = '' } = useParams()
   const { user } = useAuth()
-  const isPro = user?.plan === 'pro' || user?.plan === 'team'
+  const isPro = hasProAccess(user?.plan ?? 'free', FREE_MODE)
   const [state, setState] = useState<LoadState>({ phase: 'loading' })
   const [trackedId, setTrackedId] = useState(id)
 

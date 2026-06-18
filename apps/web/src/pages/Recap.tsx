@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { hasProAccess } from '@commma/shared'
 import { LiveDot, Shell, StatusPanel } from '../components/chrome'
 import { ApiError, getRecap, type RecapData } from '../lib/api'
 import { useAuth } from '../lib/auth'
+import { FREE_MODE } from '../lib/config'
 import { formatDuration } from '../lib/format'
 import { useSeo } from '../lib/seo'
 
@@ -78,7 +80,7 @@ export default function Recap() {
       navigate('/signin')
       return
     }
-    if (user.plan !== 'pro' && user.plan !== 'team') {
+    if (!hasProAccess(user.plan ?? 'free', FREE_MODE)) {
       navigate('/pricing')
       return
     }
@@ -141,9 +143,11 @@ export default function Recap() {
           <span className='font-mono text-[13px] text-ink-soft'>
             {weekLabel}
           </span>
-          <span className='ml-auto font-mono text-[11px] uppercase tracking-widest text-ink-soft border border-ink-mute rounded-full px-3 py-1'>
-            {user?.plan === 'team' ? 'Team' : 'Pro'}
-          </span>
+          {!FREE_MODE && (
+            <span className='ml-auto font-mono text-[11px] uppercase tracking-widest text-ink-soft border border-ink-mute rounded-full px-3 py-1'>
+              {user?.plan === 'team' ? 'Team' : 'Pro'}
+            </span>
+          )}
         </div>
 
         <h1 className='font-serif text-[clamp(30px,6vw,64px)] leading-[1.1] tracking-tight text-ink m-0 mb-5 max-w-[900px] lift-text'>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Shell } from '../components/chrome'
 import {
   ApiError,
@@ -9,6 +9,7 @@ import {
   type PaidPlan,
 } from '../lib/api'
 import { useAuth } from '../lib/auth'
+import { FREE_MODE } from '../lib/config'
 import { setPostAuthRedirect } from '../lib/redirect'
 import { useSeo } from '../lib/seo'
 
@@ -69,7 +70,117 @@ function FeatureList({ features }: { features: string[] }) {
   )
 }
 
+const FEATURES_ALL = [
+  'Full session history',
+  'Keyboard heatmap PNG export',
+  'Weekly recap',
+  'Private team leaderboards',
+  'Team aggregate heatmap',
+  'Invite up to 5 members per team',
+  'Public profile, feed & follows',
+  'Streak tracking',
+]
+
 export default function Pricing() {
+  if (FREE_MODE) return <FreePricing />
+  return <PaidPricing />
+}
+
+function FreePricing() {
+  const { token } = useAuth()
+  useSeo({
+    title: 'Pricing · commma',
+    description:
+      'commma is free for everyone during early access — every feature, no card.',
+  })
+
+  return (
+    <Shell>
+      <div>
+        <div className='mb-[clamp(40px,6vw,80px)]'>
+          <div className='font-mono text-[14px] tracking-[0.18em] uppercase text-ink-mute mb-5'>
+            § pricing
+          </div>
+          <h1 className='font-serif font-normal text-[clamp(40px,6vw,80px)] leading-[0.95] tracking-[-0.03em] m-0 mb-6 text-ink'>
+            Free for <em className='italic text-accent'>everyone.</em>
+          </h1>
+          <p className='font-mono text-[14px] text-ink-soft m-0 max-w-[56ch] leading-relaxed'>
+            Every feature is unlocked during early access — full history,
+            heatmap exports, recaps, and teams. No credit card, no trial timer.
+            Paid plans arrive later; everything you build now stays yours.
+          </p>
+        </div>
+
+        <div className='border border-rule-strong rounded-lg overflow-hidden surface'>
+          <div className='relative flex flex-col px-6 sm:px-10 pt-10 pb-10 bg-paper-2'>
+            <span className='absolute inset-x-0 top-0 h-0.5 bg-accent glow-accent' />
+            <div className='flex items-start justify-between gap-3 mb-7'>
+              <span className='font-serif text-[clamp(28px,3vw,40px)] leading-none tracking-[-0.02em] text-ink'>
+                Early access
+              </span>
+              <span className='shrink-0 font-mono text-[14px] tracking-[0.16em] uppercase text-live border border-rule-strong bg-paper-3 px-2.5 py-1 rounded-full mt-0.5'>
+                Free
+              </span>
+            </div>
+            <div className='flex items-baseline gap-1.5 mb-8'>
+              <span className='font-serif text-[clamp(44px,5vw,64px)] leading-none tracking-[-0.04em] text-ink tnum'>
+                $0
+              </span>
+              <span className='font-mono text-[14px] text-ink-mute'>
+                while in early access
+              </span>
+            </div>
+
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-10 mb-9'>
+              {FEATURES_ALL.map((f) => (
+                <div
+                  key={f}
+                  className='flex items-start gap-3 py-2.5 border-b border-dashed border-rule'
+                >
+                  <span className='font-mono text-[14px] text-accent mt-0.5 shrink-0'>
+                    ✓
+                  </span>
+                  <span className='font-mono text-[14px] text-ink-soft leading-snug min-w-0'>
+                    {f}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className='flex flex-col sm:flex-row gap-3'>
+              <a
+                href='https://marketplace.visualstudio.com'
+                className='group inline-flex items-center justify-center gap-2.5 min-h-[44px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors glow-accent press bg-accent text-paper border border-accent hover:bg-ink hover:border-ink'
+              >
+                Install the extension
+                <span className='inline-block transition-transform group-hover:translate-x-1'>
+                  →
+                </span>
+              </a>
+              {!token && (
+                <Link
+                  to='/signin'
+                  className='inline-flex items-center justify-center gap-2.5 min-h-[44px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint'
+                >
+                  Sign in with GitHub
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className='mt-10 pt-8 border-t border-rule font-mono text-[14px] text-ink-mute leading-relaxed'>
+          <p className='m-0'>
+            All access includes GitHub OAuth sign-in, the VSCode extension, and
+            the full leaderboard and public feed. No card required.
+          </p>
+        </div>
+      </div>
+    </Shell>
+  )
+}
+
+function PaidPricing() {
   const [annual, setAnnual] = useState(false)
   const [pending, setPending] = useState<PaidPlan | null>(null)
   const [portalPending, setPortalPending] = useState(false)

@@ -11,7 +11,9 @@ import {
   type TeamInvite,
   type TeamSummary,
 } from '../lib/api'
+import { hasTeamAccess } from '@commma/shared'
 import { useAuth } from '../lib/auth'
+import { FREE_MODE } from '../lib/config'
 import { useSeo } from '../lib/seo'
 
 const TEAM_OWN_LIMIT = 2
@@ -296,7 +298,7 @@ export default function Teams() {
   }
 
   const { teams, invites } = state
-  const isTeamPlan = user?.plan === 'team'
+  const isTeamPlan = hasTeamAccess(user?.plan ?? 'free', FREE_MODE)
   const ownedCount = teams.filter((t) => t.role === 'owner').length
 
   const handleAccept = (id: string) => {
