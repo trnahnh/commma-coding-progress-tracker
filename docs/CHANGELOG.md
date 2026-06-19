@@ -11,6 +11,18 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Web, Infra** — Documentation site at `docs.commma.dev`. A new `/docs`
+  section renders curated public docs (overview, getting started, architecture,
+  system design, self-hosting) with `react-markdown` through a design-token
+  `Prose` renderer and a sidebar layout; it links out to the existing API
+  reference and changelog. The docs are served on the `docs.commma.dev`
+  subdomain off the **same** CloudFront distribution and S3 bucket — the SPA
+  detects the `docs.` host and serves clean URLs (e.g.
+  `docs.commma.dev/getting-started`), `commma.dev/docs` redirects there, and the
+  docs nav gains a "← commma.dev" button back to the app. Infra adds
+  `docs.commma.dev` as a subject alternative name on the web TLS certificate, a
+  CloudFront alias, and Route53 alias records (existing distribution, no new
+  bucket). Repository reference docs moved under `docs/`.
 - **Web** — Pricing early-access section and a calmer landing hero. The pricing
   page gains a section above the tiers spelling out that the free plan currently
   includes the entire product during early access (full history, heatmap PNG

@@ -4,6 +4,7 @@ export const CHANGELOG_ENTRIES = [
     date: 'Jun 2026',
     tag: 'Release',
     changes: [
+      'Docs got a home — a dedicated documentation site at docs.commma.dev covering what commma is, getting started, the architecture, system design, and self-hosting, with the API reference and changelog one click away; commma.dev/docs redirects there, and a clear "← commma.dev" button leads back to the app',
       'commma is free for everyone during early access — every Pro and Team feature is unlocked at no cost: full session history, keyboard-heatmap PNG export, the weekly recap, and team workspaces, with no card and no checkout',
       'Pricing page reworked — a new early-access section up top makes clear the $0 plan currently includes the whole product, while the Pro and Team tiers stay visible as the roadmap with "Coming later" actions',
       'Calmer landing hero — removed the cursor-following light glow and the sweeping scan line over the keyboard',
