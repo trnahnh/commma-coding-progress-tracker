@@ -1,28 +1,35 @@
 # Deploying commma
 
 This is the operational runbook for shipping commma to AWS. It follows the
-all-AWS compute target in ADR-009: the **API** runs on an EC2 t4g (Graviton)
-box under PM2, and the **web** app is a static Vite build served from **S3 +
+all-AWS compute target in ADR-009: the **API** runs on an EC2 t4g (Graviton) box
+under PM2, and the **web** app is a static Vite build served from **S3 +
 CloudFront**. PostgreSQL stays on Neon and Redis on Upstash.
 
 The work is split in two:
 
 - **One-time setup** (the owner, once per environment) — provision the box, wire
-  DNS/TLS, create the AWS web hosting, and register GitHub secrets. All of it is
-  config-first: the scripts and configs live in `infra/`.
-- **Deploying** (every release) — push to `main` and the two GitHub Actions
-  below deploy the changed app automatically; you can also run them by hand from
-  the Actions tab. While Actions is unavailable, deploy from a laptop with the
-  AWS CLI (web) and SSH (API) — see "Manual deploy" below.
+  DNS/TLS, create the AWS web hosting, and register the GitLab CI/CD variables.
+  All of it is config-first: the scripts and configs live in `infra/`.
+- **Deploying** (every release) — push to `main`; GitLab CI runs the
+  lint/typecheck/test gate automatically, and the two **manual** deploy jobs
+  (`deploy:web`, `deploy:api`) ship the app with one click from the pipeline.
+  You can also deploy from a laptop with the AWS CLI (web) and SSH (API) — the
+  CI jobs run the exact same `infra/` scripts. See "Manual deploy" below.
+
+GitHub Actions is **disabled account-wide** on this account (an account flag
+only GitHub Support can lift), so CI/CD runs on **GitLab**
+(`gitlab.com/trnahnh1/commma`) instead. The repo is pushed to both remotes:
+GitHub `origin` (which the EC2 box still pulls from) and `gitlab` (which drives
+CI). The legacy `.github/workflows/` are inert until the account flag clears.
 
 ## Domain & DNS (Route 53)
 
-`commma.dev` is registered at **Namecheap**, but DNS is **delegated to AWS
-Route 53** so the apex can ALIAS straight to CloudFront. Namecheap's BasicDNS
-cannot point an apex record at CloudFront (no ALIAS/ANAME at the root), and the
-apex `commma.dev` is the canonical web origin — so delegation, not Namecheap's
-own DNS, is the supported setup. This also keeps every record in AWS alongside
-the rest of ADR-009's all-AWS stack.
+`commma.dev` is registered at **Namecheap**, but DNS is **delegated to AWS Route
+53** so the apex can ALIAS straight to CloudFront. Namecheap's BasicDNS cannot
+point an apex record at CloudFront (no ALIAS/ANAME at the root), and the apex
+`commma.dev` is the canonical web origin — so delegation, not Namecheap's own
+DNS, is the supported setup. This also keeps every record in AWS alongside the
+rest of ADR-009's all-AWS stack.
 
 Delegate once, before wiring CloudFront or nginx:
 
@@ -50,7 +57,7 @@ first so `api.commma.dev` points at a stable address that survives a stop/start.
 The canonical config values these records back (already the defaults below):
 
 - `VITE_API_BASE_URL=https://api.commma.dev` and `WEB_URL=https://commma.dev`
-  GitHub variables.
+  in the `.gitlab-ci.yml` `variables:` block (the web build bakes them in).
 - `WEB_ORIGIN=https://commma.dev` and
   `GITHUB_CALLBACK_URL=https://api.commma.dev/v1/auth/github/callback` in the
   server `.env`, matching the GitHub OAuth App callback.
@@ -58,28 +65,32 @@ The canonical config values these records back (already the defaults below):
 
 ## Deploying
 
-Once the one-time setup is done, the two workflows in `.github/workflows/` ship
-a release:
+Once the one-time setup is done, `.gitlab-ci.yml` ships a release. Every push to
+`main` (and every merge request) runs the `check` stage — `lint`, `typecheck`,
+and `test` in parallel on `node:22` with pnpm pinned via Corepack. The `deploy`
+stage holds two jobs:
 
-| Workflow     | File                               | What it does                                             |
-| ------------ | ---------------------------------- | -------------------------------------------------------- |
-| `Deploy API` | `.github/workflows/deploy-api.yml` | SSH to EC2, pull, build, PM2 restart, `/health` check    |
-| `Deploy Web` | `.github/workflows/deploy-web.yml` | Build, `s3 sync`, CloudFront invalidate, URL smoke check |
+| Job          | What it does                                            |
+| ------------ | ------------------------------------------------------- |
+| `deploy:web` | `infra/deploy-web.sh`: build, `s3 sync`, CF invalidate  |
+| `deploy:api` | `infra/deploy-api.sh`: SSH to EC2, pull, build, restart |
 
-Both run automatically on **push to `main`**, path-filtered so each side only
-deploys when its own files change (`Deploy API` on `apps/api`/`packages/db`/
-`packages/shared`, `Deploy Web` on `apps/web`/`packages/shared`), with a
-`concurrency` guard so two runs never overlap. Both also keep
-`workflow_dispatch`, so you can deploy by hand from the **Actions** tab (open the
-workflow, **Run workflow**, pick `main`). Push triggers fire only on a new push
-after Actions is enabled — they do not replay retroactively. CI (`ci.yml`) runs
-typecheck, lint, tests, and markdown lint on every push and PR independently.
+Both are gated to `main` and set to **`when: manual`** — they appear in the
+pipeline as click-to-run buttons, so a green `check` stage never auto-ships a
+release on its own. Open the pipeline (**Build → Pipelines**), click the play
+icon on `deploy:web` or `deploy:api`, and it runs the same script the manual
+path below uses. To switch a side to fully automatic, drop its `when: manual` in
+`.gitlab-ci.yml`.
 
-### Manual deploy (when Actions is unavailable)
+The deploy jobs reuse the laptop scripts verbatim, so they need the same inputs
+as a manual deploy, supplied as **GitLab CI/CD variables** (see step 6): AWS
+credentials for `deploy:web` and the EC2 SSH key for `deploy:api`.
 
-If GitHub Actions is disabled (e.g. the account-flag case in step 6 below),
-deploy by hand with the wrapper scripts in `infra/`. Both are env-overridable
-and default to the production targets, so a release is one command each:
+### Manual deploy (laptop)
+
+You can always deploy by hand with the wrapper scripts in `infra/`, bypassing CI
+entirely. Both are env-overridable and default to the production targets, so a
+release is one command each:
 
 ```bash
 pnpm deploy:web   # build -> s3 sync -> index.html -> CloudFront invalidate
@@ -92,8 +103,8 @@ bucket (S3 `List`/`Get`/`Put`/`Delete`) and `cloudfront:CreateInvalidation`;
 `WEB_S3_BUCKET=other-bucket pnpm deploy:web` or
 `SSH_KEY=~/.ssh/other.pem pnpm deploy:api` (see the script headers for every
 variable: `WEB_S3_BUCKET`, `CLOUDFRONT_DISTRIBUTION_ID`, `VITE_API_BASE_URL`,
-`AWS`; `SSH_KEY`, `API_HOST`, `APP_DIR`, `BRANCH`). The scripts run the exact
-steps the workflows automate, so the result is identical.
+`AWS`; `SSH_KEY`, `API_HOST`, `APP_DIR`, `BRANCH`). The CI deploy jobs call
+these same scripts, so a laptop deploy and a pipeline deploy are identical.
 
 ## One-time setup
 
@@ -124,12 +135,12 @@ outside the box. The API binds `0.0.0.0:3000`, so if the security group leaves
 defeating the `TRUST_PROXY_HOPS=1` rate limiting. nginx (on the same box) is the
 only thing that talks to `:3000`.
 
-If you deploy the API with the `deploy-api` GitHub Action (it SSHes in from
-GitHub-hosted runners), open `22` to `0.0.0.0/0` rather than a single IP —
-GitHub's runner IP ranges are too many and too dynamic to allowlist. This is
-safe because the box is **key-only**: Amazon Linux 2023 ships
-`PasswordAuthentication no`, so only the holder of the `.pem` can connect
-(confirm with `sudo sshd -T | grep -E 'passwordauthentication|pubkeyauth'`).
+If you deploy the API from CI (the `deploy:api` job SSHes in from GitLab's
+shared runners), open `22` to `0.0.0.0/0` rather than a single IP — the runner
+IP ranges are too many and too dynamic to allowlist. This is safe because the
+box is **key-only**: Amazon Linux 2023 ships `PasswordAuthentication no`, so
+only the holder of the `.pem` can connect (confirm with
+`sudo sshd -T | grep -E 'passwordauthentication|pubkeyauth'`).
 
 SSH in and run the bootstrap script:
 
@@ -212,10 +223,10 @@ committed HTTP config and sets up auto-renewal. The proxy forwards to
   the ACM console creates it for you.
 - Create a CloudFront distribution with that bucket as origin (via Origin Access
   Control), `commma.dev` as an alternate domain (CNAME), and the ACM cert above.
-  In the current console the **"Single website or app"** wizard +
-  **"Allow private S3 bucket access to CloudFront"** creates the OAC and writes
-  the bucket policy for you — no manual policy copy needed; the alternate
-  domain, cert, default root object, and error pages are then set by editing the
+  In the current console the **"Single website or app"** wizard + **"Allow
+  private S3 bucket access to CloudFront"** creates the OAC and writes the
+  bucket policy for you — no manual policy copy needed; the alternate domain,
+  cert, default root object, and error pages are then set by editing the
   distribution after it is created.
 - Set the distribution's **default root object** to `index.html`.
 - Add a CloudFront **custom error response** mapping both `403` and `404` to
@@ -226,45 +237,40 @@ committed HTTP config and sets up auto-renewal. The proxy forwards to
   Add a matching **Alias AAAA** record to the same distribution so the
   IPv6-enabled CloudFront is reachable over IPv6 as well.
 
-### 6. GitHub secrets and variables
+### 6. GitLab CI/CD variables
 
-Set these in **Settings -> Secrets and variables -> Actions**.
+CI/CD runs on GitLab (GitHub Actions is account-flagged — see the note at the
+top of this doc). The deploy jobs read their secrets from **Settings → CI/CD →
+Variables** on the `trnahnh1/commma` project. Add these four, all **Protected**
+(so they expose only on the protected `main` branch) and **Masked** where the
+value allows it:
 
-Secrets:
+| Name                    | Type     | Used by      | Value                           |
+| ----------------------- | -------- | ------------ | ------------------------------- |
+| `AWS_ACCESS_KEY_ID`     | Variable | `deploy:web` | Deploy IAM user access key      |
+| `AWS_SECRET_ACCESS_KEY` | Variable | `deploy:web` | Deploy IAM user secret key      |
+| `AWS_DEFAULT_REGION`    | Variable | `deploy:web` | Bucket region, e.g. `us-east-1` |
+| `SSH_PRIVATE_KEY`       | File     | `deploy:api` | Contents of the EC2 `.pem` key  |
 
-| Name                         | Used by      | Value                                 |
-| ---------------------------- | ------------ | ------------------------------------- |
-| `EC2_HOST`                   | `deploy-api` | Public IP or domain of the EC2 box    |
-| `EC2_SSH_KEY`                | `deploy-api` | Contents of the `.pem` private key    |
-| `AWS_ROLE_ARN`               | `deploy-web` | IAM role assumed via GitHub OIDC      |
-| `CLOUDFRONT_DISTRIBUTION_ID` | `deploy-web` | Distribution to invalidate after sync |
+`SSH_PRIVATE_KEY` must be a **File**-type variable (a multi-line key cannot be
+masked); the `deploy:api` job copies it to a `600`-perm path before use. The
+non-secret config (`WEB_S3_BUCKET`, `CLOUDFRONT_DISTRIBUTION_ID`,
+`VITE_API_BASE_URL`, `API_HOST`, `APP_DIR`) lives in the `variables:` block of
+`.gitlab-ci.yml` — override there, not as CI variables.
 
-Variables:
-
-| Name                | Default                  | Used by      |
-| ------------------- | ------------------------ | ------------ |
-| `WEB_S3_BUCKET`     | (none, required)         | `deploy-web` |
-| `AWS_REGION`        | `us-east-1`              | `deploy-web` |
-| `VITE_API_BASE_URL` | `https://api.commma.dev` | `deploy-web` |
-| `WEB_URL`           | `https://commma.dev`     | `deploy-web` |
-
-The `deploy-web` workflow authenticates to AWS with GitHub OIDC (no long-lived
-keys): create an IAM role trusting the repo's OIDC provider, granting only
+The `deploy:web` job authenticates to AWS with a long-lived IAM user key (GitLab
+has no OIDC-to-AWS path as clean as the old GitHub OIDC). Create a dedicated
+**`commma-deploy-ci`** IAM user — ideally via Terraform (see `infra/terraform/`)
+so it is tracked — granting only
 `s3:PutObject`/`s3:DeleteObject`/`s3:ListBucket` on the web bucket and
-`cloudfront:CreateInvalidation` on the distribution.
+`cloudfront:CreateInvalidation` on the distribution. Keep it separate from the
+laptop `commma-deploy-local` user so either can be revoked independently. Rotate
+the key if it ever leaks; it is the one long-lived credential in this setup.
 
-Actions must be enabled at the repo level (Settings -> Actions -> General ->
-"Allow all actions and reusable workflows"). Beyond that, GitHub can auto-flag a
-**whole account**, disabling Actions even when the repo setting allows it —
-`gh workflow run` then fails with `HTTP 422: Actions has been disabled for this
-user` and the Actions tab shows "GitHub Actions is currently disabled for your
-account." The flag follows the **account** (the actor), so it applies to every
-repo that account owns and to any org it acts in — transferring or re-creating
-the repo does not clear it. It is an account flag, not a config error; clear it
-via a reinstatement request at `support.github.com` (Account restrictions). The
-secrets/variables and workflows can all be set up while the flag is pending, and
-in the meantime deploy by hand (see "Manual deploy" above); everything runs
-unchanged once the flag is lifted.
+The `.github/workflows/` files remain in the repo but are inert: the account
+flag disables Actions even when the repo setting allows it. Clear it via a
+reinstatement request at `support.github.com` (Account restrictions); once
+lifted, you can run both CIs or retire the GitLab one.
 
 ### 7. Billing (Stripe, optional)
 
@@ -344,10 +350,11 @@ safe.
 
 ## Redeploy and rollback
 
-- **Redeploy** — re-run the relevant workflow. `Deploy API` pulls `main` and
-  PM2-restarts; `Deploy Web` rebuilds and re-syncs.
-- **Rollback** — check out the previous good commit and re-run the workflow, or
-  on the box `git checkout <sha>`, `pnpm --filter @commma/api build`,
+- **Redeploy** — re-run the relevant deploy job from the GitLab pipeline (or run
+  the `pnpm deploy:*` script from a laptop). `deploy:api` pulls `main` and
+  PM2-restarts; `deploy:web` rebuilds and re-syncs.
+- **Rollback** — check out the previous good commit and re-run the deploy, or on
+  the box `git checkout <sha>`, `pnpm --filter @commma/api build`,
   `pm2 restart commma-api`.
 - **Logs** — `pm2 logs commma-api` on the box. The API emits structured JSON.
 

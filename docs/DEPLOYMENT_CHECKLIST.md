@@ -4,15 +4,16 @@ A living status board for commma's production deploy. Tick items as they land;
 the runbook for _how_ to do each step lives in [DEPLOY.md](./DEPLOY.md). Last
 updated 2026-06-14.
 
-Legend: `[x]` done · `[ ]` open · **Blocked** / **Before launch** call out gates.
+Legend: `[x]` done · `[ ]` open · **Blocked** / **Before launch** call out
+gates.
 
 ## Live endpoints
 
-| Surface | URL                                      | State        |
-| ------- | ---------------------------------------- | ------------ |
-| Web     | <https://commma.dev>                     | Live         |
-| API     | <https://api.commma.dev>                 | Live         |
-| Health  | <https://api.commma.dev/health>          | `200`        |
+| Surface | URL                             | State |
+| ------- | ------------------------------- | ----- |
+| Web     | <https://commma.dev>            | Live  |
+| API     | <https://api.commma.dev>        | Live  |
+| Health  | <https://api.commma.dev/health> | `200` |
 
 ## 1. Managed data tier
 
@@ -53,22 +54,27 @@ Legend: `[x]` done · `[ ]` open · **Blocked** / **Before launch** call out gat
 - [ ] EC2 box git remote still points at the old `NauriFive` URL — GitHub
       redirect keeps `git pull` working, so non-blocking; update on next SSH
 
-## 6. CI/CD (GitHub Actions)
+## 6. CI/CD (GitLab)
 
-- [x] Workflows: `ci`, `deploy-api`, `deploy-web`
-- [x] Secrets set: `EC2_HOST`, `EC2_SSH_KEY`, `CLOUDFRONT_DISTRIBUTION_ID`
-- [x] Variables set: `WEB_S3_BUCKET`, `AWS_REGION`, `VITE_API_BASE_URL`,
-      `WEB_URL`
-- [x] Auto-deploy on push to `main` (path-filtered, concurrency-guarded)
-- [ ] **Blocked:** GitHub Actions disabled **at account level** on `trnahnh`
-      (`HTTP 422: Actions has been disabled for this user`). Only a GitHub
-      Support reinstatement clears it — ticket filed (Account restrictions). No
-      repo-move fixes this.
-- [ ] **After Actions returns:** create the OIDC IAM role, set `AWS_ROLE_ARN`
-      (trust subject `repo:trnahnh/commma-coding-progress-tracker:*`), then run
-      both workflows green
+- [x] GitHub Actions disabled **at account level** on `trnahnh`
+      (`HTTP 422: Actions has been disabled for this user`) — only a GitHub
+      Support reinstatement clears it; no repo-move fixes this. CI/CD moved to
+      GitLab as a result.
+- [x] GitLab project `trnahnh1/commma`; repo pushed to both `origin` (GitHub,
+      EC2 pull source) and `gitlab` (drives CI)
+- [x] `.gitlab-ci.yml`: `check` stage (`lint`/`typecheck`/`test`) green on push
+      and MR
+- [ ] Deploy jobs (`deploy:web`, `deploy:api`, manual on `main`) — pending CI
+      variables: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`,
+      `AWS_DEFAULT_REGION`, `SSH_PRIVATE_KEY` (File). Then run each once to
+      confirm green.
+- [ ] Create dedicated `commma-deploy-ci` IAM user (S3 on `commma-web` +
+      CloudFront invalidation only) for the `deploy:web` key, ideally via
+      Terraform
+- [ ] **If Actions returns:** legacy `.github/workflows/` still present; either
+      retire them or run both CIs
 
-## 7. Manual deploy (current method while Actions is blocked)
+## 7. Manual deploy (laptop path)
 
 - [x] AWS CLI v2 installed locally
 - [x] Scoped IAM user `commma-deploy-local` (S3 on `commma-web` + CloudFront
@@ -96,26 +102,26 @@ Legend: `[x]` done · `[ ]` open · **Blocked** / **Before launch** call out gat
 
 - [x] `RESEND_API_KEY` set on prod — valid, **send-only** scoped key
 - [x] `OPENAI_API_KEY` set on prod — valid (`HTTP 200`); optional recap prose
-      (`gpt-4.1-nano`, ~$0.0002/recap, aggregate stats only — no paths/keystrokes)
+      (`gpt-4.1-nano`, ~$0.0002/recap, aggregate stats only — no
+      paths/keystrokes)
 - [x] Recap scheduler runs in-process (gated by `RUN_AGGREGATION=true`)
 - [x] `commma.dev` verified in Resend (SPF/DKIM/DMARC in Route 53);
-      `RECAP_FROM_EMAIL` switched to `Commma <recap@commma.dev>` on the prod box;
-      test email from `recap@commma.dev` delivered to a real inbox
+      `RECAP_FROM_EMAIL` switched to `Commma <recap@commma.dev>` on the prod
+      box; test email from `recap@commma.dev` delivered to a real inbox
 - Pre-launch there are no Pro/Team recipients, so no recap actually sends yet
 
 ## Pre-launch gate
 
 Run before the first public launch:
 
-- [ ] GitHub Actions re-enabled → OIDC role + `AWS_ROLE_ARN` → both workflows
-      verified green
+- [ ] GitLab `deploy:web` + `deploy:api` jobs run green once (CI variables set,
+      dedicated `commma-deploy-ci` IAM user created)
 - [ ] Stripe switched to **live** mode (or deliberately left off)
 - [x] Resend `commma.dev` sender domain verified + `RECAP_FROM_EMAIL` switched
       off the throwaway `onboarding@resend.dev`
 - [ ] `commma-deploy-local` access key rotated
 - [ ] EC2 box git remote updated to the `trnahnh` URL
-- [ ] Prod-sized load test (t4g + Neon + Upstash) per
-      [METRICS.md](./METRICS.md)
+- [ ] Prod-sized load test (t4g + Neon + Upstash) per [METRICS.md](./METRICS.md)
 - [ ] Production instrumentation / metrics sink wired (prod currently
       uninstrumented)
 
@@ -128,5 +134,6 @@ pnpm deploy:api   # ssh box -> pull -> build -> pm2 restart -> health check
 
 Run from a fresh terminal so `aws` is on `PATH`. Both scripts are
 env-overridable (see headers in `infra/deploy-web.sh` / `infra/deploy-api.sh`).
-Pushing to GitHub does **not** deploy until Actions is re-enabled — deploy
-manually with the commands above.
+A push never deploys on its own: the GitLab `deploy:web`/`deploy:api` jobs are
+**manual** (click to run from the pipeline), and these laptop commands are the
+other path — both call the same scripts.
