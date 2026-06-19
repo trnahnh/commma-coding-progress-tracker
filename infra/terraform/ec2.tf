@@ -62,7 +62,11 @@ resource "aws_instance" "api" {
     iops                  = 3000
     throughput            = 125
     delete_on_termination = true
-    encrypted             = false
+    encrypted             = true
+
+    tags = {
+      Name = "commma-api-root"
+    }
   }
 
   tags = {
