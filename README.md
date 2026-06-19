@@ -70,13 +70,13 @@ commma/
 
 | Document                                                                               | Description                                                              |
 | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| [SYSTEM_DESIGN.md](./SYSTEM_DESIGN.md)                                                 | Architecture, data flows, DB schema, API route map, caching, scalability |
-| [ONBOARDING.md](./ONBOARDING.md)                                                       | First-time setup, repo map, core concepts, common tasks                  |
+| [docs/SYSTEM_DESIGN.md](./docs/SYSTEM_DESIGN.md)                                       | Architecture, data flows, DB schema, API route map, caching, scalability |
+| [docs/ONBOARDING.md](./docs/ONBOARDING.md)                                             | First-time setup, repo map, core concepts, common tasks                  |
 | [CONTRIBUTING.md](./CONTRIBUTING.md)                                                   | Branch naming, commit conventions, PR process, code style                |
 | [SECURITY.md](./SECURITY.md)                                                           | How to report a vulnerability, scope, the privacy invariant              |
-| [API_REFERENCE.md](./API_REFERENCE.md)                                                 | Every endpoint with request/response shapes, errors, rate limits         |
-| [ROADMAP.md](./ROADMAP.md)                                                             | Phase-by-phase plan with definitions of done and icebox                  |
-| [ARCHITECTURE_DECISIONS.md](./ARCHITECTURE_DECISIONS.md)                               | ADRs for every major technical decision                                  |
+| [docs/API_REFERENCE.md](./docs/API_REFERENCE.md)                                       | Every endpoint with request/response shapes, errors, rate limits         |
+| [docs/ROADMAP.md](./docs/ROADMAP.md)                                                   | Phase-by-phase plan with definitions of done and icebox                  |
+| [docs/ARCHITECTURE_DECISIONS.md](./docs/ARCHITECTURE_DECISIONS.md)                     | ADRs for every major technical decision                                  |
 | [PRD](https://docs.google.com/document/d/19pBlTpdtUVbAoK5RfuHPBKJdUgh7GsETuur-nVifaro) | Full Product Requirements Document                                       |
 
 ---
@@ -116,7 +116,8 @@ functionally complete; Phase 5 is in progress:
   push notifications are done. Not yet started: JetBrains/Neovim plugin
   scaffolds, a standalone CLI client, and a self-hosted Docker/Helm stack.
 
-See [ROADMAP.md](./ROADMAP.md) for the detailed phase plan and what remains.
+See [docs/ROADMAP.md](./docs/ROADMAP.md) for the detailed phase plan and what
+remains.
 
 ---
 

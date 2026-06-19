@@ -50,7 +50,7 @@ pnpm --filter @commma/db migrate
 pnpm dev
 ```
 
-See [ONBOARDING.md](./ONBOARDING.md) for the full setup walkthrough.
+See [docs/ONBOARDING.md](./docs/ONBOARDING.md) for the full setup walkthrough.
 
 ---
 
