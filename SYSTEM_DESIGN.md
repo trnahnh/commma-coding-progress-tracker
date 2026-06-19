@@ -478,3 +478,9 @@ infrastructure, not releases). See ADR-013 and `infra/terraform/README.md`.
   the refresh token via the loopback one-time-code flow (ADR-011), stores it in
   VSCode **SecretStorage**, and sends it in the `/v1/auth/refresh` and
   `/v1/auth/signout` request body (not a cookie)
+- **Host (EC2):** the security group exposes only `80`/`443` to the world; SSH
+  (`22`) is restricted to the operator IP via the Terraform `ssh_allowed_cidr`
+  variable, never `0.0.0.0/0`. IMDSv2 is required (`HttpTokens=required`).
+- **Data at rest:** the API host's root EBS volume is KMS-encrypted, and
+  EBS-encryption-by-default is enabled region-wide so any future volume is
+  encrypted automatically (see ADR-013)
