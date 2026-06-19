@@ -196,11 +196,11 @@ function Hero() {
           </p>
           <div className='flex gap-3 items-center flex-wrap md:justify-end opacity-0 animate-rise-700 delay-640'>
             <a
-              href='https://marketplace.visualstudio.com'
+              href='#waitlist'
               className='group inline-flex items-center gap-2.5 h-[48px] px-6 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium
                 bg-accent text-paper border border-accent glow-accent press hover:bg-ink hover:border-ink transition-colors'
             >
-              Install the extension
+              Get notified at launch
               <span className='inline-block transition-transform group-hover:translate-x-1'>
                 →
               </span>
@@ -957,10 +957,10 @@ function Final() {
               </span>
             </Link>
             <a
-              href='https://marketplace.visualstudio.com'
+              href='#waitlist'
               className='group inline-flex items-center gap-2.5 h-[52px] px-8 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint transition-colors press'
             >
-              Install free
+              Get notified
               <span className='inline-block transition-transform group-hover:translate-x-1'>
                 →
               </span>

@@ -74,12 +74,12 @@ function NavActions() {
         Sign in
       </Link>
       <a
-        href='https://marketplace.visualstudio.com'
+        href='/#waitlist'
         className='group inline-flex items-center gap-2.5 h-[38px] px-3.5 sm:px-4 rounded-full font-mono text-[12px] sm:text-[13px] uppercase tracking-wider font-medium
           bg-accent text-paper border border-accent bevel press hover:bg-ink hover:border-ink transition-colors whitespace-nowrap'
       >
-        <span className='hidden sm:inline'>Install for VSCode</span>
-        <span className='sm:hidden'>Install</span>
+        <span className='hidden sm:inline'>Get notified</span>
+        <span className='sm:hidden'>Notify me</span>
         <span className='inline-block transition-transform group-hover:translate-x-1'>
           →
         </span>

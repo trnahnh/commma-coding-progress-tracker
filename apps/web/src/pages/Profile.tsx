@@ -278,12 +278,14 @@ function SessionFeed({
   onLoadMore,
   loadingMore,
   showHistoryGate,
+  isOwnProfile,
 }: {
   sessions: SessionSummary[]
   nextCursor: string | null
   onLoadMore: () => void
   loadingMore: boolean
   showHistoryGate: boolean
+  isOwnProfile: boolean
 }) {
   return (
     <div className='border border-rule-strong rounded-lg overflow-hidden surface mt-6'>
@@ -298,7 +300,17 @@ function SessionFeed({
       </div>
       {sessions.length === 0 ? (
         <div className='px-5 sm:px-8 py-12 text-center font-mono text-[13px] text-ink-mute'>
-          No sessions yet.
+          {isOwnProfile ? (
+            <>
+              No sessions yet — the extension isn&apos;t public yet.{' '}
+              <a href='/#waitlist' className='text-accent hover:underline'>
+                Join the waitlist
+              </a>{' '}
+              to get notified at launch.
+            </>
+          ) : (
+            'No sessions yet.'
+          )}
         </div>
       ) : (
         <>
@@ -484,6 +496,7 @@ export default function Profile() {
         onLoadMore={loadMore}
         loadingMore={loadingMore}
         showHistoryGate={showHistoryGate}
+        isOwnProfile={isOwnProfile}
       />
     </Shell>
   )

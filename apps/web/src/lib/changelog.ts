@@ -12,6 +12,7 @@ export const CHANGELOG_ENTRIES = [
       'Infrastructure as code — the entire AWS footprint (compute, web CDN, DNS, TLS certificate, and IAM) is now managed with Terraform, adopted from the live stack with zero downtime, so every infrastructure change ships as a reviewed, reproducible plan instead of a console click',
       'Security hardening — the API server’s disk is now encrypted at rest (with encryption enforced on every future volume) and administrative SSH access is locked to a single operator address',
       'Smoother scrolling — fixed page-wide scroll lag caused by the textured background repainting on every frame, lightened the landing-page background glow, made the scroll-progress bar cheaper to update, and stopped the landing live-keyboard animation from running once it scrolls off-screen',
+      'Fixed every "Install the extension" button (landing, nav, pricing) pointing nowhere useful — they now link to the waitlist signup, and your own empty profile explains the extension is not public yet instead of just saying "No sessions yet"',
     ],
   },
   {

@@ -570,6 +570,13 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- **Web** — Every "Install the extension" call-to-action (landing hero, final
+  CTA, nav, both Pricing tiers) linked to the bare Marketplace homepage, which
+  is a dead end since the extension is not published yet. They now link to the
+  landing page's waitlist section and read "Get notified at launch" / "Join the
+  waitlist" instead. A signed-in user's own empty profile previously said only
+  "No sessions yet." with no next step; it now explains the extension is not
+  public yet and links to the waitlist.
 - **Web** — The API reference and Privacy Policy pages were missing the waitlist
   endpoint and its email-collection disclosure, added after the waitlist feature
   shipped.

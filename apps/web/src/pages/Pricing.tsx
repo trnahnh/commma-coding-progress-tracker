@@ -226,10 +226,10 @@ function FreePricing() {
             </div>
             <FeatureList features={FEATURES_FREE} />
             <a
-              href='https://marketplace.visualstudio.com'
+              href='/#waitlist'
               className='group inline-flex items-center justify-center gap-2.5 min-h-[44px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors glow-accent press bg-accent text-paper border border-accent hover:bg-ink hover:border-ink'
             >
-              Install the extension
+              Join the waitlist
               <span className='inline-block transition-transform group-hover:translate-x-1'>
                 →
               </span>
@@ -469,10 +469,10 @@ function PaidPricing() {
             </div>
             <FeatureList features={FEATURES_FREE} />
             <a
-              href='https://marketplace.visualstudio.com'
+              href='/#waitlist'
               className='group inline-flex items-center justify-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint'
             >
-              Install the extension
+              Join the waitlist
               <span className='inline-block transition-transform group-hover:translate-x-1'>
                 →
               </span>
