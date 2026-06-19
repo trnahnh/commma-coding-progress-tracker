@@ -1,7 +1,15 @@
 stages:
   - check
+  - deploy
 
-default:
+variables:
+  VITE_API_BASE_URL: "https://api.commma.dev"
+  WEB_S3_BUCKET: "commma-web"
+  CLOUDFRONT_DISTRIBUTION_ID: "E20DGG72SOB2P0"
+  API_HOST: "ec2-user@api.commma.dev"
+  APP_DIR: "/home/ec2-user/commma"
+
+.pnpm:
   image: node:22-bookworm-slim
   cache:
     key:
@@ -15,23 +23,56 @@ default:
     - pnpm config set store-dir .pnpm-store
     - pnpm install --frozen-lockfile
 
-variables:
-  PNPM_HOME: /usr/local/bin
-
 lint:
+  extends: .pnpm
   stage: check
   script:
     - pnpm lint
 
 typecheck:
+  extends: .pnpm
   stage: check
   script:
     - pnpm typecheck
 
 test:
+  extends: .pnpm
   stage: check
   script:
     - pnpm test
+
+deploy:web:
+  extends: .pnpm
+  stage: deploy
+  before_script:
+    - corepack enable
+    - corepack prepare pnpm@10.28.1 --activate
+    - pnpm config set store-dir .pnpm-store
+    - pnpm install --frozen-lockfile
+    - apt-get update && apt-get install -y --no-install-recommends awscli && rm -rf /var/lib/apt/lists/*
+  script:
+    - bash infra/deploy-web.sh
+  environment:
+    name: production/web
+    url: https://commma.dev
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
+
+deploy:api:
+  stage: deploy
+  image: node:22-bookworm-slim
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends openssh-client && rm -rf /var/lib/apt/lists/*
+  script:
+    - install -m 600 "$SSH_PRIVATE_KEY" /tmp/commma-api.pem
+    - SSH_KEY=/tmp/commma-api.pem bash infra/deploy-api.sh
+  environment:
+    name: production/api
+    url: https://api.commma.dev
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
 
 workflow:
   rules:
