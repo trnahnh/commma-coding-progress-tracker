@@ -60,20 +60,42 @@ that, plans stay clean.
 
 ## Layout
 
-| File            | Purpose                                           |
-| --------------- | ------------------------------------------------- |
-| `versions.tf`   | Terraform + AWS provider version constraints      |
-| `providers.tf`  | AWS provider, region, default tags                |
-| `backend.tf`    | S3 remote state + native locking                  |
-| `variables.tf`  | Input variables                                   |
-| `ec2.tf`        | API instance, security group, Elastic IP          |
-| `s3.tf`         | Web bucket, policy, encryption, access controls   |
-| `cloudfront.tf` | CDN distribution + Origin Access Control          |
-| `acm.tf`        | `commma.dev` TLS certificate                      |
-| `route53.tf`    | Hosted zone + DNS records                         |
-| `iam.tf`        | `commma-deploy-local` user + scoped deploy policy |
-| `scripts/`      | Discovery, state bootstrap, and import helpers    |
+| File            | Purpose                                            |
+| --------------- | -------------------------------------------------- |
+| `versions.tf`   | Terraform + AWS provider version constraints       |
+| `providers.tf`  | AWS provider, region, default tags                 |
+| `backend.tf`    | S3 remote state + native locking                   |
+| `variables.tf`  | Input variables                                    |
+| `ec2.tf`        | API instance, security group, Elastic IP           |
+| `s3.tf`         | Web bucket, policy, encryption, access controls    |
+| `cloudfront.tf` | CDN distribution + Origin Access Control           |
+| `acm.tf`        | TLS certificate (`commma.dev` + `docs.commma.dev`) |
+| `route53.tf`    | Hosted zone + DNS records                          |
+| `iam.tf`        | `commma-deploy-local` user + scoped deploy policy  |
+| `scripts/`      | Discovery, state bootstrap, and import helpers     |
 
-All resources are imported (not created) and the configuration reconciles to a
-clean `terraform plan`. See `ARCHITECTURE_DECISIONS.md` ADR-013 for the
+The original prod resources are imported (not created) and reconcile to a clean
+`terraform plan`. See `docs/ARCHITECTURE_DECISIONS.md` ADR-013 for the
 rationale.
+
+## docs.commma.dev
+
+`docs.commma.dev` is served by the **same** CloudFront distribution and S3
+bucket as the main site; the SPA detects the `docs.` host and serves the docs
+section. Standing it up is a non-clean, intentional change to three files:
+
+- `acm.tf` — adds `docs.commma.dev` as a subject alternative name. ACM cannot
+  edit a cert's domain set in place, so this **replaces** the certificate
+  (`create_before_destroy` issues and validates the new one before swapping it
+  into CloudFront and destroying the old).
+- `route53.tf` — the `acm_validation` record becomes a `for_each` over the
+  cert's `domain_validation_options` (one record per domain), plus new `docs_a`
+  / `docs_aaaa` alias records pointing at the distribution.
+- `cloudfront.tf` — adds `docs.commma.dev` to `aliases` and points
+  `viewer_certificate` at `aws_acm_certificate_validation.web` so the alias is
+  only added once the new cert is validated.
+
+Expect the plan to show: 1 cert replaced, 1 validation resource added,
+validation record(s) changed, the distribution updated, and 2 new DNS records.
+`apply` waits on DNS validation (usually a few minutes). No new bucket and no
+deploy-pipeline change — `pnpm deploy:web` still ships both hosts.

@@ -9,7 +9,7 @@ resource "aws_cloudfront_origin_access_control" "web" {
 resource "aws_cloudfront_distribution" "web" {
   enabled             = true
   is_ipv6_enabled     = true
-  aliases             = ["commma.dev"]
+  aliases             = ["commma.dev", "docs.commma.dev"]
   default_root_object = "index.html"
   price_class         = "PriceClass_100"
   http_version        = "http2and3"
@@ -50,7 +50,7 @@ resource "aws_cloudfront_distribution" "web" {
   }
 
   viewer_certificate {
-    acm_certificate_arn      = aws_acm_certificate.web.arn
+    acm_certificate_arn      = aws_acm_certificate_validation.web.certificate_arn
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.3_2025"
   }

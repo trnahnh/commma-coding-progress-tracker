@@ -35,12 +35,45 @@ resource "aws_route53_record" "api_a" {
   records = [aws_eip.api.public_ip]
 }
 
-resource "aws_route53_record" "acm_validation" {
+resource "aws_route53_record" "docs_a" {
   zone_id = aws_route53_zone.main.zone_id
-  name    = "_d2d07a73fb62737aa425b04e28a21022.commma.dev"
-  type    = "CNAME"
-  ttl     = 300
-  records = ["_c8a5f9ad6e6914f97900d7caa31171c4.jkddzztszm.acm-validations.aws."]
+  name    = "docs.commma.dev"
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.web.domain_name
+    zone_id                = aws_cloudfront_distribution.web.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "docs_aaaa" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "docs.commma.dev"
+  type    = "AAAA"
+
+  alias {
+    name                   = aws_cloudfront_distribution.web.domain_name
+    zone_id                = aws_cloudfront_distribution.web.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "acm_validation" {
+  for_each = {
+    for dvo in aws_acm_certificate.web.domain_validation_options : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      type   = dvo.resource_record_type
+      record = dvo.resource_record_value
+    }
+  }
+
+  zone_id         = aws_route53_zone.main.zone_id
+  name            = each.value.name
+  type            = each.value.type
+  ttl             = 300
+  records         = [each.value.record]
+  allow_overwrite = true
 }
 
 resource "aws_route53_record" "dmarc" {
