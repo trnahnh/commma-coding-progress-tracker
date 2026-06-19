@@ -135,19 +135,31 @@ export function Nav() {
         className={`fixed top-0 left-0 right-0 z-50 border-b border-rule backdrop-blur-xl backdrop-saturate-150 bg-paper/70 elev-bar transition-transform duration-300 ${visible || mobileOpen ? 'translate-y-0' : '-translate-y-full'}`}
       >
         <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
-          <div className='grid grid-cols-[1fr_auto] md:grid-cols-[1fr_auto_1fr] items-center h-16'>
-            <Link
-              to='/'
-              className='justify-self-start inline-flex items-baseline gap-2.5'
-              onClick={homeClick}
-            >
-              <Wordmark />
-              {ON_DOCS_HOST && (
+          <div
+            className={`grid items-center h-16 ${ON_DOCS_HOST ? 'grid-cols-[1fr_auto]' : 'grid-cols-[1fr_auto] md:grid-cols-[1fr_auto_1fr]'}`}
+          >
+            {ON_DOCS_HOST ? (
+              <div className='justify-self-start inline-flex items-baseline gap-2.5'>
+                <a
+                  href={MAIN_ORIGIN}
+                  className='hover:opacity-80 transition-opacity'
+                  aria-label='Back to commma.dev'
+                >
+                  <Wordmark />
+                </a>
                 <span className='font-mono text-[12px] tracking-[0.2em] uppercase text-ink-mute'>
                   docs
                 </span>
-              )}
-            </Link>
+              </div>
+            ) : (
+              <Link
+                to='/'
+                className='justify-self-start'
+                onClick={homeClick}
+              >
+                <Wordmark />
+              </Link>
+            )}
 
             {!ON_DOCS_HOST && (
               <div className='hidden md:flex gap-7 font-mono text-[13px] tracking-wider text-ink-soft'>
@@ -179,7 +191,7 @@ export function Nav() {
               {ON_DOCS_HOST ? (
                 <a
                   href={MAIN_ORIGIN}
-                  className='group inline-flex items-center gap-2 min-h-[44px] px-4 rounded-full border border-rule-strong hover:border-ink-faint text-ink-soft hover:text-ink transition-colors press whitespace-nowrap font-mono text-[12px] sm:text-[13px] uppercase tracking-wider md:px-0 md:border-0 md:rounded-none'
+                  className='group inline-flex items-center gap-2 min-h-[44px] px-4 sm:px-5 rounded-full border border-rule-strong hover:border-ink-faint text-ink-soft hover:text-ink transition-colors press whitespace-nowrap font-mono text-[12px] sm:text-[13px] uppercase tracking-wider'
                 >
                   <span
                     aria-hidden='true'
