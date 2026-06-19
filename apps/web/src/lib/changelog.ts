@@ -8,6 +8,7 @@ export const CHANGELOG_ENTRIES = [
       'Pricing page reworked — a new early-access section up top makes clear the $0 plan currently includes the whole product, while the Pro and Team tiers stay visible as the roadmap with "Coming later" actions',
       'Calmer landing hero — removed the cursor-following light glow and the sweeping scan line over the keyboard',
       'Copy pass for the free launch — the landing signup is now a launch-notify list (not an invite gate), the home and status pages drop the "invite-only" language, and the final call-to-action starts you free instead of pointing at pricing',
+      'Fixed the About page stack cards on mobile — tapping a card to expand it no longer clips the long entries (Terraform, Neon, Upstash), and cards no longer jitter when scrolling past them',
     ],
   },
   {

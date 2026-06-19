@@ -253,7 +253,7 @@ function StackCard({
       </div>
       <div className='font-mono text-[12px] text-ink-mute'>{role}</div>
       <p
-        className={`font-mono text-[13px] text-ink-soft leading-snug m-0 overflow-hidden transition-all duration-300 ease-out ${open ? 'max-h-32 mt-2' : 'max-h-0 mt-0'}`}
+        className={`font-mono text-[13px] text-ink-soft leading-snug m-0 overflow-hidden transition-all duration-300 ease-out ${open ? 'max-h-[420px] mt-2' : 'max-h-0 mt-0'}`}
       >
         {why}
       </p>
