@@ -22,27 +22,32 @@ Each metric lists:
 - **Today:** structured JSON logs (`apps/api/src/logger.ts`) and the Hono
   request logger (per-request method/path/status/ms). No metrics aggregation,
   export, or dashboards exist. The stack is **deployed live** as of 2026-06-14
-  (`commma.dev` / `api.commma.dev`), but production is still uninstrumented — the
-  `now` values below remain local/not-measured until a sink is added.
+  (`commma.dev` / `api.commma.dev`), but production is still uninstrumented —
+  the `now` values below remain local/not-measured until a sink is added.
 - **Planned (Phase 3 / infra):** choose a metrics sink (e.g. OpenTelemetry →
   hosted backend), derive the SLOs below from request logs, add alerting. Until
-  then, values are read ad-hoc from logs, the DB, and the Upstash/Neon
-  consoles.
+  then, values are read ad-hoc from logs, the DB, and the Upstash/Neon consoles.
 
 ---
 
 ## 1. System / SLO
 
-| Metric                         | now              | target         | source                 |
-| ------------------------------ | ---------------- | -------------- | ---------------------- |
-| Ingest p95 (`POST /v1/ingest`) | ~38ms (local)    | <50ms srv      | Hono logger → sink     |
-| Read p95 (see note)            | local only       | <200ms; <150ms | logger + k6            |
-| Aggregation lag                | not measured     | ≤~20 min       | `created_at − max(ts)` |
-| Ingest success (`202`/total)   | not measured     | ≥99.9%         | request logger         |
-| Server errors (`5xx`/total)    | not measured     | <0.1%          | logger / unhandled     |
-| Availability                   | not measured     | 99.5% (MVP)    | `/health` uptime       |
-| Lighthouse mobile perf         | 91 (2026-06-12)  | ≥90            | `npx lighthouse`       |
-| Lighthouse mobile a11y         | 95 (2026-06-12)  | ≥90            | `npx lighthouse`       |
+| Metric                         | now             | target         | source                 |
+| ------------------------------ | --------------- | -------------- | ---------------------- |
+| Ingest p95 (`POST /v1/ingest`) | ~38ms (local)   | <50ms srv      | Hono logger → sink     |
+| Read p95 (see note)            | local only      | <200ms; <150ms | logger + k6            |
+| Aggregation lag                | not measured    | ≤~20 min       | `created_at − max(ts)` |
+| Ingest success (`202`/total)   | not measured    | ≥99.9%         | request logger         |
+| Server errors (`5xx`/total)    | not measured    | <0.1%          | logger / unhandled     |
+| Availability                   | not measured    | 99.5% (MVP)    | `/health` uptime       |
+| Lighthouse mobile perf         | 90 (2026-06-19) | ≥90            | `npx lighthouse`       |
+| Lighthouse mobile a11y         | 95 (2026-06-19) | ≥90            | `npx lighthouse`       |
+
+Lighthouse mobile perf is the **median of 3 local `vite preview` runs**
+(2026-06-19: 87 / 94 / 90) — it now hovers right at the `≥90` line, down from 91
+as the live-keyboard hero (0.7.0) added weight. The swing is **LCP-bound**
+(2.5–3.5 s across runs); a11y held at 95. Local preview is unthrottled and
+noisy, so treat this as "at threshold, watch LCP," not a hard pass.
 
 Read p95 routes: `/v1/me`, `/v1/sessions`, `/v1/sessions/:id`,
 `/v1/leaderboard`, `/v1/users/:handle`, `/v1/feed`, `/v1/stats`, `/v1/activity`,
@@ -76,7 +81,7 @@ Aggregation lag: 5-min interval + 15-min idle gap (ADR-010); event `ts` →
 | `events` rows     | pruned after finalize | bounded        | `count(*)`             |
 | `sessions` growth | historical (rebuild)  | Neon free tier | count + table size     |
 | Postgres storage  | not measured          | 5 GB free      | Neon console           |
-| Recap LLM spend   | ~$0.0002/recap        | <$1/wk MVP     | OpenAI usage console   |
+| Recap LLM spend   | ~$0/wk (free-mode)    | <$1/wk MVP     | OpenAI usage console   |
 
 Redis cost drivers: per-request rate limits + per-finalize `ZINCRBY` (no
 BullMQ), plus a handful of cache-aside entries — the heatmap-card PNG
@@ -84,20 +89,23 @@ BullMQ), plus a handful of cache-aside entries — the heatmap-card PNG
 team aggregate heatmap (`team:heatmap:v1:<teamId>`, ~10 min). Each is one `GET`
 plus an occasional `SET` on miss (not a hot per-request loop) and is fail-open,
 so the command budget story holds. The infra-audit additions are likewise
-negligible: a once-per-interval leader-lock `SET … NX` per scheduler (five
-loops — aggregation every 5 min, the rest hourly/daily), the leaderboard rebuild
-lock, and the empty-period marker (`lbempty:<key>`, 60s TTL) — all single
-commands, fail-open, and far below the per-request rate-limit volume. `events`
-holds only open/recent sessions after aggregation prunes finalized rows;
-bounded heartbeat field sizes + the 1 MB ingest body cap keep
-per-event/per-batch storage bounded. The heatmap-card
-PNG is now cached in Redis (image bytes only, privacy re-checked per request)
-and fronted by CloudFront on the public `GET`, so render cost is amortized for
-feed thumbnails and crawler `og:image` hits. The weekly recap's optional AI
-prose layer (OpenAI `gpt-4.1-nano`) runs at most once per Pro/Team user per
-week — short structured-copy generation at ~$0.0002/recap — and is fully
-skippable (no `OPENAI_API_KEY` → deterministic template), so it cannot become a
-runaway cost.
+negligible: a once-per-interval leader-lock `SET … NX` per scheduler (five loops
+— aggregation every 5 min, the rest hourly/daily), the leaderboard rebuild lock,
+and the empty-period marker (`lbempty:<key>`, 60s TTL) — all single commands,
+fail-open, and far below the per-request rate-limit volume. `events` holds only
+open/recent sessions after aggregation prunes finalized rows; bounded heartbeat
+field sizes + the 1 MB ingest body cap keep per-event/per-batch storage bounded.
+The heatmap-card PNG is now cached in Redis (image bytes only, privacy
+re-checked per request) and fronted by CloudFront on the public `GET`, so render
+cost is amortized for feed thumbnails and crawler `og:image` hits. The weekly
+recap's optional AI prose layer (OpenAI `gpt-4.1-nano`) runs at most once per
+Pro/Team user per week — short structured-copy generation at ~$0.0002/recap —
+and is fully skippable (no `OPENAI_API_KEY` → deterministic template), so it
+cannot become a runaway cost. Under the free-mode launch the scheduled send
+(`recap/run.ts`) stays gated to literal `['pro','team']` (never free mode), so
+with no paid users it sends to no one and **actual spend is ~$0/wk**; the
+~$0.0002/recap unit cost is the estimate to hold against when paid plans
+re-enable.
 
 ## 3. Privacy / trust (invariants — verifiable, brand-defining)
 
@@ -128,6 +136,14 @@ Drift surfaces post-commit `ZINCRBY` failure (backlog B); Phase-2 rebuild fixes.
 
 All currently **now: pre-launch, no users.** Defined here so instrumentation
 lands with the features rather than being retrofitted.
+
+The two billing rows below — **free → paid conversion** and **team adoption
+(`plan='team'`)** — are **deferred with the paid tiers**, not merely awaiting
+users. The free-mode launch (FREE_MODE on, paid plans deferred to ~2029, Stripe
+dormant) removes the checkout path entirely: `users.plan` stays `free` for
+everyone and access gates open via `hasProAccess`/`hasTeamAccess`, so `plan`
+carries no conversion or team-tier signal until paid plans re-enable. Treat both
+targets as inactive for this launch.
 
 | Metric                         | target         | source                       |
 | ------------------------------ | -------------- | ---------------------------- |
