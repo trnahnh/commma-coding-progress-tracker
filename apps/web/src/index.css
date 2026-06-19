@@ -82,13 +82,17 @@ body {
   overflow-x: hidden;
 }
 
-body {
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
   background-image:
     radial-gradient(ellipse 80% 60% at 50% -10%, rgba(255, 77, 26, 0.09), transparent 60%),
     radial-gradient(ellipse 70% 50% at 50% 110%, rgba(134, 59, 255, 0.06), transparent 60%),
     radial-gradient(130% 95% at 50% 6%, transparent 56%, rgba(0, 0, 0, 0.34) 88%, rgba(0, 0, 0, 0.5) 100%),
     url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.045 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  background-attachment: fixed;
 }
 
 ::selection {
@@ -352,7 +356,7 @@ body {
 .scene-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(58px);
+  filter: blur(40px);
   will-change: transform;
 }
 
@@ -486,7 +490,6 @@ body {
   border: 1px solid;
   line-height: 1;
   user-select: none;
-  will-change: transform, background-color, box-shadow;
   transition:
     background-color 360ms ease,
     border-color 360ms ease,

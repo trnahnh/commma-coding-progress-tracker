@@ -264,6 +264,18 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
+- **Web** — Scroll-performance pass. Eliminated the main cause of scroll jank:
+  the body's noise-texture and gradient background used
+  `background-attachment: fixed`, which forced the browser to repaint a
+  viewport-sized fractal-noise SVG on every scroll frame on every page. It now
+  paints once on a `position: fixed` `body::before` layer instead. The landing
+  page's scroll-progress bar was rAF-throttled and no longer reads
+  `scrollHeight` (a forced reflow) on each scroll event — it caches the value
+  and recomputes on resize. Reduced the landing backdrop orb blur from 58 px to
+  40 px (cheaper to re-rasterize while animating, visually unchanged behind
+  content) and dropped the permanent `will-change` from every on-screen keyboard
+  key (it was promoting 60+ keys to standing compositor layers). No visual
+  change.
 - **Web** — Pre-deploy frontend audit pass across all 13 pages and components.
   Fixes: `FeedCard` replaced `<div role="link">` with a stretched `<Link>`
   (semantic navigation); `Profile` plan gate hardened from falsy `!user?.plan`

@@ -11,6 +11,7 @@ export const CHANGELOG_ENTRIES = [
       'Fixed the About page stack cards on mobile — tapping a card to expand it no longer clips the long entries (Terraform, Neon, Upstash), and cards no longer jitter when scrolling past them',
       'Infrastructure as code — the entire AWS footprint (compute, web CDN, DNS, TLS certificate, and IAM) is now managed with Terraform, adopted from the live stack with zero downtime, so every infrastructure change ships as a reviewed, reproducible plan instead of a console click',
       'Security hardening — the API server’s disk is now encrypted at rest (with encryption enforced on every future volume) and administrative SSH access is locked to a single operator address',
+      'Smoother scrolling — fixed page-wide scroll lag caused by the textured background repainting on every frame, lightened the landing-page background glow, and made the scroll-progress bar cheaper to update',
     ],
   },
   {
