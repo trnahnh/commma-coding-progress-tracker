@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { hasProAccess } from '@commma/shared'
 import { useAuth } from '../lib/auth'
 import { FREE_MODE } from '../lib/config'
+import { docTo } from '../lib/docsRouting'
 import { BackToTop } from './BackToTop'
 
 const NAV_LINKS = [
@@ -279,6 +280,7 @@ export function Footer() {
     { label: 'Feed', to: '/feed' },
     { label: 'Leaderboard', to: '/leaderboard' },
     { label: 'Pricing', to: '/pricing' },
+    { label: 'Docs', to: docTo() },
     { label: 'Changelog', to: '/changelog' },
     { label: 'API', to: '/api' },
   ]

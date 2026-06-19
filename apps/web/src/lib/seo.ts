@@ -55,7 +55,9 @@ export function useSeo({
   const { pathname } = useLocation()
 
   useEffect(() => {
-    const url = `${SITE_URL}${pathname}`
+    const origin =
+      typeof window !== 'undefined' ? window.location.origin : SITE_URL
+    const url = `${origin}${pathname}`
     document.title = title
     setMetaByAttr('name', 'description', description)
     setMetaByAttr('property', 'og:type', ogType)

@@ -5,6 +5,7 @@ import './index.css'
 import { AuthProvider } from './lib/auth.tsx'
 import RootLayout from './RootLayout.tsx'
 import App from './App.tsx'
+import { ON_DOCS_HOST } from './lib/docsRouting.ts'
 
 const SessionDetail = lazy(() => import('./pages/SessionDetail.tsx'))
 const Profile = lazy(() => import('./pages/Profile.tsx'))
@@ -27,35 +28,47 @@ const TeamDashboard = lazy(() => import('./pages/TeamDashboard.tsx'))
 const BillingSuccess = lazy(() => import('./pages/BillingSuccess.tsx'))
 const Recap = lazy(() => import('./pages/Recap.tsx'))
 const About = lazy(() => import('./pages/About.tsx'))
+const Docs = lazy(() => import('./pages/Docs.tsx'))
+const DocsArticle = lazy(() => import('./pages/DocsArticle.tsx'))
+
+const docsHostChildren = [
+  { path: '/', element: <Docs /> },
+  { path: '/:slug', element: <DocsArticle /> },
+  { path: '*', element: <NotFound /> },
+]
+
+const mainHostChildren = [
+  { path: '/', element: <App /> },
+  { path: '/profile', element: <EditProfile /> },
+  { path: '/pricing', element: <Pricing /> },
+  { path: '/billing/success', element: <BillingSuccess /> },
+  { path: '/recap', element: <Recap /> },
+  { path: '/sessions/:id', element: <SessionDetail /> },
+  { path: '/teams', element: <Teams /> },
+  { path: '/teams/:slug', element: <TeamDashboard /> },
+  { path: '/:handle', element: <Profile /> },
+  { path: '/leaderboard', element: <Leaderboard /> },
+  { path: '/feed', element: <Feed /> },
+  { path: '/signin', element: <SignIn /> },
+  { path: '/auth/callback', element: <AuthCallback /> },
+  { path: '/careers', element: <Careers /> },
+  { path: '/contact', element: <Contact /> },
+  { path: '/privacy', element: <Privacy /> },
+  { path: '/terms', element: <Terms /> },
+  { path: '/changelog', element: <Changelog /> },
+  { path: '/api', element: <Api /> },
+  { path: '/status', element: <Status /> },
+  { path: '/about', element: <About /> },
+  { path: '/docs', element: <Docs /> },
+  { path: '/docs/:slug', element: <DocsArticle /> },
+  { path: '/404', element: <NotFound /> },
+  { path: '*', element: <NotFound /> },
+]
 
 const router = createBrowserRouter([
   {
     element: <RootLayout />,
-    children: [
-      { path: '/', element: <App /> },
-      { path: '/profile', element: <EditProfile /> },
-      { path: '/pricing', element: <Pricing /> },
-      { path: '/billing/success', element: <BillingSuccess /> },
-      { path: '/recap', element: <Recap /> },
-      { path: '/sessions/:id', element: <SessionDetail /> },
-      { path: '/teams', element: <Teams /> },
-      { path: '/teams/:slug', element: <TeamDashboard /> },
-      { path: '/:handle', element: <Profile /> },
-      { path: '/leaderboard', element: <Leaderboard /> },
-      { path: '/feed', element: <Feed /> },
-      { path: '/signin', element: <SignIn /> },
-      { path: '/auth/callback', element: <AuthCallback /> },
-      { path: '/careers', element: <Careers /> },
-      { path: '/contact', element: <Contact /> },
-      { path: '/privacy', element: <Privacy /> },
-      { path: '/terms', element: <Terms /> },
-      { path: '/changelog', element: <Changelog /> },
-      { path: '/api', element: <Api /> },
-      { path: '/status', element: <Status /> },
-      { path: '/about', element: <About /> },
-      { path: '/404', element: <NotFound /> },
-      { path: '*', element: <NotFound /> },
-    ],
+    children: ON_DOCS_HOST ? docsHostChildren : mainHostChildren,
   },
 ])
 
