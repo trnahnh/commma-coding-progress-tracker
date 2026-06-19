@@ -128,17 +128,26 @@ export function LiveKeyboard() {
     const flares = new Map<string, number>()
     for (const [label, value] of SEED) heats.set(label, value)
 
+    const lastSig = new Array<string>(keyEls.length).fill('')
+
     const paint = () => {
-      for (const el of keyEls) {
+      for (let i = 0; i < keyEls.length; i++) {
+        const el = keyEls[i]
         const label = el.dataset.k ?? ''
         const heat = heats.get(label) ?? 0
         const flare = flares.get(label) ?? 0
         const lvl = Math.min(1, heat + flare * 0.55)
         const t = Math.sqrt(lvl)
+        const flareOn = flare > 0.04
+        const sig = flareOn
+          ? `${Math.round(t * 100)}:${Math.round(flare * 100)}`
+          : `${Math.round(t * 100)}:0`
+        if (sig === lastSig[i]) continue
+        lastSig[i] = sig
         el.style.background = mix(COLD, ACCENT, t)
         el.style.borderColor = mix(COLD_BORDER, ACCENT, Math.min(1, t * 0.85))
         el.style.color = mix(COLD_TEXT, HOT_TEXT, t)
-        if (flare > 0.04) {
+        if (flareOn) {
           el.style.boxShadow = `0 0 ${(flare * 22).toFixed(1)}px rgba(255, 77, 26, ${(flare * 0.7).toFixed(2)})`
           el.style.transform = `translateY(${(-flare * 2.4).toFixed(2)}px) scale(${(1 + flare * 0.05).toFixed(3)})`
           el.style.zIndex = '2'
@@ -164,6 +173,7 @@ export function LiveKeyboard() {
     let idx = 0
     let total = 0
     let raf = 0
+    let running = false
     let last = performance.now()
     const start = last
     let acc = 0
@@ -176,6 +186,7 @@ export function LiveKeyboard() {
     }
 
     const tick = (now: number) => {
+      if (!running) return
       const dt = now - last
       last = now
       acc += dt
@@ -231,11 +242,34 @@ export function LiveKeyboard() {
           keysRef.current.textContent = (8159 + total).toLocaleString()
       }
 
-      raf = requestAnimationFrame(tick)
+      if (running) raf = requestAnimationFrame(tick)
     }
 
-    raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
+    const startLoop = () => {
+      if (running) return
+      running = true
+      last = performance.now()
+      raf = requestAnimationFrame(tick)
+    }
+    const stopLoop = () => {
+      running = false
+      cancelAnimationFrame(raf)
+    }
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) startLoop()
+          else stopLoop()
+        }
+      },
+      { threshold: 0 },
+    )
+    io.observe(board)
+    return () => {
+      io.disconnect()
+      stopLoop()
+    }
   }, [])
 
   return (

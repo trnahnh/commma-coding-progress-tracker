@@ -274,7 +274,13 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   and recomputes on resize. Reduced the landing backdrop orb blur from 58 px to
   40 px (cheaper to re-rasterize while animating, visually unchanged behind
   content) and dropped the permanent `will-change` from every on-screen keyboard
-  key (it was promoting 60+ keys to standing compositor layers). No visual
+  key (it was promoting 60+ keys to standing compositor layers). Then the bigger
+  one: the landing hero's `LiveKeyboard` ran a `requestAnimationFrame` loop that
+  repainted all 60+ keyboard keys (six inline style writes each) every frame and
+  never stopped — so the main thread stayed pinned painting the hero even after
+  it scrolled out of view, starving the scroll. It now pauses the loop via an
+  `IntersectionObserver` when the board leaves the viewport and dirty-checks
+  each key so idle (cold) keys are not rewritten frame to frame. No visual
   change.
 - **Web** — Pre-deploy frontend audit pass across all 13 pages and components.
   Fixes: `FeedCard` replaced `<div role="link">` with a stretched `<Link>`
