@@ -592,6 +592,11 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- **Web** — Long handles no longer break the Feed layout (`0.9.0`). A feed
+  card's `@handle` could be up to 39 characters; without truncation it
+  overflowed its row on narrow viewports and pushed the date out of place. The
+  handle now gets `min-w-0`/`truncate` and the trailing date stays put, matching
+  the leaderboard, team, and profile rows that already handled this.
 - **Web** — Every "Install the extension" call-to-action (landing hero, final
   CTA, nav, both Pricing tiers) linked to the bare Marketplace homepage, which
   is a dead end since the extension is not published yet. They now link to the
