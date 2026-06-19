@@ -44,6 +44,7 @@ test:
 deploy:web:
   extends: .pnpm
   stage: deploy
+  resource_group: production-web
   before_script:
     - corepack enable
     - corepack prepare pnpm@10.28.1 --activate
@@ -57,11 +58,16 @@ deploy:web:
     url: https://commma.dev
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
-      when: manual
+      changes:
+        - apps/web/**/*
+        - packages/shared/**/*
+        - pnpm-lock.yaml
+        - .gitlab-ci.yml
 
 deploy:api:
   stage: deploy
   image: node:22-bookworm-slim
+  resource_group: production-api
   before_script:
     - apt-get update && apt-get install -y --no-install-recommends openssh-client && rm -rf /var/lib/apt/lists/*
   script:
@@ -72,7 +78,12 @@ deploy:api:
     url: https://api.commma.dev
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
-      when: manual
+      changes:
+        - apps/api/**/*
+        - packages/db/**/*
+        - packages/shared/**/*
+        - pnpm-lock.yaml
+        - .gitlab-ci.yml
 
 workflow:
   rules:
