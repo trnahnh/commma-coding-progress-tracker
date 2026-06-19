@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { hasProAccess } from '@commma/shared'
 import { useAuth } from '../lib/auth'
 import { FREE_MODE } from '../lib/config'
-import { docTo } from '../lib/docsRouting'
+import { docTo, MAIN_ORIGIN, ON_DOCS_HOST } from '../lib/docsRouting'
 import { BackToTop } from './BackToTop'
 
 const NAV_LINKS = [
@@ -136,71 +136,93 @@ export function Nav() {
       >
         <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
           <div className='grid grid-cols-[1fr_auto] md:grid-cols-[1fr_auto_1fr] items-center h-16'>
-            <Link to='/' className='justify-self-start' onClick={homeClick}>
+            <Link
+              to='/'
+              className='justify-self-start inline-flex items-baseline gap-2.5'
+              onClick={homeClick}
+            >
               <Wordmark />
+              {ON_DOCS_HOST && (
+                <span className='font-mono text-[12px] tracking-[0.2em] uppercase text-ink-mute'>
+                  docs
+                </span>
+              )}
             </Link>
 
-            <div className='hidden md:flex gap-7 font-mono text-[13px] tracking-wider text-ink-soft'>
-              {[
-                ...NAV_LINKS,
-                ...(token ? [{ label: 'Teams', to: '/teams' }] : []),
-                ...(showRecap ? [{ label: 'Recap', to: '/recap' }] : []),
-              ].map(({ label, to }) => {
-                const active =
-                  to === '/' ? pathname === '/' : pathname.startsWith(to)
-                return (
-                  <Link
-                    key={label}
-                    to={to}
-                    onClick={to === '/' ? homeClick : undefined}
-                    className={`relative py-1 transition-colors hover:text-ink
+            {!ON_DOCS_HOST && (
+              <div className='hidden md:flex gap-7 font-mono text-[13px] tracking-wider text-ink-soft'>
+                {[
+                  ...NAV_LINKS,
+                  ...(token ? [{ label: 'Teams', to: '/teams' }] : []),
+                  ...(showRecap ? [{ label: 'Recap', to: '/recap' }] : []),
+                ].map(({ label, to }) => {
+                  const active =
+                    to === '/' ? pathname === '/' : pathname.startsWith(to)
+                  return (
+                    <Link
+                      key={label}
+                      to={to}
+                      onClick={to === '/' ? homeClick : undefined}
+                      className={`relative py-1 transition-colors hover:text-ink
                     after:absolute after:left-0 after:right-0 after:-bottom-0.5 after:h-px after:bg-accent
                     after:origin-left after:transition-transform
                     ${active ? 'text-ink after:scale-x-100' : 'after:scale-x-0 hover:after:scale-x-100'}`}
-                  >
-                    {label}
-                  </Link>
-                )
-              })}
-            </div>
+                    >
+                      {label}
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
 
             <div className='justify-self-end flex items-center gap-2'>
-              <NavActions />
-              <button
-                type='button'
-                aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-                onClick={() => setMobileOpen((o) => !o)}
-                className='md:hidden flex items-center justify-center w-11 h-11 text-ink-mute hover:text-ink transition-colors'
-              >
-                {mobileOpen ? (
-                  <svg
-                    viewBox='0 0 16 16'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth='1.5'
-                    strokeLinecap='round'
-                    className='w-5 h-5'
+              {ON_DOCS_HOST ? (
+                <a
+                  href={MAIN_ORIGIN}
+                  className='inline-flex items-center gap-2 h-[44px] px-4 sm:px-5 rounded-full font-mono text-[12px] sm:text-[13px] uppercase tracking-wider text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint transition-colors press whitespace-nowrap'
+                >
+                  <span aria-hidden='true'>←</span> commma.dev
+                </a>
+              ) : (
+                <>
+                  <NavActions />
+                  <button
+                    type='button'
+                    aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+                    onClick={() => setMobileOpen((o) => !o)}
+                    className='md:hidden flex items-center justify-center w-11 h-11 text-ink-mute hover:text-ink transition-colors'
                   >
-                    <path d='M3 3l10 10M13 3L3 13' />
-                  </svg>
-                ) : (
-                  <svg
-                    viewBox='0 0 16 16'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth='1.5'
-                    strokeLinecap='round'
-                    className='w-5 h-5'
-                  >
-                    <path d='M2 4h12M2 8h12M2 12h12' />
-                  </svg>
-                )}
-              </button>
+                    {mobileOpen ? (
+                      <svg
+                        viewBox='0 0 16 16'
+                        fill='none'
+                        stroke='currentColor'
+                        strokeWidth='1.5'
+                        strokeLinecap='round'
+                        className='w-5 h-5'
+                      >
+                        <path d='M3 3l10 10M13 3L3 13' />
+                      </svg>
+                    ) : (
+                      <svg
+                        viewBox='0 0 16 16'
+                        fill='none'
+                        stroke='currentColor'
+                        strokeWidth='1.5'
+                        strokeLinecap='round'
+                        className='w-5 h-5'
+                      >
+                        <path d='M2 4h12M2 8h12M2 12h12' />
+                      </svg>
+                    )}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
 
-        {mobileOpen && (
+        {!ON_DOCS_HOST && mobileOpen && (
           <div className='md:hidden border-t border-rule bg-paper/95 backdrop-blur-xl'>
             <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)] flex flex-col py-2'>
               {[
