@@ -33,12 +33,12 @@ function FeedCard({ entry }: { entry: FeedEntry }) {
         )}
         <Link
           to={`/@${user.handle}`}
-          className='relative z-10 font-serif text-[16px] leading-none tracking-[-0.01em] text-ink hover:text-accent transition-colors'
+          className='relative z-10 min-w-0 truncate font-serif text-[16px] leading-none tracking-[-0.01em] text-ink hover:text-accent transition-colors'
         >
           @{user.handle}
         </Link>
-        <span className='text-ink-mute text-[12px]'>·</span>
-        <span className='font-mono text-[12px] text-ink-mute tnum'>
+        <span className='shrink-0 text-ink-mute text-[12px]'>·</span>
+        <span className='shrink-0 font-mono text-[12px] text-ink-mute tnum'>
           {formatDate(started_at)}
           <span className='mx-1.5 text-ink-mute'>·</span>
           {formatClock(started_at)}
