@@ -1,5 +1,13 @@
 export const CHANGELOG_ENTRIES = [
   {
+    version: '0.9.0',
+    date: 'Jun 2026',
+    tag: 'Infra',
+    changes: [
+      'Continuous delivery — every change now runs an automated lint, type-check, and test gate before it can ship, and merges to the main line deploy themselves: the web app and the API release automatically, each only when its own code changes, with overlapping deploys serialized so two releases never race',
+    ],
+  },
+  {
     version: '0.8.0',
     date: 'Jun 2026',
     tag: 'Release',

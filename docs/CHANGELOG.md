@@ -11,6 +11,16 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Infra** — Continuous delivery pipeline (`0.9.0`). CI/CD runs on GitLab
+  (`.gitlab-ci.yml`): a `check` stage runs `lint`/`typecheck`/`test` in parallel
+  on every push and merge request, and a `deploy` stage auto-deploys on `main`,
+  path-filtered so `deploy:web` ships only on `apps/web`/`packages/shared`
+  changes and `deploy:api` only on `apps/api`/`packages/db`/`packages/shared`
+  changes. Both reuse the existing `infra/deploy-*.sh` scripts and are
+  `resource_group`-serialized so deploys never overlap. The repo dual-pushes to
+  GitHub (the EC2 pull source) and GitLab (which drives CI). The EC2 security
+  group's SSH port was opened to allow CI runners (the box is key-only, so this
+  is safe).
 - **Web, Infra** — Documentation site at `docs.commma.dev`. A new `/docs`
   section renders curated public docs (overview, getting started, architecture,
   system design, self-hosting) with `react-markdown` through a design-token
