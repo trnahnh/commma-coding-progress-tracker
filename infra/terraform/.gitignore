@@ -11,3 +11,6 @@ discovery.txt
 .terraformrc
 terraform.rc
 *.out
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
