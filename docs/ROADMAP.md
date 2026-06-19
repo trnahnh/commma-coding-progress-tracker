@@ -9,12 +9,14 @@ availability.
 Metric targets in the Definition-of-Done sections (latency, Lighthouse, growth)
 are defined canonically in `METRICS.md` — update numbers there, not here.
 
-Current phase: Phase 3 — Hardening (wrapping up) → Phase 4. **Live in production
-since 2026-06-14** — `commma.dev` (web) and `api.commma.dev` (API) on AWS (EC2
-t4g with PM2, S3 and CloudFront, Neon Postgres, Upstash Redis), TLS everywhere
-with auto-renew. Deploys auto-run on push to `main` via GitHub Actions. The AWS
-infrastructure is codified with Terraform (`infra/terraform/`, import-adopted —
-see ADR-013).
+Current phase: Phase 5 — Growth (in progress); Phases 1–4 are functionally
+complete. **Live in production since 2026-06-14** — `commma.dev` (web) and
+`api.commma.dev` (API) on AWS (EC2 t4g with PM2, S3 and CloudFront, Neon
+Postgres, Upstash Redis), TLS everywhere with auto-renew. Deploys auto-run on
+push to `main` via GitLab CI (`trnahnh1/commma`, `.gitlab-ci.yml`),
+path-filtered per app — GitHub Actions is disabled account-wide, so the legacy
+`.github/workflows/` are inert. The AWS infrastructure is codified with
+Terraform (`infra/terraform/`, import-adopted — see ADR-013).
 
 ---
 
@@ -212,7 +214,7 @@ Goal: production-safe. No known P0/P1 bugs. Published extension.
       refreshed and security links added throughout.
 - [ ] `good-first-issue` label sweep
 - [ ] Load test: k6 at 1,000 concurrent users, p95 <150ms
-- [ ] GitHub repo made public
+- [x] GitHub repo made public
 
 **Definition of Done:**
 

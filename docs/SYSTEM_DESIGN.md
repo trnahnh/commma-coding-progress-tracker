@@ -424,22 +424,29 @@ src/
   ElastiCache (web stays on S3 + CloudFront)
 - **50k DAU:** ECS auto-scaling, separate ingest/read services
 
-### Deployment Secrets (GitHub Actions)
+### Deployment Secrets (GitLab CI/CD)
 
-The EC2 instance is not provisioned yet, so the `deploy-api` workflow
-(`.github/workflows/deploy-api.yml`) is **manual-only** (`workflow_dispatch`).
-Once EC2 is live, switch its trigger back to `push` on `main` and set these
-repository secrets under **Settings → Secrets and variables → Actions**:
+CI/CD runs on GitLab (`trnahnh1/commma`, `.gitlab-ci.yml`) because GitHub
+Actions is disabled account-wide; the legacy `.github/workflows/` are inert.
+Every push to `main` runs the `check` stage (lint/typecheck/test), then
+**auto-deploys the side whose files changed** — `deploy:api`
+(`infra/deploy-api.sh`: SSH to the live EC2 box, pull, build, PM2-restart) on
+`apps/api`/`packages/db`/`packages/shared`, `deploy:web` (`infra/deploy-web.sh`:
+build, `s3 sync`, CloudFront invalidate) on `apps/web`/`packages/shared`. The
+same scripts run by hand via `pnpm deploy:api` / `pnpm deploy:web`.
 
-- `EC2_HOST` — public IP or domain of the EC2 instance
-- `EC2_SSH_KEY` — contents of the `.pem` private key file
+Secrets are set as **GitLab CI/CD variables** (Settings → CI/CD → Variables),
+not GitHub Actions secrets. The `deploy:api` job needs:
 
-The web app deploys to S3 + CloudFront (ADR-009). Its CI job runs `vite build`
-with `VITE_API_BASE_URL` set, `aws s3 sync`s `dist/` to the bucket, then
-invalidates the distribution. That path needs:
+- `SSH_PRIVATE_KEY` (File) — contents of the EC2 `.pem` private key
+
+The web app deploys to S3 + CloudFront (ADR-009). Its job runs `vite build` with
+`VITE_API_BASE_URL` set, `aws s3 sync`s `dist/` to the bucket, then invalidates
+the distribution. That path needs:
 
 - `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` — deploy IAM user (scoped to the
   bucket + `cloudfront:CreateInvalidation`)
+- `AWS_DEFAULT_REGION` — bucket region, e.g. `us-east-1`
 - `WEB_S3_BUCKET` — target bucket name
 - `CLOUDFRONT_DISTRIBUTION_ID` — for the post-sync cache invalidation
 - `VITE_API_BASE_URL` — `https://api.commma.dev`, inlined at build time

@@ -104,9 +104,9 @@ functionally complete; Phase 5 is in progress:
 - **Phase 3 — Hardening (done):** Vitest suite (unit + gated route integration
   tests), server-side privacy enforcement, refresh-token cleanup, configurable
   proxy-trust for rate limiting, the heatmap-card image API (client + public
-  crawler `og:image` variant), and a site-wide SEO pass. Still open: publish the
-  extension to the VSCode Marketplace, a load test at 1,000 concurrent users,
-  and making the repo public.
+  crawler `og:image` variant), and a site-wide SEO pass. The repo is public.
+  Still open: publish the extension to the VSCode Marketplace and a load test at
+  1,000 concurrent users.
 - **Phase 4 — Scale & Community (done):** Stripe billing (Pro/Team), style
   badges, the team model (invites, private leaderboard, aggregate heatmap), the
   weekly recap email + page, Dvorak/Colemak layouts, and the landing page fully
