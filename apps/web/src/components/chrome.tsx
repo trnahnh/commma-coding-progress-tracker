@@ -179,9 +179,15 @@ export function Nav() {
               {ON_DOCS_HOST ? (
                 <a
                   href={MAIN_ORIGIN}
-                  className='inline-flex items-center gap-2 h-[44px] px-4 sm:px-5 rounded-full font-mono text-[12px] sm:text-[13px] uppercase tracking-wider text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint transition-colors press whitespace-nowrap'
+                  className='group inline-flex items-center gap-2 min-h-[44px] px-4 rounded-full border border-rule-strong hover:border-ink-faint text-ink-soft hover:text-ink transition-colors press whitespace-nowrap font-mono text-[12px] sm:text-[13px] uppercase tracking-wider md:px-0 md:border-0 md:rounded-none'
                 >
-                  <span aria-hidden='true'>←</span> commma.dev
+                  <span
+                    aria-hidden='true'
+                    className='inline-block transition-transform group-hover:-translate-x-0.5'
+                  >
+                    ←
+                  </span>
+                  commma.dev
                 </a>
               ) : (
                 <>
