@@ -64,13 +64,15 @@ gates.
       EC2 pull source) and `gitlab` (drives CI)
 - [x] `.gitlab-ci.yml`: `check` stage (`lint`/`typecheck`/`test`) green on push
       and MR
-- [ ] Deploy jobs (`deploy:web`, `deploy:api`, manual on `main`) — pending CI
-      variables: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`,
-      `AWS_DEFAULT_REGION`, `SSH_PRIVATE_KEY` (File). Then run each once to
-      confirm green.
-- [ ] Create dedicated `commma-deploy-ci` IAM user (S3 on `commma-web` +
-      CloudFront invalidation only) for the `deploy:web` key, ideally via
-      Terraform
+- [x] CI/CD variables set: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`,
+      `AWS_DEFAULT_REGION` (Protected+Masked), `SSH_PRIVATE_KEY` (File,
+      Protected)
+- [x] Dedicated `commma-deploy-ci` IAM user (copied `commma-deploy-local`
+      permissions) backs the `deploy:web` key
+- [x] EC2 SG port 22 opened to `0.0.0.0/0` (was operator /32) so GitLab runners
+      can SSH — via Terraform, safe because the box is key-only
+- [x] `deploy:web` + `deploy:api` **auto-deploy on `main`**, path-filtered per
+      app, `resource_group`-serialized; both verified green end-to-end
 - [ ] **If Actions returns:** legacy `.github/workflows/` still present; either
       retire them or run both CIs
 

@@ -11,10 +11,10 @@ The work is split in two:
   DNS/TLS, create the AWS web hosting, and register the GitLab CI/CD variables.
   All of it is config-first: the scripts and configs live in `infra/`.
 - **Deploying** (every release) — push to `main`; GitLab CI runs the
-  lint/typecheck/test gate automatically, and the two **manual** deploy jobs
-  (`deploy:web`, `deploy:api`) ship the app with one click from the pipeline.
-  You can also deploy from a laptop with the AWS CLI (web) and SSH (API) — the
-  CI jobs run the exact same `infra/` scripts. See "Manual deploy" below.
+  lint/typecheck/test gate, then **auto-deploys** the side whose files changed
+  (`deploy:web` / `deploy:api`). You can also deploy from a laptop with the AWS
+  CLI (web) and SSH (API) — the CI jobs run the exact same `infra/` scripts. See
+  "Manual deploy" below.
 
 GitHub Actions is **disabled account-wide** on this account (an account flag
 only GitHub Support can lift), so CI/CD runs on **GitLab**
@@ -56,8 +56,8 @@ first so `api.commma.dev` points at a stable address that survives a stop/start.
 
 The canonical config values these records back (already the defaults below):
 
-- `VITE_API_BASE_URL=https://api.commma.dev` and `WEB_URL=https://commma.dev`
-  in the `.gitlab-ci.yml` `variables:` block (the web build bakes them in).
+- `VITE_API_BASE_URL=https://api.commma.dev` and `WEB_URL=https://commma.dev` in
+  the `.gitlab-ci.yml` `variables:` block (the web build bakes them in).
 - `WEB_ORIGIN=https://commma.dev` and
   `GITHUB_CALLBACK_URL=https://api.commma.dev/v1/auth/github/callback` in the
   server `.env`, matching the GitHub OAuth App callback.
@@ -75,12 +75,14 @@ stage holds two jobs:
 | `deploy:web` | `infra/deploy-web.sh`: build, `s3 sync`, CF invalidate  |
 | `deploy:api` | `infra/deploy-api.sh`: SSH to EC2, pull, build, restart |
 
-Both are gated to `main` and set to **`when: manual`** — they appear in the
-pipeline as click-to-run buttons, so a green `check` stage never auto-ships a
-release on its own. Open the pipeline (**Build → Pipelines**), click the play
-icon on `deploy:web` or `deploy:api`, and it runs the same script the manual
-path below uses. To switch a side to fully automatic, drop its `when: manual` in
-`.gitlab-ci.yml`.
+Both **auto-deploy on push to `main`**, path-filtered so each side only ships
+when its own files change: `deploy:web` on `apps/web`/`packages/shared`,
+`deploy:api` on `apps/api`/`packages/db`/`packages/shared` (both also on
+`pnpm-lock.yaml` and `.gitlab-ci.yml`). A `resource_group` per side serializes
+deploys so two never overlap, and the `check` stage gates both — a red
+lint/typecheck/test blocks the release. A push touching only docs or infra runs
+`check` and deploys nothing. To require a manual click for a side instead, add
+`when: manual` to its rule in `.gitlab-ci.yml`.
 
 The deploy jobs reuse the laptop scripts verbatim, so they need the same inputs
 as a manual deploy, supplied as **GitLab CI/CD variables** (see step 6): AWS
