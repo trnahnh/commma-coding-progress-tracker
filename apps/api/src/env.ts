@@ -7,6 +7,9 @@ const optionalSecret = z.preprocess(
 )
 
 const envSchema = z.object({
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default('development'),
   DATABASE_URL: z.string().url(),
   REDIS_URL: z.string().url(),
   GITHUB_CLIENT_ID: z.string().min(1),

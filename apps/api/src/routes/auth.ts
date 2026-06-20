@@ -51,7 +51,7 @@ authRoutes.use(
   '*',
   rateLimit({
     scope: 'auth',
-    limit: process.env.NODE_ENV === 'production' ? 20 : 100,
+    limit: env.NODE_ENV === 'production' ? 20 : 100,
     windowS: 3600,
     key: ipKey,
     failClosed: true,
