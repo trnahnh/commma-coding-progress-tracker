@@ -46,6 +46,15 @@ Nothing yet.
   when the JetBrains, Neovim, and CLI clients ship. Privacy and API-reference
   copy was updated to match (the email list is now "product updates", not an
   "early-access waitlist"). The web `LATEST_VERSION` is now `1.0.0`.
+- **Infra** — Search Console & search indexing. Verified `commma.dev` domain
+  ownership in Google Search Console with an apex `TXT` record
+  (`google-site-verification=…`) added to Route53 as code
+  (`aws_route53_record.google_site_verification` in
+  `infra/terraform/route53.tf`, applied locally under the `commma-admin` profile
+  — a clean `1 to add` plan, no other drift). Submitted the public `sitemap.xml`
+  (already referenced by `robots.txt`, covering the marketing and discovery
+  routes plus the `docs.commma.dev` pages) so search engines crawl and index the
+  site. Domain-property verification covers every subdomain in one shot.
 - **Infra** — Continuous delivery pipeline (`0.9.0`). CI/CD runs on GitLab
   (`.gitlab-ci.yml`): a `check` stage runs `lint`/`typecheck`/`test` in parallel
   on every push and merge request, and a `deploy` stage auto-deploys on `main`,

@@ -76,6 +76,14 @@ resource "aws_route53_record" "acm_validation" {
   allow_overwrite = true
 }
 
+resource "aws_route53_record" "google_site_verification" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "commma.dev"
+  type    = "TXT"
+  ttl     = 300
+  records = ["google-site-verification=OcqqvRgyE0zO2TNPI_rwKcjR6s6qVykSyOsTbT1Op7I"]
+}
+
 resource "aws_route53_record" "dmarc" {
   zone_id = aws_route53_zone.main.zone_id
   name    = "_dmarc.commma.dev"
