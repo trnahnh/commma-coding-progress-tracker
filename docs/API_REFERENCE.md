@@ -1123,6 +1123,38 @@ limiter backing store unreachable (fails closed)
 
 ---
 
+## System Endpoints
+
+### `GET /health`
+
+Trivial liveness probe for the load balancer / PM2 — returns `200` without
+touching any dependency. Not rate-limited, no version prefix.
+
+```json
+{ "status": "ok", "ts": 1748390400000 }
+```
+
+### `GET /v1/status`
+
+Real-time dependency health, backing the public `/status` page. Probes the
+database (`SELECT 1`) and Redis (`PING`) and reports each component. The result
+is cached in Redis for ~15s, so frequent polling cannot hammer Neon or Upstash;
+each probe fails soft (reports `down`, never throws), so the endpoint itself
+never `500`s.
+
+**Auth:** None **Rate limit:** 300 requests / hour / IP (public read bucket)
+
+**Response:** `200`
+
+```json
+{ "api": "ok", "db": "ok", "cache": "ok", "ts": 1748390400000 }
+```
+
+Each of `api`, `db`, `cache` is `"ok"` or `"down"`. A client that cannot reach
+the endpoint at all should treat the API as unreachable.
+
+---
+
 ## Error Format
 
 All errors follow this shape:

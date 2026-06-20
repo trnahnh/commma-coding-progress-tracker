@@ -227,6 +227,16 @@ const ENDPOINTS = [
       },
     ],
   },
+  {
+    group: 'System',
+    routes: [
+      {
+        method: 'GET',
+        path: '/v1/status',
+        desc: 'Live dependency health (database, cache) for the status page. Public, cached ~15s, never throws.',
+      },
+    ],
+  },
 ]
 
 const RATE_LIMITS = [

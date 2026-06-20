@@ -15,6 +15,16 @@ Nothing yet.
 
 ### Added
 
+- **API, Web** — Real-time status page. A new public `GET /v1/status` probes the
+  database (`SELECT 1`) and Redis (`PING`) and returns per-dependency health
+  (`{ api, db, cache, ts }`); it is IP-rate-limited on the read bucket and the
+  probe result is cached in Redis for ~15s so a traffic spike cannot hammer Neon
+  or Upstash. The `/status` page now fetches it live and polls every 45s, with a
+  loading skeleton, a "service degraded" state when a dependency is down, and an
+  "API unreachable" state when the fetch fails — replacing the hand-written "all
+  operational" list. The granular per-feature rows were collapsed to the
+  genuinely independent components (API process, database, cache) since the API
+  is a single process.
 - **Extension** — The commma VS Code extension is published to the Visual Studio
   Marketplace as `commma.commma` (v1.0.0). Built from `apps/extension` (esbuild
   CommonJS bundle, packaged with `vsce package --no-dependencies`), it captures
@@ -328,6 +338,10 @@ Nothing yet.
 
 ### Changed
 
+- **API** — The signup confirmation email is reframed from a launch waitlist to
+  a product-updates list: it points to the live Marketplace listing and promises
+  a heads-up when the JetBrains, Neovim, and CLI clients ship, instead of "your
+  invite lands in waves."
 - **Web** — Scroll-performance pass. Eliminated the main cause of scroll jank:
   the body's noise-texture and gradient background used
   `background-attachment: fixed`, which forced the browser to repaint a

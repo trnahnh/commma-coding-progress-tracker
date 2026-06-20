@@ -4,7 +4,8 @@
 
 **Live:** [commma.dev](https://commma.dev) · API at
 [api.commma.dev](https://api.commma.dev) ·
-[LinkedIn](https://www.linkedin.com/company/commma-dev/)
+[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=commma.commma)
+· [LinkedIn](https://www.linkedin.com/company/commma-dev/)
 
 commma turns your editor into a logbook — pace, splits, streaks, podiums — all
 the rituals of a real sport, for the work you already do. A VSCode extension
@@ -13,6 +14,16 @@ surfaces sessions, streaks, leaderboards, and shareable keyboard heatmap cards.
 
 commma is open-source under MIT. All product concepts and social mechanics are
 original to this project.
+
+---
+
+## Install
+
+commma is live on the
+[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=commma.commma).
+Install it, run **commma: Sign in** from the Command Palette, and your sessions,
+streaks, and heatmaps start filling in — free, no card. JetBrains, Neovim, and a
+standalone CLI client are on the roadmap.
 
 ---
 
@@ -105,13 +116,12 @@ functionally complete; Phase 5 is in progress:
   tests), server-side privacy enforcement, refresh-token cleanup, configurable
   proxy-trust for rate limiting, the heatmap-card image API (client + public
   crawler `og:image` variant), and a site-wide SEO pass. The repo is public.
-  Still open: publish the extension to the VSCode Marketplace and a load test at
-  1,000 concurrent users.
+  Still open: a load test at 1,000 concurrent users.
 - **Phase 4 — Scale & Community (done):** Stripe billing (Pro/Team), style
   badges, the team model (invites, private leaderboard, aggregate heatmap), the
   weekly recap email + page, Dvorak/Colemak layouts, and the landing page fully
-  wired to live data. Still open: contributor onboarding, external PR merges,
-  and the public launch itself.
+  wired to live data. The VS Code extension is published to the Marketplace
+  (`commma.commma`). Still open: contributor onboarding and external PR merges.
 - **Phase 5 — Growth (in progress):** mobile layout audit, PWA manifest, and
   push notifications are done. Not yet started: JetBrains/Neovim plugin
   scaffolds, a standalone CLI client, and a self-hosted Docker/Helm stack.
