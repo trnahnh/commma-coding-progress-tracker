@@ -6,6 +6,7 @@ export const CHANGELOG_ENTRIES = [
     changes: [
       'Continuous delivery — every change now runs an automated lint, type-check, and test gate before it can ship, and merges to the main line deploy themselves: the web app and the API release automatically, each only when its own code changes, with overlapping deploys serialized so two releases never race',
       'Fixed long usernames overflowing a feed card on narrow screens — a very long handle now truncates cleanly instead of shoving the session date out of place',
+      'Backend hardening — coding activity is now accepted only with a sane timestamp (no events dated far in the future or the distant past), the sign-in rate limit is held tight in production, and the billing endpoints stay protected even if the rate limiter has a hiccup',
     ],
   },
   {

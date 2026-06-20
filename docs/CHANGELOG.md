@@ -284,6 +284,23 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `push` and `notificationclick` handlers; `EditProfile` gained a Notifications
   section with an Enable/Disable toggle.
 
+### Security
+
+- **API** — Backend hardening pass from the eleven-point infra audit. Three
+  fixes: (1) `POST /v1/ingest` now bounds event timestamps to a server-side
+  window — a batch is rejected with `400 VALIDATION_ERROR` if any `ts` is more
+  than 5 minutes in the future or more than 30 days old. Clients fully control
+  `ts`, and a future-dated event would otherwise keep its session open forever
+  (the idle-gap boundary is measured from now), growing the `events` table
+  unbounded; the 30-day floor still clears the extension's offline-buffer flush.
+  (2) The auth rate-limit bucket now reads a zod-validated `NODE_ENV` instead of
+  raw `process.env.NODE_ENV`, so it cannot silently fall back to the looser
+  100/hr limit when the variable is unset — production stays at 20/hr per IP.
+  (3) `POST /v1/billing/checkout` and `POST /v1/billing/portal` now fail closed
+  on a rate-limiter (Redis) error like the other sensitive write paths, so the
+  money paths are never left unmetered during a Redis outage. No schema or
+  API-shape change.
+
 ### Changed
 
 - **Web** — Scroll-performance pass. Eliminated the main cause of scroll jank:

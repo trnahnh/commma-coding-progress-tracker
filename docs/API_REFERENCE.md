@@ -287,6 +287,11 @@ Ingests a batch of heartbeat events from the extension.
 - Field caps: `lang` ≤ 64, `file` ≤ 1024, `project` ≤ 256 chars; `keystrokes`
   0–1,000,000; `lines` −1,000,000–1,000,000; `ts` ≤ `4102444800000` — anything
   over fails `400 VALIDATION_ERROR`
+- `ts` is additionally clamped to a server-side window: the batch is rejected
+  with `400 VALIDATION_ERROR` if any event is more than 5 minutes in the future
+  (clock-skew tolerance) or more than 30 days old (the offline buffer's flush
+  horizon). This prevents future-dated events from pinning a session open
+  indefinitely
 - All `key_freq` keys must be normalized key labels (see
   [Key Label Reference](#key-label-reference))
 
@@ -374,8 +379,8 @@ covers data captured before the user switched to `summary`.
 `card_available` is `true` only when the owner is `privacy: "full"` and the
 session has a non-empty heatmap — exactly the condition the public
 `GET /v1/sessions/:id/heatmap-card` below requires to return `200` instead of
-`404`. The web session-detail page uses this flag to decide whether to point
-its `og:image` at the heatmap card or fall back to the site default.
+`404`. The web session-detail page uses this flag to decide whether to point its
+`og:image` at the heatmap card or fall back to the site default.
 
 ---
 
@@ -1095,10 +1100,10 @@ Public pre-launch email capture for the landing page. No auth.
 }
 ```
 
-| Field    | Type     | Notes                                                  |
-| -------- | -------- | ------------------------------------------------------ |
-| `email`  | `string` | Required. Trimmed, lowercased, validated, max 254      |
-| `source` | `string` | Optional. Where the signup came from, max 64           |
+| Field    | Type     | Notes                                             |
+| -------- | -------- | ------------------------------------------------- |
+| `email`  | `string` | Required. Trimmed, lowercased, validated, max 254 |
+| `source` | `string` | Optional. Where the signup came from, max 64      |
 
 The body is validated with Zod `.strict()` — unknown fields are rejected. The
 insert is idempotent on a unique email: a repeat signup returns the same `201`
@@ -1179,9 +1184,8 @@ it to the number of proxies in front (1 = ALB, 2 = CloudFront→ALB) so a forged
 **Limiter availability:** when Redis backing the limiter is unreachable, the
 write paths that must stay protected — `POST /v1/ingest`, `POST /v1/waitlist`,
 and all auth endpoints — **fail closed** with `503 SERVICE_UNAVAILABLE`; read
-paths and the
-Stripe webhook **fail open** so a limiter blip does not take down browsing or
-drop a legitimate Stripe retry.
+paths and the Stripe webhook **fail open** so a limiter blip does not take down
+browsing or drop a legitimate Stripe retry.
 
 ---
 
