@@ -12,6 +12,6 @@ export function getPrivacyMode(): PrivacyMode {
 export function getApiBaseUrl(): string {
   return vscode.workspace
     .getConfiguration('commma')
-    .get<string>('apiBaseUrl', 'http://localhost:3000')
+    .get<string>('apiBaseUrl', 'https://api.commma.dev')
     .replace(/\/+$/, '')
 }

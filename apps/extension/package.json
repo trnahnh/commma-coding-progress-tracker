@@ -1,13 +1,29 @@
 {
-  "name": "@commma/extension",
+  "name": "commma",
   "displayName": "commma",
   "description": "Track your coding activity with commma",
-  "version": "0.1.1",
-  "private": true,
+  "version": "1.0.0",
+  "publisher": "commma",
+  "license": "MIT",
+  "icon": "icon.png",
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Other"],
+  "categories": ["Other", "Visualization"],
+  "keywords": ["coding", "activity", "tracker", "heatmap", "productivity", "keyboard"],
+  "galleryBanner": {
+    "color": "#0c0b08",
+    "theme": "dark"
+  },
+  "homepage": "https://commma.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/trnahnh/commma-coding-progress-tracker.git",
+    "directory": "apps/extension"
+  },
+  "bugs": {
+    "url": "https://github.com/trnahnh/commma-coding-progress-tracker/issues"
+  },
   "activationEvents": ["onStartupFinished"],
   "main": "./dist/extension.js",
   "contributes": {
@@ -30,7 +46,7 @@
       "properties": {
         "commma.apiBaseUrl": {
           "type": "string",
-          "default": "http://localhost:3000",
+          "default": "https://api.commma.dev",
           "description": "Base URL of the commma API."
         },
         "commma.privacy": {
@@ -52,7 +68,9 @@
     "build": "esbuild src/extension.ts --bundle --platform=node --target=node20 --external:vscode --format=cjs --sourcemap --outfile=dist/extension.js",
     "watch": "esbuild src/extension.ts --bundle --platform=node --target=node20 --external:vscode --format=cjs --sourcemap --watch --outfile=dist/extension.js",
     "dev": "pnpm run watch",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "package": "vsce package --no-dependencies",
+    "publish": "vsce publish --no-dependencies"
   },
   "dependencies": {
     "@commma/shared": "workspace:*"
@@ -60,6 +78,7 @@
   "devDependencies": {
     "@types/node": "^20.11.17",
     "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.2.2",
     "esbuild": "^0.24.2",
     "typescript": "^5.8.3"
   }

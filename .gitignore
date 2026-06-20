@@ -11,3 +11,6 @@ out
 CLAUDE.md
 SESSION.md
 tools/video-render
+
+# VSCode extension package artifacts
+*.vsix
