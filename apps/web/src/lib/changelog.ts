@@ -4,9 +4,10 @@ export const CHANGELOG_ENTRIES = [
     date: 'Jun 2026',
     tag: 'Launch',
     changes: [
-      'The commma VS Code extension is live on the Visual Studio Marketplace — search "commma" in the Extensions panel, or install it from the web. Sign in with GitHub and your sessions, streaks, and keyboard heatmaps start filling in automatically; tracking stays key-labels-only, never the content you type',
-      'The whole site now points you straight to the extension — every install button across the landing page, the top navigation, pricing, and your profile opens the Marketplace listing instead of a launch waitlist',
+      'The commma extension is live on both the Visual Studio Marketplace and the Open VSX registry — so it installs natively in Cursor, Windsurf, VSCodium, and Gitpod, not just VS Code. Search "commma" in your editor\'s Extensions panel either way. Sign in with GitHub and your sessions, streaks, and keyboard heatmaps start filling in automatically; tracking stays key-labels-only, never the content you type',
+      'New Install page — every install button across the site (landing, top navigation, pricing, your profile) now opens a dedicated /install page that lets you pick your editor and copy a one-line terminal command, instead of assuming everyone is on VS Code and dropping them on the Marketplace',
       'The landing "get notified" section became a "get started" section: install front and center, with its email signup repurposed to tell you when the JetBrains, Neovim, and CLI clients land',
+      'Pages load instantly on revisit — profiles, sessions, the leaderboard, and the feed now cache their data, so moving between them (and even a full browser refresh) serves what you already saw immediately and quietly refreshes in the background, instead of a loading spinner and a fresh server hit every time',
       'The status page is now genuinely live — it checks the API, database, and cache in real time and refreshes itself, with clear "degraded" and "unreachable" states, instead of showing a hand-written "all operational" list',
       'commma is now discoverable on Google — we verified the domain with Google Search Console and submitted the sitemap, so the public pages start showing up in search results',
     ],

@@ -25,27 +25,53 @@ Nothing yet.
   operational" list. The granular per-feature rows were collapsed to the
   genuinely independent components (API process, database, cache) since the API
   is a single process.
-- **Extension** — The commma VS Code extension is published to the Visual Studio
-  Marketplace as `commma.commma` (v1.0.0). Built from `apps/extension` (esbuild
-  CommonJS bundle, packaged with `vsce package --no-dependencies`), it captures
-  key-label frequency, active file/language, keystrokes, and lines — never file
-  content (ADR-006) — and flushes a `HeartbeatEvent` batch to the API every 60s.
+- **Extension** — The commma extension is published to two registries as
+  `commma.commma` (v1.0.0): the Visual Studio Marketplace (for VS Code) and the
+  Open VSX registry (for Cursor, Windsurf, VSCodium, and Gitpod, which do not
+  use the Microsoft Marketplace). Built from `apps/extension` (esbuild CommonJS
+  bundle, packaged with `vsce package --no-dependencies`), it captures key-label
+  frequency, active file/language, keystrokes, and lines — never file content
+  (ADR-006) — and flushes a `HeartbeatEvent` batch to the API every 60s.
   Publish-prep: the workspace package was renamed `@commma/extension` → `commma`
   and the monorepo root → `commma-monorepo` (Marketplace names cannot be
   scoped); the `commma.apiBaseUrl` default was corrected from
   `http://localhost:3000` to `https://api.commma.dev` so a fresh install reaches
   production; added an icon, README (the Marketplace listing), bundled LICENSE,
-  and `publisher`/`repository` metadata.
-- **Web** — Install call-to-action overhaul for the extension launch. Every "get
-  notified at launch" / "join the waitlist" button — the landing hero, the top
-  navigation, both pricing free-tier cards, the final landing CTA, and the empty
-  state on your own profile — now links to the Marketplace listing
-  (`EXTENSION_URL` in `lib/config`, opened in a new tab). The landing
+  and `publisher`/`repository` metadata. Dual-publish tooling: added `ovsx` plus
+  `publish:openvsx` and `publish:all` scripts to the extension package.
+- **Web** — Install call-to-action overhaul for the extension launch, then a
+  dedicated multi-marketplace install page. Every "get notified at launch" /
+  "join the waitlist" button — the landing hero, the top navigation, both
+  pricing free-tier cards, the final landing CTA, and the empty state on your
+  own profile — now routes to a new `/install` page (`INSTALL_PATH` in
+  `lib/config`) instead of assuming VS Code and deep-linking the Marketplace.
+  The install page separates the two distribution channels: VS Code via the
+  Visual Studio Marketplace, and Cursor / Windsurf / VSCodium / Gitpod via Open
+  VSX, each with a one-line `code`/`cursor --install-extension` command and a
+  copy button, plus post-install steps. `lib/config` now exports
+  `VSCODE_MARKETPLACE_URL`, `OPEN_VSX_URL`, `EXTENSION_ID`, and `INSTALL_PATH`
+  (replacing the single `EXTENSION_URL`); `RootLayout` gained hash-anchor
+  scrolling so the page's "get notified" link reaches the landing waitlist
+  (`/#install`). The status page lists both registries. The landing
   launch-notify section (`#waitlist` → `#install`) became a "get started"
   install section, and its email capture is repurposed to notify subscribers
   when the JetBrains, Neovim, and CLI clients ship. Privacy and API-reference
   copy was updated to match (the email list is now "product updates", not an
   "early-access waitlist"). The web `LATEST_VERSION` is now `1.0.0`.
+- **Web** — Client-side data caching with TanStack Query (see ADR-014). Every
+  server read now flows through a centralized query layer (`lib/queries.ts`
+  factories, `lib/queryClient.ts` client) instead of per-page
+  `useEffect`/`useState` fetches: Profile, Leaderboard, SessionDetail, Feed,
+  Recap, Teams, TeamDashboard, and the landing activity widgets. Revisiting a
+  page within the 60s `staleTime` serves cached data with no network call, and a
+  `localStorage` persister (`PersistQueryClientProvider`) hydrates public pages
+  instantly across a hard refresh, then revalidates in the background. Only
+  public queries are persisted — auth-scoped reads (feed, recap, teams, status)
+  are tagged `meta.persist:false` and excluded, and the cache is cleared on
+  sign-in/sign-out so one user's data never reaches another. Pagination uses
+  `useInfiniteQuery`; period switches use `keepPreviousData`; team mutations
+  invalidate `['teams']`/`['team', slug]`. The status page stays on its own
+  poller (it always wants a fresh probe). Adds ~13 KB gzip to the main bundle.
 - **Infra** — Search Console & search indexing. Verified `commma.dev` domain
   ownership in Google Search Console with an apex `TXT` record
   (`google-site-verification=…`) added to Route53 as code
