@@ -710,3 +710,73 @@ owned by the zone resource).
 - **AWS CloudFormation / CDK** — viable, but Terraform's `import` ergonomics and
   multi-provider reach (the stack also touches Neon and Upstash, candidates for
   later adoption) fit better, and Terraform is the more transferable skill.
+
+## ADR-014: Client-Side Data Caching with TanStack Query
+
+**Status:** Accepted — 2026-06
+
+### Context
+
+Every web page fetched its server reads with a per-page `useEffect` + `useState`
+state machine (`loading` / `ready` / `error`). Each navigation remounted the
+page and refetched from scratch: revisiting a profile, the leaderboard, the
+feed, or a session re-ran the request, re-showed a skeleton, and re-hit the API
+→ Neon/Upstash even when the same data had just been on screen seconds earlier.
+There was no shared cache, no request deduplication, and a hard refresh threw
+everything away. On the free Neon/Upstash tiers these redundant reads are a
+direct cost and a latency cost (see `docs/METRICS.md` guardrails), and the
+duplicated fetch/loading/error boilerplate was repeated in every page.
+
+### Decision
+
+Adopt **TanStack Query (v5)** as the client read-and-cache layer. Routing stays
+on `react-router-dom` — TanStack **Router** was not adopted; only the Query
+library.
+
+- **Centralized queries.** Every read is a factory in `lib/queries.ts`
+  (`queryOptions` / `infiniteQueryOptions`) with a stable namespaced key, so
+  keys and invalidation are defined once, not inlined per page. The client
+  (`lib/queryClient.ts`) defaults to `staleTime` 60s, `gcTime` 24h, no retry on
+  4xx `ApiError`, and no refetch-on-focus.
+- **Public-only persistence.** `main.tsx` wraps the app in
+  `PersistQueryClientProvider` with a `localStorage` persister, so public pages
+  hydrate instantly across a hard refresh and then revalidate in the background.
+  Auth-scoped reads (feed, recap, teams, team detail, status) are tagged
+  `meta.persist:false` and excluded from `shouldDehydrateQuery` — another user's
+  data is never written to disk. The cache is cleared on sign-in/sign-out so it
+  never bleeds between accounts.
+- **Mutations invalidate.** Team create/invite/rename/delete/accept/decline call
+  the API then invalidate `['teams']` / `['team', slug]` rather than
+  hand-patching local state. Pagination uses `useInfiniteQuery` (profile
+  sessions, feed); period switches use `keepPreviousData` (leaderboards).
+- **Exceptions.** The status page keeps its own `setInterval` poller — it always
+  wants a fresh probe and its "unreachable discards stale data" semantics do not
+  map to a cache. Forms/actions (profile edit, billing return) are not cached
+  reads.
+
+### Consequences
+
+- Revisiting a page within `staleTime` is instant with zero network calls;
+  beyond it, cached data shows immediately while a background refetch updates
+  it. Redundant reads against Neon/Upstash drop sharply.
+- A hard refresh no longer blanks public pages — they restore from the persisted
+  cache, addressing the original complaint directly.
+- Per-page fetch boilerplate collapses to a `useQuery` call; loading/error/empty
+  states are still handled explicitly per the frontend audit.
+- Cost: ~13 KB gzip added to the main bundle, and a new caching layer to reason
+  about (staleness, invalidation, what is safe to persist).
+
+### Rejected Alternatives
+
+- **TanStack Router** — would replace `react-router-dom` wholesale for a feature
+  (route-loader caching) we get from Query without a routing migration.
+- **A hand-rolled in-memory cache** — reinvents deduplication, background
+  refetch, persistence, and invalidation that Query already solves, with more
+  bugs and no devtools.
+- **react-router data loaders** — viable for route-tied reads, but no built-in
+  persistence/staleness model and weaker for shared, non-route-scoped data.
+- **SWR** — comparable, but Query's `useInfiniteQuery`, mutation/invalidation
+  model, and the official persist plugin fit the pagination and offline-refresh
+  needs better.
+- **Do nothing** — leaves the redundant-refetch cost and the slow
+  revisit/refresh experience this ADR exists to fix.

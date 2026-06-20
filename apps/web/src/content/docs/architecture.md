@@ -38,6 +38,16 @@ The web heatmap is drawn on a Canvas, not as hundreds of DOM nodes. That keeps
 the render smooth and makes exporting a transparent PNG a direct read of the
 canvas, with no extra rasterization step.
 
+## Cached reads on the web
+
+The web app reads through TanStack Query rather than a fetch in every page. Each
+server read is cached under a stable key and deduplicated, so moving between
+pages — or even a full refresh — serves what you already saw instantly and
+revalidates in the background instead of refetching from scratch. The cache is
+persisted to `localStorage`, but only for public data; anything tied to your
+account stays in memory and is cleared on sign-out, so nothing private is left
+on a shared machine.
+
 ## Key labels, never content
 
 commma records the **label** of each key pressed and never the **content** of

@@ -1,21 +1,19 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import { LiveDot, Shell, StatusPanel } from '../components/chrome'
 import KeyboardHeatmap from '../components/KeyboardHeatmap'
 import {
   ApiError,
   deleteTeam,
-  getTeam,
-  getTeamHeatmap,
-  getTeamLeaderboard,
   inviteMember,
   removeMember,
   updateTeam,
-  type KeyboardHeatmap as KeyboardHeatmapData,
   type LeaderboardPeriod,
   type TeamDetail,
   type TeamLeaderboardData,
 } from '../lib/api'
+import { queries } from '../lib/queries'
 import { useAuth } from '../lib/auth'
 import { formatDuration } from '../lib/format'
 import { useSeo } from '../lib/seo'
@@ -396,25 +394,13 @@ function DeleteTeamButton({
   )
 }
 
-type HeatmapPhase =
-  | { phase: 'idle' }
-  | { phase: 'loading' }
-  | { phase: 'ready'; data: KeyboardHeatmapData }
-  | { phase: 'error'; message: string }
-
-type LoadState =
-  | { phase: 'loading' }
-  | { phase: 'ready'; team: TeamDetail; leaderboard: TeamLeaderboardData }
-  | { phase: 'error'; message: string }
-
 export default function TeamDashboard() {
   const { slug } = useParams<{ slug: string }>()
   const { token, user, isLoading: authLoading } = useAuth()
   const navigate = useNavigate()
-  const [state, setState] = useState<LoadState>({ phase: 'loading' })
+  const queryClient = useQueryClient()
   const [period, setPeriod] = useState<LeaderboardPeriod>('week')
-  const [lbLoading, setLbLoading] = useState(false)
-  const [heatmap, setHeatmap] = useState<HeatmapPhase>({ phase: 'idle' })
+  const [heatmapRequested, setHeatmapRequested] = useState(false)
 
   useEffect(() => {
     if (authLoading) return
@@ -422,64 +408,30 @@ export default function TeamDashboard() {
       navigate('/signin')
       return
     }
-    if (!slug) {
-      navigate('/teams')
-      return
-    }
-    let cancelled = false
-    Promise.all([getTeam(token, slug), getTeamLeaderboard(token, slug, 'week')])
-      .then(([team, leaderboard]) => {
-        if (!cancelled) setState({ phase: 'ready', team, leaderboard })
-      })
-      .catch((err: unknown) => {
-        if (!cancelled)
-          setState({
-            phase: 'error',
-            message:
-              err instanceof ApiError ? err.message : 'Something went wrong',
-          })
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [token, authLoading, slug, navigate])
+    if (!slug) navigate('/teams')
+  }, [authLoading, token, slug, navigate])
+
+  const enabled = !authLoading && !!token && !!slug
+  const teamQuery = useQuery({
+    ...queries.team(token ?? '', slug ?? ''),
+    enabled,
+  })
+  const leaderboardQuery = useQuery({
+    ...queries.teamLeaderboard(token ?? '', slug ?? '', period),
+    enabled,
+    placeholderData: keepPreviousData,
+  })
+  const heatmapQuery = useQuery({
+    ...queries.teamHeatmap(token ?? '', slug ?? ''),
+    enabled: enabled && heatmapRequested,
+  })
 
   useSeo({
-    title: state.phase === 'ready' ? `${state.team.name} · commma` : 'Team · commma',
+    title: teamQuery.data ? `${teamQuery.data.name} · commma` : 'Team · commma',
     noindex: true,
   })
 
-  const changePeriod = useCallback(
-    (p: LeaderboardPeriod) => {
-      if (!token || !slug) return
-      setPeriod(p)
-      setLbLoading(true)
-      getTeamLeaderboard(token, slug, p)
-        .then((lb) => {
-          setState((prev) =>
-            prev.phase === 'ready' ? { ...prev, leaderboard: lb } : prev,
-          )
-          setLbLoading(false)
-        })
-        .catch(() => setLbLoading(false))
-    },
-    [token, slug],
-  )
-
-  const loadHeatmap = () => {
-    if (!token || !slug) return
-    setHeatmap({ phase: 'loading' })
-    getTeamHeatmap(token, slug)
-      .then((data) => setHeatmap({ phase: 'ready', data }))
-      .catch((err: unknown) =>
-        setHeatmap({
-          phase: 'error',
-          message: err instanceof ApiError ? err.message : 'Failed to load',
-        }),
-      )
-  }
-
-  if (authLoading || state.phase === 'loading') {
+  if (authLoading || !token || !slug || teamQuery.isPending) {
     return (
       <Shell>
         <StatusPanel title='Loading…' body='Fetching team data.' />
@@ -487,44 +439,46 @@ export default function TeamDashboard() {
     )
   }
 
-  if (state.phase === 'error') {
+  if (teamQuery.isError) {
     return (
       <Shell>
-        <StatusPanel title='Not found' body={state.message} />
+        <StatusPanel
+          title='Not found'
+          body={
+            teamQuery.error instanceof ApiError
+              ? teamQuery.error.message
+              : 'Something went wrong'
+          }
+        />
       </Shell>
     )
   }
 
-  const { team, leaderboard } = state
+  const team = teamQuery.data
+  const leaderboard = leaderboardQuery.data
+  const lbLoading =
+    leaderboardQuery.isPending || leaderboardQuery.isPlaceholderData
   const myRole =
     team.members.find((m) => m.handle === user?.handle)?.role ?? 'member'
   const isOwner = myRole === 'owner'
+
+  const invalidateTeam = () =>
+    void queryClient.invalidateQueries({ queryKey: ['team', slug] })
 
   const handleMemberRemoved = (handle: string) => {
     if (handle === user?.handle) {
       navigate('/teams')
       return
     }
-    setState((prev) => {
-      if (prev.phase !== 'ready') return prev
-      const updated = {
-        ...prev.team,
-        members: prev.team.members.filter((m) => m.handle !== handle),
-        member_count: prev.team.member_count - 1,
-      }
-      return { ...prev, team: updated }
-    })
+    invalidateTeam()
   }
 
-  const handleTeamDeleted = () => navigate('/teams')
-
-  const handleRenamed = (name: string) => {
-    setState((prev) => {
-      if (prev.phase !== 'ready') return prev
-      return { ...prev, team: { ...prev.team, name } }
-    })
-    document.title = `${name} · commma`
+  const handleTeamDeleted = () => {
+    void queryClient.invalidateQueries({ queryKey: ['teams'] })
+    navigate('/teams')
   }
+
+  const handleRenamed = () => invalidateTeam()
 
   return (
     <Shell>
@@ -579,7 +533,7 @@ export default function TeamDashboard() {
                   myRole={myRole}
                   myHandle={user?.handle ?? ''}
                   slug={team.slug}
-                  token={token!}
+                  token={token}
                   onRemoved={handleMemberRemoved}
                 />
               ))}
@@ -606,24 +560,13 @@ export default function TeamDashboard() {
                     <>
                       <InviteForm
                         slug={team.slug}
-                        token={token!}
-                        onInvited={() => {
-                          if (!token || !slug) return
-                          getTeam(token, slug)
-                            .then((updated) =>
-                              setState((prev) =>
-                                prev.phase === 'ready'
-                                  ? { ...prev, team: updated }
-                                  : prev,
-                              ),
-                            )
-                            .catch(() => void 0)
-                        }}
+                        token={token}
+                        onInvited={invalidateTeam}
                       />
                       <RenameForm
                         currentName={team.name}
                         slug={team.slug}
-                        token={token!}
+                        token={token}
                         onRenamed={handleRenamed}
                       />
                     </>
@@ -633,7 +576,7 @@ export default function TeamDashboard() {
                   >
                     <DeleteTeamButton
                       slug={team.slug}
-                      token={token!}
+                      token={token}
                       onDeleted={handleTeamDeleted}
                     />
                   </div>
@@ -653,9 +596,9 @@ export default function TeamDashboard() {
                 Team ranking
               </h2>
             </div>
-            <PeriodTabs active={period} onChange={changePeriod} />
+            <PeriodTabs active={period} onChange={setPeriod} />
           </div>
-          {lbLoading ? (
+          {lbLoading || !leaderboard ? (
             <div className='px-5 sm:px-8 py-12 text-center font-mono text-[14px] text-ink-mute'>
               Loading…
             </div>
@@ -688,10 +631,10 @@ export default function TeamDashboard() {
                 Team keyboard activity
               </h2>
             </div>
-            {heatmap.phase === 'idle' && (
+            {!heatmapRequested && (
               <button
                 type='button'
-                onClick={loadHeatmap}
+                onClick={() => setHeatmapRequested(true)}
                 className='shrink-0 inline-flex items-center h-[44px] px-5 rounded-full font-mono text-[12px] uppercase tracking-wider
                   border border-rule-strong text-ink-soft hover:text-ink hover:border-ink-faint transition-colors'
               >
@@ -699,25 +642,27 @@ export default function TeamDashboard() {
               </button>
             )}
           </div>
-          {heatmap.phase === 'idle' && (
+          {!heatmapRequested && (
             <div className='px-5 sm:px-8 py-12 text-center font-mono text-[14px] text-ink-mute'>
               Merged heatmap across all team members' sessions.
             </div>
           )}
-          {heatmap.phase === 'loading' && (
+          {heatmapRequested && heatmapQuery.isPending && (
             <div className='px-5 sm:px-8 py-12 text-center font-mono text-[14px] text-ink-mute'>
               Loading…
             </div>
           )}
-          {heatmap.phase === 'error' && (
+          {heatmapRequested && heatmapQuery.isError && (
             <div className='px-5 sm:px-8 py-12 text-center font-mono text-[14px] text-accent'>
-              {heatmap.message}
+              {heatmapQuery.error instanceof ApiError
+                ? heatmapQuery.error.message
+                : 'Failed to load'}
             </div>
           )}
-          {heatmap.phase === 'ready' && (
+          {heatmapRequested && heatmapQuery.isSuccess && (
             <div className='p-5 sm:p-8'>
               <KeyboardHeatmap
-                heatmap={heatmap.data}
+                heatmap={heatmapQuery.data}
                 sessionLabel={team.name}
                 isPro={true}
               />

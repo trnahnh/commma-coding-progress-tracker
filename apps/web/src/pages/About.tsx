@@ -124,6 +124,12 @@ const STACK_GROUPS = [
         role: 'Keyboard heatmap',
         why: 'The live heatmap renders in-browser via Canvas 2D — no server round-trip. PNG export is a single toBlob call.',
       },
+      {
+        no: '014',
+        name: 'TanStack Query',
+        role: 'Client data caching',
+        why: 'Every server read is cached and deduplicated, so revisiting a page is instant instead of a refetch. A localStorage persister survives hard refreshes; only public data is persisted, never another user’s.',
+      },
     ],
   },
   {
@@ -131,13 +137,13 @@ const STACK_GROUPS = [
     label: 'Extension',
     items: [
       {
-        no: '014',
+        no: '015',
         name: 'VSCode Extension API',
         role: 'Data capture',
         why: 'contentChanges → key label histograms only. The typed content is never read, stored, or transmitted. ADR-006.',
       },
       {
-        no: '015',
+        no: '016',
         name: 'esbuild',
         role: 'Extension bundler',
         why: 'ESM input → CJS output in one pass. CommonJS is required by the VS Code host — esbuild handles it without a wrapper.',
@@ -149,37 +155,37 @@ const STACK_GROUPS = [
     label: 'Infrastructure',
     items: [
       {
-        no: '016',
+        no: '017',
         name: 'AWS EC2',
         role: 'API compute',
         why: 't4g Graviton behind PM2. ARM keeps it cheap to run 24/7 at MVP scale, with enough RAM for the 5-min aggregation loop and Sharp renders.',
       },
       {
-        no: '017',
+        no: '018',
         name: 'S3 + CloudFront',
         role: 'Web CDN',
         why: 'Static Vite build on S3. CloudFront handles edge caching, HTTPS, and OG-image delivery without a dedicated web server.',
       },
       {
-        no: '018',
+        no: '019',
         name: 'Neon',
         role: 'Postgres hosting',
         why: 'Serverless Postgres with a 5 GB free tier, built-in connection pooling via PgBouncer, and database branching for cheap dev/staging copies.',
       },
       {
-        no: '019',
+        no: '020',
         name: 'Upstash',
         role: 'Serverless Redis',
         why: 'Pay-per-request Redis with a free tier that handles leaderboard sorted sets and rate-limit counters at launch volume.',
       },
       {
-        no: '020',
+        no: '021',
         name: 'PM2',
         role: 'Process manager',
         why: 'Keeps the API alive across crashes and deploys on EC2. RUN_AGGREGATION env ensures only one replica runs the scheduler.',
       },
       {
-        no: '021',
+        no: '022',
         name: 'Terraform',
         role: 'Infrastructure as code',
         why: 'The whole AWS footprint — EC2, S3, CloudFront, Route53, ACM, IAM — is imported into Terraform state with native S3 locking. Every change ships as a reviewed plan, never a console click.',
@@ -191,19 +197,19 @@ const STACK_GROUPS = [
     label: 'Services',
     items: [
       {
-        no: '022',
+        no: '023',
         name: 'Resend',
         role: 'Transactional email',
         why: 'Clean TypeScript SDK, generous free tier, and deliverability that does not require wrestling with SPF/DKIM from day one.',
       },
       {
-        no: '023',
+        no: '024',
         name: 'Sharp',
         role: 'OG image rendering',
         why: 'SVG keyboard heatmap rasterized server-side in ~120ms. No headless browser, no Puppeteer, no Chromium cold-start tax.',
       },
       {
-        no: '024',
+        no: '025',
         name: 'OpenAI',
         role: 'AI prose — optional',
         why: 'GPT-4.1-nano writes only the recap headline and note — numbers stay deterministic. Any failure falls back to the template.',

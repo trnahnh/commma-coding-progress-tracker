@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import { Shell, StatusPanel } from '../components/chrome'
-import { ApiError, getFeed, type FeedEntry, type FeedPage } from '../lib/api'
+import { ApiError, type FeedEntry } from '../lib/api'
+import { queries } from '../lib/queries'
 import { useAuth } from '../lib/auth'
 import { formatClock, formatDate, formatDuration } from '../lib/format'
 import { langStyle } from '../lib/langColors'
@@ -71,12 +72,12 @@ function FeedCard({ entry }: { entry: FeedEntry }) {
 
 function FeedList({
   entries,
-  nextCursor,
+  hasMore,
   onLoadMore,
   loadingMore,
 }: {
   entries: FeedEntry[]
-  nextCursor: string | null
+  hasMore: boolean
   onLoadMore: () => void
   loadingMore: boolean
 }) {
@@ -92,7 +93,7 @@ function FeedList({
       {entries.map((e) => (
         <FeedCard key={e.session.id} entry={e} />
       ))}
-      {nextCursor && (
+      {hasMore && (
         <div className='flex justify-center py-5 border-t border-rule'>
           <button
             type='button'
@@ -108,75 +109,26 @@ function FeedList({
   )
 }
 
-type LoadState =
-  | { phase: 'loading' }
-  | {
-      phase: 'ready'
-      entries: FeedEntry[]
-      nextCursor: string | null
-    }
-  | { phase: 'error'; error: ApiError }
-
 export default function Feed() {
   const { token, isLoading: authLoading } = useAuth()
-  const [state, setState] = useState<LoadState>({ phase: 'loading' })
-  const [loadingMore, setLoadingMore] = useState(false)
+  const {
+    data,
+    isPending,
+    isError,
+    error,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    ...queries.feed(token ?? ''),
+    enabled: !!token,
+  })
 
   useSeo({
     title: 'Feed · commma',
     description: 'Sessions from the developers you follow on commma.',
     noindex: true,
   })
-
-  useEffect(() => {
-    if (!token) return
-    let cancelled = false
-    getFeed(token)
-      .then((page: FeedPage) => {
-        if (!cancelled)
-          setState({
-            phase: 'ready',
-            entries: page.entries,
-            nextCursor: page.next_cursor,
-          })
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return
-        setState({
-          phase: 'error',
-          error:
-            err instanceof ApiError
-              ? err
-              : new ApiError(0, 'UNKNOWN', 'Something went wrong'),
-        })
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [token])
-
-  const loadMore = useCallback(async () => {
-    if (!token || state.phase !== 'ready' || !state.nextCursor || loadingMore)
-      return
-    const cursor = state.nextCursor
-    setLoadingMore(true)
-    try {
-      const page = await getFeed(token, cursor)
-      setState((prev) =>
-        prev.phase === 'ready'
-          ? {
-              ...prev,
-              entries: [...prev.entries, ...page.entries],
-              nextCursor: page.next_cursor,
-            }
-          : prev,
-      )
-    } catch {
-      void 0
-    } finally {
-      setLoadingMore(false)
-    }
-  }, [token, state, loadingMore])
 
   const header = (
     <div className='px-5 sm:px-8 py-5 sm:py-6 border-b border-rule'>
@@ -223,7 +175,7 @@ export default function Feed() {
     )
   }
 
-  if (state.phase === 'loading') {
+  if (isPending) {
     return (
       <Shell>
         <StatusPanel
@@ -234,9 +186,10 @@ export default function Feed() {
     )
   }
 
-  if (state.phase === 'error') {
+  if (isError) {
     const notAuth =
-      state.error.status === 401 || state.error.code === 'UNAUTHORIZED'
+      error instanceof ApiError &&
+      (error.status === 401 || error.code === 'UNAUTHORIZED')
     return (
       <Shell>
         <StatusPanel
@@ -244,22 +197,24 @@ export default function Feed() {
           body={
             notAuth
               ? 'Sign in again via the commma extension.'
-              : state.error.message
+              : error.message
           }
         />
       </Shell>
     )
   }
 
+  const entries = data.pages.flatMap((page) => page.entries)
+
   return (
     <Shell>
       <div className='border border-rule-strong rounded-lg bg-linear-to-b from-paper-2 to-paper overflow-hidden surface'>
         {header}
         <FeedList
-          entries={state.entries}
-          nextCursor={state.nextCursor}
-          onLoadMore={loadMore}
-          loadingMore={loadingMore}
+          entries={entries}
+          hasMore={hasNextPage}
+          onLoadMore={() => void fetchNextPage()}
+          loadingMore={isFetchingNextPage}
         />
       </div>
     </Shell>

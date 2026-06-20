@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { hasProAccess } from '@commma/shared'
 import { LiveDot, Shell, StatusPanel } from '../components/chrome'
-import { ApiError, getRecap, type RecapData } from '../lib/api'
+import { ApiError } from '../lib/api'
+import { queries } from '../lib/queries'
 import { useAuth } from '../lib/auth'
 import { FREE_MODE } from '../lib/config'
 import { formatDuration } from '../lib/format'
@@ -65,8 +67,7 @@ function RecapSkeleton() {
 export default function Recap() {
   const { token, user, isLoading } = useAuth()
   const navigate = useNavigate()
-  const [recap, setRecap] = useState<RecapData | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const isPro = !!user && hasProAccess(user.plan ?? 'free', FREE_MODE)
 
   useSeo({
     title: 'Weekly recap · commma',
@@ -82,20 +83,21 @@ export default function Recap() {
     }
     if (!hasProAccess(user.plan ?? 'free', FREE_MODE)) {
       navigate('/pricing')
-      return
     }
-    void getRecap(token)
-      .then(setRecap)
-      .catch((err: unknown) => {
-        if (err instanceof ApiError && err.status === 403) {
-          navigate('/pricing')
-        } else {
-          setError('Could not load your recap. Try again shortly.')
-        }
-      })
   }, [token, user, isLoading, navigate])
 
-  if (isLoading || (!recap && !error)) {
+  const recapQuery = useQuery({
+    ...queries.recap(token ?? ''),
+    enabled: !isLoading && !!token && isPro,
+  })
+
+  useEffect(() => {
+    if (recapQuery.error instanceof ApiError && recapQuery.error.status === 403) {
+      navigate('/pricing')
+    }
+  }, [recapQuery.error, navigate])
+
+  if (isLoading || !token || !user || !isPro || recapQuery.isPending) {
     return (
       <Shell>
         <RecapSkeleton />
@@ -103,16 +105,28 @@ export default function Recap() {
     )
   }
 
-  if (error) {
+  if (recapQuery.isError) {
+    if (
+      recapQuery.error instanceof ApiError &&
+      recapQuery.error.status === 403
+    ) {
+      return (
+        <Shell>
+          <RecapSkeleton />
+        </Shell>
+      )
+    }
     return (
       <Shell>
-        <StatusPanel title='Something went wrong' body={error} />
+        <StatusPanel
+          title='Something went wrong'
+          body='Could not load your recap. Try again shortly.'
+        />
       </Shell>
     )
   }
 
-  if (!recap) return null
-
+  const recap = recapQuery.data
   const progress = weekProgress(recap.week_start, recap.week_end)
   const dayNum = Math.min(7, Math.max(1, Math.ceil(progress * 7)))
   const weekLabel = formatWeekRange(recap.week_start, recap.week_end)

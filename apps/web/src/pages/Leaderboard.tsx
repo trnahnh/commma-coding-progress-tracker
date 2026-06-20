@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { LiveDot, Shell, StatusPanel } from '../components/chrome'
 import {
-  ApiError,
-  getLeaderboard,
   type LeaderboardData,
   type LeaderboardEntry,
   type LeaderboardPeriod,
 } from '../lib/api'
+import { queries } from '../lib/queries'
 import { formatDuration } from '../lib/format'
 import { langStyle } from '../lib/langColors'
 import { useSeo } from '../lib/seo'
@@ -170,47 +170,19 @@ function LeaderboardCard({
   )
 }
 
-type LoadState =
-  | { phase: 'loading' }
-  | { phase: 'ready'; data: LeaderboardData }
-  | { phase: 'error'; error: ApiError }
-
 export default function Leaderboard() {
   const [period, setPeriod] = useState<LeaderboardPeriod>('week')
-  const [state, setState] = useState<LoadState>({ phase: 'loading' })
-
-  const changePeriod = useCallback((p: LeaderboardPeriod) => {
-    setPeriod(p)
-    setState({ phase: 'loading' })
-  }, [])
-
-  useEffect(() => {
-    let cancelled = false
-    getLeaderboard(period)
-      .then((data) => {
-        if (!cancelled) setState({ phase: 'ready', data })
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return
-        setState({
-          phase: 'error',
-          error:
-            err instanceof ApiError
-              ? err
-              : new ApiError(0, 'UNKNOWN', 'Something went wrong'),
-        })
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [period])
+  const { data, isPending, isError, error } = useQuery({
+    ...queries.leaderboard(period),
+    placeholderData: keepPreviousData,
+  })
 
   useSeo({
     title: 'Leaderboard · commma',
     description: "This week's global coding leaderboard on commma.",
   })
 
-  if (state.phase === 'loading') {
+  if (isPending) {
     return (
       <Shell>
         <StatusPanel
@@ -221,10 +193,10 @@ export default function Leaderboard() {
     )
   }
 
-  if (state.phase === 'error') {
+  if (isError) {
     return (
       <Shell>
-        <StatusPanel title='Something went wrong' body={state.error.message} />
+        <StatusPanel title='Something went wrong' body={error.message} />
       </Shell>
     )
   }
@@ -232,9 +204,9 @@ export default function Leaderboard() {
   return (
     <Shell>
       <LeaderboardCard
-        data={state.data}
+        data={data}
         period={period}
-        onPeriodChange={changePeriod}
+        onPeriodChange={setPeriod}
       />
     </Shell>
   )

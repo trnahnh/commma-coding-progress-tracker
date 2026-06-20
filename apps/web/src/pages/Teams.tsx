@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Shell, StatusPanel } from '../components/chrome'
 import {
   ApiError,
   acceptInvite,
   createTeam,
   declineInvite,
-  getMyTeams,
-  getTeamInvites,
   type TeamInvite,
   type TeamSummary,
 } from '../lib/api'
+import { queries } from '../lib/queries'
 import { hasTeamAccess } from '@commma/shared'
 import { useAuth } from '../lib/auth'
 import { FREE_MODE } from '../lib/config'
@@ -240,48 +240,41 @@ function CreateTeamPanel({
   )
 }
 
-type LoadPhase =
-  | { phase: 'loading' }
-  | { phase: 'ready'; teams: TeamSummary[]; invites: TeamInvite[] }
-  | { phase: 'error'; message: string }
-
 export default function Teams() {
   const { token, user, isLoading: authLoading } = useAuth()
-  const [state, setState] = useState<LoadPhase>({ phase: 'loading' })
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
   useEffect(() => {
-    if (authLoading) return
-    if (!token) {
-      navigate('/signin')
-      return
-    }
-    let cancelled = false
-    Promise.all([getMyTeams(token), getTeamInvites(token)])
-      .then(([teamsRes, invitesRes]) => {
-        if (!cancelled)
-          setState({
-            phase: 'ready',
-            teams: teamsRes.teams,
-            invites: invitesRes.invites,
-          })
-      })
-      .catch((err: unknown) => {
-        if (!cancelled)
-          setState({
-            phase: 'error',
-            message:
-              err instanceof ApiError ? err.message : 'Something went wrong',
-          })
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [token, authLoading, navigate])
+    if (!authLoading && !token) navigate('/signin')
+  }, [authLoading, token, navigate])
+
+  const enabled = !authLoading && !!token
+  const teamsQuery = useQuery({ ...queries.teams(token ?? ''), enabled })
+  const invitesQuery = useQuery({
+    ...queries.teamInvites(token ?? ''),
+    enabled,
+  })
+
+  const acceptMutation = useMutation({
+    mutationFn: (id: string) => acceptInvite(token ?? '', id),
+    onSuccess: () =>
+      void queryClient.invalidateQueries({ queryKey: ['teams'] }),
+  })
+  const declineMutation = useMutation({
+    mutationFn: (id: string) => declineInvite(token ?? '', id),
+    onSuccess: () =>
+      void queryClient.invalidateQueries({ queryKey: ['teams', 'invites'] }),
+  })
 
   useSeo({ title: 'Teams · commma', noindex: true })
 
-  if (authLoading || state.phase === 'loading') {
+  if (
+    authLoading ||
+    !token ||
+    teamsQuery.isPending ||
+    invitesQuery.isPending
+  ) {
     return (
       <Shell>
         <StatusPanel title='Loading…' body='Fetching your teams.' />
@@ -289,58 +282,25 @@ export default function Teams() {
     )
   }
 
-  if (state.phase === 'error') {
+  if (teamsQuery.isError || invitesQuery.isError) {
+    const err = teamsQuery.error ?? invitesQuery.error
     return (
       <Shell>
-        <StatusPanel title='Something went wrong' body={state.message} />
+        <StatusPanel
+          title='Something went wrong'
+          body={err instanceof ApiError ? err.message : 'Something went wrong'}
+        />
       </Shell>
     )
   }
 
-  const { teams, invites } = state
+  const teams = teamsQuery.data.teams
+  const invites = invitesQuery.data.invites
   const isTeamPlan = hasTeamAccess(user?.plan ?? 'free', FREE_MODE)
   const ownedCount = teams.filter((t) => t.role === 'owner').length
 
-  const handleAccept = (id: string) => {
-    if (!token) return
-    acceptInvite(token, id)
-      .then((res) => {
-        setState((prev) => {
-          if (prev.phase !== 'ready') return prev
-          const remaining = prev.invites.filter((inv) => inv.id !== id)
-          const accepted = prev.invites.find((inv) => inv.id === id)
-          if (!accepted) return { ...prev, invites: remaining }
-          const newTeam: TeamSummary = {
-            slug: res.team.slug,
-            name: res.team.name,
-            role: 'member',
-            created_at: new Date().toISOString(),
-            frozen: false,
-          }
-          return {
-            ...prev,
-            invites: remaining,
-            teams: [newTeam, ...prev.teams],
-          }
-        })
-      })
-      .catch(() => void 0)
-  }
-
-  const handleDecline = (id: string) => {
-    if (!token) return
-    declineInvite(token, id)
-      .then(() => {
-        setState((prev) => {
-          if (prev.phase !== 'ready') return prev
-          return {
-            ...prev,
-            invites: prev.invites.filter((inv) => inv.id !== id),
-          }
-        })
-      })
-      .catch(() => void 0)
-  }
+  const handleAccept = (id: string) => acceptMutation.mutate(id)
+  const handleDecline = (id: string) => declineMutation.mutate(id)
 
   return (
     <Shell>
@@ -408,12 +368,8 @@ export default function Teams() {
         ) : isTeamPlan && token ? (
           <CreateTeamPanel
             token={token}
-            onCreated={(slug) =>
-              setState((prev) => {
-                if (prev.phase !== 'ready') return prev
-                if (prev.teams.some((t) => t.slug === slug)) return prev
-                return prev
-              })
+            onCreated={() =>
+              void queryClient.invalidateQueries({ queryKey: ['teams'] })
             }
           />
         ) : (

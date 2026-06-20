@@ -1,17 +1,17 @@
-import { useEffect, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { hasProAccess, QWERTY_LAYOUT } from '@commma/shared'
 import { LiveDot, Shell, StatusPanel } from '../components/chrome'
 import KeyboardHeatmapCanvas from '../components/KeyboardHeatmap'
 import {
   ApiError,
-  getSession,
   heatmapCardUrl,
   type KeyboardHeatmap,
   type SessionDetail as Session,
   type SessionFile,
   type SessionLang,
 } from '../lib/api'
+import { queries } from '../lib/queries'
 import { useAuth } from '../lib/auth'
 import { FREE_MODE } from '../lib/config'
 import { formatClock, formatDate, formatDuration } from '../lib/format'
@@ -303,73 +303,41 @@ function SessionCard({ session, isPro }: { session: Session; isPro: boolean }) {
   )
 }
 
-type LoadState =
-  | { phase: 'loading' }
-  | { phase: 'ready'; session: Session }
-  | { phase: 'error'; error: ApiError }
-
 export default function SessionDetail() {
   const { id = '' } = useParams()
   const { user } = useAuth()
   const isPro = hasProAccess(user?.plan ?? 'free', FREE_MODE)
-  const [state, setState] = useState<LoadState>({ phase: 'loading' })
-  const [trackedId, setTrackedId] = useState(id)
+  const { data: session, isPending, isError, error } = useQuery(
+    queries.session(id),
+  )
 
-  if (trackedId !== id) {
-    setTrackedId(id)
-    setState({ phase: 'loading' })
-  }
-
-  useEffect(() => {
-    let cancelled = false
-    getSession(id)
-      .then((session) => {
-        if (!cancelled) setState({ phase: 'ready', session })
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return
-        setState({
-          phase: 'error',
-          error:
-            err instanceof ApiError
-              ? err
-              : new ApiError(0, 'UNKNOWN', 'Something went wrong'),
-        })
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [id])
-
-  const sessionLabel =
-    state.phase === 'ready'
-      ? `${formatDate(state.session.started_at)} session`
-      : state.phase === 'error'
-        ? 'Session not found'
-        : 'Loading session'
-  const sessionDescription =
-    state.phase === 'ready'
-      ? [
-          formatDuration(state.session.duration_s),
-          state.session.langs[0]?.lang ? `in ${state.session.langs[0].lang}` : null,
-          state.session.lines_delta
-            ? `· ${state.session.lines_delta.toLocaleString()} loc`
-            : null,
-        ]
-          .filter(Boolean)
-          .join(' ')
-      : undefined
+  const sessionLabel = session
+    ? `${formatDate(session.started_at)} session`
+    : isError
+      ? 'Session not found'
+      : 'Loading session'
+  const sessionDescription = session
+    ? [
+        formatDuration(session.duration_s),
+        session.langs[0]?.lang ? `in ${session.langs[0].lang}` : null,
+        session.lines_delta
+          ? `· ${session.lines_delta.toLocaleString()} loc`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(' ')
+    : undefined
   useSeo({
     title: `${sessionLabel} · commma`,
     description: sessionDescription,
     ogType: 'article',
     image:
-      state.phase === 'ready' && state.session.card_available
+      session && session.card_available
         ? { url: heatmapCardUrl(id), width: 1920, height: 1080 }
         : undefined,
   })
 
-  if (state.phase === 'loading') {
+  if (isPending) {
     return (
       <Shell>
         <BackLink />
@@ -381,9 +349,10 @@ export default function SessionDetail() {
     )
   }
 
-  if (state.phase === 'error') {
-    const { error } = state
-    const notFound = error.status === 404 || error.code === 'NOT_FOUND'
+  if (isError) {
+    const notFound =
+      error instanceof ApiError &&
+      (error.status === 404 || error.code === 'NOT_FOUND')
     return (
       <Shell>
         <BackLink />
@@ -402,7 +371,7 @@ export default function SessionDetail() {
   return (
     <Shell>
       <BackLink />
-      <SessionCard session={state.session} isPro={isPro} />
+      <SessionCard session={session} isPro={isPro} />
     </Shell>
   )
 }

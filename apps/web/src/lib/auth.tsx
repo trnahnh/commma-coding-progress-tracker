@@ -15,6 +15,7 @@ import {
   refreshAccessToken,
   signOut as apiSignOut,
 } from './api'
+import { queryClient } from './queryClient'
 
 const STORAGE_KEY = 'commma_refresh_token'
 const REFRESH_MARGIN_MS = 60_000
@@ -140,6 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const setSession = useCallback(
     (accessToken: string, refreshToken: string, user: AuthUser) => {
+      queryClient.clear()
       refreshTokenRef.current = refreshToken
       saveRefreshToken(refreshToken)
       setState({ user: user as MeResult, token: accessToken, isLoading: true })
@@ -175,6 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const rt = refreshTokenRef.current
     refreshTokenRef.current = null
     clearRefreshToken()
+    queryClient.clear()
     setState({ user: null, token: null, isLoading: false })
     if (token && rt) {
       try {
