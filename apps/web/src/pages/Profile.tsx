@@ -11,7 +11,7 @@ import {
 } from '../lib/api'
 import { hasProAccess } from '@commma/shared'
 import { useAuth } from '../lib/auth'
-import { FREE_MODE } from '../lib/config'
+import { EXTENSION_URL, FREE_MODE } from '../lib/config'
 import { formatClock, formatDate, formatDuration } from '../lib/format'
 import { langStyle } from '../lib/langColors'
 import { useSeo } from '../lib/seo'
@@ -302,11 +302,16 @@ function SessionFeed({
         <div className='px-5 sm:px-8 py-12 text-center font-mono text-[13px] text-ink-mute'>
           {isOwnProfile ? (
             <>
-              No sessions yet — the extension isn&apos;t public yet.{' '}
-              <a href='/#waitlist' className='text-accent hover:underline'>
-                Join the waitlist
+              No sessions yet.{' '}
+              <a
+                href={EXTENSION_URL}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='text-accent hover:underline'
+              >
+                Install the commma extension
               </a>{' '}
-              to get notified at launch.
+              and start coding to log your first session.
             </>
           ) : (
             'No sessions yet.'

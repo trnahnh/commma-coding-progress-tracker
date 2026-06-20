@@ -223,7 +223,7 @@ const ENDPOINTS = [
       {
         method: 'POST',
         path: '/v1/waitlist',
-        desc: 'Join the early-access waitlist. Public endpoint, idempotent on email.',
+        desc: 'Join the product-updates list (new editor integrations). Public endpoint, idempotent on email.',
       },
     ],
   },

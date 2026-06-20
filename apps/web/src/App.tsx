@@ -16,6 +16,7 @@ import {
   type StreamEntry,
 } from './lib/api'
 import { useAuth } from './lib/auth'
+import { EXTENSION_URL } from './lib/config'
 import { LATEST_VERSION } from './lib/changelog'
 import { formatClock, formatDate, formatDuration } from './lib/format'
 import { langStyle } from './lib/langColors'
@@ -196,11 +197,13 @@ function Hero() {
           </p>
           <div className='flex gap-3 items-center flex-wrap md:justify-end opacity-0 animate-rise-700 delay-640'>
             <a
-              href='#waitlist'
+              href={EXTENSION_URL}
+              target='_blank'
+              rel='noopener noreferrer'
               className='group inline-flex items-center gap-2.5 h-[48px] px-6 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium
                 bg-accent text-paper border border-accent glow-accent press hover:bg-ink hover:border-ink transition-colors'
             >
-              Get notified at launch
+              Install for VS Code
               <span className='inline-block transition-transform group-hover:translate-x-1'>
                 →
               </span>
@@ -827,46 +830,61 @@ function Waitlist() {
 
   return (
     <section
-      id='waitlist'
+      id='install'
       className='py-[clamp(56px,9vw,140px)] border-t border-rule'
     >
       <div className='mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)]'>
         <SectionHead
           no='04'
-          kicker='stay in the loop'
+          kicker='get started'
           title={
             <>
-              Know the moment it <em className='italic text-accent'>launches.</em>
+              It&apos;s <em className='italic text-accent'>live.</em> Install and
+              start logging.
             </>
           }
-          aside='free · no invite needed'
+          aside='free · no card'
         />
         <Reveal>
           <div className='rounded-xl border border-rule-strong bg-paper-2/60 surface px-6 py-9 sm:px-8 sm:py-[clamp(36px,6vw,72px)] lg:px-[clamp(40px,5vw,72px)]'>
             <div className='grid gap-9 lg:gap-12 lg:grid-cols-[1.1fr_1fr] lg:items-center'>
               <div className='min-w-0'>
                 <p className='font-mono text-[12px] sm:text-[13px] tracking-[0.18em] uppercase text-ink-mute m-0 mb-5 inline-flex items-center gap-2.5'>
-                  <LiveDot /> shipping soon
+                  <LiveDot /> live on the marketplace
                 </p>
                 <h3 className='font-serif font-normal text-[clamp(28px,4.5vw,52px)] leading-[1.02] tracking-[-0.02em] m-0 mb-4 text-ink'>
-                  Get notified at launch
+                  Install the VS Code extension
                 </h3>
-                <p className='font-sans text-[15px] sm:text-[16px] leading-relaxed text-ink-soft m-0 max-w-[48ch]'>
-                  commma is free and open — drop your email and we&apos;ll ping
-                  you the moment the extension hits the Marketplace. No invite,
-                  no card, just a heads-up.
+                <p className='font-sans text-[15px] sm:text-[16px] leading-relaxed text-ink-soft m-0 max-w-[48ch] mb-7'>
+                  commma is live on the VS Code Marketplace. Install it, sign in
+                  with GitHub, and your sessions, streaks, and heatmaps start
+                  filling in automatically — free, no card.
                 </p>
+                <a
+                  href={EXTENSION_URL}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='group inline-flex items-center gap-2.5 h-[52px] px-7 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium
+                    bg-accent text-paper border border-accent glow-accent press hover:bg-ink hover:border-ink transition-colors'
+                >
+                  Install for VS Code
+                  <span className='inline-block transition-transform group-hover:translate-x-1'>
+                    →
+                  </span>
+                </a>
               </div>
 
               <div className='min-w-0'>
+                <p className='font-mono text-[12px] sm:text-[13px] tracking-[0.18em] uppercase text-ink-mute m-0 mb-5'>
+                  Coding in another editor? JetBrains, Neovim, and a CLI are next
+                </p>
                 {status === 'done' ? (
                   <div className='rounded-lg border border-accent-line bg-accent-soft px-6 py-7 text-center'>
                     <p className='font-mono text-[12px] tracking-[0.18em] uppercase text-accent m-0 mb-2'>
                       You&apos;re on the list
                     </p>
                     <p className='font-sans text-[15px] leading-relaxed text-ink-soft m-0'>
-                      Watch your inbox — we&apos;ll email you the moment it
-                      ships.
+                      We&apos;ll email you the moment your editor lands.
                     </p>
                   </div>
                 ) : (
@@ -920,7 +938,7 @@ function Waitlist() {
                     >
                       {status === 'error'
                         ? message
-                        : 'We only email you about launch. Unsubscribe anytime.'}
+                        : 'One email when your editor ships. Unsubscribe anytime.'}
                     </p>
                   </form>
                 )}
@@ -957,10 +975,12 @@ function Final() {
               </span>
             </Link>
             <a
-              href='#waitlist'
+              href={EXTENSION_URL}
+              target='_blank'
+              rel='noopener noreferrer'
               className='group inline-flex items-center gap-2.5 h-[52px] px-8 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint transition-colors press'
             >
-              Get notified
+              Install for VS Code
               <span className='inline-block transition-transform group-hover:translate-x-1'>
                 →
               </span>

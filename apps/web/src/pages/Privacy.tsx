@@ -93,10 +93,10 @@ export default function Privacy() {
                 — handle, email, and avatar URL from your GitHub OAuth grant.
               </li>
               <li>
-                <strong className='text-ink font-medium'>Waitlist email</strong>{' '}
-                — if you join the early-access waitlist, just the email address
-                you submit, used only to send a confirmation and notify you when
-                access opens.
+                <strong className='text-ink font-medium'>Updates email</strong>{' '}
+                — if you join the product-updates list, just the email address
+                you submit, used only to send a confirmation and let you know
+                when new editor integrations ship.
               </li>
             </ul>
           </Section>
@@ -164,7 +164,8 @@ export default function Privacy() {
           <Section title='Third parties'>
             <p>
               We use GitHub OAuth for sign-in and Resend to deliver
-              transactional email (waitlist confirmations, weekly recaps). We
+              transactional email (updates-list confirmations, weekly recaps).
+              We
               do not sell, share, or license your data to any third party.
               Infrastructure runs on AWS (compute), Neon (database), and
               Upstash (cache). All data is stored in the United States.

@@ -32,8 +32,8 @@ export default function Status() {
         </h1>
         <p className='font-sans text-[16px] leading-relaxed text-ink-soft m-0 mb-12 max-w-[48ch]'>
           commma is live on AWS — EC2 t4g (API), S3 + CloudFront (web), Neon
-          Postgres, Upstash Redis — free and open in early access. Public launch
-          is pending.
+          Postgres, Upstash Redis — free and open in early access. The VS Code
+          extension is live on the Marketplace.
         </p>
 
         <div className='border border-rule-strong rounded-lg overflow-hidden surface mb-8'>

@@ -5,12 +5,11 @@ about a minute once the extension is installed.
 
 ## 1. Install the extension
 
-commma ships as a VSCode extension. It is built and ready, but not yet published
-to the Marketplace — [join the waitlist](/#waitlist) and we will email you the
-moment it is live.
-
-When it ships, install is one click from the Marketplace, the same as any other
-VSCode extension.
+commma ships as a VSCode extension, live on the Visual Studio Marketplace.
+Install it in one click from the
+[Marketplace listing](https://marketplace.visualstudio.com/items?itemName=commma.commma),
+or search **commma** in the Extensions panel inside VSCode — the same as any
+other extension.
 
 ## 2. Sign in with GitHub
 

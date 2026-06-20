@@ -9,7 +9,7 @@ import {
   type PaidPlan,
 } from '../lib/api'
 import { useAuth } from '../lib/auth'
-import { FREE_MODE } from '../lib/config'
+import { EXTENSION_URL, FREE_MODE } from '../lib/config'
 import { setPostAuthRedirect } from '../lib/redirect'
 import { useSeo } from '../lib/seo'
 
@@ -226,10 +226,12 @@ function FreePricing() {
             </div>
             <FeatureList features={FEATURES_FREE} />
             <a
-              href='/#waitlist'
+              href={EXTENSION_URL}
+              target='_blank'
+              rel='noopener noreferrer'
               className='group inline-flex items-center justify-center gap-2.5 min-h-[44px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors glow-accent press bg-accent text-paper border border-accent hover:bg-ink hover:border-ink'
             >
-              Join the waitlist
+              Install for VS Code
               <span className='inline-block transition-transform group-hover:translate-x-1'>
                 →
               </span>
@@ -469,10 +471,12 @@ function PaidPricing() {
             </div>
             <FeatureList features={FEATURES_FREE} />
             <a
-              href='/#waitlist'
+              href={EXTENSION_URL}
+              target='_blank'
+              rel='noopener noreferrer'
               className='group inline-flex items-center justify-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint'
             >
-              Join the waitlist
+              Install for VS Code
               <span className='inline-block transition-transform group-hover:translate-x-1'>
                 →
               </span>
