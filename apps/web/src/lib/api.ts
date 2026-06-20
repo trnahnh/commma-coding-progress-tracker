@@ -347,6 +347,19 @@ export function getActivityStream(): Promise<{ entries: StreamEntry[] }> {
   return getJson<{ entries: StreamEntry[] }>('/v1/activity/stream')
 }
 
+export type HealthState = 'ok' | 'down'
+
+export interface SystemStatus {
+  api: HealthState
+  db: HealthState
+  cache: HealthState
+  ts: number
+}
+
+export function getStatus(): Promise<SystemStatus> {
+  return getJson<SystemStatus>('/v1/status')
+}
+
 export function getProfileSessions(
   handle: string,
   cursor?: string,
