@@ -1,5 +1,6 @@
 import overviewBody from './overview.md?raw'
 import gettingStartedBody from './getting-started.md?raw'
+import installationBody from './installation.md?raw'
 import architectureBody from './architecture.md?raw'
 import systemDesignBody from './system-design.md?raw'
 import selfHostingBody from './self-hosting.md?raw'
@@ -28,6 +29,14 @@ export const DOCS: DocMeta[] = [
     summary:
       'Install the extension, sign in with GitHub, pick a privacy mode, and log your first session.',
     body: gettingStartedBody,
+  },
+  {
+    slug: 'installation',
+    title: 'Installation',
+    eyebrow: 'Start here',
+    summary:
+      'Install commma in any editor — VS Code via the Marketplace, Cursor and other forks via Open VSX, plus CLI, VSIX sideloading, and troubleshooting.',
+    body: installationBody,
   },
   {
     slug: 'architecture',
@@ -72,6 +81,7 @@ export const DOC_NAV: DocNavGroup[] = [
     links: [
       { label: 'Overview', slug: 'overview' },
       { label: 'Getting started', slug: 'getting-started' },
+      { label: 'Installation', slug: 'installation' },
     ],
   },
   {

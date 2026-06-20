@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { hasProAccess } from '@commma/shared'
 import { useAuth } from '../lib/auth'
-import { EXTENSION_URL, FREE_MODE } from '../lib/config'
+import { INSTALL_PATH, FREE_MODE } from '../lib/config'
 import { docTo, MAIN_ORIGIN, ON_DOCS_HOST } from '../lib/docsRouting'
 import { BackToTop } from './BackToTop'
 
@@ -74,19 +74,16 @@ function NavActions() {
       >
         Sign in
       </Link>
-      <a
-        href={EXTENSION_URL}
-        target='_blank'
-        rel='noopener noreferrer'
+      <Link
+        to={INSTALL_PATH}
         className='group inline-flex items-center gap-2.5 h-[38px] px-3.5 sm:px-4 rounded-full font-mono text-[12px] sm:text-[13px] uppercase tracking-wider font-medium
           bg-accent text-paper border border-accent bevel press hover:bg-ink hover:border-ink transition-colors whitespace-nowrap'
       >
-        <span className='hidden sm:inline'>Install for VS Code</span>
-        <span className='sm:hidden'>Install</span>
+        Install
         <span className='inline-block transition-transform group-hover:translate-x-1'>
           →
         </span>
-      </a>
+      </Link>
     </div>
   )
 }

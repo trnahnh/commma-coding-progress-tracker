@@ -21,6 +21,7 @@ function cells(phase: Phase, data: SystemStatus | null): Cell[] {
       { name: 'Cache (Upstash Redis)', status: 'loading' },
       { name: 'Web App', status: 'ok' },
       { name: 'VS Code Marketplace', status: 'live' },
+      { name: 'Open VSX Registry', status: 'live' },
     ]
   }
   if (phase === 'unreachable' || !data) {
@@ -30,6 +31,7 @@ function cells(phase: Phase, data: SystemStatus | null): Cell[] {
       { name: 'Cache (Upstash Redis)', status: 'unknown' },
       { name: 'Web App', status: 'ok' },
       { name: 'VS Code Marketplace', status: 'live' },
+      { name: 'Open VSX Registry', status: 'live' },
     ]
   }
   return [
@@ -38,6 +40,7 @@ function cells(phase: Phase, data: SystemStatus | null): Cell[] {
     { name: 'Cache (Upstash Redis)', status: data.cache === 'ok' ? 'ok' : 'down' },
     { name: 'Web App', status: 'ok' },
     { name: 'VS Code Marketplace', status: 'live' },
+    { name: 'Open VSX Registry', status: 'live' },
   ]
 }
 

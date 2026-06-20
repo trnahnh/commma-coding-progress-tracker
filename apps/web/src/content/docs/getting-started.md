@@ -5,11 +5,15 @@ about a minute once the extension is installed.
 
 ## 1. Install the extension
 
-commma ships as a VSCode extension, live on the Visual Studio Marketplace.
-Install it in one click from the
-[Marketplace listing](https://marketplace.visualstudio.com/items?itemName=commma.commma),
-or search **commma** in the Extensions panel inside VSCode — the same as any
-other extension.
+Search **commma** in your editor's Extensions panel and click install — the same
+as any other extension. It is on the
+[Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=commma.commma)
+for VS Code and on the
+[Open VSX registry](https://open-vsx.org/extension/commma/commma) for Cursor,
+Windsurf, VSCodium, and Gitpod.
+
+For per-editor steps, CLI commands, VSIX sideloading, and troubleshooting, see
+the [Installation guide](/docs/installation).
 
 ## 2. Sign in with GitHub
 

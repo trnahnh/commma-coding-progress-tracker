@@ -9,7 +9,7 @@ import {
   type PaidPlan,
 } from '../lib/api'
 import { useAuth } from '../lib/auth'
-import { EXTENSION_URL, FREE_MODE } from '../lib/config'
+import { INSTALL_PATH, FREE_MODE } from '../lib/config'
 import { setPostAuthRedirect } from '../lib/redirect'
 import { useSeo } from '../lib/seo'
 
@@ -225,17 +225,15 @@ function FreePricing() {
               </div>
             </div>
             <FeatureList features={FEATURES_FREE} />
-            <a
-              href={EXTENSION_URL}
-              target='_blank'
-              rel='noopener noreferrer'
+            <Link
+              to={INSTALL_PATH}
               className='group inline-flex items-center justify-center gap-2.5 min-h-[44px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors glow-accent press bg-accent text-paper border border-accent hover:bg-ink hover:border-ink'
             >
-              Install for VS Code
+              Install
               <span className='inline-block transition-transform group-hover:translate-x-1'>
                 →
               </span>
-            </a>
+            </Link>
             {!token && (
               <Link
                 to='/signin'
@@ -470,17 +468,15 @@ function PaidPricing() {
               </div>
             </div>
             <FeatureList features={FEATURES_FREE} />
-            <a
-              href={EXTENSION_URL}
-              target='_blank'
-              rel='noopener noreferrer'
+            <Link
+              to={INSTALL_PATH}
               className='group inline-flex items-center justify-center gap-2.5 h-[42px] px-5 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium transition-colors text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint'
             >
-              Install for VS Code
+              Install
               <span className='inline-block transition-transform group-hover:translate-x-1'>
                 →
               </span>
-            </a>
+            </Link>
           </div>
 
           <div
