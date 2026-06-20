@@ -105,7 +105,7 @@ export default function Install() {
         <p className='font-mono text-[12px] sm:text-[13px] tracking-[0.18em] uppercase text-ink-mute m-0 mb-5 inline-flex items-center gap-2.5'>
           <LiveDot /> live on two marketplaces
         </p>
-        <h1 className='font-serif font-normal text-[clamp(40px,8vw,88px)] leading-[0.95] tracking-[-0.03em] m-0 text-ink'>
+        <h1 className='font-serif font-normal text-[clamp(34px,8vw,88px)] leading-[0.95] tracking-[-0.03em] m-0 text-ink break-words'>
           Install commma<span className='text-accent'>.</span>
         </h1>
         <p className='font-sans text-[clamp(16px,1.3vw,19px)] leading-relaxed text-ink-soft mt-6 m-0'>
@@ -114,7 +114,7 @@ export default function Install() {
         </p>
       </header>
 
-      <div className='grid gap-5 lg:grid-cols-2 mt-[clamp(40px,6vw,72px)]'>
+      <div className='grid grid-cols-1 gap-5 lg:grid-cols-2 mt-[clamp(40px,6vw,72px)]'>
         {CHANNELS.map((c) => (
           <div
             key={c.key}
@@ -123,10 +123,10 @@ export default function Install() {
             <p className='font-mono text-[12px] tracking-[0.18em] uppercase text-ink-mute m-0 mb-4'>
               {c.eyebrow}
             </p>
-            <h2 className='font-serif font-normal text-[clamp(26px,3.5vw,38px)] leading-[1.04] tracking-[-0.02em] m-0 mb-2 text-ink'>
+            <h2 className='font-serif font-normal text-[clamp(24px,3.5vw,38px)] leading-[1.04] tracking-[-0.02em] m-0 mb-2 text-ink break-words'>
               {c.title}
             </h2>
-            <p className='font-mono text-[13px] text-ink-mute m-0 mb-4'>
+            <p className='font-mono text-[12px] sm:text-[13px] text-ink-mute m-0 mb-4 break-words'>
               {c.editors}
             </p>
             <p className='font-sans text-[15px] leading-relaxed text-ink-soft m-0'>
@@ -137,7 +137,7 @@ export default function Install() {
                 href={c.href}
                 target='_blank'
                 rel='noopener noreferrer'
-                className='group inline-flex items-center gap-2.5 min-h-[48px] mt-7 px-6 rounded-full font-mono text-[14px] uppercase tracking-wider font-medium
+                className='group inline-flex w-full sm:w-auto justify-center items-center gap-2.5 min-h-[48px] mt-7 px-6 rounded-full font-mono text-[13px] sm:text-[14px] uppercase tracking-wider font-medium
                   bg-accent text-paper border border-accent glow-accent press hover:bg-ink hover:border-ink transition-colors'
               >
                 {c.cta}
@@ -158,7 +158,7 @@ export default function Install() {
         <h2 className='font-mono text-[12px] sm:text-[13px] tracking-[0.18em] uppercase text-ink-mute m-0 mb-7'>
           After you install
         </h2>
-        <div className='grid gap-5 sm:grid-cols-3'>
+        <div className='grid grid-cols-1 gap-5 sm:grid-cols-3'>
           {STEPS.map((s) => (
             <div
               key={s.n}
