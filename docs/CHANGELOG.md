@@ -9,8 +9,33 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [1.0.0] — 2026-06-19
+
 ### Added
 
+- **Extension** — The commma VS Code extension is published to the Visual Studio
+  Marketplace as `commma.commma` (v1.0.0). Built from `apps/extension` (esbuild
+  CommonJS bundle, packaged with `vsce package --no-dependencies`), it captures
+  key-label frequency, active file/language, keystrokes, and lines — never file
+  content (ADR-006) — and flushes a `HeartbeatEvent` batch to the API every 60s.
+  Publish-prep: the workspace package was renamed `@commma/extension` → `commma`
+  and the monorepo root → `commma-monorepo` (Marketplace names cannot be
+  scoped); the `commma.apiBaseUrl` default was corrected from
+  `http://localhost:3000` to `https://api.commma.dev` so a fresh install reaches
+  production; added an icon, README (the Marketplace listing), bundled LICENSE,
+  and `publisher`/`repository` metadata.
+- **Web** — Install call-to-action overhaul for the extension launch. Every "get
+  notified at launch" / "join the waitlist" button — the landing hero, the top
+  navigation, both pricing free-tier cards, the final landing CTA, and the empty
+  state on your own profile — now links to the Marketplace listing
+  (`EXTENSION_URL` in `lib/config`, opened in a new tab). The landing
+  launch-notify section (`#waitlist` → `#install`) became a "get started"
+  install section, and its email capture is repurposed to notify subscribers
+  when the JetBrains, Neovim, and CLI clients ship. Privacy and API-reference
+  copy was updated to match (the email list is now "product updates", not an
+  "early-access waitlist"). The web `LATEST_VERSION` is now `1.0.0`.
 - **Infra** — Continuous delivery pipeline (`0.9.0`). CI/CD runs on GitLab
   (`.gitlab-ci.yml`): a `check` stage runs `lint`/`typecheck`/`test` in parallel
   on every push and merge request, and a `deploy` stage auto-deploys on `main`,

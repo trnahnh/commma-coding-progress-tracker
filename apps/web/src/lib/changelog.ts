@@ -1,5 +1,15 @@
 export const CHANGELOG_ENTRIES = [
   {
+    version: '1.0.0',
+    date: 'Jun 2026',
+    tag: 'Launch',
+    changes: [
+      'The commma VS Code extension is live on the Visual Studio Marketplace — search "commma" in the Extensions panel, or install it from the web. Sign in with GitHub and your sessions, streaks, and keyboard heatmaps start filling in automatically; tracking stays key-labels-only, never the content you type',
+      'The whole site now points you straight to the extension — every install button across the landing page, the top navigation, pricing, and your profile opens the Marketplace listing instead of a launch waitlist',
+      'The landing "get notified" section became a "get started" section: install front and center, with its email signup repurposed to tell you when the JetBrains, Neovim, and CLI clients land',
+    ],
+  },
+  {
     version: '0.9.0',
     date: 'Jun 2026',
     tag: 'Infra',
