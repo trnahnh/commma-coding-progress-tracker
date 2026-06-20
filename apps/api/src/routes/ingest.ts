@@ -9,6 +9,9 @@ import { requireAuth } from '../middleware/auth.js'
 import { rateLimit, userKey } from '../middleware/rateLimit.js'
 import type { AppEnv } from '../types.js'
 
+const MAX_FUTURE_SKEW_MS = 5 * 60 * 1000
+const MAX_EVENT_AGE_MS = 30 * 24 * 60 * 60 * 1000
+
 export const ingestRoutes = new Hono<AppEnv>()
 
 ingestRoutes.post(
@@ -35,6 +38,17 @@ ingestRoutes.post(
     const userId = c.get('userId')
     const { events: batch } = c.req.valid('json')
     const received = batch.length
+
+    const now = Date.now()
+    const oldest = now - MAX_EVENT_AGE_MS
+    const newest = now + MAX_FUTURE_SKEW_MS
+    if (batch.some((e) => e.ts < oldest || e.ts > newest)) {
+      return apiError(
+        c,
+        'VALIDATION_ERROR',
+        'Event timestamp outside the acceptable window',
+      )
+    }
 
     const [owner] = await db
       .select({ privacy: users.privacy })
