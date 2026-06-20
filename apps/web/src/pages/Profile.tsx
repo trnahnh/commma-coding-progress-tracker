@@ -1,17 +1,16 @@
-import { useCallback, useEffect, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { LiveDot, Shell, StatusPanel } from '../components/chrome'
 import {
   ApiError,
-  getProfile,
-  getProfileSessions,
   type Badge,
   type SessionSummary,
   type UserProfile,
 } from '../lib/api'
+import { queries } from '../lib/queries'
 import { hasProAccess } from '@commma/shared'
 import { useAuth } from '../lib/auth'
-import { EXTENSION_URL, FREE_MODE } from '../lib/config'
+import { INSTALL_PATH, FREE_MODE } from '../lib/config'
 import { formatClock, formatDate, formatDuration } from '../lib/format'
 import { langStyle } from '../lib/langColors'
 import { useSeo } from '../lib/seo'
@@ -303,14 +302,9 @@ function SessionFeed({
           {isOwnProfile ? (
             <>
               No sessions yet.{' '}
-              <a
-                href={EXTENSION_URL}
-                target='_blank'
-                rel='noopener noreferrer'
-                className='text-accent hover:underline'
-              >
+              <Link to={INSTALL_PATH} className='text-accent hover:underline'>
                 Install the commma extension
-              </a>{' '}
+              </Link>{' '}
               and start coding to log your first session.
             </>
           ) : (
@@ -356,110 +350,53 @@ function SessionFeed({
   )
 }
 
-type LoadState =
-  | { phase: 'loading' }
-  | {
-      phase: 'ready'
-      profile: UserProfile
-      sessions: SessionSummary[]
-      nextCursor: string | null
-    }
-  | { phase: 'error'; error: ApiError }
-
 export default function Profile() {
   const { handle: rawHandle = '' } = useParams<{ handle: string }>()
   const hasAt = rawHandle.startsWith('@')
   const handle = hasAt ? rawHandle.slice(1) : rawHandle
   const { user } = useAuth()
-  const initialState = (): LoadState =>
-    hasAt
-      ? { phase: 'loading' }
-      : { phase: 'error', error: new ApiError(404, 'NOT_FOUND', 'Not found') }
-  const [state, setState] = useState<LoadState>(initialState)
-  const [trackedHandle, setTrackedHandle] = useState(rawHandle)
-  const [loadingMore, setLoadingMore] = useState(false)
 
-  if (trackedHandle !== rawHandle) {
-    setTrackedHandle(rawHandle)
-    setState(initialState())
-  }
+  const profileQuery = useQuery({ ...queries.profile(handle), enabled: hasAt })
+  const sessionsQuery = useInfiniteQuery({
+    ...queries.profileSessions(handle),
+    enabled: hasAt,
+  })
 
-  useEffect(() => {
-    if (!hasAt) return
-    let cancelled = false
-    Promise.all([getProfile(handle), getProfileSessions(handle)])
-      .then(([profile, page]) => {
-        if (!cancelled) {
-          setState({
-            phase: 'ready',
-            profile,
-            sessions: page.sessions,
-            nextCursor: page.next_cursor,
-          })
-        }
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return
-        setState({
-          phase: 'error',
-          error:
-            err instanceof ApiError
-              ? err
-              : new ApiError(0, 'UNKNOWN', 'Something went wrong'),
-        })
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [handle, hasAt])
-
-  const profileLabel =
-    state.phase === 'ready'
-      ? `@${state.profile.handle}`
-      : state.phase === 'error'
-        ? 'Profile not found'
-        : 'Loading profile'
-  const profileDescription =
-    state.phase === 'ready'
-      ? [
-          `${state.profile.stats.total_sessions} sessions`,
-          state.profile.streak.current_days > 0
-            ? `${state.profile.streak.current_days}d streak`
-            : null,
-          state.profile.stats.top_lang ? `· ${state.profile.stats.top_lang}` : null,
-        ]
-          .filter(Boolean)
-          .join(' · ')
-      : undefined
+  const profile = profileQuery.data
+  const profileLabel = profile
+    ? `@${profile.handle}`
+    : !hasAt || profileQuery.isError
+      ? 'Profile not found'
+      : 'Loading profile'
+  const profileDescription = profile
+    ? [
+        `${profile.stats.total_sessions} sessions`,
+        profile.streak.current_days > 0
+          ? `${profile.streak.current_days}d streak`
+          : null,
+        profile.stats.top_lang ? `· ${profile.stats.top_lang}` : null,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : undefined
   useSeo({
     title: `${profileLabel} · commma`,
     description: profileDescription,
     ogType: 'profile',
   })
 
-  const loadMore = useCallback(async () => {
-    if (state.phase !== 'ready' || !state.nextCursor || loadingMore) return
-    const cursor = state.nextCursor
-    setLoadingMore(true)
-    try {
-      const page = await getProfileSessions(handle, cursor)
-      setState((prev) =>
-        prev.phase === 'ready'
-          ? {
-              ...prev,
-              sessions: [...prev.sessions, ...page.sessions],
-              nextCursor: page.next_cursor,
-            }
-          : prev,
-      )
-    } catch {
-      void 0
-    } finally {
-      setLoadingMore(false)
-    }
-  }, [state, handle, loadingMore])
+  if (!hasAt) {
+    return (
+      <Shell>
+        <StatusPanel
+          title='Profile not found'
+          body='This profile is private or does not exist.'
+        />
+      </Shell>
+    )
+  }
 
-  if (state.phase === 'loading') {
+  if (profileQuery.isPending || sessionsQuery.isPending) {
     return (
       <Shell>
         <StatusPanel
@@ -470,9 +407,11 @@ export default function Profile() {
     )
   }
 
-  if (state.phase === 'error') {
-    const { error } = state
-    const notFound = error.status === 404 || error.code === 'NOT_FOUND'
+  if (profileQuery.isError) {
+    const { error } = profileQuery
+    const notFound =
+      error instanceof ApiError &&
+      (error.status === 404 || error.code === 'NOT_FOUND')
     return (
       <Shell>
         <StatusPanel
@@ -487,19 +426,19 @@ export default function Profile() {
     )
   }
 
-  const { profile, sessions, nextCursor } = state
+  const sessions = sessionsQuery.data?.pages.flatMap((p) => p.sessions) ?? []
   const isOwnProfile = user?.handle === handle
   const isFree = !hasProAccess(user?.plan ?? 'free', FREE_MODE)
   const showHistoryGate = isOwnProfile && isFree
   return (
     <Shell>
-      <ProfileHero profile={profile} />
-      <BadgeRow badges={profile.badges} />
+      <ProfileHero profile={profileQuery.data} />
+      <BadgeRow badges={profileQuery.data.badges} />
       <SessionFeed
         sessions={sessions}
-        nextCursor={nextCursor}
-        onLoadMore={loadMore}
-        loadingMore={loadingMore}
+        nextCursor={sessionsQuery.hasNextPage ? 'more' : null}
+        onLoadMore={() => void sessionsQuery.fetchNextPage()}
+        loadingMore={sessionsQuery.isFetchingNextPage}
         showHistoryGate={showHistoryGate}
         isOwnProfile={isOwnProfile}
       />

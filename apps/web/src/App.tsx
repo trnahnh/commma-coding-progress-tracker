@@ -1,22 +1,20 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { Footer, LiveDot, Nav } from './components/chrome'
 import { BackToTop } from './components/BackToTop'
 import { LiveKeyboard } from './components/LiveKeyboard'
 import { Reveal } from './components/Reveal'
 import {
-  getActivityStats,
-  getActivityStream,
-  getFeaturedSession,
-  getLeaderboard,
   joinWaitlist,
   ApiError,
   type FeaturedSession,
   type LeaderboardEntry,
   type StreamEntry,
 } from './lib/api'
+import { queries } from './lib/queries'
 import { useAuth } from './lib/auth'
-import { EXTENSION_URL } from './lib/config'
+import { INSTALL_PATH } from './lib/config'
 import { LATEST_VERSION } from './lib/changelog'
 import { formatClock, formatDate, formatDuration } from './lib/format'
 import { langStyle } from './lib/langColors'
@@ -196,18 +194,16 @@ function Hero() {
             reviewing the tape.
           </p>
           <div className='flex gap-3 items-center flex-wrap md:justify-end opacity-0 animate-rise-700 delay-640'>
-            <a
-              href={EXTENSION_URL}
-              target='_blank'
-              rel='noopener noreferrer'
+            <Link
+              to={INSTALL_PATH}
               className='group inline-flex items-center gap-2.5 h-[48px] px-6 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium
                 bg-accent text-paper border border-accent glow-accent press hover:bg-ink hover:border-ink transition-colors'
             >
-              Install for VS Code
+              Install
               <span className='inline-block transition-transform group-hover:translate-x-1'>
                 →
               </span>
-            </a>
+            </Link>
             <Link
               to='/leaderboard'
               className='inline-flex items-center gap-2.5 h-[48px] px-6 rounded-full font-mono text-[15px] uppercase tracking-wider
@@ -254,16 +250,10 @@ function Hero() {
 }
 
 function Ticker() {
-  const [entries, setEntries] =
-    useState<Pick<StreamEntry, 'who' | 'what' | 'em'>[]>(MOCK_TICKER)
-
-  useEffect(() => {
-    getActivityStream()
-      .then(({ entries: live }) => {
-        if (live.length >= 4) setEntries(live)
-      })
-      .catch(() => void 0)
-  }, [])
+  const { data } = useQuery(queries.activityStream())
+  const live = data?.entries
+  const entries: Pick<StreamEntry, 'who' | 'what' | 'em'>[] =
+    live && live.length >= 4 ? live : MOCK_TICKER
 
   const items = [...entries, ...entries, ...entries, ...entries]
   return (
@@ -524,20 +514,15 @@ function ActivityCard({
 }
 
 function Activity() {
-  const [session, setSession] = useState<SessionView>(MOCK_SESSION)
-  const [chart, setChart] = useState<number[]>(MOCK_CHART)
-  const [isLive, setIsLive] = useState(false)
+  const featuredQuery = useQuery(queries.featured())
+  const statsQuery = useQuery(queries.activityStats())
 
-  useEffect(() => {
-    Promise.all([getFeaturedSession(), getActivityStats()])
-      .then(([feat, stats]) => {
-        setSession(toSessionView(feat))
-        const minutes = stats.days.map((d) => Math.round(d.duration_s / 60))
-        if (minutes.some((v) => v > 0)) setChart(minutes)
-        setIsLive(true)
-      })
-      .catch(() => void 0)
-  }, [])
+  const session = featuredQuery.data
+    ? toSessionView(featuredQuery.data)
+    : MOCK_SESSION
+  const minutes = statsQuery.data?.days.map((d) => Math.round(d.duration_s / 60))
+  const chart = minutes && minutes.some((v) => v > 0) ? minutes : MOCK_CHART
+  const isLive = featuredQuery.isSuccess
 
   return (
     <section className='py-[clamp(56px,9vw,140px)]'>
@@ -720,24 +705,13 @@ function LeaderRow({
 
 function Leaderboard() {
   const { user } = useAuth()
-  const [entries, setEntries] = useState<LeaderboardEntry[]>([])
-  const [loading, setLoading] = useState(true)
-  const [aside, setAside] = useState('')
-
-  useEffect(() => {
-    getLeaderboard('week')
-      .then((data) => {
-        setEntries(data.entries.slice(0, 6))
-        const minAgo = Math.round(
-          (Date.now() - new Date(data.updated_at).getTime()) / 60000,
-        )
-        setAside(`updated · ${minAgo} min ago`)
-      })
-      .catch(() => {
-        setAside('unable to load')
-      })
-      .finally(() => setLoading(false))
-  }, [])
+  const { data, isPending, isError } = useQuery(queries.leaderboard('week'))
+  const entries = data?.entries.slice(0, 6) ?? []
+  const aside = isError
+    ? 'unable to load'
+    : data
+      ? `updated · ${new Date(data.updated_at).toLocaleTimeString()}`
+      : ''
 
   return (
     <section className='py-[clamp(56px,9vw,140px)] border-t border-rule'>
@@ -763,7 +737,7 @@ function Leaderboard() {
               <span className='hidden md:block'>Lang · Streak</span>
               <span className='hidden md:block' />
             </div>
-            {loading ? (
+            {isPending ? (
               <div className='px-4 sm:px-6 py-10 space-y-3'>
                 {[1, 2, 3].map((i) => (
                   <div
@@ -850,28 +824,27 @@ function Waitlist() {
             <div className='grid gap-9 lg:gap-12 lg:grid-cols-[1.1fr_1fr] lg:items-center'>
               <div className='min-w-0'>
                 <p className='font-mono text-[12px] sm:text-[13px] tracking-[0.18em] uppercase text-ink-mute m-0 mb-5 inline-flex items-center gap-2.5'>
-                  <LiveDot /> live on the marketplace
+                  <LiveDot /> live on two marketplaces
                 </p>
                 <h3 className='font-serif font-normal text-[clamp(28px,4.5vw,52px)] leading-[1.02] tracking-[-0.02em] m-0 mb-4 text-ink'>
-                  Install the VS Code extension
+                  Install the extension
                 </h3>
                 <p className='font-sans text-[15px] sm:text-[16px] leading-relaxed text-ink-soft m-0 max-w-[48ch] mb-7'>
-                  commma is live on the VS Code Marketplace. Install it, sign in
-                  with GitHub, and your sessions, streaks, and heatmaps start
-                  filling in automatically — free, no card.
+                  On VS Code from the Marketplace, and on Cursor, Windsurf, and
+                  VSCodium from Open VSX. Install it, sign in with GitHub, and
+                  your sessions, streaks, and heatmaps fill in automatically —
+                  free, no card.
                 </p>
-                <a
-                  href={EXTENSION_URL}
-                  target='_blank'
-                  rel='noopener noreferrer'
+                <Link
+                  to={INSTALL_PATH}
                   className='group inline-flex items-center gap-2.5 h-[52px] px-7 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium
                     bg-accent text-paper border border-accent glow-accent press hover:bg-ink hover:border-ink transition-colors'
                 >
-                  Install for VS Code
+                  Install
                   <span className='inline-block transition-transform group-hover:translate-x-1'>
                     →
                   </span>
-                </a>
+                </Link>
               </div>
 
               <div className='min-w-0'>
@@ -974,17 +947,15 @@ function Final() {
                 →
               </span>
             </Link>
-            <a
-              href={EXTENSION_URL}
-              target='_blank'
-              rel='noopener noreferrer'
+            <Link
+              to={INSTALL_PATH}
               className='group inline-flex items-center gap-2.5 h-[52px] px-8 rounded-full font-mono text-[15px] uppercase tracking-wider font-medium text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint transition-colors press'
             >
-              Install for VS Code
+              Install
               <span className='inline-block transition-transform group-hover:translate-x-1'>
                 →
               </span>
-            </a>
+            </Link>
           </div>
           <p className='font-mono text-[13px] sm:text-[15px] tracking-wider uppercase text-ink-mute mt-8'>
             free during early access · no card · leave anytime

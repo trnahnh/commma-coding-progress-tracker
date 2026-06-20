@@ -1,8 +1,15 @@
 import { lazy, StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
+import { defaultShouldDehydrateQuery } from '@tanstack/react-query'
 import './index.css'
 import { AuthProvider } from './lib/auth.tsx'
+import {
+  QUERY_CACHE_BUSTER,
+  queryClient,
+  queryPersister,
+} from './lib/queryClient.ts'
 import RootLayout from './RootLayout.tsx'
 import App from './App.tsx'
 import { ON_DOCS_HOST } from './lib/docsRouting.ts'
@@ -15,6 +22,7 @@ const AuthCallback = lazy(() => import('./pages/AuthCallback.tsx'))
 const SignIn = lazy(() => import('./pages/SignIn.tsx'))
 const NotFound = lazy(() => import('./pages/NotFound.tsx'))
 const Pricing = lazy(() => import('./pages/Pricing.tsx'))
+const Install = lazy(() => import('./pages/Install.tsx'))
 const Privacy = lazy(() => import('./pages/Privacy.tsx'))
 const Api = lazy(() => import('./pages/Api.tsx'))
 const Careers = lazy(() => import('./pages/Careers.tsx'))
@@ -41,6 +49,7 @@ const mainHostChildren = [
   { path: '/', element: <App /> },
   { path: '/profile', element: <EditProfile /> },
   { path: '/pricing', element: <Pricing /> },
+  { path: '/install', element: <Install /> },
   { path: '/billing/success', element: <BillingSuccess /> },
   { path: '/recap', element: <Recap /> },
   { path: '/sessions/:id', element: <SessionDetail /> },
@@ -74,11 +83,25 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AuthProvider>
-      <Suspense>
-        <RouterProvider router={router} />
-      </Suspense>
-    </AuthProvider>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister: queryPersister,
+        maxAge: 24 * 60 * 60 * 1000,
+        buster: QUERY_CACHE_BUSTER,
+        dehydrateOptions: {
+          shouldDehydrateQuery: (query) =>
+            defaultShouldDehydrateQuery(query) &&
+            query.meta?.persist !== false,
+        },
+      }}
+    >
+      <AuthProvider>
+        <Suspense>
+          <RouterProvider router={router} />
+        </Suspense>
+      </AuthProvider>
+    </PersistQueryClientProvider>
   </StrictMode>,
 )
 
