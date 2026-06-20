@@ -39,7 +39,13 @@ function optionalId(
 billingRoutes.post(
   '/checkout',
   requireAuth,
-  rateLimit({ scope: 'write', limit: 30, windowS: 3600, key: userKey }),
+  rateLimit({
+    scope: 'write',
+    limit: 30,
+    windowS: 3600,
+    key: userKey,
+    failClosed: true,
+  }),
   zValidator('json', checkoutSchema, (result, c) => {
     if (!result.success)
       return apiError(
@@ -116,7 +122,13 @@ billingRoutes.post(
 billingRoutes.post(
   '/portal',
   requireAuth,
-  rateLimit({ scope: 'write', limit: 30, windowS: 3600, key: userKey }),
+  rateLimit({
+    scope: 'write',
+    limit: 30,
+    windowS: 3600,
+    key: userKey,
+    failClosed: true,
+  }),
   async (c) => {
     if (env.FREE_MODE)
       return apiError(c, 'SERVICE_UNAVAILABLE', 'Billing is disabled')
