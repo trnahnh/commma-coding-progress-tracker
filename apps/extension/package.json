@@ -70,7 +70,9 @@
     "dev": "pnpm run watch",
     "typecheck": "tsc --noEmit",
     "package": "vsce package --no-dependencies",
-    "publish": "vsce publish --no-dependencies"
+    "publish": "vsce publish --no-dependencies",
+    "publish:openvsx": "ovsx publish --no-dependencies",
+    "publish:all": "pnpm run publish && pnpm run publish:openvsx"
   },
   "dependencies": {
     "@commma/shared": "workspace:*"
@@ -80,6 +82,7 @@
     "@types/vscode": "^1.85.0",
     "@vscode/vsce": "^3.2.2",
     "esbuild": "^0.24.2",
+    "ovsx": "^1.0.1",
     "typescript": "^5.8.3"
   }
 }
