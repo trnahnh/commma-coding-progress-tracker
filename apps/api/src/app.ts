@@ -13,6 +13,7 @@ import { userRoutes } from './routes/users.js'
 import { feedRoutes } from './routes/feed.js'
 import { leaderboardRoutes } from './routes/leaderboard.js'
 import { statsRoutes } from './routes/stats.js'
+import { statusRoutes } from './routes/status.js'
 import { activityRoutes } from './routes/activity.js'
 import { billingRoutes } from './routes/billing.js'
 import { teamRoutes } from './routes/teams.js'
@@ -56,6 +57,7 @@ export function createApp() {
   app.route('/v1/feed', feedRoutes)
   app.route('/v1/leaderboard', leaderboardRoutes)
   app.route('/v1/stats', statsRoutes)
+  app.route('/v1/status', statusRoutes)
   app.route('/v1/activity', activityRoutes)
   app.route('/v1/billing', billingRoutes)
   app.route('/v1/teams', teamRoutes)
