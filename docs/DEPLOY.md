@@ -68,12 +68,12 @@ The canonical config values these records back (already the defaults below):
 
 Once the one-time setup is done, GitHub Actions ships a release. `ci.yml` runs
 on every push and pull request — `lint`, `typecheck`, `test`, and markdown-lint
-on `node 20` with pnpm via Corepack. Two deploy workflows ship the apps:
+on `node 22` with pnpm via Corepack. Two deploy workflows ship the apps:
 
 | Workflow         | What it does                                         |
 | ---------------- | ---------------------------------------------------- |
 | `deploy-web.yml` | build, `s3 sync`, CloudFront invalidate, smoke check |
-| `deploy-api.yml` | SSH to EC2, pull, build, PM2 restart, health check   |
+| `deploy-api.yml` | SSH: pull, migrate, build, PM2 restart, health check |
 
 Both **auto-deploy on push to `main`**, path-filtered so each side only ships
 when its own files change: `deploy-web.yml` on `apps/web`/`packages/shared`,
@@ -87,11 +87,13 @@ deploy.
 The same lint/typecheck/test gate also runs on **GitLab** (`.gitlab-ci.yml`) as
 a passive backup; GitLab has no deploy jobs.
 
-The web deploy authenticates to AWS via an **OIDC role** (no long-lived keys);
-the API deploy SSHes in with the EC2 key. Both mirror the same steps as the
-laptop `infra/deploy-*.sh` scripts (build → `s3 sync` → invalidate for web; SSH
-pull → build → PM2 restart for API) rather than calling those scripts directly,
-so keep the two in sync. Their secrets and variables are listed in step 6.
+After the gate, each deploy workflow runs the **same `infra/deploy-*.sh`
+script** the laptop path uses — one source of truth, no inline reimplementation.
+`deploy-web.yml` assumes an **OIDC role** (no long-lived keys) and runs
+`infra/deploy-web.sh` (build → `s3 sync` → CloudFront invalidate), then a smoke
+check; `deploy-api.yml` writes the EC2 key to a temp file and runs
+`infra/deploy-api.sh` over SSH (pull → install → `db migrate` → build → PM2
+restart → health check). Their secrets and variables are listed in step 6.
 
 ### Manual deploy (laptop)
 
@@ -111,8 +113,8 @@ bucket (S3 `List`/`Get`/`Put`/`Delete`) and `cloudfront:CreateInvalidation`;
 `SSH_KEY=~/.ssh/other.pem pnpm deploy:api` (see the script headers for every
 variable: `WEB_S3_BUCKET`, `CLOUDFRONT_DISTRIBUTION_ID`, `VITE_API_BASE_URL`,
 `AWS`; `SSH_KEY`, `API_HOST`, `APP_DIR`, `BRANCH`). The GitHub deploy workflows
-run the same steps inline (build → `s3 sync` → invalidate; SSH pull → build →
-restart), so a laptop deploy and a pipeline deploy produce the same result.
+call these exact scripts, so a laptop deploy and a pipeline deploy are
+identical.
 
 ## One-time setup
 
