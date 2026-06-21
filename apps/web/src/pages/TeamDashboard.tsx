@@ -29,7 +29,7 @@ function RoleChip({ role }: { role: string }) {
   return (
     <span
       className={[
-        'inline-flex items-center h-[24px] px-2.5 rounded-full font-mono text-[11px] uppercase tracking-widest border',
+        'inline-flex items-center h-[24px] px-2.5 rounded-full font-mono text-[12px] uppercase tracking-widest border',
         isOwner
           ? 'text-accent border-accent-line bg-accent-soft'
           : 'text-ink-mute border-rule',
@@ -131,7 +131,7 @@ function MemberRow({
             {busy ? '…' : isSelf ? 'Leave' : 'Remove'}
           </button>
           {error && (
-            <span className='font-mono text-[11px] text-accent'>{error}</span>
+            <span className='font-mono text-[13px] text-accent'>{error}</span>
           )}
         </div>
       )}

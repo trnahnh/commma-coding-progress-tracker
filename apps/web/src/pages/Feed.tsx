@@ -38,8 +38,8 @@ function FeedCard({ entry }: { entry: FeedEntry }) {
         >
           @{user.handle}
         </Link>
-        <span className='shrink-0 text-ink-mute text-[12px]'>·</span>
-        <span className='shrink-0 font-mono text-[12px] text-ink-mute tnum'>
+        <span className='shrink-0 text-ink-mute text-[13px]'>·</span>
+        <span className='shrink-0 font-mono text-[13px] text-ink-soft tnum'>
           {formatDate(started_at)}
           <span className='mx-1.5 text-ink-mute'>·</span>
           {formatClock(started_at)}
@@ -83,7 +83,7 @@ function FeedList({
 }) {
   if (entries.length === 0) {
     return (
-      <div className='px-5 sm:px-8 py-16 text-center font-mono text-[12px] text-ink-mute'>
+      <div className='px-5 sm:px-8 py-16 text-center font-mono text-[15px] text-ink-mute'>
         Nothing here yet. Follow some coders to see their sessions.
       </div>
     )
@@ -94,12 +94,12 @@ function FeedList({
         <FeedCard key={e.session.id} entry={e} />
       ))}
       {hasMore && (
-        <div className='flex justify-center py-5 border-t border-rule'>
+        <div className='flex justify-center py-2 border-t border-rule'>
           <button
             type='button'
             onClick={onLoadMore}
             disabled={loadingMore}
-            className='font-mono text-[12px] uppercase tracking-wider text-ink-mute hover:text-ink disabled:opacity-40 transition-colors'
+            className='inline-flex items-center justify-center min-h-[44px] px-6 font-mono text-[12px] uppercase tracking-wider text-ink-mute hover:text-ink disabled:opacity-40 transition-colors'
           >
             {loadingMore ? 'Loading…' : 'Load more'}
           </button>
@@ -146,7 +146,7 @@ export default function Feed() {
       <Shell>
         <div className='border border-rule-strong rounded-lg bg-linear-to-b from-paper-2 to-paper overflow-hidden surface'>
           {header}
-          <div className='px-5 sm:px-8 py-16 text-center font-mono text-[12px] text-ink-mute'>
+          <div className='px-5 sm:px-8 py-16 text-center font-mono text-[13px] text-ink-mute'>
             Loading…
           </div>
         </div>

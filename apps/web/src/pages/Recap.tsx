@@ -158,7 +158,7 @@ export default function Recap() {
             {weekLabel}
           </span>
           {!FREE_MODE && (
-            <span className='ml-auto font-mono text-[11px] uppercase tracking-widest text-ink-soft border border-ink-mute rounded-full px-3 py-1'>
+            <span className='ml-auto font-mono text-[12px] uppercase tracking-widest text-ink-soft border border-ink-mute rounded-full px-3 py-1'>
               {user?.plan === 'team' ? 'Team' : 'Pro'}
             </span>
           )}

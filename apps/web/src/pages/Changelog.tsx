@@ -28,7 +28,7 @@ export default function Changelog() {
                 <span className='font-serif text-[clamp(22px,2.5vw,32px)] leading-none tracking-[-0.02em] text-ink tnum'>
                   {entry.version}
                 </span>
-                <span className='font-mono text-[11px] tracking-[0.16em] uppercase text-accent-2 border border-accent-2-line bg-accent-2-soft px-2.5 py-1 rounded-full bevel'>
+                <span className='font-mono text-[12px] tracking-[0.16em] uppercase text-accent-2 border border-accent-2-line bg-accent-2-soft px-2.5 py-1 rounded-full bevel'>
                   {entry.tag}
                 </span>
                 <span className='font-mono text-[13px] text-ink-mute ml-auto'>

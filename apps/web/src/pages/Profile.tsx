@@ -32,7 +32,7 @@ function BadgeRow({ badges }: { badges: Badge[] }) {
           <span
             key={id}
             className={[
-              'inline-flex items-center h-[28px] px-3 rounded-full font-mono text-[11px] uppercase tracking-wider border',
+              'inline-flex items-center h-[28px] px-3 rounded-full font-mono text-[12px] uppercase tracking-wider border',
               earned
                 ? 'text-accent-2 border-accent-2-line bg-accent-2-soft'
                 : 'text-ink-faint border-rule opacity-25 select-none',
@@ -89,7 +89,7 @@ function ProfileHero({ profile }: { profile: UserProfile }) {
               </h1>
             )}
             {open_to_work && (
-              <span className='inline-flex items-center h-[24px] px-2.5 rounded-full font-mono text-[11px] uppercase tracking-wider text-accent-2 border border-accent-2-line bg-accent-2-soft'>
+              <span className='inline-flex items-center h-[24px] px-2.5 rounded-full font-mono text-[12px] uppercase tracking-wider text-accent-2 border border-accent-2-line bg-accent-2-soft'>
                 Open to work
               </span>
             )}

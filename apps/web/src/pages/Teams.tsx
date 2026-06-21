@@ -23,7 +23,7 @@ function RoleChip({ role }: { role: string }) {
   return (
     <span
       className={[
-        'inline-flex items-center h-[24px] px-2.5 rounded-full font-mono text-[11px] uppercase tracking-widest border',
+        'inline-flex items-center h-[24px] px-2.5 rounded-full font-mono text-[12px] uppercase tracking-widest border',
         isOwner
           ? 'text-accent border-accent-line bg-accent-soft'
           : 'text-ink-mute border-rule',
@@ -36,7 +36,7 @@ function RoleChip({ role }: { role: string }) {
 
 function FrozenBadge() {
   return (
-    <span className='inline-flex items-center h-[24px] px-2.5 rounded-full font-mono text-[11px] uppercase tracking-widest border text-ink-mute border-rule bg-paper-3'>
+    <span className='inline-flex items-center h-[24px] px-2.5 rounded-full font-mono text-[12px] uppercase tracking-widest border text-ink-mute border-rule bg-paper-3'>
       plan inactive
     </span>
   )
@@ -316,7 +316,7 @@ export default function Teams() {
                   Pending invites
                 </h2>
               </div>
-              <span className='ml-auto inline-flex items-center justify-center w-6 h-6 rounded-full bg-accent text-paper font-mono text-[11px]'>
+              <span className='ml-auto inline-flex items-center justify-center w-6 h-6 rounded-full bg-accent text-paper font-mono text-[12px]'>
                 {invites.length}
               </span>
             </div>

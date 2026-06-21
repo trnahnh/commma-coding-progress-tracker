@@ -191,7 +191,7 @@ export default function KeyboardHeatmap({
               type='button'
               onClick={() => setLayoutName(name)}
               className={[
-                'h-[36px] px-3 rounded font-mono text-[11px] uppercase tracking-wider transition-colors',
+                'h-[36px] px-3 rounded font-mono text-[12px] uppercase tracking-wider transition-colors',
                 layoutName === name
                   ? 'bg-accent-soft text-accent border border-accent-line'
                   : 'text-ink-mute border border-transparent hover:text-ink-soft hover:border-rule',
@@ -261,7 +261,7 @@ export default function KeyboardHeatmap({
               key={label}
               type='button'
               onClick={() => exportPreset(w, h, label)}
-              className='group inline-flex items-center gap-1.5 h-[44px] sm:h-[32px] px-5 sm:px-3 rounded-full font-mono text-[13px] sm:text-[11px] uppercase tracking-wider text-ink-soft border border-rule-strong press hover:text-paper hover:bg-accent hover:border-accent transition-colors'
+              className='group inline-flex items-center gap-1.5 h-[44px] sm:h-[32px] px-5 sm:px-3 rounded-full font-mono text-[13px] sm:text-[12px] uppercase tracking-wider text-ink-soft border border-rule-strong press hover:text-paper hover:bg-accent hover:border-accent transition-colors'
             >
               {label}
               <span className='inline-block transition-transform group-hover:translate-y-0.5'>
@@ -274,10 +274,10 @@ export default function KeyboardHeatmap({
         <div className='mt-4 flex items-center justify-end'>
           <Link
             to='/pricing'
-            className='group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-ink-mute hover:text-ink transition-colors'
+            className='group inline-flex items-center gap-2 font-mono text-[12px] uppercase tracking-wider text-ink-mute hover:text-ink transition-colors'
           >
             PNG export
-            <span className='font-mono text-[10px] tracking-[0.18em] uppercase text-accent-2 border border-accent-2-line bg-accent-2-soft px-2 py-0.5 rounded-full'>
+            <span className='font-mono text-[12px] tracking-[0.18em] uppercase text-accent-2 border border-accent-2-line bg-accent-2-soft px-2 py-0.5 rounded-full'>
               Pro
             </span>
             <span className='inline-block transition-transform group-hover:translate-x-0.5'>
