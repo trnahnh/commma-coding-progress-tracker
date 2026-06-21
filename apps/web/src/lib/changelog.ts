@@ -11,6 +11,7 @@ export const CHANGELOG_ENTRIES = [
       'The status page is now genuinely live — it checks the API, database, and cache in real time and refreshes itself, with clear "degraded" and "unreachable" states, instead of showing a hand-written "all operational" list',
       'commma is now discoverable on Google — we verified the domain with Google Search Console and submitted the sitemap, so the public pages start showing up in search results',
       'commma is open source — the whole monorepo (extension, API, and web) is public under the MIT license, with a contributor guide. As part of the launch cleanup, the landing page was broken out of one 1,000-line file into focused per-section pieces, so the codebase is easier to read, review, and contribute to',
+      'Hardened release pipeline — every update now ships through an automated lint, type-check, and test gate that blocks the release if anything fails, with a second pipeline mirroring the same checks as a standby backup, so updates roll out reliably and never from a broken build',
       'Security hardening — a fresh pre-launch audit of the whole API confirmed auth, rate limits, payment-webhook verification, and ownership checks all hold, and closed one issue it surfaced: links on your profile (website and LinkedIn) are now restricted to normal http(s) addresses, so a profile can never smuggle a script-bearing link',
     ],
   },

@@ -190,6 +190,12 @@ const STACK_GROUPS = [
         role: 'Infrastructure as code',
         why: 'The whole AWS footprint — EC2, S3, CloudFront, Route53, ACM, IAM — is imported into Terraform state with native S3 locking. Every change ships as a reviewed plan, never a console click.',
       },
+      {
+        no: '023',
+        name: 'GitHub Actions',
+        role: 'CI/CD',
+        why: 'Every push runs a lint, type-check, and test gate, then auto-deploys the side that changed — web to S3 + CloudFront via an OIDC role, API to EC2 over SSH. A mirror pipeline on GitLab runs the same gate as a passive backup.',
+      },
     ],
   },
   {
@@ -197,19 +203,19 @@ const STACK_GROUPS = [
     label: 'Services',
     items: [
       {
-        no: '023',
+        no: '024',
         name: 'Resend',
         role: 'Transactional email',
         why: 'Clean TypeScript SDK, generous free tier, and deliverability that does not require wrestling with SPF/DKIM from day one.',
       },
       {
-        no: '024',
+        no: '025',
         name: 'Sharp',
         role: 'OG image rendering',
         why: 'SVG keyboard heatmap rasterized server-side in ~120ms. No headless browser, no Puppeteer, no Chromium cold-start tax.',
       },
       {
-        no: '025',
+        no: '026',
         name: 'OpenAI',
         role: 'AI prose — optional',
         why: 'GPT-4.1-nano writes only the recap headline and note — numbers stay deterministic. Any failure falls back to the template.',
