@@ -9,7 +9,24 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **CLI** — New `@commma/cli` headless data source (`apps/cli`), so coding
+  activity can be tracked from any editor that writes files to disk (Neovim,
+  Emacs, Helix, JetBrains) without a dedicated plugin. Commands: `commma login`
+  / `logout` / `watch [dir]` / `status`. `login` reuses the ADR-011 loopback
+  OAuth one-time-code flow and `POST /v1/auth/cli/exchange` built CLI-first for
+  the extension; the refresh token is stored in `~/.commma/credentials.json` at
+  `0600`. `watch` runs a dependency-free polling file watcher that derives
+  per-file keystroke and line deltas from byte changes and flushes a
+  `HeartbeatEvent[]` batch every 60s, reusing the extension's offline-buffer +
+  backoff ingest client. Sessions stay server-derived — no manual start/stop.
+  **Privacy (ADR-006):** the same `full`/`summary`/`off` modes apply, and
+  because the CLI observes the filesystem rather than keypresses it **never
+  sends the `key_freq` keyboard-heatmap field**; file content is read only to
+  count characters and lines, never stored or transmitted. Keystroke counts are
+  an approximation from file deltas — the editor extension remains the precise
+  heatmap source.
 
 ## [1.0.0] — 2026-06-19
 

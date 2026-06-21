@@ -333,7 +333,7 @@ Goal: mobile, multi-editor, self-hosted.
 - [x] Heatmap export on mobile (touch-friendly)
 - [ ] JetBrains plugin scaffold (community-contributed)
 - [ ] Neovim Lua plugin scaffold (community-contributed)
-- [ ] Standalone CLI client (`commma login` / `commma watch`) as a headless data
+- [x] Standalone CLI client (`commma login` / `commma watch`) as a headless data
       source — **auth is already unblocked by ADR-011** (the loopback
       one-time-code flow + `POST /v1/auth/cli/exchange` were built CLI-first in
       step 5; a CLI just reuses them). Sessions stay server-derived, so no
