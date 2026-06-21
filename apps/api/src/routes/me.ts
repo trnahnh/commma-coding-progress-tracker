@@ -12,18 +12,34 @@ import type { AppEnv } from '../types.js'
 
 export const meRoutes = new Hono<AppEnv>()
 
+function httpUrl(max: number) {
+  return z
+    .string()
+    .trim()
+    .url()
+    .max(max)
+    .refine((value) => {
+      try {
+        const protocol = new URL(value).protocol
+        return protocol === 'http:' || protocol === 'https:'
+      } catch {
+        return false
+      }
+    }, 'Must be an http or https URL')
+}
+
 const patchMeSchema = z
   .object({
     display_name: z.string().max(64).nullable().optional(),
     bio: z.string().max(160).nullable().optional(),
-    website: z.union([z.string().url().max(256), z.null()]).optional(),
+    website: z.union([httpUrl(256), z.null()]).optional(),
     location: z.string().max(64).nullable().optional(),
     school: z.string().max(128).nullable().optional(),
     field_of_study: z.string().max(64).nullable().optional(),
     company: z.string().max(128).nullable().optional(),
     job_title: z.string().max(64).nullable().optional(),
     pronouns: z.string().max(32).nullable().optional(),
-    linkedin: z.union([z.string().url().max(160), z.null()]).optional(),
+    linkedin: z.union([httpUrl(160), z.null()]).optional(),
     open_to_work: z.boolean().optional(),
     privacy: z.enum(['full', 'summary', 'off']).optional(),
   })
