@@ -205,7 +205,9 @@ Goal: production-safe. No known P0/P1 bugs. Published extension.
       now fetches `GET /v1/leaderboard?period=week` (real avatars, lang colors,
       streak, self-highlight); SESSION/CHART/TICKER sections remain mocked (no
       suitable endpoint yet — scheduled in Phase 4).
-- [ ] Extension published to VSCode Marketplace (unlisted)
+- [x] Extension published to the VS Code Marketplace and Open VSX
+      (`commma.commma`, v1.0.0, listed) — dual-published so it installs in VS
+      Code plus Cursor/Windsurf/VSCodium/Gitpod
 - [x] `CONTRIBUTING.md`, `ONBOARDING.md`, `SECURITY.md` complete — added
       `SECURITY.md` (private reporting, scope, safe harbor, the no-keylogging
       invariant); reconciled `ONBOARDING.md` with reality (interval aggregation
