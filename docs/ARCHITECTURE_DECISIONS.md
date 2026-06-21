@@ -676,9 +676,9 @@ Terraform runs under a **separate `commma-terraform` IAM identity** with broad
 access, kept distinct from `commma-deploy-local`, whose policy stays scoped to
 S3-sync + CloudFront-invalidate. The least-privilege deploy boundary is
 preserved and itself codified in `iam.tf`. Application deploys remain the
-existing `infra/deploy-*.sh` scripts; Terraform owns **infrastructure**, not
-release. Because GitHub Actions is disabled at the account level, Terraform is
-run locally, the same operator model as the deploy scripts.
+existing `infra/deploy-*.sh` scripts (which GitHub Actions also drives);
+Terraform owns **infrastructure**, not release, and is run locally — the same
+operator model as the manual deploy scripts — rather than from CI.
 
 The EC2 key pair and the AWS-managed Route53 `NS`/`SOA` records are deliberately
 left unmanaged (the private key is not reproducible from config; `NS`/`SOA` are
