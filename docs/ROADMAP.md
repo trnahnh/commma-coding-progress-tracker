@@ -13,9 +13,9 @@ Current phase: Phase 5 — Growth (in progress); Phases 1–4 are functionally
 complete. **Live in production since 2026-06-14** — `commma.dev` (web) and
 `api.commma.dev` (API) on AWS (EC2 t4g with PM2, S3 and CloudFront, Neon
 Postgres, Upstash Redis), TLS everywhere with auto-renew. Deploys auto-run on
-push to `main` via GitLab CI (`trnahnh1/commma`, `.gitlab-ci.yml`),
-path-filtered per app — GitHub Actions is disabled account-wide, so the legacy
-`.github/workflows/` are inert. The AWS infrastructure is codified with
+push to `main` via GitHub Actions (`.github/workflows/`), path-filtered per app;
+a passive GitLab pipeline (`trnahnh1/commma`, `.gitlab-ci.yml`) re-runs the
+lint/typecheck/test gate as a backup. The AWS infrastructure is codified with
 Terraform (`infra/terraform/`, import-adopted — see ADR-013).
 
 ---

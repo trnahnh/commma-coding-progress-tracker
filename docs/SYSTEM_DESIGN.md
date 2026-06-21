@@ -424,32 +424,32 @@ src/
   ElastiCache (web stays on S3 + CloudFront)
 - **50k DAU:** ECS auto-scaling, separate ingest/read services
 
-### Deployment Secrets (GitLab CI/CD)
+### Deployment Secrets (GitHub Actions)
 
-CI/CD runs on GitLab (`trnahnh1/commma`, `.gitlab-ci.yml`) because GitHub
-Actions is disabled account-wide; the legacy `.github/workflows/` are inert.
-Every push to `main` runs the `check` stage (lint/typecheck/test), then
-**auto-deploys the side whose files changed** — `deploy:api`
-(`infra/deploy-api.sh`: SSH to the live EC2 box, pull, build, PM2-restart) on
-`apps/api`/`packages/db`/`packages/shared`, `deploy:web` (`infra/deploy-web.sh`:
-build, `s3 sync`, CloudFront invalidate) on `apps/web`/`packages/shared`. The
-same scripts run by hand via `pnpm deploy:api` / `pnpm deploy:web`.
+CI/CD runs on **GitHub Actions** (`.github/workflows/`). Every push to `main`
+runs the `ci.yml` gate (lint/typecheck/test/markdown-lint), and two deploy
+workflows **auto-deploy the side whose files changed** — `deploy-api.yml` (SSH
+to the live EC2 box, pull, build, PM2-restart) on
+`apps/api`/`packages/db`/`packages/shared`, `deploy-web.yml` (build, `s3 sync`,
+CloudFront invalidate) on `apps/web`/`packages/shared`. The same steps run by
+hand via `pnpm deploy:api` / `pnpm deploy:web`. A second copy of the gate runs
+on GitLab (`.gitlab-ci.yml`) as a passive backup with no deploy jobs.
 
-Secrets are set as **GitLab CI/CD variables** (Settings → CI/CD → Variables),
-not GitHub Actions secrets. The `deploy:api` job needs:
+Secrets and variables are set under **Settings → Secrets and variables →
+Actions**. `deploy-api.yml` needs:
 
-- `SSH_PRIVATE_KEY` (File) — contents of the EC2 `.pem` private key
+- `EC2_HOST` / `EC2_SSH_KEY` — the API box host and the EC2 `.pem` private key
 
-The web app deploys to S3 + CloudFront (ADR-009). Its job runs `vite build` with
-`VITE_API_BASE_URL` set, `aws s3 sync`s `dist/` to the bucket, then invalidates
-the distribution. That path needs:
+The web app deploys to S3 + CloudFront (ADR-009). Its workflow runs `vite build`
+with `VITE_API_BASE_URL` set, `aws s3 sync`s `dist/` to the bucket, then
+invalidates the distribution. It authenticates to AWS via OIDC and needs:
 
-- `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` — deploy IAM user (scoped to the
-  bucket + `cloudfront:CreateInvalidation`)
-- `AWS_DEFAULT_REGION` — bucket region, e.g. `us-east-1`
-- `WEB_S3_BUCKET` — target bucket name
-- `CLOUDFRONT_DISTRIBUTION_ID` — for the post-sync cache invalidation
-- `VITE_API_BASE_URL` — `https://api.commma.dev`, inlined at build time
+- `AWS_ROLE_ARN` (secret) — the IAM role assumed through the GitHub OIDC
+  provider (scoped to the bucket + `cloudfront:CreateInvalidation`)
+- `CLOUDFRONT_DISTRIBUTION_ID` (secret) — for the post-sync cache invalidation
+- `WEB_S3_BUCKET` / `AWS_REGION` (variables) — target bucket and region
+- `VITE_API_BASE_URL` (variable) — `https://api.commma.dev`, inlined at build
+  time
 
 SPA deep links are served by a CloudFront custom error response mapping 403/404
 to `/index.html` (the S3+CloudFront equivalent of the interim `vercel.json`

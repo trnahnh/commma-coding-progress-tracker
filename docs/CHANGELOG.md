@@ -81,16 +81,18 @@ Nothing yet.
   (already referenced by `robots.txt`, covering the marketing and discovery
   routes plus the `docs.commma.dev` pages) so search engines crawl and index the
   site. Domain-property verification covers every subdomain in one shot.
-- **Infra** — Continuous delivery pipeline (`0.9.0`). CI/CD runs on GitLab
-  (`.gitlab-ci.yml`): a `check` stage runs `lint`/`typecheck`/`test` in parallel
-  on every push and merge request, and a `deploy` stage auto-deploys on `main`,
-  path-filtered so `deploy:web` ships only on `apps/web`/`packages/shared`
-  changes and `deploy:api` only on `apps/api`/`packages/db`/`packages/shared`
-  changes. Both reuse the existing `infra/deploy-*.sh` scripts and are
-  `resource_group`-serialized so deploys never overlap. The repo dual-pushes to
-  GitHub (the EC2 pull source) and GitLab (which drives CI). The EC2 security
-  group's SSH port was opened to allow CI runners (the box is key-only, so this
-  is safe).
+- **Infra** — Continuous delivery across two pipelines. CI/CD runs on **GitHub
+  Actions** (`.github/workflows/`) as the active pipeline: `ci.yml` runs
+  `lint`/`typecheck`/`test`/markdown-lint on every push and pull request, and
+  `deploy-web.yml`/`deploy-api.yml` auto-deploy on `main`, path-filtered so the
+  web ships only on `apps/web`/`packages/shared` changes and the API only on
+  `apps/api`/`packages/db`/`packages/shared` changes, `concurrency`-serialized
+  so deploys never overlap (web via an OIDC role to S3 + CloudFront, API via SSH
+  to the EC2 box). A second pipeline on **GitLab** (`.gitlab-ci.yml`) runs the
+  same `lint`/`typecheck`/`test` gate as a **passive backup** — its deploy jobs
+  are removed so the dual-push to GitHub and GitLab can never double-deploy. The
+  EC2 security group's SSH port was opened to allow hosted CI runners (the box
+  is key-only, so this is safe).
 - **Web, Infra** — Documentation site at `docs.commma.dev`. A new `/docs`
   section renders curated public docs (overview, getting started, architecture,
   system design, self-hosting) with `react-markdown` through a design-token

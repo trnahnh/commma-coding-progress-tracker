@@ -2,7 +2,7 @@
 
 A living status board for commma's production deploy. Tick items as they land;
 the runbook for _how_ to do each step lives in [DEPLOY.md](./DEPLOY.md). Last
-updated 2026-06-14.
+updated 2026-06-21.
 
 Legend: `[x]` done · `[ ]` open · **Blocked** / **Before launch** call out
 gates.
@@ -54,27 +54,28 @@ gates.
 - [ ] EC2 box git remote still points at the old `NauriFive` URL — GitHub
       redirect keeps `git pull` working, so non-blocking; update on next SSH
 
-## 6. CI/CD (GitLab)
+## 6. CI/CD
 
-- [x] GitHub Actions disabled **at account level** on `trnahnh`
-      (`HTTP 422: Actions has been disabled for this user`) — only a GitHub
-      Support reinstatement clears it; no repo-move fixes this. CI/CD moved to
-      GitLab as a result.
-- [x] GitLab project `trnahnh1/commma`; repo pushed to both `origin` (GitHub,
-      EC2 pull source) and `gitlab` (drives CI)
-- [x] `.gitlab-ci.yml`: `check` stage (`lint`/`typecheck`/`test`) green on push
-      and MR
-- [x] CI/CD variables set: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`,
-      `AWS_DEFAULT_REGION` (Protected+Masked), `SSH_PRIVATE_KEY` (File,
-      Protected)
-- [x] Dedicated `commma-deploy-ci` IAM user (copied `commma-deploy-local`
-      permissions) backs the `deploy:web` key
-- [x] EC2 SG port 22 opened to `0.0.0.0/0` (was operator /32) so GitLab runners
-      can SSH — via Terraform, safe because the box is key-only
-- [x] `deploy:web` + `deploy:api` **auto-deploy on `main`**, path-filtered per
-      app, `resource_group`-serialized; both verified green end-to-end
-- [ ] **If Actions returns:** legacy `.github/workflows/` still present; either
-      retire them or run both CIs
+- [x] **GitHub Actions** is the active pipeline (`.github/workflows/`): `ci.yml`
+      runs `lint`/`typecheck`/`test`/markdown-lint on every push and PR;
+      `deploy-web.yml` and `deploy-api.yml` **auto-deploy on `main`**,
+      path-filtered per app, `concurrency`-serialized
+- [ ] `deploy-web.yml` authenticates to AWS via an **OIDC role**
+      (`AWS_ROLE_ARN`) — role/provider not yet created; **web deploy fails until
+      `AWS_ROLE_ARN` is set** (API deploy is unaffected)
+- [x] **GitLab** (`trnahnh1/commma`, `.gitlab-ci.yml`) runs the same
+      `lint`/`typecheck`/`test` gate as a **passive backup** — deploy jobs
+      removed so a dual-push can't double-deploy
+- [x] Repo dual-pushes to GitHub `origin` (EC2 pull source) and `gitlab`
+- [x] EC2 SG port 22 open to `0.0.0.0/0` so hosted CI runners can SSH — via
+      Terraform, safe because the box is key-only
+- [ ] Confirm Actions secrets/vars are set: `AWS_ROLE_ARN`,
+      `CLOUDFRONT_DISTRIBUTION_ID`, `EC2_HOST`, `EC2_SSH_KEY` (secrets);
+      `WEB_S3_BUCKET`, `AWS_REGION`, `VITE_API_BASE_URL`, `WEB_URL` (variables)
+- [ ] Verify the `AWS_ROLE_ARN` OIDC role trust `sub` is
+      `repo:trnahnh/commma-coding-progress-tracker:*`
+- [ ] Decommission the now-unused `commma-deploy-ci` IAM user (it backed the
+      retired GitLab `deploy:web` key; web deploys via OIDC now)
 
 ## 7. Manual deploy (laptop path)
 
@@ -82,8 +83,6 @@ gates.
 - [x] Scoped IAM user `commma-deploy-local` (S3 on `commma-web` + CloudFront
       invalidation only)
 - [x] One-command scripts: `pnpm deploy:web` / `pnpm deploy:api`
-- [ ] Rotate the `commma-deploy-local` access key (it was pasted in chat once;
-      low blast radius, but rotate when convenient)
 
 ## 8. Billing (Stripe — sandbox rehearsal)
 
@@ -116,12 +115,11 @@ gates.
 
 Run before the first public launch:
 
-- [ ] GitLab `deploy:web` + `deploy:api` jobs run green once (CI variables set,
-      dedicated `commma-deploy-ci` IAM user created)
+- [ ] GitHub Actions `deploy-web.yml` + `deploy-api.yml` run green once (Actions
+      secrets/vars set, OIDC role trust policy verified)
 - [ ] Stripe switched to **live** mode (or deliberately left off)
 - [x] Resend `commma.dev` sender domain verified + `RECAP_FROM_EMAIL` switched
       off the throwaway `onboarding@resend.dev`
-- [ ] `commma-deploy-local` access key rotated
 - [ ] EC2 box git remote updated to the `trnahnh` URL
 - [ ] Prod-sized load test (t4g + Neon + Upstash) per [METRICS.md](./METRICS.md)
 - [ ] Production instrumentation / metrics sink wired (prod currently
@@ -136,6 +134,6 @@ pnpm deploy:api   # ssh box -> pull -> build -> pm2 restart -> health check
 
 Run from a fresh terminal so `aws` is on `PATH`. Both scripts are
 env-overridable (see headers in `infra/deploy-web.sh` / `infra/deploy-api.sh`).
-A push never deploys on its own: the GitLab `deploy:web`/`deploy:api` jobs are
-**manual** (click to run from the pipeline), and these laptop commands are the
-other path — both call the same scripts.
+A push to `main` auto-deploys via GitHub Actions
+(`deploy-web.yml`/`deploy-api.yml`, path-filtered); these laptop commands are
+the manual alternative that runs the same `infra/` steps.
