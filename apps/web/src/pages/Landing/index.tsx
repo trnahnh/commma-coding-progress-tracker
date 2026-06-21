@@ -3,6 +3,7 @@ import { Footer, Nav } from '../../components/chrome'
 import { SceneBackdrop } from '../../components/SceneBackdrop'
 import { useSeo } from '../../lib/seo'
 import { Activity } from './Activity'
+import { CliBand } from './CliBand'
 import { Final } from './Final'
 import { Hero } from './Hero'
 import { HowItWorks } from './HowItWorks'
@@ -28,6 +29,7 @@ export default function Landing() {
         <Ticker />
         <Activity />
         <HowItWorks />
+        <CliBand />
         <Leaderboard />
         <Waitlist />
         <Final />

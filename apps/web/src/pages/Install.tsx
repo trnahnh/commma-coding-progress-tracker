@@ -181,19 +181,23 @@ export default function Install() {
       <section className='mt-[clamp(40px,6vw,72px)] rounded-xl border border-rule bg-paper-2/40 surface px-6 sm:px-8 py-8 flex flex-col sm:flex-row sm:items-center gap-6 sm:justify-between'>
         <div className='min-w-0'>
           <h2 className='font-serif font-normal text-[clamp(22px,3vw,30px)] leading-[1.05] tracking-[-0.01em] m-0 mb-2 text-ink'>
-            Coding somewhere else?
+            Not in a VS Code editor?
           </h2>
           <p className='font-sans text-[15px] leading-relaxed text-ink-soft m-0 max-w-[52ch]'>
-            JetBrains, Neovim, and a standalone CLI are next. Drop your email on
-            the home page and we’ll ping you the moment your editor lands.
+            The commma CLI tracks your coding from any editor that writes files —
+            Neovim, Emacs, Helix, JetBrains. Native JetBrains and Neovim plugins
+            are still on the way.
           </p>
         </div>
         <Link
-          to='/#get-started'
-          className='shrink-0 inline-flex items-center gap-2.5 min-h-[48px] px-6 rounded-full font-mono text-[14px] uppercase tracking-wider
+          to='/cli'
+          className='group shrink-0 inline-flex items-center gap-2.5 min-h-[48px] px-6 rounded-full font-mono text-[14px] uppercase tracking-wider
             text-ink-soft hover:text-ink border border-rule-strong hover:border-ink-faint transition-colors press'
         >
-          Get notified
+          Explore the CLI
+          <span className='inline-block transition-transform group-hover:translate-x-1'>
+            →
+          </span>
         </Link>
       </section>
     </Shell>

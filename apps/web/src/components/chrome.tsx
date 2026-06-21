@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { label: 'Activity', to: '/' },
   { label: 'Feed', to: '/feed' },
   { label: 'Leaderboard', to: '/leaderboard' },
+  { label: 'CLI', to: '/cli' },
   { label: 'Pricing', to: '/pricing' },
 ]
 
@@ -318,6 +319,7 @@ export function Footer() {
     { label: 'Activity', to: '/' },
     { label: 'Feed', to: '/feed' },
     { label: 'Leaderboard', to: '/leaderboard' },
+    { label: 'CLI', to: '/cli' },
     { label: 'Pricing', to: '/pricing' },
     { label: 'Docs', to: docTo() },
     { label: 'Changelog', to: '/changelog' },
