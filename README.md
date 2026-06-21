@@ -9,7 +9,7 @@ Turn your editor into a logbook — pace, splits, streaks, and podiums, for the
 work you already do.
 
 [![Live](https://img.shields.io/badge/Live-commma.dev-ff4d1a?style=for-the-badge&logo=googlechrome&logoColor=white)](https://commma.dev)
-[![VS Code](https://img.shields.io/visual-studio-marketplace/v/commma.commma?style=for-the-badge&label=VS%20Code&color=ff4d1a&logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=commma.commma)
+[![VS Code](https://img.shields.io/badge/VS%20Code-Marketplace-ff4d1a?style=for-the-badge&logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=commma.commma)
 [![Open VSX](https://img.shields.io/open-vsx/v/commma/commma?style=for-the-badge&label=Open%20VSX&color=ff4d1a&logo=eclipseide&logoColor=white)](https://open-vsx.org/extension/commma/commma)
 [![CI](https://img.shields.io/github/actions/workflow/status/trnahnh/commma-coding-progress-tracker/ci.yml?branch=main&style=for-the-badge&label=CI&color=ff4d1a&logo=githubactions&logoColor=white)](https://github.com/trnahnh/commma-coding-progress-tracker/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-ff4d1a?style=for-the-badge)](#license)
