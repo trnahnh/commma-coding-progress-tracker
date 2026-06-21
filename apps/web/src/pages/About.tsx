@@ -220,6 +220,12 @@ const STACK_GROUPS = [
         role: 'AI prose — optional',
         why: 'GPT-4.1-nano writes only the recap headline and note — numbers stay deterministic. Any failure falls back to the template.',
       },
+      {
+        no: '027',
+        name: 'ElevenLabs',
+        role: 'Voice synthesis',
+        why: 'The launch film narration is rendered from a script with ElevenLabs neural TTS — a cinematic voiceover without a studio booth.',
+      },
     ],
   },
 ]
@@ -292,9 +298,18 @@ export default function About() {
   const { ref: filmRef, visible: filmVisible } = useReveal(0.08)
 
   const videoRef = useRef<HTMLVideoElement>(null)
+  const [soundOn, setSoundOn] = useState(false)
   const [reducedMotion, setReducedMotion] = useState(
     () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )
+  const toggleSound = () => {
+    const v = videoRef.current
+    if (!v) return
+    const next = !soundOn
+    v.muted = !next
+    if (next) v.play().catch(() => {})
+    setSoundOn(next)
+  }
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
     const onChange = (e: MediaQueryListEvent) => setReducedMotion(e.matches)
@@ -347,25 +362,69 @@ export default function About() {
           The film
         </p>
         <div
-          className={`rounded-xl overflow-hidden border border-rule-strong surface ${filmVisible ? 'animate-fade-up' : 'opacity-0'}`}
+          className={`relative rounded-xl overflow-hidden border border-rule-strong surface ${filmVisible ? 'animate-fade-up' : 'opacity-0'}`}
           style={{ animationDelay: '80ms' }}
         >
           <video
             ref={videoRef}
             className='block w-full aspect-video bg-paper'
-            src='/commma-intro.mp4'
-            poster='/commma-intro-poster.jpg'
+            src='/commma-launch.mp4'
+            poster='/commma-launch-poster.jpg'
             muted
             loop
             playsInline
             preload='metadata'
             controls={reducedMotion}
-            aria-label='commma brand film — every commit is a step'
+            aria-label='commma launch film — every commit is a step'
           />
+          {!reducedMotion && (
+            <button
+              type='button'
+              onClick={toggleSound}
+              aria-pressed={soundOn}
+              aria-label={soundOn ? 'Mute the film' : 'Play the film with sound'}
+              className='absolute bottom-3 right-3 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-rule-strong bg-paper-2 text-ink-soft transition-colors hover:border-accent-line hover:text-ink focus-visible:border-accent-line focus-visible:text-ink focus-visible:outline-none'
+            >
+              {soundOn ? (
+                <svg
+                  width='20'
+                  height='20'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='1.6'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  aria-hidden='true'
+                >
+                  <path d='M11 5 6 9H3v6h3l5 4z' />
+                  <path d='M15.5 8.5a5 5 0 0 1 0 7' />
+                  <path d='M18.8 5.8a9 9 0 0 1 0 12.4' />
+                </svg>
+              ) : (
+                <svg
+                  width='20'
+                  height='20'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='1.6'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  aria-hidden='true'
+                >
+                  <path d='M11 5 6 9H3v6h3l5 4z' />
+                  <line x1='16' y1='9' x2='22' y2='15' />
+                  <line x1='22' y1='9' x2='16' y2='15' />
+                </svg>
+              )}
+            </button>
+          )}
         </div>
         <p className='font-sans text-[15px] leading-relaxed text-ink-mute m-0 mt-4 max-w-[56ch]'>
-          Fifteen seconds of what commma sees — every keystroke mapped to the
-          board, a session scored like a race, a streak that keeps the count.
+          Nineteen seconds of what commma sees — every keystroke mapped to the
+          board, a session scored like a race, and the headless CLI that tracks
+          it from any terminal. Tap the speaker for sound.
         </p>
       </section>
 
