@@ -25,18 +25,21 @@ boundary.
 
 ```text
 ┌─────────────────────────────────────────────────────────┐
-│  VSCode Extension (@commma/extension)                   │
+│  Data sources                                           │
 │                                                         │
-│  onDidChangeTextDocument ──► in-memory buffer           │
-│  onDidOpenTextDocument   ──► (HeartbeatEvent[])         │
-│  window.onDidChangeActiveTextEditor                     │
-│                    │                                    │
-│                    │  flush every 60s                   │
-│                    ▼                                    │
-│            POST /v1/ingest                              │
-└───────────────────┬─────────────────────────────────────┘
-                    │ HTTPS/JSON  HeartbeatBatch
-                    ▼
+│ ┌─────────────────────┐       ┌─────────────────────┐   │
+│ │VSCode Extension     │       │CLI (@commma/cli)    │   │
+│ │(@commma/extension)  │       │polling file watcher │   │
+│ │editor events →      │       │byte deltas → counts │   │
+│ │in-memory buffer     │       │(no key_freq)        │   │
+│ └──────────┬──────────┘       └──────────┬──────────┘   │
+│            │       flush every 60s       │              │
+│            └──────────────┬──────────────┘              │
+│                           │                             │
+│                   POST /v1/ingest                       │
+└───────────────────────────┬─────────────────────────────┘
+                            │ HTTPS/JSON  HeartbeatBatch
+                            ▼
 ┌─────────────────────────────────────────────────────────┐
 │  API  (@commma/api  —  Hono on Node)                    │
 │                                                         │
