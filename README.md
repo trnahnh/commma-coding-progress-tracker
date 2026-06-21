@@ -37,8 +37,14 @@ for VS Code, and the
 Windsurf, VSCodium, and Gitpod. Search **commma** in your editor's Extensions
 panel, run **commma: Sign in** from the Command Palette, and your sessions,
 streaks, and heatmaps start filling in — free, no card. See
-[commma.dev/install](https://commma.dev/install) for every option. JetBrains,
-Neovim, and a standalone CLI client are on the roadmap.
+[commma.dev/install](https://commma.dev/install) for every option.
+
+Coding outside a VS Code editor? The headless **commma CLI** (`apps/cli`) tracks
+any editor that writes files — Neovim, Emacs, Helix, JetBrains — from one
+terminal command. Build it from this monorepo and run `commma login` /
+`commma watch`; see [commma.dev/cli](https://commma.dev/cli) and the
+[CLI README](apps/cli/README.md). Native JetBrains and Neovim plugins are still
+on the roadmap.
 
 ---
 
@@ -93,6 +99,7 @@ Neovim, and a standalone CLI client are on the roadmap.
 commma/
 ├── apps/
 │   ├── api/          Hono REST API
+│   ├── cli/          Headless CLI client (any editor)
 │   ├── extension/    VSCode extension
 │   └── web/          React web app
 ├── packages/

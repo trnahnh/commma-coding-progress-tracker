@@ -99,8 +99,30 @@ VS Code `^1.85.0` engine. Update your editor to a recent build and retry.
 **Behind a corporate proxy.** Set `http.proxy` in your editor settings so the
 Extensions panel can reach the registry, or install from a downloaded VSIX.
 
+## Any editor: the CLI
+
+Not on a VS Code–family editor? The **commma CLI** is a headless client that
+tracks your coding from anything that writes source files to disk — Neovim,
+Emacs, Helix, JetBrains. It ships in the open-source monorepo; build it once,
+sign in, and run the watcher:
+
+```bash
+git clone https://github.com/trnahnh/commma-coding-progress-tracker
+pnpm install
+pnpm --filter @commma/cli build
+node apps/cli/dist/cli.js login
+node apps/cli/dist/cli.js watch
+```
+
+`commma watch` derives keystroke and line counts from file changes and flushes
+them every 60 seconds — it reads files only to measure how much changed, never
+what you typed, and it cannot build a key-frequency heatmap at all (that stays
+the editor extension's job). The same `full` / `summary` / `off` privacy modes
+apply, set with `--privacy` or the `COMMMA_PRIVACY` environment variable. See
+the [CLI page](/cli) for the full command reference.
+
 ## Other editors
 
-JetBrains, Neovim, and a standalone CLI client are on the roadmap. Drop your
-email on the [home page](/#install) and we will let you know the moment your
-editor lands.
+Native JetBrains and Neovim plugins are still on the roadmap. Until they land,
+the CLI above already covers those editors; drop your email on the
+[home page](/#install) and we will let you know when the native plugins ship.

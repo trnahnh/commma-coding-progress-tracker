@@ -1,5 +1,14 @@
 export const CHANGELOG_ENTRIES = [
   {
+    version: '1.1.0',
+    date: 'Jun 2026',
+    tag: 'CLI',
+    changes: [
+      'The commma CLI is here — track your coding from any editor that writes files, not just VS Code. On Neovim, Emacs, Helix, or JetBrains, run "commma login" once and "commma watch" in your project, and your sessions, streaks, and leaderboard standing fill in straight from the terminal. Same privacy promise: it counts which keys moved the file, never what you typed',
+      'New CLI page — a dedicated /cli walkthrough covers the four commands, the three privacy modes, and how to build it from source, with a live terminal that streams a real watch session. The CLI now has its own place in the top navigation, the footer, and the install page, so it is easy to find',
+    ],
+  },
+  {
     version: '1.0.0',
     date: 'Jun 2026',
     tag: 'Launch',
