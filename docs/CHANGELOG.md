@@ -28,6 +28,19 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   an approximation from file deltas — the editor extension remains the precise
   heatmap source.
 
+### Changed
+
+- **Web** — The About-page brand film is now a 19-second launch cut. It keeps
+  the keyboard-heatmap flood and session-stats beats, adds a terminal sequence
+  that shows the CLI (`commma login` → `commma watch` → a live flush line), and
+  carries a cinematic voiceover synthesized with **ElevenLabs** neural
+  text-to-speech. The film autoplays muted in view, pauses off-screen, and
+  exposes a corner speaker button to enable the narration; reduced-motion still
+  falls back to native controls. The animation source lives in
+  `assets/video/commma-launch.html`, with vertical and landscape masters (1080p
+  and 4K) under `assets/video/`. The original `commma-intro` masters are
+  retained.
+
 ## [1.0.0] — 2026-06-19
 
 ### Added
