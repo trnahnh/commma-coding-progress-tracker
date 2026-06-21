@@ -8,14 +8,16 @@ Version 1.0 · May 2026
 
 commma is a three-tier distributed system:
 
-1. **VSCode Extension** — data source; captures editor activity and ships
-   heartbeat batches
+1. **VSCode Extension & CLI** — data sources; capture coding activity (the
+   extension from editor events, the headless CLI from filesystem changes) and
+   ship heartbeat batches
 2. **API (Hono/Node)** — ingestion, aggregation, query, and auth layer
 3. **Web App (React/Vite)** — presentation layer; session detail, leaderboards,
    profiles, heatmap export
 
 All three tiers communicate over HTTPS/JSON. A shared package (`@commma/shared`)
-holds Zod schemas enforcing the data contract across the extension→API boundary.
+holds Zod schemas enforcing the data contract across the data-source→API
+boundary.
 
 ---
 

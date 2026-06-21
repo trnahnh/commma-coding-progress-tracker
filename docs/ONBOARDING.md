@@ -38,6 +38,13 @@ commma/
 │   │       ├── db.ts redis.ts logger.ts   shared clients + structured logger
 │   │       └── lib/              jwt, refresh, cookies, errors, github, heatmapCard
 │   │
+│   ├── cli/              Headless CLI client (any editor that writes files)
+│   │   └── src/
+│   │       ├── index.ts          commands: login / logout / watch / status
+│   │       ├── watcher.ts        dependency-free polling file watcher
+│   │       ├── auth.ts           loopback OAuth one-time-code flow
+│   │       └── client.ts         ingest client + offline buffer
+│   │
 │   ├── extension/        VSCode extension
 │   │   └── src/
 │   │       ├── extension.ts      activate / deactivate
