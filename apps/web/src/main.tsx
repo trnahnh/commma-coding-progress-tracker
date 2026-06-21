@@ -23,6 +23,7 @@ const SignIn = lazy(() => import('./pages/SignIn.tsx'))
 const NotFound = lazy(() => import('./pages/NotFound.tsx'))
 const Pricing = lazy(() => import('./pages/Pricing.tsx'))
 const Install = lazy(() => import('./pages/Install.tsx'))
+const Cli = lazy(() => import('./pages/Cli.tsx'))
 const Privacy = lazy(() => import('./pages/Privacy.tsx'))
 const Api = lazy(() => import('./pages/Api.tsx'))
 const Careers = lazy(() => import('./pages/Careers.tsx'))
@@ -50,6 +51,7 @@ const mainHostChildren = [
   { path: '/profile', element: <EditProfile /> },
   { path: '/pricing', element: <Pricing /> },
   { path: '/install', element: <Install /> },
+  { path: '/cli', element: <Cli /> },
   { path: '/billing/success', element: <BillingSuccess /> },
   { path: '/recap', element: <Recap /> },
   { path: '/sessions/:id', element: <SessionDetail /> },
