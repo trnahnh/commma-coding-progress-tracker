@@ -11,7 +11,12 @@ import { queries } from '../lib/queries'
 import { hasProAccess } from '@commma/shared'
 import { useAuth } from '../lib/auth'
 import { INSTALL_PATH, FREE_MODE } from '../lib/config'
-import { formatClock, formatDate, formatDuration } from '../lib/format'
+import {
+  formatClock,
+  formatDate,
+  formatDuration,
+  safeExternalUrl,
+} from '../lib/format'
 import { langStyle } from '../lib/langColors'
 import { useSeo } from '../lib/seo'
 
@@ -113,41 +118,52 @@ function ProfileHero({ profile }: { profile: UserProfile }) {
               {bio}
             </p>
           )}
-          {(location || website || linkedin || streak.current_days > 0) && (
-            <div className='mt-2 flex flex-wrap items-center gap-x-4 gap-y-1'>
-              {streak.current_days > 0 && (
-                <span className='font-mono text-[13px] text-live flex items-center gap-1.5'>
-                  <LiveDot color='live' />
-                  {streak.current_days}d streak
-                </span>
-              )}
-              {location && (
-                <span className='font-mono text-[13px] text-ink-mute'>
-                  {location}
-                </span>
-              )}
-              {website && (
-                <a
-                  href={website}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='font-mono text-[13px] text-ink-soft hover:text-ink transition-colors'
-                >
-                  {website.replace(/^https?:\/\//, '')}
-                </a>
-              )}
-              {linkedin && (
-                <a
-                  href={linkedin}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='font-mono text-[13px] text-ink-soft hover:text-ink transition-colors'
-                >
-                  LinkedIn
-                </a>
-              )}
-            </div>
-          )}
+          {(() => {
+            const websiteHref = safeExternalUrl(website)
+            const linkedinHref = safeExternalUrl(linkedin)
+            if (
+              !location &&
+              !websiteHref &&
+              !linkedinHref &&
+              streak.current_days <= 0
+            )
+              return null
+            return (
+              <div className='mt-2 flex flex-wrap items-center gap-x-4 gap-y-1'>
+                {streak.current_days > 0 && (
+                  <span className='font-mono text-[13px] text-live flex items-center gap-1.5'>
+                    <LiveDot color='live' />
+                    {streak.current_days}d streak
+                  </span>
+                )}
+                {location && (
+                  <span className='font-mono text-[13px] text-ink-mute'>
+                    {location}
+                  </span>
+                )}
+                {websiteHref && (
+                  <a
+                    href={websiteHref}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='font-mono text-[13px] text-ink-soft hover:text-ink transition-colors'
+                  >
+                    {websiteHref.replace(/^https?:\/\//, '')}
+                  </a>
+                )}
+                {linkedinHref && (
+                  <a
+                    href={linkedinHref}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='font-mono text-[13px] text-ink-soft hover:text-ink transition-colors'
+                  >
+                    LinkedIn
+                  </a>
+                )}
+              </div>
+            )
+          })()}
         </div>
       </div>
       <div className='grid grid-cols-2 sm:grid-cols-4 gap-px bg-rule'>
