@@ -6,11 +6,11 @@ does.
 
 ## Monorepo
 
-Everything lives in one pnpm workspace: the extension, the API, the web app, the
-database package, and a shared contract package. The extension and the API have
-to agree on an exact event shape, and the web app and the API share keyboard
-layouts; a monorepo lets a single shared package be the one source of truth for
-both, with no version drift.
+Everything lives in one pnpm workspace: the extension, the CLI, the API, the web
+app, the database package, and a shared contract package. The extension and the
+API have to agree on an exact event shape, and the web app and the API share
+keyboard layouts; a monorepo lets a single shared package be the one source of
+truth for both, with no version drift.
 
 ## Hono on the API
 

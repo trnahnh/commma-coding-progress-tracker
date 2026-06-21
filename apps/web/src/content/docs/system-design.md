@@ -7,8 +7,8 @@ session, the shape of what is stored, and where the security boundary sits.
 
 Writes are intentionally cheap and asynchronous:
 
-1. The extension buffers activity and flushes a batch of 1–500 heartbeat events
-   to `POST /v1/ingest` every 60 seconds.
+1. The extension — or the headless CLI — buffers activity and flushes a batch of
+   1–500 heartbeat events to `POST /v1/ingest` every 60 seconds.
 2. The API validates the batch against a shared schema, writes the events
    idempotently keyed on event id, and immediately returns `202 Accepted`. No
    aggregation happens on the request.
@@ -59,9 +59,10 @@ A few lines are drawn hard:
   caller owns the row they are changing.
 - **Validation.** Every body, query string, and route parameter is validated
   before use. Invalid input is a `400`, never a `500` and never a partial write.
-- **Secrets.** No secret ever appears in the web or extension bundles. The
+- **Secrets.** No secret ever appears in the web, extension, or CLI bundles. The
   server holds them, validated from the environment; the extension holds only
-  your own refresh token, in encrypted secret storage.
+  your own refresh token, in the editor's encrypted secret storage, and the CLI
+  keeps it in a `0600` file under your home directory.
 - **Rate limits.** Every route sits in a rate-limit bucket. Authenticated routes
   are limited per user; public and auth routes are limited per IP.
 

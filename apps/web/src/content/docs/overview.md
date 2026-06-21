@@ -5,16 +5,18 @@ already do in your editor into sessions, pace, splits, streaks, leaderboards,
 and a shareable **keyboard heatmap** — a per-session map of which physical keys
 you pressed, exported as a transparent PNG.
 
-You install an editor extension once, code as usual, and read the week back like
-an athlete reviewing the tape.
+You install the editor extension — or run the headless CLI — once, code as
+usual, and read the week back like an athlete reviewing the tape.
 
 ## The three tiers
 
 commma is three pieces talking HTTPS and JSON:
 
-- **Extension** — the data source. It captures keystroke counts, the active
-  file, the language, and a key-label frequency map, buffers them in memory, and
-  flushes a batch of heartbeat events to the API every 60 seconds.
+- **Extension & CLI** — the data sources. The VS Code extension captures
+  keystroke counts, the active file, the language, and a key-label frequency
+  map; the headless CLI tracks any editor that writes files, deriving counts
+  from filesystem changes (no key map). Both buffer in memory and flush a batch
+  of heartbeat events to the API every 60 seconds.
 - **API** — a Hono server on Node. It handles auth, ingest, asynchronous session
   aggregation, and every read query.
 - **Web** — the React app you are reading now. Session detail, leaderboards,
