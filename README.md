@@ -85,6 +85,7 @@ on the roadmap.
 | Shared              | Zod schemas, TypeScript types                                                                      |
 | Heatmap (client)    | Canvas API → transparent PNG                                                                       |
 | Heatmap (server OG) | sharp                                                                                              |
+| Brand film          | ElevenLabs neural voiceover; Canvas animation → ffmpeg                                             |
 | Auth                | GitHub OAuth, JWT + HTTP-only refresh token                                                        |
 | Billing             | Stripe (Pro/Team subscriptions, signature-verified webhooks)                                       |
 | Monorepo            | pnpm workspaces                                                                                    |
@@ -155,9 +156,10 @@ functionally complete; Phase 5 is in progress:
   wired to live data. The extension is published to both the VS Code Marketplace
   and Open VSX (`commma.commma`). Still open: contributor onboarding and
   external PR merges.
-- **Phase 5 — Growth (in progress):** mobile layout audit, PWA manifest, and
-  push notifications are done. Not yet started: JetBrains/Neovim plugin
-  scaffolds, a standalone CLI client, and a self-hosted Docker/Helm stack.
+- **Phase 5 — Growth (in progress):** mobile layout audit, PWA manifest, push
+  notifications, and the headless CLI client (`apps/cli`, any editor that writes
+  files) are done. Not yet started: JetBrains/Neovim plugin scaffolds and a
+  self-hosted Docker/Helm stack.
 
 See [docs/ROADMAP.md](./docs/ROADMAP.md) for the detailed phase plan and what
 remains.
