@@ -297,11 +297,11 @@ Goal: growth mechanics live. First external contributors merged.
 - [x] Dvorak keyboard layout config
 - [x] Colemak keyboard layout config
 - [x] Wire the landing page `SESSION`/`CHART`/`TICKER` sections to live data
-      (currently mocked in `App.tsx`) — needs new read endpoints: a featured
-      public session for `SESSION`, a daily activity time-series for `CHART`
-      (derived from `sessions`, not `events`, which are pruned per ADR-010), and
-      a recent public-activity feed for `TICKER`. Land before public launch so
-      the landing page is fully real.
+      (sample fallbacks now in `pages/Landing/mocks.ts`) — needs new read
+      endpoints: a featured public session for `SESSION`, a daily activity
+      time-series for `CHART` (derived from `sessions`, not `events`, which are
+      pruned per ADR-010), and a recent public-activity feed for `TICKER`. Land
+      before public launch so the landing page is fully real.
 - [x] `/about` page — origin story (GitHub × Strava inspiration), animated
       "insight" comparison visualization, manifesto, and a 23-entry stack
       catalogue grouped by layer (Language & Tooling / API / Data / Frontend /

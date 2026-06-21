@@ -49,10 +49,11 @@ commma/
 │   │
 │   └── web/              React web app
 │       └── src/
-│           ├── App.tsx
+│           ├── main.tsx          router + providers entry
 │           ├── components/
 │           │   └── KeyboardHeatmap/  Canvas heatmap renderer
 │           ├── pages/
+│           │   └── Landing/      landing page, one file per section
 │           └── index.css         design tokens (@theme)
 │
 ├── packages/
@@ -221,7 +222,8 @@ pnpm test --filter @commma/shared  # shared schema tests only
 ```
 
 Tests use Vitest and run from the repo root. Pure-logic unit tests (aggregator,
-key counter, shared schema, extension offline queue) always run. The API
+key counter, shared schema, extension offline queue, and the web waitlist
+validation/error-mapping helpers under `apps/web/test/`) always run. The API
 route/integration suite under `apps/api/test/routes/` runs against a real
 Postgres + Redis only when `TEST_DATABASE_URL` is set (point it at a throwaway
 database, never production) and skips cleanly otherwise:

@@ -11,7 +11,7 @@ import {
   queryPersister,
 } from './lib/queryClient.ts'
 import RootLayout from './RootLayout.tsx'
-import App from './App.tsx'
+import Landing from './pages/Landing/index.tsx'
 import { ON_DOCS_HOST } from './lib/docsRouting.ts'
 
 const SessionDetail = lazy(() => import('./pages/SessionDetail.tsx'))
@@ -46,7 +46,7 @@ const docsHostChildren = [
 ]
 
 const mainHostChildren = [
-  { path: '/', element: <App /> },
+  { path: '/', element: <Landing /> },
   { path: '/profile', element: <EditProfile /> },
   { path: '/pricing', element: <Pricing /> },
   { path: '/install', element: <Install /> },
