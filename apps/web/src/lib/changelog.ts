@@ -10,6 +10,8 @@ export const CHANGELOG_ENTRIES = [
       'Pages load instantly on revisit — profiles, sessions, the leaderboard, and the feed now cache their data, so moving between them (and even a full browser refresh) serves what you already saw immediately and quietly refreshes in the background, instead of a loading spinner and a fresh server hit every time',
       'The status page is now genuinely live — it checks the API, database, and cache in real time and refreshes itself, with clear "degraded" and "unreachable" states, instead of showing a hand-written "all operational" list',
       'commma is now discoverable on Google — we verified the domain with Google Search Console and submitted the sitemap, so the public pages start showing up in search results',
+      'commma is open source — the whole monorepo (extension, API, and web) is public under the MIT license, with a contributor guide. As part of the launch cleanup, the landing page was broken out of one 1,000-line file into focused per-section pieces, so the codebase is easier to read, review, and contribute to',
+      'Security hardening — a fresh pre-launch audit of the whole API confirmed auth, rate limits, payment-webhook verification, and ownership checks all hold, and closed one issue it surfaced: links on your profile (website and LinkedIn) are now restricted to normal http(s) addresses, so a profile can never smuggle a script-bearing link',
     ],
   },
   {

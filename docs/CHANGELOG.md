@@ -356,6 +356,20 @@ Nothing yet.
 
 ### Security
 
+- **API, Web** — Stored-XSS hardening on profile links, found in a pre-launch
+  re-audit of the API surface. `PATCH /v1/me` validated `website` and `linkedin`
+  with a bare `z.string().url()`, which accepts `javascript:` and `data:` URLs
+  (the WHATWG URL parser treats them as valid). The public profile renders both
+  as `<a href=…>`, so a crafted value would have executed script in the
+  `commma.dev` origin when another visitor clicked it. The two fields are now
+  constrained to `http`/`https` only at the API (the enforcement boundary) —
+  anything else returns `400 VALIDATION_ERROR` — and the web profile passes both
+  through a `safeExternalUrl` guard that drops any non-`http(s)` URL, so legacy
+  rows already in the database also render inert. The rest of the eleven-point
+  audit (auth coverage, per-route rate-limit buckets, Stripe webhook signature
+  verification and event idempotency, OAuth state/redirect handling, refresh
+  cookie flags, ownership checks on every mutation, parameterized SQL, and no
+  secrets in the web bundle) passed with no further changes.
 - **API** — Backend hardening pass from the eleven-point infra audit. Three
   fixes: (1) `POST /v1/ingest` now bounds event timestamps to a server-side
   window — a batch is rejected with `400 VALIDATION_ERROR` if any `ts` is more
@@ -373,10 +387,29 @@ Nothing yet.
 
 ### Changed
 
-- **API** — The signup confirmation email is reframed from a launch waitlist to
-  a product-updates list: it points to the live Marketplace listing and promises
-  a heads-up when the JetBrains, Neovim, and CLI clients ship, instead of "your
-  invite lands in waves."
+- **Web** — Open-source launch cleanup of the landing page. The 1,028-line
+  `apps/web/src/App.tsx` (the single largest source file, mixing every landing
+  section with inline mock data and chart helpers) was split into a focused
+  `apps/web/src/pages/Landing/` module: one file per section
+  (`Hero`/`Ticker`/`Activity`/`HowItWorks`/`Leaderboard`/`Waitlist`/`Final`), a
+  shared `SectionHead`, the scroll `ProgressBar`, an `index.tsx` that composes
+  them, and `mocks.ts` holding the sample data the live API falls back to.
+  `main.tsx` now imports `Landing` from `pages/Landing`; no UI, copy, route, or
+  behavior changed. The MIT-licensed monorepo (extension, API, web) is public
+  with a contributor guide, and this split makes the most-edited page far easier
+  to read and review.
+- **Web** — Landing behavior extracted into reusable custom hooks, with the
+  repo's first web test. Three inline `useState`/`useEffect` blocks became hooks
+  in `lib/`: `useScrollProgress<T>()` (the scroll-progress bar),
+  `useLiveCount()` (the hero "typing right now" counter), and
+  `useWaitlistForm()` (the waitlist email state machine) — the section
+  components are now mostly markup, with no behavior change. The waitlist's pure
+  logic (`isValidWaitlistEmail`, `waitlistErrorMessage`) moved to
+  `lib/waitlist.ts` and is covered by a new `apps/web/test/waitlist.test.ts` (10
+  cases) — the first test under `apps/web/`, running on the existing `node`
+  Vitest with no jsdom or testing-library added. A `useMutation` rewrite of the
+  waitlist POST was considered and declined: the TanStack Query layer is for
+  cached reads (ADR-014), not a fire-and-forget signup with per-error copy.
 - **Web** — Scroll-performance pass. Eliminated the main cause of scroll jank:
   the body's noise-texture and gradient background used
   `background-attachment: fixed`, which forced the browser to repaint a
