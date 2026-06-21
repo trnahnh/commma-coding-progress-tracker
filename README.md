@@ -1,12 +1,22 @@
+<!-- markdownlint-disable MD033 MD041 MD013 MD036 -->
+<div align="center">
+
 # commma
 
-> Every commit is a step.
+**Every commit is a step.**
 
-**Live:** [commma.dev](https://commma.dev) · API at
-[api.commma.dev](https://api.commma.dev) ·
-[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=commma.commma)
-· [Open VSX](https://open-vsx.org/extension/commma/commma) ·
-[LinkedIn](https://www.linkedin.com/company/commma-dev/)
+Turn your editor into a logbook — pace, splits, streaks, and podiums, for the
+work you already do.
+
+[![Live](https://img.shields.io/badge/Live-commma.dev-ff4d1a?style=for-the-badge&logo=googlechrome&logoColor=white)](https://commma.dev)
+[![VS Code](https://img.shields.io/visual-studio-marketplace/v/commma.commma?style=for-the-badge&label=VS%20Code&color=ff4d1a&logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=commma.commma)
+[![Open VSX](https://img.shields.io/open-vsx/v/commma/commma?style=for-the-badge&label=Open%20VSX&color=ff4d1a&logo=eclipseide&logoColor=white)](https://open-vsx.org/extension/commma/commma)
+[![CI](https://img.shields.io/github/actions/workflow/status/trnahnh/commma-coding-progress-tracker/ci.yml?branch=main&style=for-the-badge&label=CI&color=ff4d1a&logo=githubactions&logoColor=white)](https://github.com/trnahnh/commma-coding-progress-tracker/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-ff4d1a?style=for-the-badge)](#license)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-commma-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/company/commma-dev/)
+
+</div>
+<!-- markdownlint-enable MD033 MD041 MD013 MD036 -->
 
 commma turns your editor into a logbook — pace, splits, streaks, podiums — all
 the rituals of a real sport, for the work you already do. A VSCode extension
@@ -48,6 +58,16 @@ Neovim, and a standalone CLI client are on the roadmap.
 ---
 
 ## Tech Stack
+
+<!-- markdownlint-disable MD033 MD013 -->
+<div align="center">
+
+![Frontend](https://skillicons.dev/icons?i=ts,react,vite,tailwind&theme=dark)
+![Backend and data](https://skillicons.dev/icons?i=nodejs,postgres,redis&theme=dark)
+![Cloud and infra](https://skillicons.dev/icons?i=aws,terraform,docker,nginx,githubactions&theme=dark)
+
+</div>
+<!-- markdownlint-enable MD033 MD013 -->
 
 | Layer               | Technology                                                                                         |
 | ------------------- | -------------------------------------------------------------------------------------------------- |
