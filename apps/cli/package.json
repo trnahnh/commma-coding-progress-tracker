@@ -1,0 +1,30 @@
+{
+  "name": "@commma/cli",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Headless commma data source — track coding activity from any editor",
+  "license": "MIT",
+  "bin": {
+    "commma": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "node esbuild.config.js",
+    "start": "node dist/cli.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@commma/shared": "workspace:*",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "esbuild": "^0.24.2",
+    "tsx": "^4.7.1",
+    "typescript": "^5.8.3"
+  }
+}

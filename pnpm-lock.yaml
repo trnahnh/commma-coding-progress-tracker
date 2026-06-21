@@ -73,6 +73,28 @@ importers:
         specifier: ^5.8.3
         version: 5.9.3
 
+  apps/cli:
+    dependencies:
+      '@commma/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^20.11.17
+        version: 20.19.41
+      esbuild:
+        specifier: ^0.24.2
+        version: 0.24.2
+      tsx:
+        specifier: ^4.7.1
+        version: 4.22.3
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
   apps/extension:
     dependencies:
       '@commma/shared':
