@@ -168,17 +168,21 @@ export const follows = pgTable(
   ],
 )
 
-export const teams = pgTable('teams', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  slug: text('slug').notNull().unique(),
-  name: varchar('name', { length: 64 }).notNull(),
-  ownerId: uuid('owner_id')
-    .notNull()
-    .references(() => users.id),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-})
+export const teams = pgTable(
+  'teams',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    slug: text('slug').notNull().unique(),
+    name: varchar('name', { length: 64 }).notNull(),
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index('teams_owner').on(t.ownerId)],
+)
 
 export const teamMembers = pgTable(
   'team_members',
@@ -267,5 +271,6 @@ export const teamInvites = pgTable(
   (t) => [
     uniqueIndex('team_invites_unique').on(t.teamId, t.inviteeId),
     index('team_invites_invitee').on(t.inviteeId),
+    index('team_invites_invited_by').on(t.invitedBy),
   ],
 )

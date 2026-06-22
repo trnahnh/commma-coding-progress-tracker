@@ -78,6 +78,13 @@
       "when": 1781654400000,
       "tag": "0010_waitlist",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1781740800000,
+      "tag": "0011_account_indexes",
+      "breakpoints": true
     }
   ]
 }
