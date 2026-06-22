@@ -50,6 +50,19 @@ export async function addLeaderboardScore(
     .exec()
 }
 
+export async function removeLeaderboardUser(
+  userId: string,
+  date: Date,
+): Promise<void> {
+  const keys = leaderboardKeys(date)
+  await redis
+    .pipeline()
+    .zrem(keys.alltime, userId)
+    .zrem(keys.week, userId)
+    .zrem(keys.month, userId)
+    .exec()
+}
+
 export interface PeriodWindow {
   start: Date
   end: Date
