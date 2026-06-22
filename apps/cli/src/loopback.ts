@@ -1,21 +1,14 @@
 import { spawn } from 'node:child_process'
 import * as http from 'node:http'
 import type { AddressInfo } from 'node:net'
+import { authPage } from '@commma/shared/authPage'
 import { ui } from './ui.js'
 
 const LOOPBACK_TIMEOUT_MS = 5 * 60 * 1000
 
-const SUCCESS_PAGE =
-  '<!doctype html><meta charset="utf-8"><title>commma</title>' +
-  '<body style="font:16px system-ui;background:#0c0b08;color:#efead8;' +
-  'display:grid;place-items:center;height:100vh;margin:0">' +
-  '<p>commma is connected. You can close this tab.</p></body>'
+const SUCCESS_PAGE = authPage({ ok: true })
 
-const FAILURE_PAGE =
-  '<!doctype html><meta charset="utf-8"><title>commma</title>' +
-  '<body style="font:16px system-ui;background:#0c0b08;color:#efead8;' +
-  'display:grid;place-items:center;height:100vh;margin:0">' +
-  '<p>commma sign-in failed. You can close this tab.</p></body>'
+const FAILURE_PAGE = authPage({ ok: false })
 
 function openBrowser(url: string): void {
   const platform = process.platform
@@ -53,7 +46,7 @@ export function runLoopbackLogin(apiBaseUrl: string): Promise<string | null> {
         return
       }
       const code = url.searchParams.get('code')
-      res.writeHead(200, { 'Content-Type': 'text/html' })
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
       if (!code) {
         res.end(FAILURE_PAGE)
         finish(null)
