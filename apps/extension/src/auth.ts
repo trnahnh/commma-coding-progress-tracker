@@ -1,7 +1,6 @@
 import * as http from 'node:http'
 import type { AddressInfo } from 'node:net'
 import * as vscode from 'vscode'
-import { authPage } from '@commma/shared/authPage'
 import { getApiBaseUrl } from './privacy.js'
 
 const REFRESH_SECRET_KEY = 'commma.refreshToken'
@@ -134,13 +133,13 @@ export class Auth {
           return
         }
         const code = url.searchParams.get('code')
-        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
+        res.writeHead(200, { 'Content-Type': 'text/html' })
         if (!code) {
-          res.end(authPage({ ok: false }))
+          res.end('<html><body>commma sign-in failed. You can close this tab.</body></html>')
           finish(null)
           return
         }
-        res.end(authPage({ ok: true }))
+        res.end('<html><body>commma is connected. You can close this tab.</body></html>')
         finish(code)
       })
 

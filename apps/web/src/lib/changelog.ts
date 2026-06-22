@@ -1,19 +1,11 @@
 export const CHANGELOG_ENTRIES = [
   {
-    version: '1.1.0',
-    date: 'Jun 2026',
-    tag: 'Release',
-    changes: [
-      'You can now delete your account. The edit-profile page has a new "Danger zone" with a two-step confirmation that permanently erases everything tied to you — sessions, streaks, keyboard heatmaps, the teams you own, and your leaderboard standing — in one go, then signs you out. If you had a paid subscription it is cancelled first. This cannot be undone',
-      'Faster team operations behind the scenes — added database indexes that speed up creating a team and removing your data, so those actions stay quick as the userbase grows',
-      'Signing in from your editor or the CLI now lands on a branded commma confirmation page — the animated wordmark and warm palette instead of a blank "connected" line — so the handoff back to your editor feels like part of the product',
-    ],
-  },
-  {
     version: '1.0.0',
     date: 'Jun 2026',
     tag: 'Launch',
     changes: [
+      'You can now delete your account. The edit-profile page has a new "Danger zone" with a two-step confirmation that permanently erases everything tied to you — sessions, streaks, keyboard heatmaps, the teams you own, and your leaderboard standing — in one go, then signs you out. If you had a paid subscription it is cancelled first. This cannot be undone',
+      'Faster team operations behind the scenes — added database indexes that speed up creating a team and removing your data, so those actions stay quick as the userbase grows',
       'The commma CLI is here — track your coding from any editor that writes files, not just VS Code. On Neovim, Emacs, Helix, or JetBrains, run "commma login" once and "commma watch" in your project, and your sessions, streaks, and leaderboard standing fill in straight from the terminal. Same privacy promise: it counts which keys moved the file, never what you typed',
       'New CLI page — a dedicated /cli walkthrough covers the four commands, the three privacy modes, and how to build it from source, with a live terminal that streams a real watch session. The CLI now has its own place in the top navigation, the footer, and the install page, so it is easy to find',
       'New launch film on the About page — the brand teaser is now a 19-second cut with a cinematic voiceover and a terminal sequence showing the CLI sign in and watch a project live. It autoplays muted when it scrolls into view, with a speaker button in the corner to turn the narration on, and still respects reduced-motion',
