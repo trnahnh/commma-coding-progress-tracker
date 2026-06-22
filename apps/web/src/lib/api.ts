@@ -231,6 +231,13 @@ export function updateProfile(
   })
 }
 
+export function deleteAccount(token: string): Promise<void> {
+  return requestVoid('/v1/me', {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+}
+
 export function getSession(id: string): Promise<SessionDetail> {
   return getJson<SessionDetail>(`/v1/sessions/${encodeURIComponent(id)}`)
 }

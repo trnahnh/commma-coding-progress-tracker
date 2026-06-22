@@ -1,5 +1,14 @@
 export const CHANGELOG_ENTRIES = [
   {
+    version: '1.1.0',
+    date: 'Jun 2026',
+    tag: 'Release',
+    changes: [
+      'You can now delete your account. The edit-profile page has a new "Danger zone" with a two-step confirmation that permanently erases everything tied to you — sessions, streaks, keyboard heatmaps, the teams you own, and your leaderboard standing — in one go, then signs you out. If you had a paid subscription it is cancelled first. This cannot be undone',
+      'Faster team operations behind the scenes — added database indexes that speed up creating a team and removing your data, so those actions stay quick as the userbase grows',
+    ],
+  },
+  {
     version: '1.0.0',
     date: 'Jun 2026',
     tag: 'Launch',

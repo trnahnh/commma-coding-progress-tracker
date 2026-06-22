@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Shell } from '../components/chrome'
-import { ApiError, getMe, openBillingPortal, updateProfile } from '../lib/api'
+import {
+  ApiError,
+  deleteAccount,
+  getMe,
+  openBillingPortal,
+  updateProfile,
+} from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { FREE_MODE } from '../lib/config'
 import {
@@ -205,6 +211,119 @@ function BillingSection({
           >
             Upgrade
           </Link>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function DangerZone({ token }: { token: string }) {
+  const { signOut } = useAuth()
+  const navigate = useNavigate()
+  const [stage, setStage] = useState<'idle' | 'confirm' | 'final'>('idle')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+
+  const cancel = () => {
+    setStage('idle')
+    setErr(null)
+  }
+
+  const confirmDelete = async () => {
+    setBusy(true)
+    setErr(null)
+    try {
+      await deleteAccount(token)
+      await signOut()
+      navigate('/', { replace: true })
+    } catch (e) {
+      setErr(
+        e instanceof ApiError
+          ? e.message
+          : 'Could not delete your account. Try again.',
+      )
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className='mt-8 border border-accent-line rounded-lg bg-accent-soft overflow-hidden surface'>
+      <div className='px-5 sm:px-8 py-6 sm:py-7 flex flex-col gap-4'>
+        <div className='font-mono text-[12px] uppercase tracking-[0.18em] text-accent'>
+          Danger zone
+        </div>
+        <div>
+          <p className='font-mono text-[13px] text-ink m-0'>Delete account</p>
+          <p className='font-mono text-[13px] text-ink-soft m-0 mt-1 leading-relaxed'>
+            Permanently delete your account and all associated data — sessions,
+            streaks, heatmaps, teams you own, and leaderboard standing. This
+            cannot be undone.
+          </p>
+        </div>
+
+        {err && (
+          <p className='font-mono text-[12px] text-accent m-0'>{err}</p>
+        )}
+
+        {stage === 'idle' && (
+          <button
+            type='button'
+            onClick={() => setStage('confirm')}
+            className='self-start inline-flex items-center min-h-[44px] px-5 rounded-full font-mono text-[12px] uppercase tracking-wider border border-accent-line text-accent hover:bg-accent hover:text-paper hover:border-accent transition-colors'
+          >
+            Delete account
+          </button>
+        )}
+
+        {stage === 'confirm' && (
+          <div className='flex flex-col gap-3 border-t border-accent-line pt-4'>
+            <p className='font-mono text-[13px] text-ink m-0'>
+              Are you sure? This will erase everything tied to your account.
+            </p>
+            <div className='flex flex-col sm:flex-row gap-3'>
+              <button
+                type='button'
+                onClick={() => setStage('final')}
+                className='inline-flex items-center justify-center min-h-[44px] px-5 rounded-full font-mono text-[12px] uppercase tracking-wider border border-accent-line text-accent hover:bg-accent hover:text-paper hover:border-accent transition-colors'
+              >
+                Continue
+              </button>
+              <button
+                type='button'
+                onClick={cancel}
+                className='inline-flex items-center justify-center min-h-[44px] px-5 rounded-full font-mono text-[12px] uppercase tracking-wider border border-rule-strong text-ink-soft hover:text-ink hover:border-ink-faint transition-colors'
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {stage === 'final' && (
+          <div className='flex flex-col gap-3 border-t border-accent-line pt-4'>
+            <p className='font-mono text-[13px] text-ink m-0'>
+              Last chance — this permanently deletes your account and cannot be
+              undone.
+            </p>
+            <div className='flex flex-col sm:flex-row gap-3'>
+              <button
+                type='button'
+                disabled={busy}
+                onClick={() => void confirmDelete()}
+                className='inline-flex items-center justify-center min-h-[44px] px-5 rounded-full font-mono text-[12px] uppercase tracking-wider bg-accent text-paper border border-accent hover:bg-ink hover:border-ink disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+              >
+                {busy ? 'Deleting…' : 'Permanently delete'}
+              </button>
+              <button
+                type='button'
+                disabled={busy}
+                onClick={cancel}
+                className='inline-flex items-center justify-center min-h-[44px] px-5 rounded-full font-mono text-[12px] uppercase tracking-wider border border-rule-strong text-ink-soft hover:text-ink hover:border-ink-faint disabled:opacity-50 transition-colors'
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -532,6 +651,8 @@ export default function EditProfile() {
             </button>
           </div>
         </form>
+
+        <DangerZone token={token} />
       </div>
     </Shell>
   )
