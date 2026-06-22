@@ -11,6 +11,22 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **API, Web** — Account deletion. A new `DELETE /v1/me` (auth + write
+  rate-limit bucket) permanently erases the caller's account and every row tied
+  to it — sessions and their language/file breakdowns, raw events, streaks,
+  refresh tokens, push subscriptions, recap-email records, follows in both
+  directions, team memberships and invites (sent and received), and any teams
+  the user owns (with their members and invites) — all inside a single
+  transaction so a partial delete can't leave orphaned rows. A best-effort
+  Stripe subscription cancel runs first (when billing is configured), and the
+  user is removed from the current Redis leaderboard sets afterward. The web
+  Edit-profile page gains a "Danger zone" with a two-step confirmation (Continue
+  → Permanently delete) that signs the user out and returns home on success.
+- **DB** — Indexed `teams.owner_id` and `team_invites.invited_by` (migration
+  `0011_account_indexes`). Both columns are filtered on hot paths — the
+  team-create owned-count check, and the account-deletion cascade — but were
+  previously unindexed, forcing sequential scans. Append-only; apply with
+  `drizzle-kit migrate`.
 - **CLI** — New `@commma/cli` headless data source (`apps/cli`), so coding
   activity can be tracked from any editor that writes files to disk (Neovim,
   Emacs, Helix, JetBrains) without a dedicated plugin. Commands: `commma login`
