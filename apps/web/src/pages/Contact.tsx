@@ -17,41 +17,84 @@ export default function Contact() {
           Get in <em className='italic text-accent'>touch.</em>
         </h1>
 
-        <div className='border-t border-rule'>
-          <div className='grid grid-cols-1 sm:grid-cols-[140px_1fr] items-baseline gap-1 sm:gap-6 py-6 border-b border-rule'>
-            <span className='font-mono text-[12px] tracking-[0.16em] uppercase text-ink-mute'>
+        <p className='font-mono text-[12px] tracking-[0.16em] uppercase text-ink-mute m-0 mb-4'>
+          Founders
+        </p>
+        <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12'>
+          <div className='relative rounded-xl border border-accent-line bg-accent-soft p-6 surface lift overflow-hidden'>
+            <span
+              className='absolute top-4 right-5 font-mono text-[44px] leading-none text-accent-line select-none tnum'
+              aria-hidden='true'
+            >
+              01
+            </span>
+            <div className='font-mono text-[12px] tracking-[0.18em] uppercase text-accent mb-4 flex items-center gap-2'>
+              <span
+                className='w-2 h-2 rounded-full bg-accent inline-block animate-pulse-dot'
+                aria-hidden='true'
+              />
               Founder
-            </span>
-            <span className='font-sans text-[17px] text-ink'>Anh Tran</span>
+            </div>
+            <div className='font-serif text-[28px] text-ink mb-5 lift-text'>
+              Anh Tran
+            </div>
+            <div className='flex flex-col gap-2 pt-4 border-t border-accent-line'>
+              <a
+                href='mailto:anhdtran.forwork@gmail.com'
+                className='font-mono text-[13px] text-ink-soft hover:text-accent transition-colors break-all'
+              >
+                anhdtran.forwork@gmail.com
+              </a>
+              <a
+                href='https://github.com/trnahnh'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='font-mono text-[13px] text-ink-soft hover:text-accent transition-colors inline-flex items-center gap-1.5 break-all'
+              >
+                trnahnh
+                <span className='text-ink-mute text-[12px] shrink-0'>↗</span>
+              </a>
+            </div>
           </div>
 
-          <div className='grid grid-cols-1 sm:grid-cols-[140px_1fr] items-baseline gap-1 sm:gap-6 py-6 border-b border-rule'>
-            <span className='font-mono text-[12px] tracking-[0.16em] uppercase text-ink-mute'>
-              Email
-            </span>
-            <a
-              href='mailto:anhdtran.forwork@gmail.com'
-              className='font-mono text-[15px] text-accent hover:text-ink-soft transition-colors break-all'
+          <div className='relative rounded-xl border border-rule-strong bg-accent-2 p-6 surface lift overflow-hidden'>
+            <span
+              className='absolute top-4 right-5 font-mono text-[44px] leading-none text-paper select-none tnum'
+              aria-hidden='true'
             >
-              anhdtran.forwork@gmail.com
-            </a>
-          </div>
-
-          <div className='grid grid-cols-1 sm:grid-cols-[140px_1fr] items-baseline gap-1 sm:gap-6 py-6 border-b border-rule'>
-            <span className='font-mono text-[12px] tracking-[0.16em] uppercase text-ink-mute'>
-              GitHub
+              02
             </span>
-            <a
-              href='https://github.com/trnahnh'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='font-mono text-[14px] text-ink-soft hover:text-ink transition-colors inline-flex items-center gap-1.5 break-all'
-            >
-              trnahnh
-              <span className='text-ink-mute text-[12px] shrink-0'>↗</span>
-            </a>
+            <div className='font-mono text-[12px] tracking-[0.18em] uppercase text-paper mb-4 flex items-center gap-2'>
+              <span
+                className='w-2 h-2 rounded-full bg-paper inline-block'
+                aria-hidden='true'
+              />
+              Co-founder
+            </div>
+            <div className='font-serif text-[28px] text-paper mb-5'>
+              Khiem Nguyen
+            </div>
+            <div className='flex flex-col gap-2 pt-4 border-t border-rule-strong'>
+              <a
+                href='mailto:khiem@sukaseven.com'
+                className='font-mono text-[13px] text-paper hover:text-accent transition-colors break-all'
+              >
+                khiem@sukaseven.com
+              </a>
+              <a
+                href='https://github.com/suka712'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='font-mono text-[13px] text-paper hover:text-accent transition-colors inline-flex items-center gap-1.5 break-all'
+              >
+                suka712
+                <span className='text-ink-mute text-[12px] shrink-0'>↗</span>
+              </a>
+            </div>
           </div>
+        </div>
 
+        <div className='border-t border-rule'>
           <div className='grid grid-cols-1 sm:grid-cols-[140px_1fr] items-baseline gap-1 sm:gap-6 py-6 border-b border-rule'>
             <span className='font-mono text-[12px] tracking-[0.16em] uppercase text-ink-mute'>
               LinkedIn

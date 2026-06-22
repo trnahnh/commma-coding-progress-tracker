@@ -173,7 +173,9 @@ export default function Status() {
         <p className='font-mono text-[13px] text-ink-mute'>
           Incidents or outages?{' '}
           <a
-            href='mailto:anhdtran.forwork@gmail.com?subject=commma status'
+            href='https://www.linkedin.com/company/commma-dev/'
+            target='_blank'
+            rel='noopener noreferrer'
             className='text-accent hover:text-ink-soft transition-colors'
           >
             Contact us
