@@ -134,8 +134,9 @@ Drift surfaces post-commit `ZINCRBY` failure (backlog B); Phase-2 rebuild fixes.
 
 ## 4. Product (post-launch — aspirational until users exist)
 
-All currently **now: pre-launch, no users.** Defined here so instrumentation
-lands with the features rather than being retrofitted.
+All currently **now: pre-launch, no users**, except extension installs (already
+real, see below). Defined here so instrumentation lands with the features rather
+than being retrofitted.
 
 The two billing rows below — **free → paid conversion** and **team adoption
 (`plan='team'`)** — are **deferred with the paid tiers**, not merely awaiting
@@ -145,15 +146,16 @@ everyone and access gates open via `hasProAccess`/`hasTeamAccess`, so `plan`
 carries no conversion or team-tier signal until paid plans re-enable. Treat both
 targets as inactive for this launch.
 
-| Metric                         | target         | source                       |
-| ------------------------------ | -------------- | ---------------------------- |
-| Activation (install → HB @24h) | ≥60%           | extension telemetry + events |
-| Retention W1 / W4              | W1≥40%; W4≥20% | cohort on events/sessions    |
-| Sessions / active user / week  | ≥5             | `sessions`                   |
-| Streak (`currentDays ≥ 3`)     | grows MoM      | `streaks`                    |
-| Free → paid conversion         | ≥3%            | `users.plan` + Stripe        |
-| Team adoption (`plan='team'`)  | grows MoM      | `users.plan` + `teams`       |
-| Launch GitHub stars            | 200 / 72h      | GitHub (ROADMAP Ph4)         |
+| Metric                         | now                  | target         | source                       |
+| ------------------------------ | -------------------- | -------------- | ---------------------------- |
+| Extension installs             | ~200 (2026-06-22)    | grows MoM      | Marketplace + Open VSX stats |
+| Activation (install → HB @24h) | not measured         | ≥60%           | extension telemetry + events |
+| Retention W1 / W4              | not measured         | W1≥40%; W4≥20% | cohort on events/sessions    |
+| Sessions / active user / week  | not measured         | ≥5             | `sessions`                   |
+| Streak (`currentDays ≥ 3`)     | not measured         | grows MoM      | `streaks`                    |
+| Free → paid conversion         | inactive (free-mode) | ≥3%            | `users.plan` + Stripe        |
+| Team adoption (`plan='team'`)  | not measured         | grows MoM      | `users.plan` + `teams`       |
+| Launch GitHub stars            | not measured         | 200 / 72h      | GitHub (ROADMAP Ph4)         |
 
 ---
 
