@@ -18,7 +18,7 @@ if [ ! -f "${SWAP_FILE}" ]; then
 fi
 
 if command -v dnf >/dev/null 2>&1; then
-  sudo dnf install -y git tar gzip dejavu-sans-mono-fonts nginx
+  sudo dnf install -y git tar gzip dejavu-sans-mono-fonts nginx amazon-cloudwatch-agent
 elif command -v apt-get >/dev/null 2>&1; then
   sudo apt-get update
   sudo apt-get install -y git tar gzip fonts-dejavu-core nginx
@@ -46,6 +46,13 @@ fi
 
 cd "${APP_DIR}"
 git pull origin main
+
+CW_AGENT_CTL="/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl"
+CW_AGENT_CONFIG="${APP_DIR}/infra/cloudwatch-agent-config.json"
+if [ -x "${CW_AGENT_CTL}" ] && [ -f "${CW_AGENT_CONFIG}" ]; then
+  sudo "${CW_AGENT_CTL}" -a fetch-config -m ec2 -s -c "file:${CW_AGENT_CONFIG}"
+fi
+
 pnpm install --frozen-lockfile
 pnpm --filter @commma/api build
 
