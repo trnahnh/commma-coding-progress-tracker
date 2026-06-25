@@ -372,6 +372,33 @@ safe.
   `pm2 restart commma-api`.
 - **Logs** — `pm2 logs commma-api` on the box. The API emits structured JSON.
 
+## Monitoring (infra layer)
+
+CloudWatch covers **host health and uptime only** — it is not the application
+SLO sink (those stay on the planned OpenTelemetry route in
+[METRICS.md](./METRICS.md), since CloudWatch cannot see Neon or Upstash).
+Defined as Terraform in `infra/terraform/cloudwatch.tf`:
+
+- **Alarms → SNS email** (`commma-alerts` topic): EC2 status-check, high CPU,
+  high memory, root-disk fill, and a Route 53 HTTPS health check on
+  `api.commma.dev/health`. Status-check, CPU, and health-down use native AWS
+  metrics and are live the moment the Terraform applies.
+- **CloudWatch Agent** supplies memory/disk/swap. It is installed and started by
+  `infra/provision-ec2.sh` from `infra/cloudwatch-agent-config.json` (namespace
+  `CWAgent`), and needs the EC2 instance profile `commma-api-instance` (attached
+  by Terraform) for `cloudwatch:PutMetricData`. Until the agent runs on the box,
+  the memory/disk alarms sit in `INSUFFICIENT_DATA`.
+- **Email confirmation** — AWS sends a one-time SNS confirmation link to
+  `alert_email`; alarms do not deliver until it is clicked.
+
+Start (or restart) the agent on the box by hand:
+
+```bash
+sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+  -a fetch-config -m ec2 -s \
+  -c file:/home/ec2-user/commma/infra/cloudwatch-agent-config.json
+```
+
 ## Constraints that must not be broken
 
 - **Web and API share one registrable domain.** The refresh cookie is

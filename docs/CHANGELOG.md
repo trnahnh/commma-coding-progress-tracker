@@ -44,6 +44,18 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   an approximation from file deltas — the editor extension remains the precise
   heatmap source.
 
+- **Infra** — CloudWatch host monitoring for the API box
+  (`infra/terraform/cloudwatch.tf`). An EC2 instance profile +
+  `CloudWatchAgentServerPolicy` lets the **CloudWatch Agent** (installed and
+  started by `infra/provision-ec2.sh` from `infra/cloudwatch-agent-config.json`)
+  publish memory, disk, and swap under the `CWAgent` namespace. Five alarms
+  route to a `commma-alerts` SNS email topic: EC2 status-check, high CPU, high
+  memory, root-disk fill, and a Route 53 HTTPS health check on
+  `api.commma.dev/health`. This is the **infra layer only** — CloudWatch cannot
+  see Neon (Postgres) or Upstash (Redis), so application SLOs (ingest/read p95,
+  error rate, aggregation lag) stay on the planned OpenTelemetry route
+  documented in `docs/METRICS.md`.
+
 ### Changed
 
 - **Web** — The About-page brand film is now a 19-second launch cut. It keeps

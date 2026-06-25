@@ -27,21 +27,35 @@ Each metric lists:
 - **Planned (Phase 3 / infra):** choose a metrics sink (e.g. OpenTelemetry →
   hosted backend), derive the SLOs below from request logs, add alerting. Until
   then, values are read ad-hoc from logs, the DB, and the Upstash/Neon consoles.
+- **Two-layer split.** Observability is deliberately split by layer so no single
+  tool is asked to do what it can't. **CloudWatch is the infra layer only**
+  (`infra/terraform/cloudwatch.tf`): API-box host health (CPU, memory, root
+  disk, swap via the CloudWatch Agent), the EC2 status check, and a Route 53
+  health check on `api.commma.dev/health` — all alarmed to the `commma-alerts`
+  SNS topic (email). It is **not** the application-SLO sink: CloudWatch cannot
+  see Neon (Postgres) or Upstash (Redis), which run off AWS and are read from
+  their own consoles (the cost guardrails below). The **application SLOs**
+  (ingest/read p95, `5xx` rate, aggregation lag) stay on the planned
+  OpenTelemetry → hosted-backend route, derived from the request logs, so they
+  span the EC2 box and the managed services in one place. Keep CloudWatch to
+  default + agent metrics and a few alarms; pushing high-cardinality custom
+  metrics or all request logs into CloudWatch Logs is billable and is the wrong
+  layer for it.
 
 ---
 
 ## 1. System / SLO
 
-| Metric                         | now             | target         | source                 |
-| ------------------------------ | --------------- | -------------- | ---------------------- |
-| Ingest p95 (`POST /v1/ingest`) | ~38ms (local)   | <50ms srv      | Hono logger → sink     |
-| Read p95 (see note)            | local only      | <200ms; <150ms | logger + k6            |
-| Aggregation lag                | not measured    | ≤~20 min       | `created_at − max(ts)` |
-| Ingest success (`202`/total)   | not measured    | ≥99.9%         | request logger         |
-| Server errors (`5xx`/total)    | not measured    | <0.1%          | logger / unhandled     |
-| Availability                   | not measured    | 99.5% (MVP)    | `/health` uptime       |
-| Lighthouse mobile perf         | 90 (2026-06-19) | ≥90            | `npx lighthouse`       |
-| Lighthouse mobile a11y         | 95 (2026-06-19) | ≥90            | `npx lighthouse`       |
+| Metric                         | now              | target         | source                 |
+| ------------------------------ | ---------------- | -------------- | ---------------------- |
+| Ingest p95 (`POST /v1/ingest`) | ~38ms (local)    | <50ms srv      | Hono logger → sink     |
+| Read p95 (see note)            | local only       | <200ms; <150ms | logger + k6            |
+| Aggregation lag                | not measured     | ≤~20 min       | `created_at − max(ts)` |
+| Ingest success (`202`/total)   | not measured     | ≥99.9%         | request logger         |
+| Server errors (`5xx`/total)    | not measured     | <0.1%          | logger / unhandled     |
+| Availability                   | R53 health check | 99.5% (MVP)    | CloudWatch alarm       |
+| Lighthouse mobile perf         | 90 (2026-06-19)  | ≥90            | `npx lighthouse`       |
+| Lighthouse mobile a11y         | 95 (2026-06-19)  | ≥90            | `npx lighthouse`       |
 
 Lighthouse mobile perf is the **median of 3 local `vite preview` runs**
 (2026-06-19: 87 / 94 / 90) — it now hovers right at the `≥90` line, down from 91

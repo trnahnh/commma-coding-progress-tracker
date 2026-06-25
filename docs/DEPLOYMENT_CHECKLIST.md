@@ -111,6 +111,19 @@ gates.
       box; test email from `recap@commma.dev` delivered to a real inbox
 - Pre-launch there are no Pro/Team recipients, so no recap actually sends yet
 
+## 10. Monitoring (CloudWatch — infra layer)
+
+- [x] `infra/terraform/cloudwatch.tf` applied — EC2 instance profile
+      `commma-api-instance` (CloudWatch Agent), `commma-alerts` SNS topic, and
+      five alarms (EC2 status-check, CPU, memory, root-disk, Route 53
+      `api.commma.dev/health`)
+- [x] CloudWatch Agent installed + started on the box (mem/disk/swap →
+      `CWAgent`); `infra/provision-ec2.sh` now does this on provision
+- [ ] SNS email subscription **confirmed** — click the one-time AWS link sent to
+      `alert_email` (alarms do not deliver until confirmed)
+- Infra layer only; application SLOs stay on the planned OpenTelemetry route
+  (see [METRICS.md](./METRICS.md))
+
 ## Pre-launch gate
 
 Run before the first public launch:

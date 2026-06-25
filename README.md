@@ -91,6 +91,7 @@ on the roadmap.
 | Monorepo            | pnpm workspaces                                                                                    |
 | Deployment (MVP)    | AWS-hosted compute — EC2 t4g (Graviton) + PM2 (API), S3 + CloudFront (web); Neon PG, Upstash Redis |
 | Infra as code       | Terraform (AWS footprint import-adopted; S3-locked remote state) — see ADR-013                     |
+| Monitoring (infra)  | CloudWatch host metrics + Agent (mem/disk/swap), EC2/Route 53 health alarms → SNS email            |
 
 ---
 

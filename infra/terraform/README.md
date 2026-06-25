@@ -72,6 +72,7 @@ that, plans stay clean.
 | `acm.tf`        | TLS certificate (`commma.dev` + `docs.commma.dev`) |
 | `route53.tf`    | Hosted zone + DNS records                          |
 | `iam.tf`        | `commma-deploy-local` user + scoped deploy policy  |
+| `cloudwatch.tf` | API-box instance role + alarms + SNS alert topic   |
 | `scripts/`      | Discovery, state bootstrap, and import helpers     |
 
 The original prod resources are imported (not created) and reconcile to a clean
@@ -99,3 +100,45 @@ Expect the plan to show: 1 cert replaced, 1 validation resource added,
 validation record(s) changed, the distribution updated, and 2 new DNS records.
 `apply` waits on DNS validation (usually a few minutes). No new bucket and no
 deploy-pipeline change — `pnpm deploy:web` still ships both hosts.
+
+## CloudWatch monitoring
+
+`cloudwatch.tf` is the **infra-layer** observability for the API box — it is
+deliberately scoped to host health and uptime, not application SLOs (ingest/read
+p95, error rate, aggregation lag). Those stay on the planned OpenTelemetry route
+in `docs/METRICS.md`, because CloudWatch cannot see Neon (Postgres) or Upstash
+(Redis), which live off AWS and are watched from their own consoles.
+
+It adds: a `commma-alerts` SNS topic with an email subscription (set
+`alert_email` in `terraform.tfvars`; **AWS emails a one-time confirmation link
+that must be clicked** before any alarm delivers), a Route 53 health check on
+`https://api.commma.dev/health`, and five alarms — EC2 status-check, high CPU,
+high memory, root-disk fill, and health-check-down — all wired to the topic.
+CPU/memory/disk/swap require the **CloudWatch Agent** running on the box; the
+agent is installed and started by `infra/provision-ec2.sh` from
+`infra/cloudwatch-agent-config.json`, and pushes custom metrics under the
+`CWAgent` namespace.
+
+Standing this up is one **intentional non-clean change** to an existing
+resource: `ec2.tf` gains
+`iam_instance_profile = aws_iam_instance_profile.api.name` so the agent can call
+`cloudwatch:PutMetricData` via the `CloudWatchAgentServerPolicy` managed policy.
+Attaching an instance profile to the running box is an in-place update (no
+replacement, no restart). Everything else in `cloudwatch.tf` is newly created,
+not imported. Expect the plan to show: 1 instance updated, plus the IAM
+role/profile, SNS topic + subscription, health check, and five alarms added.
+
+The agent must be (re)started on the box for the CPU/mem/disk alarms to leave
+`INSUFFICIENT_DATA` — re-run `infra/provision-ec2.sh` (idempotent) or, by hand:
+
+```bash
+sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+  -a fetch-config -m ec2 -s \
+  -c file:/home/ec2-user/commma/infra/cloudwatch-agent-config.json
+```
+
+Cost stays in the AWS free tier at this scale (default per-instance EC2 metrics,
+a handful of standard alarms, one health check, and four 1-minute custom
+metrics) — but do **not** add high-cardinality custom metrics or ship request
+logs to CloudWatch Logs without re-checking the bill against the Neon/Upstash
+free-tier discipline in `docs/METRICS.md`.
