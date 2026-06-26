@@ -32,15 +32,20 @@ Each metric lists:
   (`infra/terraform/cloudwatch.tf`): API-box host health (CPU, memory, root
   disk, swap via the CloudWatch Agent), the EC2 status check, and a Route 53
   health check on `api.commma.dev/health` — all alarmed to the `commma-alerts`
-  SNS topic (email). It is **not** the application-SLO sink: CloudWatch cannot
-  see Neon (Postgres) or Upstash (Redis), which run off AWS and are read from
-  their own consoles (the cost guardrails below). The **application SLOs**
-  (ingest/read p95, `5xx` rate, aggregation lag) stay on the planned
-  OpenTelemetry → hosted-backend route, derived from the request logs, so they
-  span the EC2 box and the managed services in one place. Keep CloudWatch to
-  default + agent metrics and a few alarms; pushing high-cardinality custom
-  metrics or all request logs into CloudWatch Logs is billable and is the wrong
-  layer for it.
+  SNS topic (email). Two of those alarms are **self-healing**, not just
+  notifying: a `StatusCheckFailed_System` alarm fires the EC2 `recover` action
+  and a `StatusCheckFailed_Instance` alarm fires `reboot`, so a host fault
+  recovers without a manual round trip (cutting MTTR on the single API box). A
+  Data Lifecycle Manager policy (`infra/terraform/dlm.tf`) takes a daily 7-day
+  root-volume snapshot as the recovery path for the box's only non-reproducible
+  state. It is **not** the application-SLO sink: CloudWatch cannot see Neon
+  (Postgres) or Upstash (Redis), which run off AWS and are read from their own
+  consoles (the cost guardrails below). The **application SLOs** (ingest/read
+  p95, `5xx` rate, aggregation lag) stay on the planned OpenTelemetry →
+  hosted-backend route, derived from the request logs, so they span the EC2 box
+  and the managed services in one place. Keep CloudWatch to default + agent
+  metrics and a few alarms; pushing high-cardinality custom metrics or all
+  request logs into CloudWatch Logs is billable and is the wrong layer for it.
 
 ---
 

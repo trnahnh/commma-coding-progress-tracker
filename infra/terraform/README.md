@@ -73,6 +73,7 @@ that, plans stay clean.
 | `route53.tf`    | Hosted zone + DNS records                          |
 | `iam.tf`        | `commma-deploy-local` user + scoped deploy policy  |
 | `cloudwatch.tf` | API-box instance role + alarms + SNS alert topic   |
+| `dlm.tf`        | Data Lifecycle Manager daily EBS snapshot policy   |
 | `scripts/`      | Discovery, state bootstrap, and import helpers     |
 
 The original prod resources are imported (not created) and reconcile to a clean
@@ -112,12 +113,12 @@ in `docs/METRICS.md`, because CloudWatch cannot see Neon (Postgres) or Upstash
 It adds: a `commma-alerts` SNS topic with an email subscription (set
 `alert_email` in `terraform.tfvars`; **AWS emails a one-time confirmation link
 that must be clicked** before any alarm delivers), a Route 53 health check on
-`https://api.commma.dev/health`, and five alarms — EC2 status-check, high CPU,
-high memory, root-disk fill, and health-check-down — all wired to the topic.
-CPU/memory/disk/swap require the **CloudWatch Agent** running on the box; the
-agent is installed and started by `infra/provision-ec2.sh` from
-`infra/cloudwatch-agent-config.json`, and pushes custom metrics under the
-`CWAgent` namespace.
+`https://api.commma.dev/health`, and seven alarms — EC2 status-check, high CPU,
+high memory, root-disk fill, health-check-down, and two **self-healing** alarms
+— all wired to the topic. CPU/memory/disk/swap require the **CloudWatch Agent**
+running on the box; the agent is installed and started by
+`infra/provision-ec2.sh` from `infra/cloudwatch-agent-config.json`, and pushes
+custom metrics under the `CWAgent` namespace.
 
 Standing this up is one **intentional non-clean change** to an existing
 resource: `ec2.tf` gains
@@ -126,7 +127,7 @@ resource: `ec2.tf` gains
 Attaching an instance profile to the running box is an in-place update (no
 replacement, no restart). Everything else in `cloudwatch.tf` is newly created,
 not imported. Expect the plan to show: 1 instance updated, plus the IAM
-role/profile, SNS topic + subscription, health check, and five alarms added.
+role/profile, SNS topic + subscription, health check, and seven alarms added.
 
 The agent must be (re)started on the box for the CPU/mem/disk alarms to leave
 `INSUFFICIENT_DATA` — re-run `infra/provision-ec2.sh` (idempotent) or, by hand:
@@ -142,3 +143,36 @@ a handful of standard alarms, one health check, and four 1-minute custom
 metrics) — but do **not** add high-cardinality custom metrics or ship request
 logs to CloudWatch Logs without re-checking the bill against the Neon/Upstash
 free-tier discipline in `docs/METRICS.md`.
+
+## Self-healing, backups, and keyless access
+
+The single API box is the stack's main point of failure, so three additions make
+it survive and recover from host-level faults without a manual round trip:
+
+- **Auto-recovery** (`cloudwatch.tf`): two alarms act, not just notify.
+  `commma-api-system-status-recover` watches `StatusCheckFailed_System` and
+  fires the EC2 `recover` action — AWS migrates the instance to healthy hardware
+  with the same instance ID, Elastic IP, and EBS volume.
+  `commma-api-instance-status-reboot` watches `StatusCheckFailed_Instance` and
+  fires the `reboot` action to clear an OS-level hang. Both also notify the SNS
+  topic. The original `commma-api-status-check-failed` alarm stays as the
+  combined notifier.
+- **Backups** (`dlm.tf`): a Data Lifecycle Manager policy snapshots every volume
+  tagged `Backup = daily` (the root volume, tagged in `ec2.tf`) once a day at
+  07:00 UTC with a 7-day retention. The volume is `delete_on_termination`, so
+  the snapshot is the recovery path for the box's only non-reproducible state
+  (the `apps/api/.env`) if the instance is terminated. DLM runs under its own
+  service-linked role (`commma-dlm-snapshots`).
+- **Keyless operator access** (`cloudwatch.tf`): the instance role gains
+  `AmazonSSMManagedInstanceCore`, enabling **SSM Session Manager**
+  (`aws ssm start-session --target <id>`) for audited, key-free shell access.
+  The SSM agent ships preinstalled on Amazon Linux 2023. Port 22 stays open
+  because the GitHub Actions API deploy (`deploy-api.yml`) SSHes in from hosted
+  runners with dynamic IPs; removing `:22` is blocked on first migrating that
+  deploy off SSH (e.g. to SSM Run Command).
+
+All of the above is **newly created** infrastructure — none of it is imported —
+except the single in-place change of adding the `Backup` tag to the existing
+root volume. Apply locally (`AWS_PROFILE=commma-admin terraform apply`); the
+auto-recovery and reboot actions take effect as soon as the alarms exist, and
+the first DLM snapshot lands at the next 07:00 UTC window.
