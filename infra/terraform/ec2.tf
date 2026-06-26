@@ -66,7 +66,8 @@ resource "aws_instance" "api" {
     encrypted             = true
 
     tags = {
-      Name = "commma-api-root"
+      Name   = "commma-api-root"
+      Backup = "daily"
     }
   }
 

@@ -20,6 +20,11 @@ resource "aws_iam_role_policy_attachment" "api_cloudwatch_agent" {
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
 
+resource "aws_iam_role_policy_attachment" "api_ssm" {
+  role       = aws_iam_role.api.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
 resource "aws_iam_instance_profile" "api" {
   name = "commma-api-instance"
   role = aws_iam_role.api.name
@@ -48,6 +53,50 @@ resource "aws_cloudwatch_metric_alarm" "api_status_check" {
   treat_missing_data  = "breaching"
   alarm_actions       = [aws_sns_topic.alerts.arn]
   ok_actions          = [aws_sns_topic.alerts.arn]
+
+  dimensions = {
+    InstanceId = aws_instance.api.id
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "api_system_recover" {
+  alarm_name          = "commma-api-system-status-recover"
+  alarm_description   = "System status check failing on the API box: auto-recover the instance to healthy hardware."
+  namespace           = "AWS/EC2"
+  metric_name         = "StatusCheckFailed_System"
+  statistic           = "Maximum"
+  comparison_operator = "GreaterThanThreshold"
+  threshold           = 0
+  period              = 60
+  evaluation_periods  = 2
+  treat_missing_data  = "missing"
+  alarm_actions = [
+    "arn:aws:automate:${var.aws_region}:ec2:recover",
+    aws_sns_topic.alerts.arn,
+  ]
+  ok_actions = [aws_sns_topic.alerts.arn]
+
+  dimensions = {
+    InstanceId = aws_instance.api.id
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "api_instance_reboot" {
+  alarm_name          = "commma-api-instance-status-reboot"
+  alarm_description   = "Instance status check failing on the API box: reboot to clear an OS-level hang."
+  namespace           = "AWS/EC2"
+  metric_name         = "StatusCheckFailed_Instance"
+  statistic           = "Maximum"
+  comparison_operator = "GreaterThanThreshold"
+  threshold           = 0
+  period              = 60
+  evaluation_periods  = 3
+  treat_missing_data  = "missing"
+  alarm_actions = [
+    "arn:aws:automate:${var.aws_region}:ec2:reboot",
+    aws_sns_topic.alerts.arn,
+  ]
+  ok_actions = [aws_sns_topic.alerts.arn]
 
   dimensions = {
     InstanceId = aws_instance.api.id
