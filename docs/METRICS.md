@@ -19,14 +19,21 @@ Each metric lists:
 
 ## Instrumentation status
 
-- **Today:** structured JSON logs (`apps/api/src/logger.ts`) and the Hono
-  request logger (per-request method/path/status/ms). No metrics aggregation,
-  export, or dashboards exist. The stack is **deployed live** as of 2026-06-14
-  (`commma.dev` / `api.commma.dev`), but production is still uninstrumented —
-  the `now` values below remain local/not-measured until a sink is added.
-- **Planned (Phase 3 / infra):** choose a metrics sink (e.g. OpenTelemetry →
-  hosted backend), derive the SLOs below from request logs, add alerting. Until
-  then, values are read ad-hoc from logs, the DB, and the Upstash/Neon consoles.
+- **Today:** structured JSON logs (`apps/api/src/logger.ts`) — a per-request
+  `request` line (`method`/`path`/`status`/`ms`) and a per-cycle
+  `aggregation_cycle` line (`maxLagMs` + counts/duration). The **Level 1**
+  app-SLO pipeline is wired (`docs/OBSERVABILITY.md`): Grafana Alloy
+  (`infra/alloy/config.alloy`) ships those logs off-box to **Grafana Cloud
+  Loki**, where the SLOs below are derived with LogQL at query time. The
+  pipeline is code-complete and provisioned; it goes live the moment the Grafana
+  Cloud credentials are set on the box, after which the `now` values stop being
+  local-only.
+- **Planned (Phase 3 / infra):** stand up the Grafana dashboards + the two alert
+  rules (5xx rate, ingest p95) on the shipped logs, then — when traffic
+  justifies latency decomposition — add **Level 2** OpenTelemetry traces
+  exporting OTLP to the same Grafana Cloud stack. Until the dashboards land,
+  values are read ad-hoc from Loki (Explore/LogQL), the DB, and the Upstash/Neon
+  consoles.
 - **Two-layer split.** Observability is deliberately split by layer so no single
   tool is asked to do what it can't. **CloudWatch is the infra layer only**
   (`infra/terraform/cloudwatch.tf`): API-box host health (CPU, memory, root
@@ -41,26 +48,28 @@ Each metric lists:
   state. It is **not** the application-SLO sink: CloudWatch cannot see Neon
   (Postgres) or Upstash (Redis), which run off AWS and are read from their own
   consoles (the cost guardrails below). The **application SLOs** (ingest/read
-  p95, `5xx` rate, aggregation lag) stay on the planned OpenTelemetry →
-  hosted-backend route, derived from the request logs, so they span the EC2 box
-  and the managed services in one place. Keep CloudWatch to default + agent
-  metrics and a few alarms; pushing high-cardinality custom metrics or all
-  request logs into CloudWatch Logs is billable and is the wrong layer for it.
+  p95, `5xx` rate, aggregation lag) live on the Grafana Cloud route instead
+  (Level 1: structured logs shipped to Loki, SLOs derived via LogQL; see
+  `docs/OBSERVABILITY.md`), derived from the request logs so they span the EC2
+  box and the managed services in one place — with OpenTelemetry traces as the
+  later Level 2 on the same backend. Keep CloudWatch to default + agent metrics
+  and a few alarms; pushing high-cardinality custom metrics or all request logs
+  into CloudWatch Logs is billable and is the wrong layer for it.
 
 ---
 
 ## 1. System / SLO
 
-| Metric                         | now              | target         | source                 |
-| ------------------------------ | ---------------- | -------------- | ---------------------- |
-| Ingest p95 (`POST /v1/ingest`) | ~38ms (local)    | <50ms srv      | Hono logger → sink     |
-| Read p95 (see note)            | local only       | <200ms; <150ms | logger + k6            |
-| Aggregation lag                | not measured     | ≤~20 min       | `created_at − max(ts)` |
-| Ingest success (`202`/total)   | not measured     | ≥99.9%         | request logger         |
-| Server errors (`5xx`/total)    | not measured     | <0.1%          | logger / unhandled     |
-| Availability                   | R53 health check | 99.5% (MVP)    | CloudWatch alarm       |
-| Lighthouse mobile perf         | 90 (2026-06-19)  | ≥90            | `npx lighthouse`       |
-| Lighthouse mobile a11y         | 95 (2026-06-19)  | ≥90            | `npx lighthouse`       |
+| Metric                         | now              | target         | source                  |
+| ------------------------------ | ---------------- | -------------- | ----------------------- |
+| Ingest p95 (`POST /v1/ingest`) | ~38ms (local)    | <50ms srv      | `request` log → Loki    |
+| Read p95 (see note)            | local only       | <200ms; <150ms | `request` log + k6      |
+| Aggregation lag                | not measured     | ≤~20 min       | `aggregation_cycle` log |
+| Ingest success (`202`/total)   | not measured     | ≥99.9%         | `request` log → Loki    |
+| Server errors (`5xx`/total)    | not measured     | <0.1%          | `request` log → Loki    |
+| Availability                   | R53 health check | 99.5% (MVP)    | CloudWatch alarm        |
+| Lighthouse mobile perf         | 90 (2026-06-19)  | ≥90            | `npx lighthouse`        |
+| Lighthouse mobile a11y         | 95 (2026-06-19)  | ≥90            | `npx lighthouse`        |
 
 Lighthouse mobile perf is the **median of 3 local `vite preview` runs**
 (2026-06-19: 87 / 94 / 90) — it now hovers right at the `≥90` line, down from 91
