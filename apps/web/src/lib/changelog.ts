@@ -19,6 +19,8 @@ export const CHANGELOG_ENTRIES = [
       'Hardened release pipeline — every update now ships through an automated lint, type-check, and test gate that blocks the release if anything fails, with a second pipeline mirroring the same checks as a standby backup, so updates roll out reliably and never from a broken build',
       'Security hardening — a fresh pre-launch audit of the whole API confirmed auth, rate limits, payment-webhook verification, and ownership checks all hold, and closed one issue it surfaced: links on your profile (website and LinkedIn) are now restricted to normal http(s) addresses, so a profile can never smuggle a script-bearing link',
       'Always-on server monitoring — the production box now reports its own CPU, memory, and disk, with a health check on the live API, and emails an alert the instant the service stops responding or the server runs hot or low on space, so outages get caught immediately instead of waiting for someone to notice',
+      'The server now heals itself — if the underlying hardware fails it automatically moves to a healthy host, and if the system hangs it reboots itself, both without waiting on a person. A daily encrypted snapshot of the box is kept as a clean restore point, and operators connect through a keyless, audited session instead of an open SSH port',
+      'Live performance dashboards — every API request and the background session-aggregation now stream structured metrics to a Grafana Cloud dashboard tracking request speed (95th-percentile latency), error rate, and how fresh your session data is, so a slow path or an error spike shows up on a graph the moment it starts instead of waiting for someone to report it',
     ],
   },
   {
