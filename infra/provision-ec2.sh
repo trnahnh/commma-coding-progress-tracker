@@ -66,3 +66,49 @@ cd "${APP_DIR}/apps/api"
 pm2 start ecosystem.config.cjs --env production
 pm2 save
 pm2 startup | tail -n 1
+
+GRAFANA_LOKI_URL="${GRAFANA_LOKI_URL:-}"
+GRAFANA_LOKI_USER="${GRAFANA_LOKI_USER:-}"
+GRAFANA_LOKI_TOKEN="${GRAFANA_LOKI_TOKEN:-}"
+
+if [ -n "${GRAFANA_LOKI_URL}" ] && [ -n "${GRAFANA_LOKI_USER}" ] && [ -n "${GRAFANA_LOKI_TOKEN}" ] && command -v dnf >/dev/null 2>&1; then
+  if ! command -v alloy >/dev/null 2>&1; then
+    sudo tee /etc/yum.repos.d/grafana.repo >/dev/null <<'EOF'
+[grafana]
+name=grafana
+baseurl=https://rpm.grafana.com
+repo_gpgcheck=1
+enabled=1
+gpgcheck=1
+gpgkey=https://rpm.grafana.com/gpg.key
+sslverify=1
+sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+EOF
+    sudo rpm --import https://rpm.grafana.com/gpg.key
+    sudo dnf install -y alloy
+  fi
+
+  sudo install -m 0644 "${APP_DIR}/infra/alloy/config.alloy" /etc/alloy/config.alloy
+
+  sudo tee /etc/sysconfig/alloy >/dev/null <<EOF
+CONFIG_FILE="/etc/alloy/config.alloy"
+CUSTOM_ARGS=""
+RESTART_ON_UPGRADE=true
+GRAFANA_LOKI_URL="${GRAFANA_LOKI_URL}"
+GRAFANA_LOKI_USER="${GRAFANA_LOKI_USER}"
+GRAFANA_LOKI_TOKEN="${GRAFANA_LOKI_TOKEN}"
+EOF
+
+  sudo mkdir -p /etc/systemd/system/alloy.service.d
+  sudo tee /etc/systemd/system/alloy.service.d/override.conf >/dev/null <<'EOF'
+[Service]
+User=root
+Group=root
+EOF
+
+  sudo systemctl daemon-reload
+  sudo systemctl enable alloy
+  sudo systemctl restart alloy
+else
+  echo "Grafana Loki env not set (GRAFANA_LOKI_URL/USER/TOKEN) — skipping Alloy log shipper setup."
+fi

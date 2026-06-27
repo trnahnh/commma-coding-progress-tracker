@@ -1,0 +1,51 @@
+local.file_match "api_logs" {
+  path_targets = [
+    {
+      __path__ = "/home/ec2-user/.pm2/logs/commma-api-out.log",
+      service  = "commma-api",
+      stream   = "stdout",
+    },
+    {
+      __path__ = "/home/ec2-user/.pm2/logs/commma-api-error.log",
+      service  = "commma-api",
+      stream   = "stderr",
+    },
+  ]
+}
+
+loki.source.file "api" {
+  targets    = local.file_match.api_logs.targets
+  forward_to = [loki.process.api.receiver]
+}
+
+loki.process "api" {
+  forward_to = [loki.write.grafana_cloud.receiver]
+
+  stage.json {
+    expressions = {
+      level = "level",
+    }
+  }
+
+  stage.labels {
+    values = {
+      level = "level",
+    }
+  }
+}
+
+loki.write "grafana_cloud" {
+  endpoint {
+    url = sys.env("GRAFANA_LOKI_URL")
+
+    basic_auth {
+      username = sys.env("GRAFANA_LOKI_USER")
+      password = sys.env("GRAFANA_LOKI_TOKEN")
+    }
+  }
+
+  external_labels = {
+    job  = "commma-api",
+    host = constants.hostname,
+  }
+}
