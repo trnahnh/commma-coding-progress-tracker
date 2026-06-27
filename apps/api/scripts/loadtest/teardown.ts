@@ -52,15 +52,30 @@ export async function runTeardown(confirm: boolean): Promise<TeardownResult> {
     return { users: 0, sessions: 0, events: 0 }
   }
 
-  const sessionRows = await db
-    .select({ id: sessions.id })
-    .from(sessions)
-    .where(inArray(sessions.userId, ids))
-  const sessionIds = sessionRows.map((row) => row.id)
+  let deletedEvents = 0
+  for (const part of chunk(ids, 500)) {
+    const removed = await db
+      .delete(events)
+      .where(inArray(events.userId, part))
+      .returning({ id: events.id })
+    deletedEvents += removed.length
+  }
 
-  for (const part of chunk(sessionIds, 500)) {
-    await db.delete(sessionLangs).where(inArray(sessionLangs.sessionId, part))
-    await db.delete(sessionFiles).where(inArray(sessionFiles.sessionId, part))
+  let deletedSessions = 0
+  for (let attempt = 0; attempt < 12; attempt++) {
+    const live = await db
+      .select({ id: sessions.id })
+      .from(sessions)
+      .where(inArray(sessions.userId, ids))
+    if (live.length === 0) break
+    const liveIds = live.map((row) => row.id)
+    for (const part of chunk(liveIds, 500)) {
+      await db.delete(sessionLangs).where(inArray(sessionLangs.sessionId, part))
+      await db.delete(sessionFiles).where(inArray(sessionFiles.sessionId, part))
+      await db.delete(sessions).where(inArray(sessions.id, part))
+    }
+    deletedSessions += liveIds.length
+    await new Promise<void>((resolve) => setTimeout(resolve, 1000))
   }
 
   const ownedTeams = await db
@@ -69,14 +84,7 @@ export async function runTeardown(confirm: boolean): Promise<TeardownResult> {
     .where(inArray(teams.ownerId, ids))
   const teamIds = ownedTeams.map((row) => row.id)
 
-  let deletedEvents = 0
   for (const part of chunk(ids, 500)) {
-    await db.delete(sessions).where(inArray(sessions.userId, part))
-    const removed = await db
-      .delete(events)
-      .where(inArray(events.userId, part))
-      .returning({ id: events.id })
-    deletedEvents += removed.length
     await db.delete(streaks).where(inArray(streaks.userId, part))
     await db
       .delete(follows)
@@ -108,7 +116,7 @@ export async function runTeardown(confirm: boolean): Promise<TeardownResult> {
 
   const result = {
     users: deletedUsers.length,
-    sessions: sessionIds.length,
+    sessions: deletedSessions,
     events: deletedEvents,
   }
   console.log(
