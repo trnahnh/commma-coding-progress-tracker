@@ -92,14 +92,16 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
-- **API** — `DB_POOL_MAX` default raised from 10 to 25 (`apps/api/src/env.ts`).
-  A controlled load test isolated the Postgres connection pool as the ingest
-  bottleneck — the path is Neon-round-trip bound, not CPU (CloudWatch peaked
-  ~25% at the ceiling). At pool=10 the ingest ceiling was ~67 rps with p95 1,518
-  ms at 100 concurrent; at pool=25 it rose to ~153 rps (**+128%**, ~2.3×) with
-  p95 733 ms (**−52%**), zero errors in both runs (`docs/METRICS.md`). The live
-  box's own `.env` `DB_POOL_MAX` override must be set to 25 (or removed so the
-  new default applies) to adopt it in production.
+- **API** — `DB_POOL_MAX` default raised from 10 to 25 (`apps/api/src/env.ts`),
+  kept as headroom. A controlled load test (laptop API → cross-internet prod
+  Neon) showed the connection pool _can_ bottleneck ingest under high DB
+  latency: pool 10→25 gave ~67→153 rps (+128%) in that regime. **Re-running
+  against the real co-located prod box (t4g.small + Neon in `us-east-1`) showed
+  ~95 rps at both pool=10 and pool=25 — no change** — so the pool is not the
+  production bottleneck (the prod ceiling sits ~95 rps at ~25% CPU, most likely
+  the single shared Redis rate-limit connection). The bump is harmless headroom,
+  not a measured prod throughput win; the live box `.env` was set to 25 and
+  restarted. Details in `docs/METRICS.md`.
 - **Web** — The About-page brand film is now a 19-second launch cut. It keeps
   the keyboard-heatmap flood and session-stats beats, adds a terminal sequence
   that shows the CLI (`commma login` → `commma watch` → a live flush line), and

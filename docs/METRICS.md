@@ -145,26 +145,33 @@ the `request`-log `ms` in Grafana/Loki — the harness's role is to prove
 zero-error throughput and drive the CloudWatch/Grafana/Neon/Upstash signal,
 which it did.
 
-Pool tuning — before/after (2026-06-27): acting on the "not CPU, it's
-connection-pool bound" finding above, a controlled experiment isolated
-`DB_POOL_MAX` as the only variable — one API instance against **real prod Neon**
-(so the Neon round-trip latency that drives pool contention is real), local
-Redis, identical 700-user ingest load (`25 → 50 → 100` concurrent, 4,500
-requests / 270,000 events), run at pool=10 then pool=25:
+Pool tuning — `DB_POOL_MAX` 10→25, and an honest negative result (2026-06-27).
+**Controlled experiment** — to test the "pool-bound, not CPU" hypothesis, one
+API instance ran against **real prod Neon** from a laptop (so each query paid
+the ~100 ms cross-internet round trip — an _artificial_ high-DB-latency regime),
+local Redis, identical 700-user ingest (`25 → 50 → 100` concurrent, 4,500
+requests / 270,000 events), at pool=10 then pool=25:
 
 | `DB_POOL_MAX` | sustained ingest  | p95 @100c | wall (4.5k req) |
 | ------------- | ----------------- | --------- | --------------- |
-| 10 (before)   | ~67 rps           | 1,518 ms  | 67.1 s          |
-| 25 (after)    | ~153 rps          | 733 ms    | 29.9 s          |
-| **delta**     | **+128% (~2.3×)** | **−52%**  | **−55%**        |
+| 10            | ~67 rps           | 1,518 ms  | 67.1 s          |
+| 25            | ~153 rps          | 733 ms    | 29.9 s          |
+| **delta**     | **+128% (~2.3×)** | **−52%**  | —               |
 
-Raising the pool 2.5× lifted sustained ingest throughput ~2.3× (near-linear) and
-cut p95 latency at 100 concurrent by more than half, with zero errors in both
-runs — confirming the path was connection-pool/round-trip bound, not CPU. The
-`DB_POOL_MAX` default is now **25** (`apps/api/src/env.ts`); for the live box to
-adopt it, its own `.env` `DB_POOL_MAX` override must be set to 25 (or removed so
-the default applies). Headroom check: pool 25 from the single API instance is
-well under Neon's connection ceiling.
+In that regime the pool was clearly the limiter (+2.3×, near-linear, zero
+errors). **But on the real box it is not.** Re-running the same ingest against
+live `api.commma.dev` — t4g.small co-located with Neon in `us-east-1`, so DB
+round-trips are ~1–5 ms — gave **~95 rps at both pool=10 and pool=25** (91/96/95
+vs 83/93/96 across 25/50/100 concurrent): **no change**. The laptop experiment
+measured a bottleneck (cross-internet DB latency) that does not exist in prod,
+so its 2.3× does **not** transfer. The `DB_POOL_MAX` default is now 25
+(`apps/api/src/env.ts`) and the live box `.env` was set to 25 + restarted
+(verified) — kept as harmless headroom for future concurrency, **not** a
+measured prod throughput win. The real prod ingest ceiling (~95 rps at only ~25%
+CloudWatch CPU) is bound elsewhere — most likely the single shared `ioredis`
+connection used for per-request rate limiting against Upstash (network-RTT
+serialized through one socket), or per-request event-loop work — which is the
+actual lever to investigate next (`ROADMAP.md` Phase 3 ingest scaling).
 
 Aggregation lag: 5-min interval + 15-min idle gap (ADR-010); event `ts` →
 `sessions.created_at`.
