@@ -167,11 +167,49 @@ measured a bottleneck (cross-internet DB latency) that does not exist in prod,
 so its 2.3× does **not** transfer. The `DB_POOL_MAX` default is now 25
 (`apps/api/src/env.ts`) and the live box `.env` was set to 25 + restarted
 (verified) — kept as harmless headroom for future concurrency, **not** a
-measured prod throughput win. The real prod ingest ceiling (~95 rps at only ~25%
-CloudWatch CPU) is bound elsewhere — most likely the single shared `ioredis`
-connection used for per-request rate limiting against Upstash (network-RTT
-serialized through one socket), or per-request event-loop work — which is the
-actual lever to investigate next (`ROADMAP.md` Phase 3 ingest scaling).
+measured prod throughput win. The ~95 rps figure later proved to be a
+**load-generation artifact, not a server ceiling** (next section): from a single
+client, ingest is bound by upload bandwidth for realistic batch sizes, and the
+box never left ~25% CPU. pool=25 is harmless headroom; no real prod ingest
+ceiling was reached.
+
+### Ingest path — optimizations and the load-generation finding (2026-06-27)
+
+Two server-side ingest optimizations shipped, plus a correction to how the
+"ceiling" was being read:
+
+- **Privacy-mode cache.** Every ingest ran a `SELECT users.privacy` before
+  insert — a per-request Postgres round-trip averaging **~42 ms (p50 41 ms)** on
+  prod, nearly as costly as the **~35 ms** batch insert, for a value that rarely
+  changes. Serving it from a Redis cache (`priv:v1:<id>`, 60 s TTL, invalidated
+  on privacy change and account deletion, fail-open to Postgres) cut the lookup
+  to **~13 ms p50 (~70% lower)** while keeping the ADR-006 privacy modes exact
+  (a downgrade still takes effect immediately via invalidation). Measured
+  server-side from the new `ingest_db` log, so it is independent of client
+  bandwidth.
+- **Redis auto-pipelining** (`enableAutoPipelining`) batches the per-request
+  rate-limit evals issued in the same event-loop tick into single round-trips.
+- **The cap was the generator, not the API.** With 60-event (~15 KB) batches,
+  ingest from one client plateaus at **~95 rps**; shrinking the batch to 5
+  events lifts it to **~340 rps** on the same path — an upload-bandwidth /
+  request-body limit, not the server, which stayed at **~25% CPU** throughout.
+  The true prod ingest ceiling is therefore **higher than measured and still
+  open** — establishing it needs an in-region load generator (a second EC2), per
+  the Phase 3 gate. Across the whole campaign: **zero `5xx`, zero `429`** on
+  tens of thousands of requests.
+
+Engineering outcomes:
+
+- Cut the ingest hot-path privacy lookup from 42 ms to 13 ms p50 by serving the
+  mode from a Redis cache with correct invalidation, removing a redundant
+  per-request Postgres read while keeping the privacy guarantee exact.
+- Added per-stage ingest timing (`ingest_db`: lookup/insert ms) so hot-path cost
+  is attributable from logs, and enabled Redis command auto-pipelining on the
+  rate-limited path.
+- Established that the API box serves ingest at ~25% CPU under single-client
+  load, with the observed rate bound by client upload bandwidth — directing
+  capacity work toward an in-region generator and horizontal API instances
+  rather than the already-lean per-request code.
 
 Aggregation lag: 5-min interval + 15-min idle gap (ADR-010); event `ts` →
 `sessions.created_at`.

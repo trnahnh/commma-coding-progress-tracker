@@ -98,10 +98,18 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   latency: pool 10→25 gave ~67→153 rps (+128%) in that regime. **Re-running
   against the real co-located prod box (t4g.small + Neon in `us-east-1`) showed
   ~95 rps at both pool=10 and pool=25 — no change** — so the pool is not the
-  production bottleneck (the prod ceiling sits ~95 rps at ~25% CPU, most likely
-  the single shared Redis rate-limit connection). The bump is harmless headroom,
-  not a measured prod throughput win; the live box `.env` was set to 25 and
-  restarted. Details in `docs/METRICS.md`.
+  production bottleneck (the ~95 rps was later found to be a single-client
+  upload-bandwidth limit, not a server ceiling — see the ingest entry below).
+  The bump is harmless headroom, not a measured prod throughput win; the live
+  box `.env` was set to 25 and restarted. Details in `docs/METRICS.md`.
+- **API** — Ingest hot-path optimizations. The per-request `users.privacy`
+  lookup — a ~42 ms Postgres round-trip on every ingest, for a value that rarely
+  changes — is now served from a Redis cache (`priv:v1:<id>`, 60 s TTL,
+  invalidated on privacy change and account deletion, fail-open to Postgres),
+  dropping it to ~13 ms p50 while keeping the ADR-006 privacy modes exact (a
+  downgrade still takes effect immediately). `enableAutoPipelining` batches the
+  per-request rate-limit Redis evals, and a new `ingest_db` log records
+  per-stage lookup/insert timing. Details in `docs/METRICS.md`.
 - **Web** — The About-page brand film is now a 19-second launch cut. It keeps
   the keyboard-heatmap flood and session-stats beats, adds a terminal sequence
   that shows the CLI (`commma login` → `commma watch` → a live flush line), and
