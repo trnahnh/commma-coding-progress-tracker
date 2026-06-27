@@ -6,7 +6,14 @@
     "dev": "tsx watch src/index.ts",
     "build": "node esbuild.config.js",
     "start": "node dist/index.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "loadtest": "tsx scripts/loadtest/run.ts",
+    "loadtest:seed": "tsx scripts/loadtest/seed.ts",
+    "loadtest:ingest": "tsx scripts/loadtest/ingest.ts",
+    "loadtest:aggregate": "tsx scripts/loadtest/aggregate.ts",
+    "loadtest:read": "tsx scripts/loadtest/read.ts",
+    "loadtest:status": "tsx scripts/loadtest/status.ts",
+    "loadtest:teardown": "tsx scripts/loadtest/teardown.ts"
   },
   "dependencies": {
     "@commma/db": "workspace:*",
