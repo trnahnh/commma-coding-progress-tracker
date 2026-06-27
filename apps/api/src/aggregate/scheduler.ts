@@ -11,11 +11,17 @@ async function tick(): Promise<void> {
   if (inFlight) return
   if (!(await acquireLeader('aggregation', INTERVAL_MS))) return
   inFlight = (async () => {
+    const start = Date.now()
     try {
-      await runAggregation()
+      const stats = await runAggregation()
+      log.info('aggregation_cycle', {
+        ...stats,
+        durationMs: Date.now() - start,
+      })
     } catch (err) {
       log.error('aggregation_tick_failed', {
         message: err instanceof Error ? err.message : String(err),
+        durationMs: Date.now() - start,
       })
     }
   })()

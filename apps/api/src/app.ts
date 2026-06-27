@@ -1,7 +1,6 @@
 import { Hono } from 'hono'
 import { bodyLimit } from 'hono/body-limit'
 import { cors } from 'hono/cors'
-import { logger } from 'hono/logger'
 import { env } from './env.js'
 import { log } from './logger.js'
 import { apiError } from './lib/errors.js'
@@ -25,10 +24,19 @@ import type { AppEnv } from './types.js'
 export function createApp() {
   const app = new Hono<AppEnv>()
 
-  app.use(
-    '*',
-    logger((str) => log.info(str.trim())),
-  )
+  app.use('*', async (c, next) => {
+    const start = Date.now()
+    try {
+      await next()
+    } finally {
+      log.info('request', {
+        method: c.req.method,
+        path: c.req.path,
+        status: c.res.status,
+        ms: Date.now() - start,
+      })
+    }
+  })
   app.use(
     '/v1/*',
     cors({

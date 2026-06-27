@@ -16,14 +16,35 @@ import type { EventRow } from './types.js'
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0]
 
-export async function runAggregation(now = Date.now()): Promise<void> {
+export interface AggregationStats {
+  usersScanned: number
+  usersFinalized: number
+  sessionsFinalized: number
+  maxLagMs: number
+}
+
+export async function runAggregation(
+  now = Date.now(),
+): Promise<AggregationStats> {
   const userRows = await db
     .selectDistinct({ userId: events.userId })
     .from(events)
 
+  const stats: AggregationStats = {
+    usersScanned: userRows.length,
+    usersFinalized: 0,
+    sessionsFinalized: 0,
+    maxLagMs: 0,
+  }
+
   for (const { userId } of userRows) {
     try {
-      await aggregateUser(userId, now)
+      const result = await aggregateUser(userId, now)
+      if (result.sessions > 0) {
+        stats.usersFinalized += 1
+        stats.sessionsFinalized += result.sessions
+        stats.maxLagMs = Math.max(stats.maxLagMs, result.maxLagMs)
+      }
     } catch (err) {
       log.error('aggregation_user_failed', {
         userId,
@@ -31,9 +52,14 @@ export async function runAggregation(now = Date.now()): Promise<void> {
       })
     }
   }
+
+  return stats
 }
 
-async function aggregateUser(userId: string, now: number): Promise<void> {
+async function aggregateUser(
+  userId: string,
+  now: number,
+): Promise<{ sessions: number; maxLagMs: number }> {
   const userEvents = await db
     .select()
     .from(events)
@@ -41,14 +67,21 @@ async function aggregateUser(userId: string, now: number): Promise<void> {
     .orderBy(events.ts)
 
   const groups = splitIntoSessions(userEvents, now).filter((g) => g.closed)
-  if (groups.length === 0) return
+  if (groups.length === 0) return { sessions: 0, maxLagMs: 0 }
 
   const scored: { durationS: number; date: Date }[] = []
+  let maxLagMs = 0
 
   await db.transaction(async (tx) => {
     let streakState = await loadStreak(tx, userId)
 
     for (const group of groups) {
+      const latestTs = group.events.reduce(
+        (max, e) => Math.max(max, e.ts.getTime()),
+        0,
+      )
+      maxLagMs = Math.max(maxLagMs, now - latestTs)
+
       const draft = buildSession(group.events)
 
       const [session] = await tx
@@ -108,6 +141,8 @@ async function aggregateUser(userId: string, now: number): Promise<void> {
       })
     }
   }
+
+  return { sessions: groups.length, maxLagMs }
 }
 
 async function loadStreak(tx: Tx, userId: string): Promise<StreakState> {
