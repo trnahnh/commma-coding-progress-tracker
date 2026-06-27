@@ -780,3 +780,70 @@ library.
   needs better.
 - **Do nothing** — leaves the redundant-refetch cost and the slow
   revisit/refresh experience this ADR exists to fix.
+
+## ADR-015: App-SLO Observability via Grafana Cloud (logs-first)
+
+**Status:** Accepted — 2026-06
+
+### Context
+
+`docs/METRICS.md` defines the application SLOs (ingest/read p95, 5xx rate,
+ingest success, aggregation lag) but production was uninstrumented: the API's
+structured logs landed in PM2 log files on the single EC2 box and went nowhere
+else. CloudWatch (ADR-013 era, `cloudwatch.tf`) covers host health but
+deliberately cannot see the application layer — it has no view of request
+latency or error rate, and cannot reach Neon or Upstash off AWS. There was no
+way to know in production whether the SLO targets were being met, and no alert
+on a latency or error regression.
+
+### Decision
+
+Ship the structured logs the API already emits to **Grafana Cloud** and derive
+the SLOs there with LogQL — a **logs-first (Level 1)** approach, no tracing SDK
+in the API process.
+
+- **Structured emit.** A custom Hono middleware logs one `request` line per
+  request (`method`/`path`/`status`/`ms`), replacing Hono's formatted-string
+  logger so status/latency/path are real JSON fields. The aggregation scheduler
+  logs a per-cycle `aggregation_cycle` line (`maxLagMs` + counts + `durationMs`)
+  that also serves as a liveness heartbeat.
+- **Ship via Alloy.** **Grafana Alloy** (`infra/alloy/config.alloy`, installed
+  and configured by `infra/provision-ec2.sh`) tails the PM2 log files and
+  forwards to Grafana Cloud Loki. Only low-cardinality labels are promoted
+  (`service`/`stream`/`level`/`job`/`host`); status, latency, and path stay in
+  the line and are extracted with `| json` at query time, keeping Loki stream
+  cardinality bounded per the `docs/METRICS.md` cost discipline.
+- **Derive + dashboard.** SLOs are LogQL metric queries
+  (`quantile_over_time … unwrap ms`, `count_over_time … status>=500`) on an
+  importable dashboard (`infra/grafana/dashboards/api-slo.json`). Credentials
+  live only in `/etc/sysconfig/alloy` on the box, never in the repo or the API
+  env.
+
+### Consequences
+
+- Production SLOs are visible and alertable for the first time, off-box, so a
+  host failure (which the CloudWatch auto-recovery alarm heals) does not take
+  the telemetry with it.
+- No runtime dependency or failure surface is added to the API process — Alloy
+  is a separate, fail-open sidecar that only reads logs.
+- Free tier covers pre-launch volume; `request` is one line per request, so a
+  sampling stage is the lever if post-launch volume approaches the Loki free
+  tier (errors and aggregation lines never sampled out).
+- Alloy runs as root (systemd drop-in) to read the PM2 logs under the `0700`
+  home — the cleaner `/var/log/commma` route is deferred to avoid changing the
+  live PM2 lifecycle in the same change.
+
+### Rejected Alternatives
+
+- **OpenTelemetry SDK in the API now (Level 2)** — gives distributed traces and
+  latency decomposition, but adds runtime deps and a failure surface to the live
+  process for value that only pays off under real traffic. Deferred to Level 2
+  on the same Grafana Cloud backend, so Level 1 is not throwaway.
+- **CloudWatch Logs + metric filters** — keeps everything in AWS but is the
+  documented anti-pattern in `docs/METRICS.md` (billable at log volume, weak
+  query experience) and still can't see Neon/Upstash.
+- **Self-hosted Grafana + Loki/Prometheus** — burns compute budget and adds an
+  ops burden; worse, putting it on the same `t4g.small` means it dies with the
+  box it is meant to observe.
+- **Do nothing** — leaves production blind to its own SLOs, the gap this ADR
+  exists to close.

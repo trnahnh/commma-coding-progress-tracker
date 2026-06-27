@@ -475,6 +475,31 @@ a private, versioned, encrypted S3 bucket with native S3 locking
 application releases stay on the `infra/deploy-*.sh` scripts (Terraform owns
 infrastructure, not releases). See ADR-013 and `infra/terraform/README.md`.
 
+### Monitoring & Observability
+
+Observability is split by layer so no single tool is asked to do what it can't
+(see `docs/METRICS.md` and `docs/OBSERVABILITY.md`):
+
+- **Infra layer — CloudWatch** (`infra/terraform/cloudwatch.tf`). The CloudWatch
+  Agent publishes host CPU/memory/disk/swap; alarms cover the EC2 status checks,
+  high CPU/memory, root-disk fill, and a Route 53 HTTPS health check on
+  `api.commma.dev/health`, all paging a `commma-alerts` SNS email topic. Two
+  alarms are **self-healing** rather than paging-only: a
+  `StatusCheckFailed_System` alarm fires the EC2 `recover` action (rehost on
+  healthy hardware) and a `StatusCheckFailed_Instance` alarm fires `reboot`. A
+  Data Lifecycle Manager policy (`dlm.tf`) keeps a daily 7-day root-volume
+  snapshot as the restore path. CloudWatch cannot see Neon or Upstash (off AWS),
+  so it is host-health only.
+- **App layer — Grafana Cloud** (`docs/OBSERVABILITY.md`). The API emits
+  structured JSON logs — a per-request `request` line and a per-cycle
+  `aggregation_cycle` line. **Grafana Alloy** (`infra/alloy/config.alloy`) tails
+  the PM2 logs on the box and ships them to **Grafana Cloud Loki** with
+  low-cardinality labels; the application SLOs (ingest/read p95, 5xx rate,
+  ingest success, aggregation lag) are derived with LogQL on an importable
+  dashboard (`infra/grafana/dashboards/api-slo.json`). This is **Level 1**
+  (logs-first); OpenTelemetry traces for latency decomposition are the deferred
+  Level 2 on the same backend. See ADR-015.
+
 ---
 
 ## 11. Security Boundaries

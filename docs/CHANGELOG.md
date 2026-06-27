@@ -53,8 +53,31 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   memory, root-disk fill, and a Route 53 HTTPS health check on
   `api.commma.dev/health`. This is the **infra layer only** — CloudWatch cannot
   see Neon (Postgres) or Upstash (Redis), so application SLOs (ingest/read p95,
-  error rate, aggregation lag) stay on the planned OpenTelemetry route
-  documented in `docs/METRICS.md`.
+  error rate, aggregation lag) ship to Grafana Cloud instead (see the
+  observability entry below; `docs/OBSERVABILITY.md`).
+
+- **Infra** — Self-healing, backups, and keyless access for the API box
+  (`infra/terraform/cloudwatch.tf`, `dlm.tf`). Two CloudWatch alarms now **act**
+  instead of only paging: `StatusCheckFailed_System` fires the EC2 `recover`
+  action (rehost on healthy hardware, same id/EIP/EBS) and
+  `StatusCheckFailed_Instance` fires `reboot`. A Data Lifecycle Manager policy
+  snapshots the root volume daily (07:00 UTC, 7-day retention) as the restore
+  path for the box's only non-reproducible state (`apps/api/.env`). The instance
+  role gains `AmazonSSMManagedInstanceCore` for keyless, audited **SSM Session
+  Manager** access; port 22 stays open for the SSH-based CI deploy. Applied via
+  local `terraform apply`.
+
+- **API, Infra** — Level 1 app-SLO observability via Grafana Cloud
+  (`docs/OBSERVABILITY.md`, ADR-015). The API emits structured logs — a
+  per-request `request` line (`method`/`path`/`status`/`ms`, replacing the Hono
+  string logger) and a per-cycle `aggregation_cycle` line (`maxLagMs` + counts +
+  `durationMs`, doubling as a scheduler heartbeat). **Grafana Alloy**
+  (`infra/alloy/config.alloy`, provisioned by `infra/provision-ec2.sh`) tails
+  the PM2 logs and ships them to **Grafana Cloud Loki** with low-cardinality
+  labels; the SLOs (ingest/read p95, 5xx rate, ingest success, aggregation lag)
+  are derived with LogQL on an importable dashboard
+  (`infra/grafana/dashboards/api-slo.json`). Logs-first by design —
+  OpenTelemetry traces are the deferred Level 2 on the same backend.
 
 ### Changed
 

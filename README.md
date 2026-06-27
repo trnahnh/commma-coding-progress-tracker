@@ -70,28 +70,29 @@ on the roadmap.
 
 ![Frontend](https://skillicons.dev/icons?i=ts,react,vite,tailwind&theme=dark)
 ![Backend and data](https://skillicons.dev/icons?i=nodejs,postgres,redis&theme=dark)
-![Cloud and infra](https://skillicons.dev/icons?i=aws,terraform,docker,nginx,githubactions&theme=dark)
+![Cloud and infra](https://skillicons.dev/icons?i=aws,terraform,docker,nginx,githubactions,grafana&theme=dark)
 
 </div>
 <!-- markdownlint-enable MD033 MD013 -->
 
-| Layer               | Technology                                                                                         |
-| ------------------- | -------------------------------------------------------------------------------------------------- |
-| Extension           | TypeScript, VSCode API                                                                             |
-| API                 | Hono, Node.js, `@hono/node-server`                                                                 |
-| Web App             | React 19, Vite 8, Tailwind v4, TanStack Query (cached reads)                                       |
-| Database            | PostgreSQL (Drizzle ORM)                                                                           |
-| Cache / Leaderboard | Redis (rate limits + leaderboard sorted sets)                                                      |
-| Shared              | Zod schemas, TypeScript types                                                                      |
-| Heatmap (client)    | Canvas API → transparent PNG                                                                       |
-| Heatmap (server OG) | sharp                                                                                              |
-| Brand film          | ElevenLabs neural voiceover; Canvas animation → ffmpeg                                             |
-| Auth                | GitHub OAuth, JWT + HTTP-only refresh token                                                        |
-| Billing             | Stripe (Pro/Team subscriptions, signature-verified webhooks)                                       |
-| Monorepo            | pnpm workspaces                                                                                    |
-| Deployment (MVP)    | AWS-hosted compute — EC2 t4g (Graviton) + PM2 (API), S3 + CloudFront (web); Neon PG, Upstash Redis |
-| Infra as code       | Terraform (AWS footprint import-adopted; S3-locked remote state) — see ADR-013                     |
-| Monitoring (infra)  | CloudWatch host metrics + Agent (mem/disk/swap), EC2/Route 53 health alarms → SNS email            |
+| Layer               | Technology                                                                                                                             |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Extension           | TypeScript, VSCode API                                                                                                                 |
+| API                 | Hono, Node.js, `@hono/node-server`                                                                                                     |
+| Web App             | React 19, Vite 8, Tailwind v4, TanStack Query (cached reads)                                                                           |
+| Database            | PostgreSQL (Drizzle ORM)                                                                                                               |
+| Cache / Leaderboard | Redis (rate limits + leaderboard sorted sets)                                                                                          |
+| Shared              | Zod schemas, TypeScript types                                                                                                          |
+| Heatmap (client)    | Canvas API → transparent PNG                                                                                                           |
+| Heatmap (server OG) | sharp                                                                                                                                  |
+| Brand film          | ElevenLabs neural voiceover; Canvas animation → ffmpeg                                                                                 |
+| Auth                | GitHub OAuth, JWT + HTTP-only refresh token                                                                                            |
+| Billing             | Stripe (Pro/Team subscriptions, signature-verified webhooks)                                                                           |
+| Monorepo            | pnpm workspaces                                                                                                                        |
+| Deployment (MVP)    | AWS-hosted compute — EC2 t4g (Graviton) + PM2 (API), S3 + CloudFront (web); Neon PG, Upstash Redis                                     |
+| Infra as code       | Terraform (AWS footprint import-adopted; S3-locked remote state) — see ADR-013                                                         |
+| Monitoring (infra)  | CloudWatch host metrics + Agent (mem/disk/swap), EC2/Route 53 health alarms → SNS email; EC2 auto-recovery + daily EBS snapshots (DLM) |
+| Observability (app) | Grafana Cloud — structured logs shipped via Grafana Alloy → Loki; SLO dashboard (p95 / 5xx / lag) in LogQL — see ADR-015               |
 
 ---
 
@@ -113,16 +114,17 @@ commma/
 
 ## Documentation
 
-| Document                                                                               | Description                                                              |
-| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| [docs/SYSTEM_DESIGN.md](./docs/SYSTEM_DESIGN.md)                                       | Architecture, data flows, DB schema, API route map, caching, scalability |
-| [docs/ONBOARDING.md](./docs/ONBOARDING.md)                                             | First-time setup, repo map, core concepts, common tasks                  |
-| [CONTRIBUTING.md](./CONTRIBUTING.md)                                                   | Branch naming, commit conventions, PR process, code style                |
-| [SECURITY.md](./SECURITY.md)                                                           | How to report a vulnerability, scope, the privacy invariant              |
-| [docs/API_REFERENCE.md](./docs/API_REFERENCE.md)                                       | Every endpoint with request/response shapes, errors, rate limits         |
-| [docs/ROADMAP.md](./docs/ROADMAP.md)                                                   | Phase-by-phase plan with definitions of done and icebox                  |
-| [docs/ARCHITECTURE_DECISIONS.md](./docs/ARCHITECTURE_DECISIONS.md)                     | ADRs for every major technical decision                                  |
-| [PRD](https://docs.google.com/document/d/19pBlTpdtUVbAoK5RfuHPBKJdUgh7GsETuur-nVifaro) | Full Product Requirements Document                                       |
+| Document                                                                               | Description                                                               |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| [docs/SYSTEM_DESIGN.md](./docs/SYSTEM_DESIGN.md)                                       | Architecture, data flows, DB schema, API route map, caching, scalability  |
+| [docs/ONBOARDING.md](./docs/ONBOARDING.md)                                             | First-time setup, repo map, core concepts, common tasks                   |
+| [CONTRIBUTING.md](./CONTRIBUTING.md)                                                   | Branch naming, commit conventions, PR process, code style                 |
+| [SECURITY.md](./SECURITY.md)                                                           | How to report a vulnerability, scope, the privacy invariant               |
+| [docs/API_REFERENCE.md](./docs/API_REFERENCE.md)                                       | Every endpoint with request/response shapes, errors, rate limits          |
+| [docs/ROADMAP.md](./docs/ROADMAP.md)                                                   | Phase-by-phase plan with definitions of done and icebox                   |
+| [docs/ARCHITECTURE_DECISIONS.md](./docs/ARCHITECTURE_DECISIONS.md)                     | ADRs for every major technical decision                                   |
+| [docs/OBSERVABILITY.md](./docs/OBSERVABILITY.md)                                       | App-SLO observability — structured logs → Grafana Cloud, LogQL, dashboard |
+| [PRD](https://docs.google.com/document/d/19pBlTpdtUVbAoK5RfuHPBKJdUgh7GsETuur-nVifaro) | Full Product Requirements Document                                        |
 
 ---
 
