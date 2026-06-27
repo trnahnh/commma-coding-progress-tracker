@@ -28,7 +28,7 @@
   "timezone": "",
   "title": "commma API SLOs",
   "uid": "commma-api-slo",
-  "version": 1,
+  "version": 2,
   "panels": [
     {
       "id": 1,
@@ -86,7 +86,7 @@
           "refId": "A",
           "datasource": { "type": "loki", "uid": "${loki}" },
           "queryType": "range",
-          "expr": "sum(count_over_time({job=\"commma-api\"} | json | msg=\"request\" | status>=500 [5m])) / sum(count_over_time({job=\"commma-api\"} | json | msg=\"request\" [5m]))"
+          "expr": "(sum(count_over_time({job=\"commma-api\"} | json | msg=\"request\" | status>=500 [5m])) or vector(0)) / sum(count_over_time({job=\"commma-api\"} | json | msg=\"request\" [5m]))"
         }
       ]
     },

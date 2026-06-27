@@ -98,7 +98,8 @@ quantile_over_time(0.95,
   | unwrap ms [5m])
 
 # Server error rate (5xx / total) — target < 0.1%
-sum(count_over_time({service="commma-api"} | json | msg="request" | status>=500 [5m]))
+# `or vector(0)` makes the panel read 0 instead of blank when there are no 5xx
+(sum(count_over_time({service="commma-api"} | json | msg="request" | status>=500 [5m])) or vector(0))
 /
 sum(count_over_time({service="commma-api"} | json | msg="request" [5m]))
 
