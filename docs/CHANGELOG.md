@@ -11,6 +11,17 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **API** — Load-test harness (`apps/api/scripts/loadtest/`, run via the
+  `loadtest:*` package scripts). Seeds tagged `loadtest-*` users, signs a JWT
+  per user, and drives the real ingest → aggregate → read pipeline with ramping
+  concurrency to find the saturation knee, then tears everything down
+  (prefix-scoped row delete + Redis leaderboard cleanup). Round-robins all user
+  tokens so per-user rate caps don't mask the server limit; a `prod` target
+  sources creds from the gitignored `.env.production`, caps request volume under
+  the Upstash/Neon free-tier budgets, and requires `--confirm` to delete. Closes
+  the pre-launch load-test gate (backend audit check 11); results — including
+  the first prod-sized run and the `DB_POOL_MAX` before/after — are recorded in
+  `docs/METRICS.md`.
 - **API, Web** — Account deletion. A new `DELETE /v1/me` (auth + write
   rate-limit bucket) permanently erases the caller's account and every row tied
   to it — sessions and their language/file breakdowns, raw events, streaks,
@@ -81,6 +92,14 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
+- **API** — `DB_POOL_MAX` default raised from 10 to 25 (`apps/api/src/env.ts`).
+  A controlled load test isolated the Postgres connection pool as the ingest
+  bottleneck — the path is Neon-round-trip bound, not CPU (CloudWatch peaked
+  ~25% at the ceiling). At pool=10 the ingest ceiling was ~67 rps with p95 1,518
+  ms at 100 concurrent; at pool=25 it rose to ~153 rps (**+128%**, ~2.3×) with
+  p95 733 ms (**−52%**), zero errors in both runs (`docs/METRICS.md`). The live
+  box's own `.env` `DB_POOL_MAX` override must be set to 25 (or removed so the
+  new default applies) to adopt it in production.
 - **Web** — The About-page brand film is now a 19-second launch cut. It keeps
   the keyboard-heatmap flood and session-stats beats, adds a terminal sequence
   that shows the CLI (`commma login` → `commma watch` → a live flush line), and

@@ -60,16 +60,16 @@ Each metric lists:
 
 ## 1. System / SLO
 
-| Metric                         | now              | target         | source                  |
-| ------------------------------ | ---------------- | -------------- | ----------------------- |
-| Ingest p95 (`POST /v1/ingest`) | ~38ms (local)    | <50ms srv      | `request` log → Loki    |
-| Read p95 (see note)            | local only       | <200ms; <150ms | `request` log + k6      |
-| Aggregation lag                | not measured     | ≤~20 min       | `aggregation_cycle` log |
-| Ingest success (`202`/total)   | not measured     | ≥99.9%         | `request` log → Loki    |
-| Server errors (`5xx`/total)    | not measured     | <0.1%          | `request` log → Loki    |
-| Availability                   | R53 health check | 99.5% (MVP)    | CloudWatch alarm        |
-| Lighthouse mobile perf         | 90 (2026-06-19)  | ≥90            | `npx lighthouse`        |
-| Lighthouse mobile a11y         | 95 (2026-06-19)  | ≥90            | `npx lighthouse`        |
+| Metric                         | now                                    | target         | source                  |
+| ------------------------------ | -------------------------------------- | -------------- | ----------------------- |
+| Ingest p95 (`POST /v1/ingest`) | 73ms @10c local                        | <50ms srv      | `request` log → Loki    |
+| Read p95 (see note)            | 153ms @100c local; ~155ms srv-est prod | <200ms; <150ms | `request` log + k6      |
+| Aggregation lag                | ~6–10 min prod (2026-06-27)            | ≤~20 min       | `aggregation_cycle` log |
+| Ingest success (`202`/total)   | 100% / 16.5k ingest (local+prod)       | ≥99.9%         | `request` log → Loki    |
+| Server errors (`5xx`/total)    | 0% / 33k req (local+prod)              | <0.1%          | `request` log → Loki    |
+| Availability                   | R53 health check                       | 99.5% (MVP)    | CloudWatch alarm        |
+| Lighthouse mobile perf         | 90 (2026-06-19)                        | ≥90            | `npx lighthouse`        |
+| Lighthouse mobile a11y         | 95 (2026-06-19)                        | ≥90            | `npx lighthouse`        |
 
 Lighthouse mobile perf is the **median of 3 local `vite preview` runs**
 (2026-06-19: 87 / 94 / 90) — it now hovers right at the `≥90` line, down from 91
@@ -98,18 +98,86 @@ Redis key, so every read re-ran the cold rebuild (now negative-cached). The
 prod-sized gate (`<150 ms` p95 @ 1k concurrent on t4g.micro + Neon + Upstash via
 k6, from a separate load box) is still open (`ROADMAP.md` Phase 3).
 
+Load test (local, 2026-06-27): a typed in-repo harness
+(`apps/api/scripts/loadtest/`, seed → ingest → aggregate → read → teardown)
+seeded **700 synthetic users** and drove the real pipeline, round-robining 700
+signed JWTs so per-user rate caps never mask the server knee (public reads are
+IP-keyed, so the authed user-keyed reads are the load surface). Against one dev
+API (single Node process, native Postgres, Docker Redis): ingest sustained a
+**~190 rps** `202` ceiling with a textbook saturation curve — p95 73 → 154 → 298
+→ 695 → 1236 → 2741 ms across 10 → 400 concurrent (latency = concurrency ÷
+throughput) — with **zero `5xx`, zero errors** across **12,000 requests /
+720,000 events** in 63.6 s; knee at 400 concurrent (60-event batches, heavier
+than the single-event `<50 ms` target). The async aggregator finalized **11,548
+sessions** from those 720k events in ~45 s (sequential per-user) and **drained
+the `events` hot table to 0 rows** post-finalize, confirming the
+storage-discipline guardrail under load. Read p95 held at **153 ms @ 100
+concurrent — within the `<200 ms` SLO** — on a populated 12k-session DB, with a
+**~1,000 rps** read ceiling (≈5× ingest) and zero errors to 400 concurrent (p95
+620 ms). Teardown removed all 700 users + 11.7k sessions and `ZREM`'d the
+leaderboard idempotently (second pass = 0). The prod gate against
+`api.commma.dev` (the only environment wired to CloudWatch + Grafana) runs from
+this same harness next; its numbers land here when captured.
+
+Load test (prod, 2026-06-27): the same harness run against live `api.commma.dev`
+(EC2 **t4g.small** `i-066e0ba33b711ff85` + Neon + Upstash) — the first
+prod-sized exercise of the full stack and its observability. 700 synthetic
+users + a capped ramp (25 → 50 → 100 concurrent) drove **4,500 ingest requests /
+271,200 events** with **zero `5xx`, zero `429`, zero errors**; ingest saturated
+at **~95 rps** (half the local dev box, as expected for t4g.small +
+cross-network Neon inserts) with the same flat-throughput / linear-latency
+signature. **The bottleneck is not CPU:** CloudWatch showed the box rise from
+**~1.2% idle to ~25% peak** CPUUtilization at the throughput ceiling, so ingest
+is **Neon-round-trip / connection-pool bound** (`DB_POOL_MAX=10`), not compute —
+vertical CPU scaling would not raise it; pool/batch tuning or lower DB latency
+would. The live in-process aggregator then finalized all 271,200 events into
+**4,447 sessions and drained the `events` table to 0** in a single ~2-min
+scheduler pass, an **end-to-end ingest→finalize lag of ~6–10 min** (well within
+the `≤20 min` target). Reads against the materialized data scaled to **~447 rps
+@ 100 concurrent** (climbing, unlike write-bound ingest) at **p95 256 ms
+client-side** — which nets to **~155 ms server-side** after the ~100 ms
+laptop→`us-east-1` RTT, matching the local figure and within the `<200 ms` SLO —
+again with zero errors. Teardown removed all 700 users + 4,447 sessions and
+cleaned the Redis leaderboard (verified 0 residual on the public board).
+**Caveat:** harness latencies are client-observed end-to-end (laptop →
+`us-east-1`), so they include network RTT; the authoritative server-side p95 is
+the `request`-log `ms` in Grafana/Loki — the harness's role is to prove
+zero-error throughput and drive the CloudWatch/Grafana/Neon/Upstash signal,
+which it did.
+
+Pool tuning — before/after (2026-06-27): acting on the "not CPU, it's
+connection-pool bound" finding above, a controlled experiment isolated
+`DB_POOL_MAX` as the only variable — one API instance against **real prod Neon**
+(so the Neon round-trip latency that drives pool contention is real), local
+Redis, identical 700-user ingest load (`25 → 50 → 100` concurrent, 4,500
+requests / 270,000 events), run at pool=10 then pool=25:
+
+| `DB_POOL_MAX` | sustained ingest  | p95 @100c | wall (4.5k req) |
+| ------------- | ----------------- | --------- | --------------- |
+| 10 (before)   | ~67 rps           | 1,518 ms  | 67.1 s          |
+| 25 (after)    | ~153 rps          | 733 ms    | 29.9 s          |
+| **delta**     | **+128% (~2.3×)** | **−52%**  | **−55%**        |
+
+Raising the pool 2.5× lifted sustained ingest throughput ~2.3× (near-linear) and
+cut p95 latency at 100 concurrent by more than half, with zero errors in both
+runs — confirming the path was connection-pool/round-trip bound, not CPU. The
+`DB_POOL_MAX` default is now **25** (`apps/api/src/env.ts`); for the live box to
+adopt it, its own `.env` `DB_POOL_MAX` override must be set to 25 (or removed so
+the default applies). Headroom check: pool 25 from the single API instance is
+well under Neon's connection ceiling.
+
 Aggregation lag: 5-min interval + 15-min idle gap (ADR-010); event `ts` →
 `sessions.created_at`.
 
 ## 2. Cost guardrails
 
-| Metric            | now                   | target         | source                 |
-| ----------------- | --------------------- | -------------- | ---------------------- |
-| Redis cmds/mo     | ~0 idle (ADR-010)     | <500k/mo       | Upstash / commandstats |
-| `events` rows     | pruned after finalize | bounded        | `count(*)`             |
-| `sessions` growth | historical (rebuild)  | Neon free tier | count + table size     |
-| Postgres storage  | not measured          | 5 GB free      | Neon console           |
-| Recap LLM spend   | ~$0/wk (free-mode)    | <$1/wk MVP     | OpenAI usage console   |
+| Metric            | now                  | target         | source                 |
+| ----------------- | -------------------- | -------------- | ---------------------- |
+| Redis cmds/mo     | ~0 idle (ADR-010)    | <500k/mo       | Upstash / commandstats |
+| `events` rows     | 0 after finalize ✓   | bounded        | `count(*)`             |
+| `sessions` growth | historical (rebuild) | Neon free tier | count + table size     |
+| Postgres storage  | not measured         | 5 GB free      | Neon console           |
+| Recap LLM spend   | ~$0/wk (free-mode)   | <$1/wk MVP     | OpenAI usage console   |
 
 Redis cost drivers: per-request rate limits + per-finalize `ZINCRBY` (no
 BullMQ), plus a handful of cache-aside entries — the heatmap-card PNG
@@ -133,7 +201,10 @@ cannot become a runaway cost. Under the free-mode launch the scheduled send
 (`recap/run.ts`) stays gated to literal `['pro','team']` (never free mode), so
 with no paid users it sends to no one and **actual spend is ~$0/wk**; the
 ~$0.0002/recap unit cost is the estimate to hold against when paid plans
-re-enable.
+re-enable. The 2026-06-27 load test confirmed the events-drain guardrail (✓):
+after the aggregator finalized 720k synthetic events into 11,548 sessions, the
+`events` table held **0 rows**, so the hot table stays bounded under sustained
+ingest.
 
 ## 3. Privacy / trust (invariants — verifiable, brand-defining)
 
