@@ -1,0 +1,175 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "liveNow": false,
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["commma", "slo"],
+  "templating": {
+    "list": [
+      {
+        "name": "loki",
+        "label": "Loki data source",
+        "type": "datasource",
+        "query": "loki",
+        "current": {},
+        "hide": 0,
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false
+      }
+    ]
+  },
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "commma API SLOs",
+  "uid": "commma-api-slo",
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Ingest p95 (ms) — target < 50",
+      "type": "timeseries",
+      "datasource": { "type": "loki", "uid": "${loki}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "fieldConfig": {
+        "defaults": { "unit": "ms", "custom": { "drawStyle": "line", "fillOpacity": 10 } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single" } },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "loki", "uid": "${loki}" },
+          "queryType": "range",
+          "expr": "quantile_over_time(0.95, {job=\"commma-api\"} | json | msg=\"request\" | path=\"/v1/ingest\" | unwrap ms [5m])"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Read p95 (ms) — target < 200",
+      "type": "timeseries",
+      "datasource": { "type": "loki", "uid": "${loki}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "fieldConfig": {
+        "defaults": { "unit": "ms", "custom": { "drawStyle": "line", "fillOpacity": 10 } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single" } },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "loki", "uid": "${loki}" },
+          "queryType": "range",
+          "expr": "quantile_over_time(0.95, {job=\"commma-api\"} | json | msg=\"request\" | path=~\"/v1/(me|sessions|leaderboard|users|feed|stats|activity).*\" | unwrap ms [5m])"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Server error rate (5xx) — target < 0.1%",
+      "type": "timeseries",
+      "datasource": { "type": "loki", "uid": "${loki}" },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+      "fieldConfig": {
+        "defaults": { "unit": "percentunit", "min": 0, "custom": { "drawStyle": "line", "fillOpacity": 10 } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single" } },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "loki", "uid": "${loki}" },
+          "queryType": "range",
+          "expr": "sum(count_over_time({job=\"commma-api\"} | json | msg=\"request\" | status>=500 [5m])) / sum(count_over_time({job=\"commma-api\"} | json | msg=\"request\" [5m]))"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Ingest success (202) — target >= 99.9%",
+      "type": "timeseries",
+      "datasource": { "type": "loki", "uid": "${loki}" },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
+      "fieldConfig": {
+        "defaults": { "unit": "percentunit", "max": 1, "custom": { "drawStyle": "line", "fillOpacity": 10 } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single" } },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "loki", "uid": "${loki}" },
+          "queryType": "range",
+          "expr": "sum(count_over_time({job=\"commma-api\"} | json | msg=\"request\" | path=\"/v1/ingest\" | status=202 [5m])) / sum(count_over_time({job=\"commma-api\"} | json | msg=\"request\" | path=\"/v1/ingest\" [5m]))"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Aggregation lag (min) — target <= 20",
+      "type": "timeseries",
+      "datasource": { "type": "loki", "uid": "${loki}" },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
+      "fieldConfig": {
+        "defaults": { "unit": "m", "min": 0, "custom": { "drawStyle": "line", "fillOpacity": 10 } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single" } },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "loki", "uid": "${loki}" },
+          "queryType": "range",
+          "expr": "max_over_time({job=\"commma-api\"} | json | msg=\"aggregation_cycle\" | unwrap maxLagMs [1h]) / 1000 / 60"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Request rate by status",
+      "type": "timeseries",
+      "datasource": { "type": "loki", "uid": "${loki}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "fieldConfig": {
+        "defaults": { "unit": "short", "custom": { "drawStyle": "line", "fillOpacity": 10, "stacking": { "mode": "normal" } } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "loki", "uid": "${loki}" },
+          "queryType": "range",
+          "expr": "sum by (status) (count_over_time({job=\"commma-api\"} | json | msg=\"request\" [5m]))"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Recent requests",
+      "type": "logs",
+      "datasource": { "type": "loki", "uid": "${loki}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": false,
+        "enableLogDetails": true,
+        "sortOrder": "Descending"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "loki", "uid": "${loki}" },
+          "queryType": "range",
+          "expr": "{job=\"commma-api\"} | json | msg=\"request\""
+        }
+      ]
+    }
+  ]
+}

@@ -80,8 +80,10 @@ own env (`apps/api/.env`), since the API does not read them.
 
 ## SLO queries (LogQL)
 
-Starting points for the panels that back the `docs/METRICS.md` SLO table. Tune
-the window per panel.
+An importable dashboard with all of these panels lives at
+`infra/grafana/dashboards/api-slo.json` — in Grafana, **Dashboards → New →
+Import**, upload the file, and pick the Loki data source. The raw queries below
+back those panels (and the alert rules); tune the window per panel.
 
 ```logql
 # Ingest p95 (ms) — target < 50ms
