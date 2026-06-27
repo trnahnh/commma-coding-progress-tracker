@@ -1,11 +1,11 @@
 import { Hono } from 'hono'
-import { eq } from 'drizzle-orm'
 import { zValidator } from '@hono/zod-validator'
 import { heartbeatBatchSchema } from '@commma/shared'
-import { events, users, type KeyFreq } from '@commma/db'
+import { events, type KeyFreq } from '@commma/db'
 import { db } from '../db.js'
 import { log } from '../logger.js'
 import { apiError } from '../lib/errors.js'
+import { getPrivacyMode } from '../lib/privacyCache.js'
 import { requireAuth } from '../middleware/auth.js'
 import { rateLimit, userKey } from '../middleware/rateLimit.js'
 import type { AppEnv } from '../types.js'
@@ -51,18 +51,14 @@ ingestRoutes.post(
       )
     }
 
-    const selectStart = performance.now()
-    const [owner] = await db
-      .select({ privacy: users.privacy })
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1)
-    const selectMs = performance.now() - selectStart
+    const lookupStart = performance.now()
+    const privacy = await getPrivacyMode(userId)
+    const lookupMs = performance.now() - lookupStart
 
-    if (!owner) return apiError(c, 'UNAUTHORIZED', 'Unknown user')
-    if (owner.privacy === 'off') return c.json({ received, duplicate: 0 }, 202)
+    if (!privacy) return apiError(c, 'UNAUTHORIZED', 'Unknown user')
+    if (privacy === 'off') return c.json({ received, duplicate: 0 }, 202)
 
-    const summary = owner.privacy === 'summary'
+    const summary = privacy === 'summary'
     const rows = batch.map((e) => ({
       id: e.id,
       userId,
@@ -85,7 +81,7 @@ ingestRoutes.post(
 
     log.info('ingest_db', {
       n: received,
-      selectMs: Math.round(selectMs),
+      lookupMs: Math.round(lookupMs),
       insertMs: Math.round(insertMs),
     })
 

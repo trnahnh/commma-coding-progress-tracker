@@ -23,6 +23,7 @@ import { apiError } from '../lib/errors.js'
 import { log } from '../logger.js'
 import { stripe } from '../lib/stripe.js'
 import { removeLeaderboardUser } from '../aggregate/leaderboard.js'
+import { invalidatePrivacyMode } from '../lib/privacyCache.js'
 import { requireAuth } from '../middleware/auth.js'
 import { rateLimit, userKey } from '../middleware/rateLimit.js'
 import type { AppEnv } from '../types.js'
@@ -157,6 +158,8 @@ meRoutes.patch(
     const u = updated[0]
     if (!u) return apiError(c, 'NOT_FOUND', 'User not found')
 
+    if (data.privacy !== undefined) await invalidatePrivacyMode(userId)
+
     const streakRows = await db
       .select()
       .from(streaks)
@@ -256,6 +259,7 @@ meRoutes.delete(
         message: err instanceof Error ? err.message : String(err),
       })
     }
+    await invalidatePrivacyMode(userId)
 
     log.info('account_deleted', { userId })
     return c.body(null, 204)
