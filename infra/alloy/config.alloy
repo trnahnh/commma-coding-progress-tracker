@@ -1,12 +1,12 @@
 local.file_match "api_logs" {
   path_targets = [
     {
-      __path__ = "/home/ec2-user/.pm2/logs/commma-api-out.log",
+      __path__ = "/home/ec2-user/.pm2/logs/commma-api-out*.log",
       service  = "commma-api",
       stream   = "stdout",
     },
     {
-      __path__ = "/home/ec2-user/.pm2/logs/commma-api-error.log",
+      __path__ = "/home/ec2-user/.pm2/logs/commma-api-error*.log",
       service  = "commma-api",
       stream   = "stderr",
     },
