@@ -5,6 +5,7 @@ import { log } from './logger.js'
 export const redis = new Redis(env.REDIS_URL, {
   maxRetriesPerRequest: 3,
   enableReadyCheck: true,
+  enableAutoPipelining: true,
 })
 
 redis.on('error', (err) => {

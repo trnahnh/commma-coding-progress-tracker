@@ -4,6 +4,7 @@ import { zValidator } from '@hono/zod-validator'
 import { heartbeatBatchSchema } from '@commma/shared'
 import { events, users, type KeyFreq } from '@commma/db'
 import { db } from '../db.js'
+import { log } from '../logger.js'
 import { apiError } from '../lib/errors.js'
 import { requireAuth } from '../middleware/auth.js'
 import { rateLimit, userKey } from '../middleware/rateLimit.js'
@@ -50,11 +51,13 @@ ingestRoutes.post(
       )
     }
 
+    const selectStart = performance.now()
     const [owner] = await db
       .select({ privacy: users.privacy })
       .from(users)
       .where(eq(users.id, userId))
       .limit(1)
+    const selectMs = performance.now() - selectStart
 
     if (!owner) return apiError(c, 'UNAUTHORIZED', 'Unknown user')
     if (owner.privacy === 'off') return c.json({ received, duplicate: 0 }, 202)
@@ -72,11 +75,19 @@ ingestRoutes.post(
       keyFreq: summary ? null : e.key_freq ? (e.key_freq as KeyFreq) : null,
     }))
 
+    const insertStart = performance.now()
     const inserted = await db
       .insert(events)
       .values(rows)
       .onConflictDoNothing({ target: [events.id, events.ts] })
       .returning({ id: events.id })
+    const insertMs = performance.now() - insertStart
+
+    log.info('ingest_db', {
+      n: received,
+      selectMs: Math.round(selectMs),
+      insertMs: Math.round(insertMs),
+    })
 
     return c.json({ received, duplicate: received - inserted.length }, 202)
   },
