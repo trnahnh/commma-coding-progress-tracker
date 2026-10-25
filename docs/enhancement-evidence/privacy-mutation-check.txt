@@ -1,0 +1,33 @@
+=== MUTANT M1-unknown-char-as-label: apps/extension/src/keyCounter.ts
+--- replaced: return isKeyLabel(lower) ? lower : 'Other'
++++ with:     return (isKeyLabel(lower) ? lower : ch) as KeyLabel
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+Error: Property failed after 3 tests
+Counterexample: ["SECRET_gggggggggggggggg",[{"doc":0,"insertCanary":false,"canaryAsKeystrokes":false,"fragment":"\u0000","rangeLength":0,"removedLines":0,"scheme":"file"}]]
+Caused by: ZodError: [
+      Tests  1 failed | 2 passed (3)
+=== MUTANT M2-doc-text-in-lang: apps/extension/src/tracker.ts
+--- replaced: lang: doc.languageId,
++++ with:     lang: doc.languageId + doc.getText().slice(0, 24),
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+Error: Property failed after 2 tests
+Counterexample: ["SECRET_gggggggggggggggg",[{"doc":0,"insertCanary":false,"canaryAsKeystrokes":false,"fragment":"  ","rangeLength":0,"removedLines":1,"scheme":"file"}]]
+Caused by: AssertionError: expected '{"events":[{"id":"c8e958f5-5043-477a-…' not to contain 'SECRET_gggggggggggggggg'
+      Tests  2 failed | 1 passed (3)
+=== MUTANT M3-paste-as-key: apps/extension/src/keyCounter.ts
+--- replaced:   return { keystrokes: 0, lines, keyFreq }
++++ with:       keyFreq[input.text as KeyLabel] = 1
+  return { keystrokes: 1, lines, keyFreq }
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+Error: Property failed after 1 tests
+Counterexample: ["SECRET_gggggggggggggggg",[{"doc":0,"insertCanary":false,"canaryAsKeystrokes":false,"fragment":"  ","rangeLength":0,"removedLines":0,"scheme":"file"},{"doc":0,"insertCanary":false,"canaryAsKeystrokes":false,"fragment":"\u0000","rangeLength":0,"removedLines":0,"scheme":"file"}]]
+Caused by: ZodError: [
+      Tests  1 failed | 2 passed (3)
+=== MUTANT M4-summary-keeps-keyfreq: apps/extension/src/tracker.ts
+--- replaced:       if (mode === 'full') {
++++ with:           if (mode !== 'off') {
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+Error: Property failed after 2 tests
+Counterexample: ["SECRET_gggggggggggggggg",[{"doc":0,"insertCanary":false,"canaryAsKeystrokes":false,"fragment":"  ","rangeLength":0,"removedLines":1,"scheme":"file"}]]
+Caused by: AssertionError: expected 'src/index.ts' to be undefined
+      Tests  1 failed | 2 passed (3)

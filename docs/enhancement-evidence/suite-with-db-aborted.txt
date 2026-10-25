@@ -1,0 +1,15 @@
+$ TEST_DATABASE_URL=<local pg> TEST_REDIS_URL=redis://localhost:6379/9 npx vitest run --testTimeout=90000 --hookTimeout=90000
+(stopped manually after ~25 min; Docker Desktop port proxy degraded: new Redis connections took 20-50s or timed out)
+PRIVACY_CACHE_STALE_WINDOW_MS change=0
+PRIVACY_CACHE_STALE_WINDOW_MS delete=0
+PRIVACY_PROPERTY_RESULT {"runs":900,"editEvents":36531,"requests":544,"heartbeats":1274,"bytes":209707}
+ ❯ apps/api/test/aggregate/scanner.integration.test.ts (1 test | 1 failed) 690032ms
+     × finalizes each session exactly once with 2 concurrent scanners 600021ms
+ ❯ apps/api/test/routes/integration.test.ts (20 tests | 7 failed) 1077190ms
+     × rejects a heartbeat carrying a content field and stores nothing 90019ms
+     × rejects a heartbeat carrying a text field and stores nothing 90013ms
+     × stores file and key_freq for a full-privacy user 90012ms
+     × drops file and key_freq for a summary-privacy user 90003ms
+     × stores nothing for an off-privacy user 90010ms
+     × suppresses files and heatmap to non-owners of a summary session 90014ms
+     × serves a public heatmap card PNG for a full-privacy session 90008ms

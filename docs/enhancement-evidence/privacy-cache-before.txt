@@ -1,0 +1,10 @@
+PRIVACY_CACHE_STALE_WINDOW_MS change=60000
+PRIVACY_CACHE_STALE_WINDOW_MS delete=60000
+     × does not let an in-flight read re-cache the old mode after a change 73ms
+     × does not let an in-flight read re-cache a deleted account 57ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected 60000 to be +0 // Object.is equality
+    116|     process.stdout.write(`PRIVACY_CACHE_STALE_WINDOW_MS change=${windo…
+AssertionError: expected 60000 to be +0 // Object.is equality
+    134|     process.stdout.write(`PRIVACY_CACHE_STALE_WINDOW_MS delete=${windo…
+      Tests  2 failed | 3 passed (5)

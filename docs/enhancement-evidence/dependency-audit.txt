@@ -1,0 +1,41 @@
+$ pnpm audit --prod
+├─────────────────────┼────────────────────────────────────────────────────────┤
+│ Vulnerable versions │ >=4.12.4 <4.13.11                                      │
+├─────────────────────┼────────────────────────────────────────────────────────┤
+│ Patched versions    │ >=4.13.11                                              │
+├─────────────────────┼────────────────────────────────────────────────────────┤
+│ Paths               │ apps__api>hono                                         │
+├─────────────────────┼────────────────────────────────────────────────────────┤
+│ More info           │ https://github.com/advisories/GHSA-5r4p-p66f-jhc7      │
+└─────────────────────┴────────────────────────────────────────────────────────┘
+┌─────────────────────┬────────────────────────────────────────────────────────┐
+│ low                 │ Hono: Proxy Helper does not remove response headers    │
+│                     │ listed in the `Connection` header                      │
+├─────────────────────┼────────────────────────────────────────────────────────┤
+│ Package             │ hono                                                   │
+├─────────────────────┼────────────────────────────────────────────────────────┤
+│ Vulnerable versions │ >=4.7.0 <4.12.34                                       │
+├─────────────────────┼────────────────────────────────────────────────────────┤
+│ Patched versions    │ >=4.12.34                                              │
+├─────────────────────┼────────────────────────────────────────────────────────┤
+│ Paths               │ apps__api>hono                                         │
+├─────────────────────┼────────────────────────────────────────────────────────┤
+│ More info           │ https://github.com/advisories/GHSA-79qm-7rj5-m7r9      │
+└─────────────────────┴────────────────────────────────────────────────────────┘
+29 vulnerabilities found
+Severity: 1 low | 21 moderate | 7 high
+
+$ pnpm audit (all, summary)
+│ More info           │ https://github.com/advisories/GHSA-333x-w4r6-6crp      │
+└─────────────────────┴────────────────────────────────────────────────────────┘
+103 vulnerabilities found
+Severity: 10 low | 51 moderate | 42 high
+@hono/node-server moderate x1 patched >=1.19.15 | apps__api>@hono/node-server | Node.js Adapter for Hono: Path traversal in `serve-static` on Windows 
+hono high x1 patched >=4.12.25 | apps__api>hono | hono: CORS Middleware reflects any Origin with credentials when `origi
+hono low x1 patched >=4.12.34 | apps__api>hono | Hono: Proxy Helper does not remove response headers listed in the `Con
+hono moderate x15 patched >=4.12.25 | apps__api>hono | hono: Body Limit Middleware can be bypassed on AWS Lambda by understat / hono: Lambda@Edge adapter keeps only the last value of a repeated requ
+qs moderate x2 patched >=6.16.0 | apps__api>stripe | qs array-limit bypass via bracket-key comma parsing / qs: Denial of Service via Attacker Controlled isBuffer
+react-router high x2 patched >=7.18.0 | apps__web>react-router-dom | React Router: Unauthenticated Denial of Service via Inefficient Route  / React Router: RSC Mode CSRF Bypass Allows Action Execution Before 400 
+react-router moderate x3 patched >=7.18.0 | apps__web>react-router-dom | React Router: Open redirect via backslash in <Link> and useNavigate (C / React Router: RSCErrorHandler Missing Protocol Validation (XSS)
+sharp high x3 patched >=0.35.0 | apps__api>sharp | sharp inherited vulnerabilities in libvips: CVE-2026-33327, CVE-2026-3 / sharp: Vulnerabilities in libheif: GHSA-g89c-p67h-r497 and GHSA-2jg2-4
+zod high x1 patched >=4.6.6 | apps__api>zod | Zod can exhaust memory while validating oversized constrained collecti

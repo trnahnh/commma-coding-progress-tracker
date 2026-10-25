@@ -1,0 +1,193 @@
+Pager usage is off.
+BEGIN
+INSERT 0 2000
+SELECT 2000
+INSERT 0 400000
+INSERT 0 100000
+INSERT 0 200
+ANALYZE
+ANALYZE
+ANALYZE
+ANALYZE
+ sessions_rows | events_rows | pending_rows 
+---------------+-------------+--------------
+        400058 |      100000 |         1000
+(1 row)
+
+### Q1 aggregator: distinct users with pending events
+                                                      QUERY PLAN                                                       
+-----------------------------------------------------------------------------------------------------------------------
+ HashAggregate  (cost=2789.00..2794.00 rows=500 width=16) (actual time=27.210..27.261 rows=500.00 loops=1)
+   Group Key: user_id
+   Batches: 1  Memory Usage: 57kB
+   Buffers: shared hit=1539
+   ->  Seq Scan on events  (cost=0.00..2539.00 rows=100000 width=16) (actual time=0.014..8.656 rows=100000.00 loops=1)
+         Buffers: shared hit=1539
+ Planning:
+   Buffers: shared hit=8
+ Planning Time: 0.137 ms
+ Execution Time: 27.328 ms
+(10 rows)
+
+### Q2 aggregator: one user's events in ts order
+                                                             QUERY PLAN                                                             
+------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=622.39..622.89 rows=200 width=149) (actual time=0.396..0.404 rows=200.00 loops=1)
+   Sort Key: events.ts
+   Sort Method: quicksort  Memory: 46kB
+   Buffers: shared hit=204, local hit=16
+   InitPlan 1
+     ->  Seq Scan on ex_users  (cost=0.00..47.40 rows=13 width=16) (actual time=0.013..0.102 rows=1.00 loops=1)
+           Filter: (n = 7)
+           Rows Removed by Filter: 1999
+           Buffers: local hit=16
+   ->  Bitmap Heap Scan on events  (cost=9.97..567.34 rows=200 width=149) (actual time=0.155..0.349 rows=200.00 loops=1)
+         Recheck Cond: (user_id = (InitPlan 1).col1)
+         Heap Blocks: exact=200
+         Buffers: shared hit=204, local hit=16
+         ->  Bitmap Index Scan on events_user_ts  (cost=0.00..9.92 rows=200 width=0) (actual time=0.134..0.134 rows=200.00 loops=1)
+               Index Cond: (user_id = (InitPlan 1).col1)
+               Index Searches: 1
+               Buffers: shared hit=4, local hit=16
+ Planning:
+   Buffers: shared hit=24
+ Planning Time: 0.142 ms
+ Execution Time: 0.431 ms
+(21 rows)
+
+### Q3 leaderboard outbox: pending batch
+                                                                     QUERY PLAN                                                                     
+----------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=41.46..1312.74 rows=500 width=40) (actual time=0.058..0.186 rows=500.00 loops=1)
+   Buffers: shared hit=14
+   ->  Bitmap Heap Scan on sessions  (cost=41.46..2550.96 rows=987 width=40) (actual time=0.058..0.159 rows=500.00 loops=1)
+         Recheck Cond: leaderboard_pending
+         Heap Blocks: exact=7
+         Buffers: shared hit=14
+         ->  Bitmap Index Scan on sessions_leaderboard_pending  (cost=0.00..41.21 rows=987 width=0) (actual time=0.045..0.045 rows=1000.00 loops=1)
+               Index Searches: 1
+               Buffers: shared hit=6
+ Planning Time: 0.099 ms
+ Execution Time: 0.209 ms
+(11 rows)
+
+### Q4 leaderboard outbox: weekly totals for 500 users
+                                                                        QUERY PLAN                                                                        
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+ HashAggregate  (cost=15792.25..15817.29 rows=2003 width=20) (actual time=92.715..92.783 rows=500.00 loops=1)
+   Group Key: sessions.user_id
+   Batches: 1  Memory Usage: 121kB
+   Buffers: shared hit=4868, local hit=16
+   ->  Hash Join  (cost=54.40..15090.14 rows=140421 width=20) (actual time=0.304..81.615 rows=84000.00 loops=1)
+         Hash Cond: (sessions.user_id = ex_users.id)
+         Buffers: shared hit=4868, local hit=16
+         ->  Index Scan using sessions_started on sessions  (cost=0.43..12591.89 rows=336037 width=20) (actual time=0.012..50.968 rows=336058.00 loops=1)
+               Index Cond: ((started_at >= (now() - '7 days'::interval)) AND (started_at < now()))
+               Index Searches: 1
+               Buffers: shared hit=4868
+         ->  Hash  (cost=51.48..51.48 rows=199 width=16) (actual time=0.269..0.271 rows=500.00 loops=1)
+               Buckets: 1024  Batches: 1  Memory Usage: 32kB
+               Buffers: local hit=16
+               ->  HashAggregate  (cost=49.49..51.48 rows=199 width=16) (actual time=0.192..0.224 rows=500.00 loops=1)
+                     Group Key: ex_users.id
+                     Batches: 1  Memory Usage: 73kB
+                     Buffers: local hit=16
+                     ->  Seq Scan on ex_users  (cost=0.00..47.40 rows=837 width=16) (actual time=0.010..0.111 rows=500.00 loops=1)
+                           Filter: (n <= 500)
+                           Rows Removed by Filter: 1500
+                           Buffers: local hit=16
+ Planning:
+   Buffers: shared hit=23
+ Planning Time: 0.382 ms
+ Execution Time: 92.939 ms
+(26 rows)
+
+### Q5 read: a user's session list page (keyset)
+                                                                   QUERY PLAN                                                                    
+-------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=739.70..739.75 rows=21 width=28) (actual time=0.352..0.354 rows=21.00 loops=1)
+   Buffers: shared hit=204, local hit=16
+   InitPlan 1
+     ->  Seq Scan on ex_users  (cost=0.00..47.40 rows=13 width=16) (actual time=0.011..0.111 rows=1.00 loops=1)
+           Filter: (n = 7)
+           Rows Removed by Filter: 1999
+           Buffers: local hit=16
+   ->  Sort  (cost=692.30..692.80 rows=200 width=28) (actual time=0.351..0.352 rows=21.00 loops=1)
+         Sort Key: sessions.started_at DESC, sessions.id DESC
+         Sort Method: top-N heapsort  Memory: 26kB
+         Buffers: shared hit=204, local hit=16
+         ->  Bitmap Heap Scan on sessions  (cost=9.97..686.91 rows=200 width=28) (actual time=0.153..0.323 rows=200.00 loops=1)
+               Recheck Cond: (user_id = (InitPlan 1).col1)
+               Heap Blocks: exact=200
+               Buffers: shared hit=204, local hit=16
+               ->  Bitmap Index Scan on sessions_user_started  (cost=0.00..9.92 rows=200 width=0) (actual time=0.136..0.136 rows=200.00 loops=1)
+                     Index Cond: (user_id = (InitPlan 1).col1)
+                     Index Searches: 1
+                     Buffers: shared hit=4, local hit=16
+ Planning:
+   Buffers: shared hit=10
+ Planning Time: 0.200 ms
+ Execution Time: 0.392 ms
+(23 rows)
+
+### Q6 read: following feed page
+                                                                      QUERY PLAN                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=8943.57..8946.01 rows=21 width=24) (actual time=76.667..82.882 rows=21.00 loops=1)
+   Buffers: shared hit=5373, local hit=16
+   InitPlan 1
+     ->  Seq Scan on ex_users  (cost=0.00..47.40 rows=13 width=16) (actual time=0.039..0.168 rows=1.00 loops=1)
+           Filter: (n = 1)
+           Rows Removed by Filter: 1999
+           Buffers: local hit=16
+   ->  Gather Merge  (cost=8896.17..13548.54 rows=39946 width=24) (actual time=76.666..82.877 rows=21.00 loops=1)
+         Workers Planned: 2
+         Workers Launched: 2
+         Buffers: shared hit=5373, local hit=16
+         ->  Sort  (cost=7896.14..7937.75 rows=16644 width=24) (actual time=33.861..33.864 rows=21.00 loops=3)
+               Sort Key: s.started_at DESC, s.id DESC
+               Sort Method: top-N heapsort  Memory: 27kB
+               Buffers: shared hit=5373
+               Worker 0:  Sort Method: top-N heapsort  Memory: 27kB
+               Worker 1:  Sort Method: top-N heapsort  Memory: 27kB
+               ->  Hash Join  (cost=7.00..7447.40 rows=16644 width=24) (actual time=0.594..32.354 rows=13333.33 loops=3)
+                     Hash Cond: (s.user_id = f.followee_id)
+                     Buffers: shared hit=5341
+                     ->  Parallel Seq Scan on sessions s  (cost=0.00..7001.91 rows=166691 width=40) (actual time=0.015..19.974 rows=133352.67 loops=3)
+                           Buffers: shared hit=5335
+                     ->  Hash  (cost=4.50..4.50 rows=200 width=16) (actual time=0.512..0.513 rows=200.00 loops=3)
+                           Buckets: 1024  Batches: 1  Memory Usage: 18kB
+                           Buffers: shared hit=6
+                           ->  Seq Scan on follows f  (cost=0.00..4.50 rows=200 width=16) (actual time=0.463..0.483 rows=200.00 loops=3)
+                                 Filter: (follower_id = (InitPlan 1).col1)
+                                 Buffers: shared hit=6
+ Planning:
+   Buffers: shared hit=54
+ Planning Time: 2.445 ms
+ Execution Time: 82.927 ms
+(32 rows)
+
+### Q7 leaderboard cold rebuild (alltime, full scan)
+                                                                  QUERY PLAN                                                                   
+-----------------------------------------------------------------------------------------------------------------------------------------------
+ Finalize HashAggregate  (cost=9360.13..9385.17 rows=2003 width=20) (actual time=68.659..73.445 rows=2020.00 loops=1)
+   Group Key: user_id
+   Batches: 1  Memory Usage: 217kB
+   Buffers: shared hit=5335
+   ->  Gather  (cost=8835.36..9336.09 rows=4807 width=24) (actual time=66.701..71.944 rows=6020.00 loops=1)
+         Workers Planned: 2
+         Workers Launched: 2
+         Buffers: shared hit=5335
+         ->  Partial HashAggregate  (cost=7835.36..7855.39 rows=2003 width=24) (actual time=40.471..40.746 rows=2006.67 loops=3)
+               Group Key: user_id
+               Batches: 1  Memory Usage: 217kB
+               Buffers: shared hit=5335
+               Worker 0:  Batches: 1  Memory Usage: 217kB
+               Worker 1:  Batches: 1  Memory Usage: 217kB
+               ->  Parallel Seq Scan on sessions  (cost=0.00..7001.91 rows=166691 width=20) (actual time=0.014..19.049 rows=133352.67 loops=3)
+                     Buffers: shared hit=5335
+ Planning Time: 0.099 ms
+ Execution Time: 73.662 ms
+(18 rows)
+
+ROLLBACK

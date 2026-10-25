@@ -1,0 +1,22 @@
+$ DATABASE_URL=<wrong password> pnpm migrate   (before: drizzle-kit only)
+No config path provided, using default 'drizzle.config.ts'
+Reading config file 'D:\Projects\Commma-Tracker\commma-coding-progress-tracker\packages\db\drizzle.config.ts'
+◇ injected env (22) from ..\..\apps\api\.env // tip: ⌁ auth for agents [www.vestauth.com]
+Using 'postgres' driver for database querying
+exit=1
+
+$ DATABASE_URL=<wrong password> pnpm migrate   (after: preflight first)
+> node scripts/preflight.mjs && drizzle-kit migrate
+db preflight: FAILED code=28P01 message=password authentication failed for user "postgres"
+ ELIFECYCLE  Command failed with exit code 1.
+
+$ DATABASE_URL=<closed port> pnpm preflight
+> @commma/db@0.0.0 preflight D:\Projects\Commma-Tracker\commma-coding-progress-tracker\packages\db
+> node scripts/preflight.mjs
+db preflight: FAILED code=ECONNREFUSED message=
+
+$ DATABASE_URL=<test db> pnpm migrate
+> node scripts/preflight.mjs && drizzle-kit migrate
+db preflight: ok db=commma_enh_test ms=76 PostgreSQL 18.1
+[✓] migrations applied successfully!
+db preflight: FAILED code=ECONNREFUSED message=connect ECONNREFUSED ::1:1; connect ECONNREFUSED 127.0.0.1:1

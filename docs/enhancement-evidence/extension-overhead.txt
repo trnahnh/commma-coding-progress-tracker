@@ -1,0 +1,17 @@
+## bundle
+-rw-r--r-- 1 ASUS 197609 73422 Oct 25 15:28 /c/Users/ASUS/AppData/Local/Temp/claude/D--Projects-Commma-Tracker-commma-coding-progress-tracker/cb079508-66f3-49a5-b27b-6dd42a8a0c29/scratchpad/extension.min.js
+    73422  2026-06-19 21:01   extension/dist/extension.js
+-rw-r--r-- 1 ASUS 197609 37877 Jun 19 21:01 commma-1.0.0.vsix
+gzip bytes: 19044
+## runs (50 files)
+EXTENSION_OVERHEAD_RESULT {"node":"v24.12.0","platform":"win32-x64","bundle":"extension.min.js","bundleBytes":73422,"moduleLoadMs":23.86,"activateMs":40.81,"openFiles":50,"perKeystroke":{"n":200000,"meanUs":0.724,"p50Us":0.6,"p99Us":2.2,"p999Us":8.3,"maxUs":589.8},"amortizedPerKeystrokeUs":0.604,"heapDeltaKbWhileTracking":-20.1,"gcExposed":true,"heapUsedMb":9.74,"rssMb":68.66}
+EXTENSION_OVERHEAD_RESULT {"node":"v24.12.0","platform":"win32-x64","bundle":"extension.min.js","bundleBytes":73422,"moduleLoadMs":23.28,"activateMs":40.02,"openFiles":50,"perKeystroke":{"n":200000,"meanUs":0.698,"p50Us":0.6,"p99Us":2,"p999Us":7.2,"maxUs":209.8},"amortizedPerKeystrokeUs":0.626,"heapDeltaKbWhileTracking":-20,"gcExposed":true,"heapUsedMb":9.67,"rssMb":68.26}
+EXTENSION_OVERHEAD_RESULT {"node":"v24.12.0","platform":"win32-x64","bundle":"extension.min.js","bundleBytes":73422,"moduleLoadMs":26.15,"activateMs":38.87,"openFiles":50,"perKeystroke":{"n":200000,"meanUs":0.684,"p50Us":0.6,"p99Us":1.9,"p999Us":6.6,"maxUs":195.2},"amortizedPerKeystrokeUs":0.596,"heapDeltaKbWhileTracking":-20.1,"gcExposed":true,"heapUsedMb":9.68,"rssMb":68.92}
+EXTENSION_OVERHEAD_RESULT {"node":"v24.12.0","platform":"win32-x64","bundle":"extension.min.js","bundleBytes":73422,"moduleLoadMs":26.09,"activateMs":41.87,"openFiles":50,"perKeystroke":{"n":200000,"meanUs":0.764,"p50Us":0.6,"p99Us":2.2,"p999Us":9.6,"maxUs":279.6},"amortizedPerKeystrokeUs":0.671,"heapDeltaKbWhileTracking":-3.4,"gcExposed":true,"heapUsedMb":9.88,"rssMb":68.61}
+EXTENSION_OVERHEAD_RESULT {"node":"v24.12.0","platform":"win32-x64","bundle":"extension.min.js","bundleBytes":73422,"moduleLoadMs":36.54,"activateMs":48.77,"openFiles":50,"perKeystroke":{"n":200000,"meanUs":0.866,"p50Us":0.7,"p99Us":3,"p999Us":9.5,"maxUs":195.7},"amortizedPerKeystrokeUs":0.702,"heapDeltaKbWhileTracking":-5.6,"gcExposed":true,"heapUsedMb":9.73,"rssMb":68.6}
+## runs (1 file / 5000 files)
+EXTENSION_OVERHEAD_RESULT {"node":"v24.12.0","platform":"win32-x64","bundle":"extension.min.js","bundleBytes":73422,"moduleLoadMs":29.93,"activateMs":43.07,"openFiles":1,"perKeystroke":{"n":200000,"meanUs":0.724,"p50Us":0.5,"p99Us":2.4,"p999Us":9,"maxUs":495.5},"amortizedPerKeystrokeUs":0.515,"heapDeltaKbWhileTracking":-5.4,"gcExposed":true,"heapUsedMb":11.68,"rssMb":68.48}
+EXTENSION_OVERHEAD_RESULT {"node":"v24.12.0","platform":"win32-x64","bundle":"extension.min.js","bundleBytes":73422,"moduleLoadMs":24.47,"activateMs":40.9,"openFiles":5000,"perKeystroke":{"n":200000,"meanUs":0.936,"p50Us":0.7,"p99Us":3.4,"p999Us":10,"maxUs":243.8},"amortizedPerKeystrokeUs":0.858,"heapDeltaKbWhileTracking":-4.4,"gcExposed":true,"heapUsedMb":10.56,"rssMb":69.95}
+
+## run via `pnpm --filter commma bench` while the full vitest suite ran concurrently (loaded machine)
+EXTENSION_OVERHEAD_RESULT {"node":"v24.12.0","platform":"win32-x64","bundle":"extension.min.js","bundleBytes":73422,"moduleLoadMs":68.04,"activateMs":60.84,"openFiles":50,"perKeystroke":{"n":200000,"meanUs":1.367,"p50Us":1.1,"p99Us":4.1,"p999Us":43.4,"maxUs":564.6},"amortizedPerKeystrokeUs":1.175,"heapDeltaKbWhileTracking":-5.5,"gcExposed":true,"heapUsedMb":9.74,"rssMb":69.86}

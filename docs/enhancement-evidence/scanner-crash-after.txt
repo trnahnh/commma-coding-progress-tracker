@@ -1,0 +1,10 @@
+
+ RUN  v4.1.8 D:/Projects/Commma-Tracker/commma-coding-progress-tracker
+
+SCANNER_CRASH_RESULT {"trials":40,"usersPerTrial":20,"calibrationRunMs":2010,"killedBeforeAnyCommit":2,"killedMidRunWithPartialCommit":14,"finishedBeforeKill":15,"invariantViolations":0,"leaderboardTrialsWithDrift":0,"leaderboardUsersWithDrift":0,"leaderboardMissingSeconds":0,"leaderboardExtraSeconds":0}
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  15:03:29
+   Duration  194.46s (transform 252ms, setup 0ms, import 170ms, tests 194.02s, environment 0ms)
+

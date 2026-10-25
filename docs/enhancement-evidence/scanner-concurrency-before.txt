@@ -1,0 +1,34 @@
+
+ RUN  v4.1.8 D:/Projects/Commma-Tracker/commma-coding-progress-tracker
+
+SCANNER_CONCURRENCY_RESULT {"trials":50,"scanners":2,"users":400,"sessionsExpected":1220,"sessionsActual":2390,"duplicateSessions":1170,"linesViolations":382,"keysViolations":382,"eventsRemaining":0,"trialsWithViolation":50}
+ ❯ apps/api/test/aggregate/scanner.integration.test.ts (1 test | 1 failed) 66823ms
+     × finalizes each session exactly once with 2 concurrent scanners 66782ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  apps/api/test/aggregate/scanner.integration.test.ts > aggregation scanner under concurrency > finalizes each session exactly once with 2 concurrent scanners
+AssertionError: expected 1170 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1170
+
+ ❯ apps/api/test/aggregate/scanner.integration.test.ts:81:41
+     79|       process.stdout.write(`SCANNER_CONCURRENCY_RESULT ${JSON.stringif…
+     80|
+     81|       expect(summary.duplicateSessions).toBe(0)
+       |                                         ^
+     82|       expect(summary.sessionsActual).toBe(summary.sessionsExpected)
+     83|       expect(summary.linesViolations).toBe(0)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  14:49:34
+   Duration  67.30s (transform 245ms, setup 0ms, import 198ms, tests 66.82s, environment 0ms)
+

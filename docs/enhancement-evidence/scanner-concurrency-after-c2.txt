@@ -1,0 +1,10 @@
+
+ RUN  v4.1.8 D:/Projects/Commma-Tracker/commma-coding-progress-tracker
+
+SCANNER_CONCURRENCY_RESULT {"trials":50,"scanners":2,"users":400,"sessionsExpected":1220,"sessionsActual":1220,"duplicateSessions":0,"linesViolations":0,"keysViolations":0,"eventsRemaining":0,"usersLocked":376,"leaderboardUsersWithDrift":0,"trialsWithViolation":0}
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  15:06:46
+   Duration  49.86s (transform 223ms, setup 0ms, import 151ms, tests 49.44s, environment 0ms)
+

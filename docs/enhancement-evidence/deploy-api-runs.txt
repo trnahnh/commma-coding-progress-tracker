@@ -1,0 +1,14 @@
+completed	success	Deploy API	Deploy API	main	workflow_dispatch	34265952691	49s	2026-09-08T18:55:46Z
+completed	failure	docs: record the api bug-fix pass	Deploy API	main	push	30322408336	42s	2026-07-28T02:11:33Z
+completed	success	docs: record ingest hot-path optimizations and load-generation finding	Deploy API	main	push	28302484660	47s	2026-06-27T21:35:23Z
+completed	success	perf(api): cache user privacy mode to drop a per-ingest Neon read	Deploy API	main	push	28302152451	45s	2026-06-27T21:21:37Z
+completed	success	perf(api): enable Redis auto-pipelining; instrument ingest DB stages	Deploy API	main	push	28301989343	53s	2026-06-27T21:14:34Z
+completed	success	docs: record load-test results and DB pool tuning	Deploy API	main	push	28301526845	54s	2026-06-27T20:54:56Z
+completed	success	docs: document Level 1 app-SLO observability via Grafana Cloud	Deploy API	main	push	28279561900	54s	2026-06-27T05:13:25Z
+completed	success	revert: drop the 1.1.0 sign-in page release, keep changes at 1.0.0	Deploy API	main	push	27962386763	52s	2026-06-22T15:02:27Z
+completed	success	docs: cut the 1.1.0 changelog	Deploy API	main	push	27961573791	52s	2026-06-22T14:50:14Z
+completed	success	docs: changelog for account deletion and db indexes	Deploy API	main	push	27958207646	53s	2026-06-22T13:58:46Z
+completed	success	docs: announce the CLI on the changelog and docs	Deploy API	main	push	27909757122	50s	2026-06-21T16:00:20Z
+completed	success	docs(readme): give the VS Code badge its logo via data-uri	Deploy API	main	push	27903364744	53s	2026-06-21T11:49:34Z
+completed	success	docs: reflect script-based deploy workflows and Node 22	Deploy API	main	push	27902904464	39s	2026-06-21T11:30:23Z
+completed	success	docs: document two-pipeline CI/CD and OIDC web deploy	Deploy API	main	push	27902577737	49s	2026-06-21T11:16:56Z

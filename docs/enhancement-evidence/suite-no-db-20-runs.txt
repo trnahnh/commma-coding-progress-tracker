@@ -1,0 +1,4 @@
+$ for i in 1..20: npx vitest run   (no TEST_DATABASE_URL)
+pass=20 fail=0
+ Test Files  25 passed | 3 skipped (28)
+      Tests  179 passed | 22 skipped (201)

@@ -1,0 +1,8 @@
+
+
+ Test Files  1 failed | 19 passed | 1 skipped (21)
+      Tests  1 failed | 159 passed | 15 skipped (175)
+   Start at  14:44:56
+   Duration  9.97s (transform 6.09s, setup 0ms, import 15.67s, tests 5.31s, environment 4ms)
+
+ ELIFECYCLE  Test failed. See above for more details.

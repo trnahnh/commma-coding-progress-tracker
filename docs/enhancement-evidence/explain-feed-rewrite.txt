@@ -1,0 +1,291 @@
+Pager usage is off.
+BEGIN
+INSERT 0 2000
+SELECT 2000
+INSERT 0 400000
+INSERT 0 100000
+INSERT 0 200
+ANALYZE
+ANALYZE
+ANALYZE
+ANALYZE
+ sessions_rows | events_rows | pending_rows 
+---------------+-------------+--------------
+        400058 |      100000 |         1000
+(1 row)
+
+### Q6 current feed (join + sort)
+                                                                       QUERY PLAN                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=14279.35..14281.80 rows=21 width=24) (actual time=65.359..70.875 rows=21.00 loops=1)
+   Buffers: shared hit=5537 read=5176 written=93, local hit=16
+   InitPlan 1
+     ->  Seq Scan on ex_users  (cost=0.00..47.40 rows=13 width=16) (actual time=0.012..0.096 rows=1.00 loops=1)
+           Filter: (n = 1)
+           Rows Removed by Filter: 1999
+           Buffers: local hit=16
+   ->  Gather Merge  (cost=14231.95..18881.99 rows=39926 width=24) (actual time=65.357..70.870 rows=21.00 loops=1)
+         Workers Planned: 2
+         Workers Launched: 2
+         Buffers: shared hit=5537 read=5176 written=93, local hit=16
+         ->  Sort  (cost=13231.93..13273.52 rows=16636 width=24) (actual time=37.146..37.148 rows=21.00 loops=3)
+               Sort Key: s.started_at DESC, s.id DESC
+               Sort Method: top-N heapsort  Memory: 27kB
+               Buffers: shared hit=5537 read=5176 written=93
+               Worker 0:  Sort Method: top-N heapsort  Memory: 27kB
+               Worker 1:  Sort Method: top-N heapsort  Memory: 27kB
+               ->  Hash Join  (cost=9.00..12783.40 rows=16636 width=24) (actual time=7.555..35.915 rows=13333.33 loops=3)
+                     Hash Cond: (s.user_id = f.followee_id)
+                     Buffers: shared hit=5505 read=5176 written=93
+                     ->  Parallel Seq Scan on sessions s  (cost=0.00..12335.91 rows=166691 width=40) (actual time=0.159..24.704 rows=133352.67 loops=3)
+                           Buffers: shared hit=5494 read=5175 written=92
+                     ->  Hash  (cost=6.50..6.50 rows=200 width=16) (actual time=0.739..0.739 rows=200.00 loops=3)
+                           Buckets: 1024  Batches: 1  Memory Usage: 18kB
+                           Buffers: shared hit=11 read=1 written=1
+                           ->  Seq Scan on follows f  (cost=0.00..6.50 rows=200 width=16) (actual time=0.664..0.695 rows=200.00 loops=3)
+                                 Filter: (follower_id = (InitPlan 1).col1)
+                                 Buffers: shared hit=11 read=1 written=1
+ Planning:
+   Buffers: shared hit=77 read=8 written=8
+ Planning Time: 2.725 ms
+ Execution Time: 70.917 ms
+(32 rows)
+
+### Q6b candidate feed (LATERAL top-21 per followee)
+                                                                              QUERY PLAN                                                                              
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=147485.79..147485.84 rows=21 width=24) (actual time=29.836..29.839 rows=21.00 loops=1)
+   Buffers: shared hit=40694 read=22 written=1, local hit=16
+   InitPlan 1
+     ->  Seq Scan on ex_users  (cost=0.00..47.40 rows=13 width=16) (actual time=0.016..0.098 rows=1.00 loops=1)
+           Filter: (n = 1)
+           Rows Removed by Filter: 1999
+           Buffers: local hit=16
+   ->  Sort  (cost=147438.39..147448.89 rows=4200 width=24) (actual time=29.835..29.836 rows=21.00 loops=1)
+         Sort Key: sessions.started_at DESC, sessions.id DESC
+         Sort Method: top-N heapsort  Memory: 27kB
+         Buffers: shared hit=40694 read=22 written=1, local hit=16
+         ->  Nested Loop  (cost=736.33..147325.15 rows=4200 width=24) (actual time=0.405..29.501 rows=4200.00 loops=1)
+               Buffers: shared hit=40694 read=22 written=1, local hit=16
+               ->  Seq Scan on follows f  (cost=0.00..6.50 rows=200 width=16) (actual time=0.126..0.205 rows=200.00 loops=1)
+                     Filter: (follower_id = (InitPlan 1).col1)
+                     Buffers: shared hit=4, local hit=16
+               ->  Limit  (cost=736.33..736.38 rows=21 width=24) (actual time=0.143..0.144 rows=21.00 loops=200)
+                     Buffers: shared hit=40690 read=22 written=1
+                     ->  Sort  (cost=736.33..736.83 rows=200 width=24) (actual time=0.142..0.142 rows=21.00 loops=200)
+                           Sort Key: sessions.started_at DESC, sessions.id DESC
+                           Sort Method: top-N heapsort  Memory: 26kB
+                           Buffers: shared hit=40690 read=22 written=1
+                           ->  Bitmap Heap Scan on sessions  (cost=13.97..730.94 rows=200 width=24) (actual time=0.025..0.117 rows=200.00 loops=200)
+                                 Recheck Cond: (user_id = f.followee_id)
+                                 Heap Blocks: exact=40000
+                                 Buffers: shared hit=40690 read=22 written=1
+                                 ->  Bitmap Index Scan on sessions_user_started  (cost=0.00..13.92 rows=200 width=0) (actual time=0.016..0.016 rows=200.00 loops=200)
+                                       Index Cond: (user_id = f.followee_id)
+                                       Index Searches: 200
+                                       Buffers: shared hit=690 read=22 written=1
+ Planning Time: 0.410 ms
+ Execution Time: 78.805 ms
+(32 rows)
+
+### result equality check (0 = identical pages)
+ differing_rows 
+----------------
+              0
+(1 row)
+
+ROLLBACK
+Pager usage is off.
+BEGIN
+INSERT 0 2000
+SELECT 2000
+INSERT 0 400000
+INSERT 0 100000
+INSERT 0 200
+ANALYZE
+ANALYZE
+ANALYZE
+ANALYZE
+ sessions_rows | events_rows | pending_rows 
+---------------+-------------+--------------
+        400058 |      100000 |         1000
+(1 row)
+
+### Q6 current feed (join + sort)
+                                                                       QUERY PLAN                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=19612.35..19614.80 rows=21 width=24) (actual time=81.343..88.341 rows=21.00 loops=1)
+   Buffers: shared hit=5744 read=10302, local hit=16
+   InitPlan 1
+     ->  Seq Scan on ex_users  (cost=0.00..47.40 rows=13 width=16) (actual time=0.022..0.246 rows=1.00 loops=1)
+           Filter: (n = 1)
+           Rows Removed by Filter: 1999
+           Buffers: local hit=16
+   ->  Gather Merge  (cost=19564.95..24214.99 rows=39926 width=24) (actual time=81.342..88.336 rows=21.00 loops=1)
+         Workers Planned: 2
+         Workers Launched: 2
+         Buffers: shared hit=5744 read=10302, local hit=16
+         ->  Sort  (cost=18564.93..18606.52 rows=16636 width=24) (actual time=46.228..46.230 rows=21.00 loops=3)
+               Sort Key: s.started_at DESC, s.id DESC
+               Sort Method: top-N heapsort  Memory: 27kB
+               Buffers: shared hit=5744 read=10302
+               Worker 0:  Sort Method: top-N heapsort  Memory: 27kB
+               Worker 1:  Sort Method: top-N heapsort  Memory: 27kB
+               ->  Hash Join  (cost=9.00..18116.40 rows=16636 width=24) (actual time=12.324..44.814 rows=13333.33 loops=3)
+                     Hash Cond: (s.user_id = f.followee_id)
+                     Buffers: shared hit=5712 read=10302
+                     ->  Parallel Seq Scan on sessions s  (cost=0.00..17668.91 rows=166691 width=40) (actual time=0.104..32.533 rows=133352.67 loops=3)
+                           Buffers: shared hit=5700 read=10302
+                     ->  Hash  (cost=6.50..6.50 rows=200 width=16) (actual time=0.539..0.539 rows=200.00 loops=3)
+                           Buckets: 1024  Batches: 1  Memory Usage: 18kB
+                           Buffers: shared hit=12
+                           ->  Seq Scan on follows f  (cost=0.00..6.50 rows=200 width=16) (actual time=0.468..0.504 rows=200.00 loops=3)
+                                 Filter: (follower_id = (InitPlan 1).col1)
+                                 Buffers: shared hit=12
+ Planning:
+   Buffers: shared hit=73 read=3
+ Planning Time: 2.960 ms
+ Execution Time: 88.395 ms
+(32 rows)
+
+### Q6b candidate feed (LATERAL top-21 per followee)
+                                                                              QUERY PLAN                                                                              
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=151277.52..151277.58 rows=21 width=24) (actual time=50.001..50.006 rows=21.00 loops=1)
+   Buffers: shared hit=40627 read=142, local hit=16
+   InitPlan 1
+     ->  Seq Scan on ex_users  (cost=0.00..47.40 rows=13 width=16) (actual time=0.008..0.091 rows=1.00 loops=1)
+           Filter: (n = 1)
+           Rows Removed by Filter: 1999
+           Buffers: local hit=16
+   ->  Sort  (cost=151230.12..151240.62 rows=4200 width=24) (actual time=50.001..50.003 rows=21.00 loops=1)
+         Sort Key: sessions.started_at DESC, sessions.id DESC
+         Sort Method: top-N heapsort  Memory: 27kB
+         Buffers: shared hit=40627 read=142, local hit=16
+         ->  Nested Loop  (cost=755.29..151116.88 rows=4200 width=24) (actual time=0.467..49.363 rows=4200.00 loops=1)
+               Buffers: shared hit=40627 read=142, local hit=16
+               ->  Seq Scan on follows f  (cost=0.00..6.50 rows=200 width=16) (actual time=0.110..0.191 rows=200.00 loops=1)
+                     Filter: (follower_id = (InitPlan 1).col1)
+                     Buffers: shared hit=4, local hit=16
+               ->  Limit  (cost=755.29..755.34 rows=21 width=24) (actual time=0.239..0.242 rows=21.00 loops=200)
+                     Buffers: shared hit=40623 read=142
+                     ->  Sort  (cost=755.29..755.79 rows=200 width=24) (actual time=0.239..0.240 rows=21.00 loops=200)
+                           Sort Key: sessions.started_at DESC, sessions.id DESC
+                           Sort Method: top-N heapsort  Memory: 26kB
+                           Buffers: shared hit=40623 read=142
+                           ->  Bitmap Heap Scan on sessions  (cost=17.97..749.90 rows=200 width=24) (actual time=0.048..0.197 rows=200.00 loops=200)
+                                 Recheck Cond: (user_id = f.followee_id)
+                                 Heap Blocks: exact=40000
+                                 Buffers: shared hit=40623 read=142
+                                 ->  Bitmap Index Scan on sessions_user_started  (cost=0.00..17.92 rows=200 width=0) (actual time=0.035..0.035 rows=200.00 loops=200)
+                                       Index Cond: (user_id = f.followee_id)
+                                       Index Searches: 200
+                                       Buffers: shared hit=623 read=142
+ Planning Time: 0.195 ms
+ Execution Time: 50.138 ms
+(32 rows)
+
+### result equality check (0 = identical pages)
+ differing_rows 
+----------------
+              0
+(1 row)
+
+ROLLBACK
+Pager usage is off.
+BEGIN
+INSERT 0 2000
+SELECT 2000
+INSERT 0 400000
+INSERT 0 100000
+INSERT 0 200
+ANALYZE
+ANALYZE
+ANALYZE
+ANALYZE
+ sessions_rows | events_rows | pending_rows 
+---------------+-------------+--------------
+        400058 |      100000 |         1000
+(1 row)
+
+### Q6 current feed (join + sort)
+                                                                       QUERY PLAN                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=24945.89..24948.34 rows=21 width=24) (actual time=137.547..142.335 rows=21.00 loops=1)
+   Buffers: shared hit=5405 read=15972, local hit=16
+   InitPlan 1
+     ->  Seq Scan on ex_users  (cost=0.00..47.40 rows=13 width=16) (actual time=0.014..0.138 rows=1.00 loops=1)
+           Filter: (n = 1)
+           Rows Removed by Filter: 1999
+           Buffers: local hit=16
+   ->  Gather Merge  (cost=24898.49..29543.88 rows=39886 width=24) (actual time=137.546..142.329 rows=21.00 loops=1)
+         Workers Planned: 2
+         Workers Launched: 2
+         Buffers: shared hit=5405 read=15972, local hit=16
+         ->  Sort  (cost=23898.47..23940.02 rows=16619 width=24) (actual time=48.041..48.044 rows=14.00 loops=3)
+               Sort Key: s.started_at DESC, s.id DESC
+               Sort Method: top-N heapsort  Memory: 27kB
+               Buffers: shared hit=5405 read=15972
+               Worker 0:  Sort Method: top-N heapsort  Memory: 27kB
+               Worker 1:  Sort Method: quicksort  Memory: 25kB
+               ->  Hash Join  (cost=10.00..23450.40 rows=16619 width=24) (actual time=18.520..46.727 rows=13333.33 loops=3)
+                     Hash Cond: (s.user_id = f.followee_id)
+                     Buffers: shared hit=5373 read=15972
+                     ->  Parallel Seq Scan on sessions s  (cost=0.00..23001.91 rows=166691 width=40) (actual time=2.478..36.040 rows=133352.67 loops=3)
+                           Buffers: shared hit=5363 read=15972
+                     ->  Hash  (cost=7.50..7.50 rows=200 width=16) (actual time=0.507..0.507 rows=200.00 loops=2)
+                           Buckets: 1024  Batches: 1  Memory Usage: 18kB
+                           Buffers: shared hit=10
+                           ->  Seq Scan on follows f  (cost=0.00..7.50 rows=200 width=16) (actual time=0.448..0.472 rows=200.00 loops=2)
+                                 Filter: (follower_id = (InitPlan 1).col1)
+                                 Buffers: shared hit=10
+ Planning:
+   Buffers: shared hit=78 read=2
+ Planning Time: 2.866 ms
+ Execution Time: 142.380 ms
+(32 rows)
+
+### Q6b candidate feed (LATERAL top-21 per followee)
+                                                                              QUERY PLAN                                                                              
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=154652.69..154652.75 rows=21 width=24) (actual time=42.994..42.998 rows=21.00 loops=1)
+   Buffers: shared hit=40585 read=186 written=46, local hit=16
+   InitPlan 1
+     ->  Seq Scan on ex_users  (cost=0.00..47.40 rows=13 width=16) (actual time=0.006..0.090 rows=1.00 loops=1)
+           Filter: (n = 1)
+           Rows Removed by Filter: 1999
+           Buffers: local hit=16
+   ->  Sort  (cost=154605.29..154615.79 rows=4200 width=24) (actual time=42.993..42.995 rows=21.00 loops=1)
+         Sort Key: sessions.started_at DESC, sessions.id DESC
+         Sort Method: top-N heapsort  Memory: 27kB
+         Buffers: shared hit=40585 read=186 written=46, local hit=16
+         ->  Nested Loop  (cost=772.16..154492.05 rows=4200 width=24) (actual time=0.445..42.502 rows=4200.00 loops=1)
+               Buffers: shared hit=40585 read=186 written=46, local hit=16
+               ->  Seq Scan on follows f  (cost=0.00..7.50 rows=200 width=16) (actual time=0.110..0.192 rows=200.00 loops=1)
+                     Filter: (follower_id = (InitPlan 1).col1)
+                     Buffers: shared hit=5, local hit=16
+               ->  Limit  (cost=772.16..772.21 rows=21 width=24) (actual time=0.206..0.209 rows=21.00 loops=200)
+                     Buffers: shared hit=40580 read=186 written=46
+                     ->  Sort  (cost=772.16..772.66 rows=199 width=24) (actual time=0.205..0.206 rows=21.00 loops=200)
+                           Sort Key: sessions.started_at DESC, sessions.id DESC
+                           Sort Method: top-N heapsort  Memory: 26kB
+                           Buffers: shared hit=40580 read=186 written=46
+                           ->  Bitmap Heap Scan on sessions  (cost=25.96..766.79 rows=199 width=24) (actual time=0.049..0.170 rows=200.00 loops=200)
+                                 Recheck Cond: (user_id = f.followee_id)
+                                 Heap Blocks: exact=40000
+                                 Buffers: shared hit=40580 read=186 written=46
+                                 ->  Bitmap Index Scan on sessions_user_started  (cost=0.00..25.91 rows=199 width=0) (actual time=0.037..0.037 rows=200.00 loops=200)
+                                       Index Cond: (user_id = f.followee_id)
+                                       Index Searches: 200
+                                       Buffers: shared hit=580 read=186 written=46
+ Planning Time: 0.178 ms
+ Execution Time: 43.149 ms
+(32 rows)
+
+### result equality check (0 = identical pages)
+ differing_rows 
+----------------
+              0
+(1 row)
+
+ROLLBACK

@@ -1,0 +1,5 @@
+$ terraform fmt -check -diff cloudwatch.tf variables.tf
+fmt_exit=0
+$ terraform validate -no-color
+Success! The configuration is valid.
+
