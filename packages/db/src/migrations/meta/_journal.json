@@ -85,6 +85,13 @@
       "when": 1781740800000,
       "tag": "0011_account_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1781827200000,
+      "tag": "0012_leaderboard_outbox",
+      "breakpoints": true
     }
   ]
 }

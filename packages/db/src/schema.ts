@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm'
 import {
   boolean,
   date,
@@ -86,6 +87,9 @@ export const sessions = pgTable(
     peakCpm: integer('peak_cpm'),
     peakAt: timestamp('peak_at', { withTimezone: true }),
     keyboardHeatmap: jsonb('keyboard_heatmap').$type<KeyboardHeatmap>(),
+    leaderboardPending: boolean('leaderboard_pending')
+      .notNull()
+      .default(false),
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -93,6 +97,9 @@ export const sessions = pgTable(
   (t) => [
     index('sessions_user_started').on(t.userId, t.startedAt.desc()),
     index('sessions_started').on(t.startedAt.desc()),
+    index('sessions_leaderboard_pending')
+      .on(t.userId)
+      .where(sql`${t.leaderboardPending}`),
   ],
 )
 
