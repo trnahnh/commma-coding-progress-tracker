@@ -158,7 +158,9 @@ meRoutes.patch(
     const u = updated[0]
     if (!u) return apiError(c, 'NOT_FOUND', 'User not found')
 
-    if (data.privacy !== undefined) await invalidatePrivacyMode(userId)
+    if (data.privacy !== undefined) {
+      await invalidatePrivacyMode(userId, u.privacy)
+    }
 
     const streakRows = await db
       .select()
@@ -259,7 +261,7 @@ meRoutes.delete(
         message: err instanceof Error ? err.message : String(err),
       })
     }
-    await invalidatePrivacyMode(userId)
+    await invalidatePrivacyMode(userId, null)
 
     log.info('account_deleted', { userId })
     return c.body(null, 204)
