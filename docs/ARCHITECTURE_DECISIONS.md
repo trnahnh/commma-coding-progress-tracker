@@ -847,3 +847,55 @@ in the API process.
   box it is meant to observe.
 - **Do nothing** — leaves production blind to its own SLOs, the gap this ADR
   exists to close.
+
+---
+
+## ADR-016: Per-User Advisory Lock and Leaderboard Outbox in the Aggregator
+
+**Status:** Accepted
+
+### Context
+
+ADR-010 described the interval scanner as idempotent, but that only held for
+sequential runs. Two scanners running at once (a second instance whose leader
+lock expired mid-run, or a manual `runAggregation` from the load-test scripts)
+both read the same closed events, both inserted sessions, and the second
+`DELETE` simply matched nothing. A test with two concurrent scanners produced
+2,390 sessions where 1,220 were expected. Separately, the Redis leaderboard was
+updated with `ZINCRBY` after the Postgres commit, so a crash between the two
+lost that session's seconds permanently (the cold-key rebuild only runs when a
+key is absent).
+
+### Decision
+
+- Each user's finalize transaction starts with
+  `pg_try_advisory_xact_lock(hashtextextended(user_id, 0))` and re-reads the
+  user's events inside the transaction. A scanner that cannot take the lock
+  skips the user for this cycle; the holder finalizes it.
+- Sessions are inserted with `leaderboard_pending = true` in the same
+  transaction. At the end of each cycle the scanner reads pending sessions
+  (partial index, batches of 500), computes each affected user's absolute total
+  per period key from `sessions`, writes it with a Lua `ZADD` that is skipped
+  when the key does not exist, and then clears the flag.
+
+### Consequences
+
+- Sessions are finalized exactly once under concurrency and after a crash at any
+  point (verified by the scanner concurrency and SIGKILL suites).
+- Leaderboard writes are idempotent, so a retried sync after a crash heals the
+  score instead of double-counting it.
+- Cost: one extra indexed `SELECT` per cycle, plus one `UPDATE` and a few
+  grouped `SUM` queries on cycles that finalized sessions; Redis commands per
+  finalized user drop from 8 to 3.
+- A sync racing a cold-key rebuild can still miss a session until that user's
+  next session is synced, and a sync racing account deletion can briefly re-add
+  a deleted user. Both windows are milliseconds wide.
+
+### Rejected Alternatives
+
+- **`ZINCRBY` inside the transaction** — a crash after the Redis write and
+  before commit double-counts on retry.
+- **Blocking `pg_advisory_xact_lock`** — correct, but stacks waiting scanners
+  behind a slow user; skipping is equally correct and never waits.
+- **Periodic full leaderboard rebuild** — a full scan of `sessions` on every
+  rebuild, which grows with history and Neon cost.

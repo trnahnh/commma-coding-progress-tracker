@@ -1125,7 +1125,7 @@ limiter backing store unreachable (fails closed)
 
 ## System Endpoints
 
-### `GET /health`
+### `GET /health` · `GET /health/live`
 
 Trivial liveness probe for the load balancer / PM2 — returns `200` without
 touching any dependency. Not rate-limited, no version prefix.
@@ -1133,6 +1133,21 @@ touching any dependency. Not rate-limited, no version prefix.
 ```json
 { "status": "ok", "ts": 1748390400000 }
 ```
+
+### `GET /health/ready`
+
+Readiness probe: `200` only when Postgres (`SELECT 1`) and Redis (`PING`) both
+answer within 2s, otherwise `503`. Concurrent requests share one probe, and the
+result is cached in-process (30s when ready, 5s when not), so probe frequency
+does not translate into database or Redis load. Not rate-limited, no version
+prefix.
+
+```json
+{ "status": "ready", "db": "ok", "cache": "ok", "checkedAt": 1748390400000 }
+```
+
+The `503` body has the same shape with `"status": "not_ready"` and the failing
+component reported as `"down"`.
 
 ### `GET /v1/status`
 

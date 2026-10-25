@@ -11,6 +11,26 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **API** — `GET /health/ready` readiness probe that checks Postgres
+  (`SELECT 1`) and Redis (`PING`) with a 2s timeout each, collapses concurrent
+  probes into one, and caches the result (30s ok / 5s down) so probe traffic
+  cannot amplify into Neon/Upstash load. `GET /health` and `GET /health/live`
+  stay dependency-free liveness checks. The deploy script now gates on
+  readiness, and a Terraform Route 53 health check + CloudWatch alarm on
+  `/health/ready` is prepared (not applied).
+- **DB** — `pnpm --filter @commma/db migrate` now runs a connection preflight
+  first that prints the Postgres error code and message; `drizzle-kit migrate`
+  exits 1 with no error text on a connection failure, which is why the
+  2026-07-28 deploy log showed no cause.
+- **CI** — The GitHub Actions gate starts Postgres 17 and Redis 7 service
+  containers and migrates a test database, so the DB-gated integration, scanner
+  concurrency, and scanner crash suites run in CI instead of being skipped.
+- **Tests** — Privacy property tests: the extension's real `Tracker` and
+  `IngestClient` are driven with random edit sequences (fast-check) and every
+  outbound request body is checked against the label-only contract and a canary
+  secret; the shared contract rejects any non-allowlisted field or non-label
+  `key_freq` key.
+
 - **API** — Load-test harness (`apps/api/scripts/loadtest/`, run via the
   `loadtest:*` package scripts). Seeds tagged `loadtest-*` users, signs a JWT
   per user, and drives the real ingest → aggregate → read pipeline with ramping
@@ -122,6 +142,31 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   retained.
 
 ### Fixed
+
+- **API** — Concurrent aggregation runs no longer double-finalize sessions. Each
+  user's finalize now takes a Postgres transaction-scoped advisory lock
+  (`pg_try_advisory_xact_lock`) and re-reads that user's events inside the
+  transaction; a scanner that loses the lock skips the user for this cycle.
+  Before the fix, two concurrent scanners turned 1,220 expected sessions into
+  2,390 across 50 synthetic trials; after it, 0 duplicates with 2 and 4
+  concurrent scanners (`apps/api/test/aggregate/scanner.integration.test.ts`).
+- **API, DB** — The Redis leaderboard no longer loses a finalized session's
+  seconds when the process dies between the Postgres commit and the Redis write.
+  Sessions are now inserted with `leaderboard_pending = true` inside the
+  finalize transaction (migration `0012_leaderboard_outbox`, partial index), and
+  a sync step at the end of every aggregation cycle writes absolute per-period
+  totals from `sessions` (idempotent `ZADD`, skipped on a cold key so the read
+  path's rebuild owns it) before clearing the flag. Replaces post-commit
+  `ZINCRBY`. Measured with SIGKILL at random points: 35 of 40 trials drifted
+  before, 0 of 40 after (`scannerCrash.integration.test.ts`).
+- **API** — Closed a cache-aside race in the privacy-mode cache: an ingest that
+  read the old mode from Postgres could re-cache it after a privacy change or
+  account deletion, leaving the stale mode live for the full 60s TTL. Readers
+  now fill with `SET NX`; the writer overwrites the key with the new mode (or a
+  deletion tombstone) instead of deleting it. Stale window under the
+  interleaving: 60,000ms before, 0ms after (`test/lib/privacyCache.test.ts`).
+  ADR-006: this tightens enforcement of a user's `off`/`summary` choice; no
+  change to what is collected.
 
 - **API** — GitHub sign-in no longer fails with a generic 500 when the account's
   GitHub email or username is already attached to another commma account. The

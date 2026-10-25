@@ -105,15 +105,18 @@ Aggregation interval (in-process setInterval, every 5 min — see ADR-010)
   ├─ for each user: fetch events ordered by ts
   ├─ detect session boundaries (15-min idle gap = new session)
   ├─ finalize only CLOSED sessions (trailing in-progress group waits for next tick)
-  ├─ for each closed session (one transaction per user):
+  ├─ for each user with closed sessions (one transaction per user):
+  │   ├─ pg_try_advisory_xact_lock(user): skip the user if another scanner holds it
+  │   ├─ re-read the user's events inside the transaction
   │   ├─ sum duration, keystrokes, lines_delta; compute pace/peak
   │   ├─ merge key_freq maps → keyboard_heatmap JSONB
   │   ├─ group by lang → session_langs rows
   │   ├─ group by file → session_files rows
-  │   ├─ INSERT into sessions table
+  │   ├─ INSERT into sessions table (leaderboard_pending = true)
   │   └─ DELETE the finalized events (prune — bounds events storage)
   ├─ UPDATE streaks table
-  └─ UPDATE Redis leaderboard sorted set (ZINCRBY, after commit)
+  └─ sync pending sessions to the Redis leaderboard (absolute ZADD from
+     sessions totals, then clear leaderboard_pending)
 ```
 
 ---
@@ -306,10 +309,13 @@ CREATE INDEX waitlist_created ON waitlist(created_at DESC);
 - **Logic:** `SELECT DISTINCT user_id` → per user fetch events by `ts` →
   boundary detection → finalize only _closed_ sessions → build
   sessions/langs/files/heatmap, update streaks, delete finalized events (one
-  txn/user) → `ZINCRBY` leaderboard after commit.
+  txn/user, under a per-user advisory lock) → sync `leaderboard_pending`
+  sessions to Redis with absolute `ZADD` totals (ADR-016).
 - **Failure:** a failed user is logged and retried on the next tick — its events
   stay in the table until successfully finalized (no queue/DLQ). Re-runs are
-  idempotent because only closed sessions are written.
+  idempotent because only closed sessions are written and concurrent scanners
+  serialize per user on an advisory lock; leaderboard writes are absolute, so a
+  retried sync cannot double-count.
 - **Cost:** zero idle Redis commands (no queue polling); Redis touched only on
   session write. This is the reason BullMQ was dropped — see ADR-010.
 

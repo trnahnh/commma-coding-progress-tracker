@@ -274,7 +274,8 @@ members-only (`404` to non-members, no existence leak). Auditable via the
 `events`/`sessions` rows, independent of client.
 
 Leaderboard: `Σ sessions.duration_s` per period must match Redis ZSET score.
-Drift surfaces post-commit `ZINCRBY` failure (backlog B); Phase-2 rebuild fixes.
+Post-commit drift is closed by the `leaderboard_pending` outbox (ADR-016): 0 of
+40 SIGKILL trials drifted after the change, 35 of 40 before.
 
 ## 4. Product (post-launch — aspirational until users exist)
 
