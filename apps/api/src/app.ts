@@ -13,6 +13,7 @@ import { feedRoutes } from './routes/feed.js'
 import { leaderboardRoutes } from './routes/leaderboard.js'
 import { statsRoutes } from './routes/stats.js'
 import { statusRoutes } from './routes/status.js'
+import { createHealthRoutes } from './routes/health.js'
 import { activityRoutes } from './routes/activity.js'
 import { billingRoutes } from './routes/billing.js'
 import { teamRoutes } from './routes/teams.js'
@@ -55,7 +56,7 @@ export function createApp() {
     }),
   )
 
-  app.get('/health', (c) => c.json({ status: 'ok', ts: Date.now() }))
+  app.route('/health', createHealthRoutes())
 
   app.route('/v1/auth', authRoutes)
   app.route('/v1/me', meRoutes)
