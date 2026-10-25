@@ -68,6 +68,7 @@
     "build": "esbuild src/extension.ts --bundle --platform=node --target=node20 --external:vscode --format=cjs --sourcemap --outfile=dist/extension.js",
     "watch": "esbuild src/extension.ts --bundle --platform=node --target=node20 --external:vscode --format=cjs --sourcemap --watch --outfile=dist/extension.js",
     "dev": "pnpm run watch",
+    "bench": "esbuild src/extension.ts --bundle --platform=node --target=node20 --external:vscode --format=cjs --minify --outfile=dist/bench/extension.min.js && node --expose-gc bench/overhead.cjs dist/bench/extension.min.js",
     "typecheck": "tsc --noEmit",
     "package": "vsce package --no-dependencies",
     "publish": "vsce publish --no-dependencies",
