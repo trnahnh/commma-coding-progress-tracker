@@ -81,6 +81,55 @@ describe.skipIf(!hasDb)('route integration', () => {
     expect(body.error.code).toBe('VALIDATION_ERROR')
   })
 
+  it.each([
+    ['content', 'const apiKey = "sk-live-123"'],
+    ['text', 'password = hunter2'],
+    ['snippet', 'SELECT * FROM users'],
+    ['contentChanges', [{ text: 'secret' }]],
+  ])(
+    'rejects a heartbeat carrying a %s field and stores nothing',
+    async (field, value) => {
+      const user = await seedUser({ privacy: 'full' })
+      const token = await mintToken(user.id)
+      const event = heartbeat({ [field]: value })
+      const res = await req('/v1/ingest', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ events: [event] }),
+      })
+      expect(res.status).toBe(400)
+      const body = (await res.json()) as { error: { code: string } }
+      expect(body.error.code).toBe('VALIDATION_ERROR')
+
+      const db = await getDb()
+      const { events, eq } = await loadDb()
+      const rows = await db
+        .select()
+        .from(events)
+        .where(eq(events.userId, user.id))
+      expect(rows).toHaveLength(0)
+    },
+  )
+
+  it('rejects a key_freq entry that is not a physical key label', async () => {
+    const user = await seedUser({ privacy: 'full' })
+    const token = await mintToken(user.id)
+    const res = await req('/v1/ingest', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        events: [heartbeat({ key_freq: { hunter2: 1 } })],
+      }),
+    })
+    expect(res.status).toBe(400)
+  })
+
   it('stores file and key_freq for a full-privacy user', async () => {
     const user = await seedUser({ privacy: 'full' })
     const token = await mintToken(user.id)
