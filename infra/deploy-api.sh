@@ -17,6 +17,6 @@ ssh -i "$SSH_KEY" -o StrictHostKeyChecking=accept-new "$API_HOST" \
    pnpm --filter @commma/api build
    pm2 restart commma-api
    curl -fsS --retry 5 --retry-delay 2 --retry-all-errors -o /dev/null \
-     -w 'health %{http_code}\n' http://127.0.0.1:3000/health"
+     -w 'ready %{http_code}\n' http://127.0.0.1:3000/health/ready"
 
 echo "deployed api -> $API_HOST ($BRANCH)"

@@ -47,3 +47,9 @@ variable "disk_alarm_threshold" {
   default     = 85
   description = "disk_used_percent on / that triggers the low-disk alarm on the API box."
 }
+
+variable "ready_check_regions" {
+  type        = list(string)
+  default     = ["us-east-1", "us-west-1", "us-west-2"]
+  description = "Route 53 checker regions for the /health/ready check. Three is the minimum Route 53 allows; keeping it at three bounds probe traffic, and the API caches readiness for 30s, so Postgres and Redis see at most about two probes per minute from this check."
+}

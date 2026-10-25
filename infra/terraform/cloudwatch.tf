@@ -197,3 +197,36 @@ resource "aws_cloudwatch_metric_alarm" "api_health" {
 output "alerts_topic_arn" {
   value = aws_sns_topic.alerts.arn
 }
+
+resource "aws_route53_health_check" "api_ready" {
+  fqdn              = "api.commma.dev"
+  type              = "HTTPS"
+  port              = 443
+  resource_path     = "/health/ready"
+  request_interval  = 30
+  failure_threshold = 3
+  regions           = var.ready_check_regions
+
+  tags = {
+    Name = "commma-api-ready"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "api_ready" {
+  alarm_name          = "commma-api-ready-down"
+  alarm_description   = "api.commma.dev/health/ready failing: Postgres or Redis unreachable from the API even though the process is up."
+  namespace           = "AWS/Route53"
+  metric_name         = "HealthCheckStatus"
+  statistic           = "Minimum"
+  comparison_operator = "LessThanThreshold"
+  threshold           = 1
+  period              = 60
+  evaluation_periods  = 3
+  treat_missing_data  = "breaching"
+  alarm_actions       = [aws_sns_topic.alerts.arn]
+  ok_actions          = [aws_sns_topic.alerts.arn]
+
+  dimensions = {
+    HealthCheckId = aws_route53_health_check.api_ready.id
+  }
+}
