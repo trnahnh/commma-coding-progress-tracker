@@ -17,6 +17,7 @@
   },
   "packageManager": "pnpm@10.28.1",
   "devDependencies": {
+    "fast-check": "^4.10.2",
     "vitest": "^4.1.8"
   },
   "pnpm": {
