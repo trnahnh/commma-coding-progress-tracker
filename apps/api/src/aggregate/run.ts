@@ -10,7 +10,7 @@ import { db } from '../db.js'
 import { log } from '../logger.js'
 import { splitIntoSessions } from './boundaries.js'
 import { buildSession } from './build.js'
-import { addLeaderboardScore } from './leaderboard.js'
+import { syncPendingLeaderboard } from './leaderboard.js'
 import { applyActiveDate, type StreakState } from './streak.js'
 import type { EventRow } from './types.js'
 
@@ -21,6 +21,7 @@ export interface AggregationStats {
   usersFinalized: number
   usersLocked: number
   sessionsFinalized: number
+  leaderboardSynced: number
   maxLagMs: number
 }
 
@@ -36,6 +37,7 @@ export async function runAggregation(
     usersFinalized: 0,
     usersLocked: 0,
     sessionsFinalized: 0,
+    leaderboardSynced: 0,
     maxLagMs: 0,
   }
 
@@ -54,6 +56,15 @@ export async function runAggregation(
         message: err instanceof Error ? err.message : String(err),
       })
     }
+  }
+
+  try {
+    const synced = await syncPendingLeaderboard()
+    stats.leaderboardSynced = synced.sessions
+  } catch (err) {
+    log.error('leaderboard_sync_failed', {
+      message: err instanceof Error ? err.message : String(err),
+    })
   }
 
   return stats
@@ -94,7 +105,6 @@ async function aggregateUser(
     return { sessions: 0, maxLagMs: 0, locked: false }
   }
 
-  const scored: { durationS: number; date: Date }[] = []
   let maxLagMs = 0
   let finalized = 0
   let locked = false
@@ -131,6 +141,7 @@ async function aggregateUser(
           peakCpm: draft.peakCpm,
           peakAt: draft.peakAt,
           keyboardHeatmap: draft.keyboardHeatmap,
+          leaderboardPending: true,
         })
         .returning({ id: sessions.id })
 
@@ -160,22 +171,10 @@ async function aggregateUser(
       }
 
       await deleteEvents(tx, group.events)
-      scored.push({ durationS: draft.durationS, date: draft.startedAt })
     }
 
     await saveStreak(tx, userId, streakState)
   })
-
-  for (const entry of scored) {
-    try {
-      await addLeaderboardScore(userId, entry.durationS, entry.date)
-    } catch (err) {
-      log.error('leaderboard_update_failed', {
-        userId,
-        message: err instanceof Error ? err.message : String(err),
-      })
-    }
-  }
 
   return { sessions: finalized, maxLagMs, locked }
 }

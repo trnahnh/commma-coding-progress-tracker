@@ -1,4 +1,4 @@
-import { and, gte, lt, sql } from 'drizzle-orm'
+import { and, eq, gte, inArray, lt, sql } from 'drizzle-orm'
 import { sessions } from '@commma/db'
 import { db } from '../db.js'
 import { redis } from '../redis.js'
@@ -31,23 +31,129 @@ export function leaderboardKeys(date: Date): LeaderboardKeys {
   }
 }
 
-export async function addLeaderboardScore(
-  userId: string,
-  durationS: number,
-  date: Date,
-): Promise<void> {
-  const keys = leaderboardKeys(date)
-  await redis
-    .pipeline()
-    .zincrby(keys.alltime, durationS, userId)
-    .zincrby(keys.week, durationS, userId)
-    .expire(keys.week, WEEK_TTL_S)
-    .zincrby(keys.month, durationS, userId)
-    .expire(keys.month, MONTH_TTL_S)
-    .del(emptyKeyFor(keys.alltime))
-    .del(emptyKeyFor(keys.week))
-    .del(emptyKeyFor(keys.month))
-    .exec()
+const SYNC_BATCH = 500
+const SYNC_MAX_BATCHES = 20
+const PERIODS: LeaderboardPeriod[] = ['alltime', 'week', 'month']
+
+const SYNC_SCRIPT = `
+redis.call('del', KEYS[2])
+if redis.call('exists', KEYS[1]) == 0 then return 0 end
+redis.call('zadd', KEYS[1], ARGV[1], ARGV[2])
+local ttl = tonumber(ARGV[3])
+if ttl > 0 then redis.call('expire', KEYS[1], ttl) end
+return 1
+`
+
+interface SyncTarget {
+  key: string
+  ttlS: number | null
+  window: PeriodWindow | null
+  users: Set<string>
+}
+
+export interface LeaderboardSyncStats {
+  sessions: number
+  writes: number
+}
+
+async function userTotals(
+  userIds: string[],
+  window: PeriodWindow | null,
+): Promise<Map<string, number>> {
+  const rows = await db
+    .select({
+      userId: sessions.userId,
+      total: sql<number>`sum(${sessions.durationS})::int`,
+    })
+    .from(sessions)
+    .where(
+      and(
+        inArray(sessions.userId, userIds),
+        window
+          ? and(
+              gte(sessions.startedAt, window.start),
+              lt(sessions.startedAt, window.end),
+            )
+          : undefined,
+      ),
+    )
+    .groupBy(sessions.userId)
+  return new Map(rows.map((row) => [row.userId, row.total]))
+}
+
+async function syncBatch(): Promise<LeaderboardSyncStats> {
+  const pending = await db
+    .select({
+      id: sessions.id,
+      userId: sessions.userId,
+      startedAt: sessions.startedAt,
+    })
+    .from(sessions)
+    .where(eq(sessions.leaderboardPending, true))
+    .limit(SYNC_BATCH)
+  if (pending.length === 0) return { sessions: 0, writes: 0 }
+
+  const targets = new Map<string, SyncTarget>()
+  for (const row of pending) {
+    for (const period of PERIODS) {
+      const { key, ttlS } = keyForPeriod(period, row.startedAt)
+      const target = targets.get(key) ?? {
+        key,
+        ttlS,
+        window: periodWindow(period, row.startedAt),
+        users: new Set<string>(),
+      }
+      target.users.add(row.userId)
+      targets.set(key, target)
+    }
+  }
+
+  const pipeline = redis.pipeline()
+  let writes = 0
+  for (const target of targets.values()) {
+    const totals = await userTotals([...target.users], target.window)
+    for (const userId of target.users) {
+      const total = totals.get(userId) ?? 0
+      if (total <= 0) continue
+      pipeline.eval(
+        SYNC_SCRIPT,
+        2,
+        target.key,
+        emptyKeyFor(target.key),
+        total,
+        userId,
+        target.ttlS ?? 0,
+      )
+      writes += 1
+    }
+  }
+  const results = await pipeline.exec()
+  const failed = results?.find(([err]) => err)
+  if (failed?.[0]) throw failed[0]
+
+  await db
+    .update(sessions)
+    .set({ leaderboardPending: false })
+    .where(
+      inArray(
+        sessions.id,
+        pending.map((row) => row.id),
+      ),
+    )
+  return { sessions: pending.length, writes }
+}
+
+export async function syncPendingLeaderboard(): Promise<
+  LeaderboardSyncStats
+> {
+  const stats: LeaderboardSyncStats = { sessions: 0, writes: 0 }
+  for (let i = 0; i < SYNC_MAX_BATCHES; i++) {
+    const batch = await syncBatch()
+    stats.sessions += batch.sessions
+    stats.writes += batch.writes
+    if (batch.sessions < SYNC_BATCH) break
+  }
+  return stats
 }
 
 export async function removeLeaderboardUser(
