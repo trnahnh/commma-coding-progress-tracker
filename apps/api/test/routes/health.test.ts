@@ -9,7 +9,7 @@ beforeAll(async () => {
   await new Promise<void>((resolve) => deadDb.listen(0, '127.0.0.1', resolve))
   const address = deadDb.address()
   deadPort = typeof address === 'object' && address ? address.port : 0
-  process.env.DATABASE_URL = `postgres://commma:commma@127.0.0.1:${deadPort}/commma`
+  process.env.DATABASE_URL = `postgres://commma@127.0.0.1:${deadPort}/commma`
   process.env.REDIS_URL =
     process.env.TEST_REDIS_URL ?? 'redis://127.0.0.1:6379/9'
   process.env.GITHUB_CLIENT_ID = 'test-client'
